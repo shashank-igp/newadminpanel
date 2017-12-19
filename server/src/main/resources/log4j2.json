@@ -1,0 +1,97 @@
+{
+    "configuration": {
+        "status": "TRACE",
+        "name": "App",
+        "monitorInterval": "300",
+        "ThresholdFilter": {
+            "level": "trace"
+        },
+        "appenders": {
+            "Console": {
+                "name": "STDOUT",
+                "PatternLayout": {
+                    "pattern": "%m%n"
+                }
+            },
+            "RollingFile": [
+                {
+                    "name": "ROLLING-FILE",
+                    "fileName": "/var/log/api/console.log",
+                    "filePattern": "/var/log/api/${date:yyyy-MM}/console-%d{MM-dd-yyyy}-%i.log",
+                    "PatternLayout": {
+                        "pattern": "%d{HH:mm:ss,SSS} : %5p [%t] [%c] (%F:%L) - %m%n"
+                    },
+                    "append": true,
+                    "Policies": {
+                        "TimeBasedTriggeringPolicy": {
+                            "interval": 1,
+                            "modulate": true
+                        }
+                    }
+                },
+                {
+                    "name": "TEXT-ROLL",
+                    "fileName": "/var/log/api/info.log",
+                    "filePattern": "/var/log/api/${date:yyyy-MM}/info-%d{MM-dd-yyyy}-%i.log",
+                    "PatternLayout": {
+                        "pattern": "%d{HH:mm:ss,SSS} : %5p [%t] [%c] (%F:%L) - %m%n"
+                    },
+                    "append": true,
+                    "Policies": {
+                        "TimeBasedTriggeringPolicy": {
+                            "interval": 1,
+                            "modulate": true,
+                            "max": 2
+                        }
+                    }
+                },
+                {
+                    "name": "JSON-ROLL",
+                    "fileName": "/var/log/api/json.log",
+                    "filePattern": "/var/log/api/${date:yyyy-MM}/json-%d{MM-dd-yyyy}-%i.log",
+                    "JsonLayout": {
+                        "complete": true,
+                        "compact": true,
+                        "eventEol": true
+                    },
+                    "append": true,
+                    "Policies": {
+                        "TimeBasedTriggeringPolicy": {
+                            "interval": 1,
+                            "modulate": true,
+                            "max": 2
+                        }
+                    }
+                }
+            ]
+        },
+        "loggers": {
+            "root": {
+                "level": "trace",
+                "AppenderRef": [
+                    {
+                        "ref": "STDOUT"
+                    }
+                ]
+            },
+            "logger": [
+                {
+                    "name": "com.igp",
+                    "level": "debug",
+                    "additivity": "true",
+                    "AppenderRef": {
+                        "ref": "TEXT-ROLL"
+                    }
+                },
+                {
+                    "name": "com",
+                    "level": "error",
+                    "additivity": "true",
+                    "AppenderRef": {
+                        "ref": "JSON-ROLL"
+                    }
+                }
+            ]
+        }
+    }
+}
