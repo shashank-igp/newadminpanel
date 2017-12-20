@@ -272,7 +272,7 @@ public class OrderMapper
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTime(df.parse(key[1]));
                 try {
-                    if (key[3].length() != 0) {
+                    if (key.length >=4 && key[3].length() != 0) {
                         key[3]=key[3].split(" - ")[0];
                         calendar.add(Calendar.HOUR_OF_DAY, Integer.parseInt(key[3]) / 100);
                         calendar.add(Calendar.MINUTE, Integer.parseInt(key[3]) % 100);
