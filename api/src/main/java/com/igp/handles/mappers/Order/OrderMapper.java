@@ -281,6 +281,8 @@ public class OrderMapper
                     logger.error("delivery Time Not Present :" + entry.getKey(), e);
                 }
                 long deliveryTime = calendar.getTimeInMillis() / 86400000l;
+                logger.debug("delivery time + orderId  is key for sorted order map "+deliveryTime+" "+orderId.toString()
+                );
 //                order.setPriceAdjustment((order.getVendorOrderTotal()-order.getComponentTotal()));
 //                order.setComponentTotal(order.getComponentTotal()+orderProducts.getComponentTotal());
                 order.setVendorOrderTotal(order.getVendorOrderTotal() + order.getVendorDeliveryCharge());
