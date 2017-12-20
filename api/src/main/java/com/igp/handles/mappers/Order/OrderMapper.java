@@ -289,7 +289,7 @@ public class OrderMapper
                 order.setVendorOrderTotal((int)order.getVendorOrderTotal());
                 Map<String,List<String>> uploadedFilePath=uploadUtil.getUploadedfilePathFromVpFileUpload(orderId.intValue());
                 order.setUploadedFilePath(uploadedFilePath);
-                sortedOrderMap.put(Long.valueOf(deliveryTime + "" + orderId), order);
+                sortedOrderMap.put(Long.valueOf(String.valueOf(deliveryTime) + "" + orderId), order);
             } catch (Exception e) {
                 logger.error("Error in the order :" + entry.getKey(), e);
             }
