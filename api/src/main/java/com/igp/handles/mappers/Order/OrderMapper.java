@@ -193,7 +193,7 @@ public class OrderMapper
 
         }
 
-        logger.debug("original order map  "+originalOrderMap.toString());
+        logger.debug("original order map before processing "+originalOrderMap.toString());
 
         logger.debug("Temp Order Products Map  "+tempOrderProductsMap.toString());
 
@@ -220,7 +220,7 @@ public class OrderMapper
 //                }
                 order = originalOrderMap.get(newKey);
 
-                logger.debug("new key to get order object from  original order map "+newKey);
+                logger.debug("old key -> "+key+" and new key to get order object from  original order map "+newKey);
                 if (order != null) {
                     // order = getOrderOnly(scopeId, Integer.parseInt(data[0]));
 
@@ -259,6 +259,7 @@ public class OrderMapper
                 e.printStackTrace();
             }
         }
+        logger.debug("original order map before processing "+originalOrderMap.toString());
         Map<Long, Order> sortedOrderMap = new TreeMap<>();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         UploadUtil uploadUtil=new UploadUtil();
@@ -276,7 +277,7 @@ public class OrderMapper
                         calendar.add(Calendar.MINUTE, Integer.parseInt(key[3]) % 100);
                     }
                 } catch (Exception e) {
-                    logger.error("delivery Time Not Present :" + entry.getKey(), e.getMessage());
+                    logger.error("delivery Time Not Present :" + entry.getKey(), e);
                 }
                 long deliveryTime = calendar.getTimeInMillis() / 86400000l;
 //                order.setPriceAdjustment((order.getVendorOrderTotal()-order.getComponentTotal()));
