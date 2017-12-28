@@ -1,17 +1,21 @@
 package com.igp.handles.endpoints;
 
 import com.igp.handles.mappers.Reports.ReportMapper;
+import com.igp.handles.models.Report.PayoutAndTaxReportSummaryModel;
 import com.igp.handles.models.Report.PincodeModelListWithSummary;
 import com.igp.handles.models.Report.ReportOrderWithSummaryModel;
 import com.igp.handles.models.Report.VendorModelListWithSummary;
 import com.igp.handles.response.HandleServiceResponse;
 import com.igp.handles.response.ReportResponse;
 import com.igp.handles.utils.Order.OrderStatusUpdateUtil;
+import com.igp.handles.utils.Reports.PayoutAndTaxesReport;
 import com.igp.handles.utils.Reports.SummaryFunctionsUtil;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static com.igp.handles.mappers.Reports.ReportMapper.*;
 import static com.igp.handles.utils.Reports.SummaryFunctionsUtil.getTimestampString;
@@ -153,4 +157,29 @@ public class Reports {
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
+
+    @GET
+    @Path("/v1/handels/getPayoutAndTaxesReport")
+    public ReportResponse getPayoutAndTaxes(@QueryParam("fkAssociateId") int fkAssociateId, @QueryParam("orderId")int orderId,
+                                        @QueryParam("orderDateFrom") String orderDateFrom, @QueryParam("orderDateTo")String orderDateTo,
+                                        @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
+        ReportResponse reportResponse=new ReportResponse();
+        PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
+        try{
+            reportResponse.setTableHeaders(new String[]{"orderId","date purchased","pincode","delivery date","invoice number","taxable amount"
+                ,"tax","total amount","payment status"});
+
+            PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=payoutAndTaxesReport.getPayoutAndTaxes(fkAssociateId,
+                                                                        orderId,orderDateFrom,orderDateTo,startLimit,endLimit);
+            reportResponse.setSummary(payoutAndTaxReportSummaryModel.getSummaryModelList());
+            List<Object> objectList = new ArrayList<Object>(payoutAndTaxReportSummaryModel.getOrderTaxReportList());
+            reportResponse.setTableData(objectList);
+
+        }catch (Exception exception){
+
+        }
+
+        return reportResponse;
+    }
+
 }

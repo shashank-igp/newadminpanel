@@ -76,16 +76,18 @@ public class SummaryFunctionsUtil
 
         String[] parts = res.split("-");
 
-
-
-
         PreparedStatement preparedStatement = null;
         try{
-
-
-
                 connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = " select  vap.assign_time as Date,vap.orders_id as  Order_No,oo.occasion_name as Ocassion , o.delivery_city as City ,o.delivery_postcode as Pincode ,vap.delivery_date  as Delivery_Date ,op.orders_product_status as opStatus,op.shipping_type_g as Delivery_Type  , o.delivery_name as Recipient_Name , o.delivery_mobile as Phone  , (vap.vendor_price+vap.shipping) as Amount,op.delivery_status as status  from vendor_assign_price as  vap  inner join  orders_products as op on vap.orders_id=op.orders_id  and  vap.products_id=op.products_id  inner join order_product_extra_info as oe on op.orders_products_id=oe.order_product_id inner  join  orders as o on  vap.orders_id=o.orders_id inner join  orders_occasions  as oo  on o.orders_occasionid=oo.occasion_id    where vap.fk_associate_id="+fkAssociateId+"  "+sb.toString()+" limit "+startLimit+","+endLimit+" ";
+            statement = " select  vap.assign_time as Date,vap.orders_id as  Order_No,oo.occasion_name as Ocassion , "
+                + " o.delivery_city as City ,o.delivery_postcode as Pincode ,vap.delivery_date  as Delivery_Date , "
+                + " op.orders_product_status as opStatus,op.shipping_type_g as Delivery_Type  , o.delivery_name as "
+                + " Recipient_Name , o.delivery_mobile as Phone  , (vap.vendor_price+vap.shipping) as Amount, "
+                + " op.delivery_status as status  from vendor_assign_price as  vap  inner join  orders_products as "
+                + " op on vap.orders_id=op.orders_id  and  vap.products_id=op.products_id  inner join order_product_extra_info "
+                + " as oe on op.orders_products_id=oe.order_product_id inner  join  orders as o on  vap.orders_id=o.orders_id "
+                + " inner join  orders_occasions  as oo  on o.orders_occasionid=oo.occasion_id    where "
+                + " vap.fk_associate_id="+fkAssociateId+"  "+sb.toString()+" limit "+startLimit+","+endLimit+" ";
             preparedStatement = connection.prepareStatement(statement);
             resultSet = preparedStatement.executeQuery();
             Double totalPrice=0.00;
