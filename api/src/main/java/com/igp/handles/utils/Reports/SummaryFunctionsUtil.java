@@ -446,8 +446,6 @@ public class SummaryFunctionsUtil
         try {
             timestamp = new Timestamp(((java.util.Date)df.parse(date)).getTime());
             if (flag==1){
-
-
                 Calendar cal = Calendar.getInstance();
                 cal.setTime(timestamp);
                 cal.add(Calendar.DAY_OF_WEEK, 1);
