@@ -4,10 +4,14 @@ package com.igp.handles.mappers.Reports;
  * Created by shal on 22/9/17.
  */
 
+import com.igp.handles.models.Report.PayoutAndTaxReportSummaryModel;
 import com.igp.handles.models.Report.PincodeModelListWithSummary;
 import com.igp.handles.models.Report.ReportOrderWithSummaryModel;
 import com.igp.handles.models.Report.VendorModelListWithSummary;
 import com.igp.handles.utils.Order.OrderStatusUpdateUtil;
+import com.igp.handles.utils.Reports.PayoutAndTaxesReport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -15,17 +19,15 @@ import static com.igp.handles.utils.Reports.SummaryFunctionsUtil.*;
 
 public class ReportMapper {
 
+    private static final Logger logger = LoggerFactory.getLogger(ReportMapper.class);
+
+
     public  static ReportOrderWithSummaryModel getSummaryDetails(String fkAssociateId, String startDate, String endDate, String startLimit,String endLimit,Integer orderNo,String delhiveryDate,String status,String deliveryDateFrom,String deliveryDateTo){
 
         ReportOrderWithSummaryModel reportOrderWithSummaryModel=null;
         reportOrderWithSummaryModel=getSummaryDetailsForVendor(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,delhiveryDate,status,deliveryDateFrom,deliveryDateTo);
-
         return reportOrderWithSummaryModel;
-
-
-
     }
-
     public static VendorModelListWithSummary getVendorSummaryDetails(String fkAssociateId,String startLimit,String endLimit){
 
         VendorModelListWithSummary vendorModelListWithSummary=null;
@@ -40,10 +42,6 @@ public class ReportMapper {
         return  pincodeModelListWithSummary;
 
     }
-
-
-
-
     public static boolean updateComponentMapper(Integer flag,String fk_associate_id,String  componentId){
         boolean result=updateVendorComponet(flag,fk_associate_id,componentId);
         return result;
@@ -60,6 +58,22 @@ public class ReportMapper {
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
         return result;
     }
+
+
+    public PayoutAndTaxReportSummaryModel getPayoutAndTaxes(int fkAssociateId,int orderId,String orderDateFrom,
+                                                        String orderDateTo,String startLimit,String endLimit){
+        PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
+        PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=null;
+        try{
+            payoutAndTaxReportSummaryModel=payoutAndTaxesReport.getPayoutAndTaxes(fkAssociateId,
+                                            orderId,orderDateFrom,orderDateTo,startLimit,endLimit);
+        }catch (Exception exception){
+            logger.error("Error in getPayoutAndTaxes ",exception);
+        }
+        return payoutAndTaxReportSummaryModel;
+    }
+
+
     public static boolean addVendorPincode(String fkAssociateId,int pincode,int cityId,int shipType,int shipCharge){
         Map<Integer,String> map= new HashMap<>();
         map.put(1,"Standard Delivery");
