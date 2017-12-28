@@ -41,10 +41,10 @@ public class PayoutAndTaxesReport {
                 sb.append(" and o.orders_id = "+orderId+" ");
             }
             if(orderDateFrom != null && !orderDateFrom.isEmpty()){
-                sb.append(" and date_format(vsp.assign_time,'%Y-%d-%m') >= "+orderDateFrom+" ");
+                sb.append(" and date_format(vsp.assign_time,'%Y-%d-%m') >= '"+orderDateFrom+"' ");
             }
             if(orderDateTo != null && !orderDateTo.isEmpty()){
-                sb.append(" and date_format(vsp.assign_time,'%Y-%d-%m') <= "+orderDateTo+" ");
+                sb.append(" and date_format(vsp.assign_time,'%Y-%d-%m') <= '"+orderDateTo+"' ");
             }
 
             connection = Database.INSTANCE.getReadOnlyConnection();
