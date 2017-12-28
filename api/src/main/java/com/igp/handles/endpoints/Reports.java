@@ -10,6 +10,8 @@ import com.igp.handles.response.ReportResponse;
 import com.igp.handles.utils.Order.OrderStatusUpdateUtil;
 import com.igp.handles.utils.Reports.PayoutAndTaxesReport;
 import com.igp.handles.utils.Reports.SummaryFunctionsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -27,6 +29,9 @@ import static com.igp.handles.utils.Reports.SummaryFunctionsUtil.getTimestampStr
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
 public class Reports {
+
+    private static final Logger logger = LoggerFactory.getLogger(Reports.class);
+
     @GET
     @Path("/v1/handels/getOrderReport")
     public ReportResponse getOrderReport(@QueryParam("fkAssociateId") String fkAssociateId, @QueryParam("orderDateFrom") String startDate, @QueryParam("orderDateTo")String endDate , @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit , @QueryParam("orderNumber") Integer orderNo,@QueryParam("delhiveryDate") String delhiveryDate,@QueryParam("status")  String status,@QueryParam("deliveryDateFrom") String deliveryDateFrom,@QueryParam("deliveryDateTo") String deliveryDateTo){
@@ -169,6 +174,10 @@ public class Reports {
             reportResponse.setTableHeaders(new String[]{"orderId","date purchased","pincode","delivery date","invoice number","taxable amount"
                 ,"tax","total amount","payment status"});
 
+
+            orderDateFrom=getTimestampString(orderDateFrom,0);
+            orderDateTo=getTimestampString(orderDateTo,0);
+
             PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=payoutAndTaxesReport.getPayoutAndTaxes(fkAssociateId,
                                                                         orderId,orderDateFrom,orderDateTo,startLimit,endLimit);
             reportResponse.setSummary(payoutAndTaxReportSummaryModel.getSummaryModelList());
@@ -176,9 +185,8 @@ public class Reports {
             reportResponse.setTableData(objectList);
 
         }catch (Exception exception){
-
+            logger.error("Error occured at getPayoutAndTaxes ",exception);
         }
-
         return reportResponse;
     }
 
