@@ -56,7 +56,7 @@ public class PayoutAndTaxesReport {
             statement = "select o.orders_id as orderId, sum(gvd.taxable) as taxableAmount ,sum(gvd.amt) as totalAmount, "
                 + "(sum(gvd.igst)+sum(gvd.sgst)+sum(gvd.cgst)) as tax , o.delivery_postcode as pincode,  "
                 + "date_format(o.date_purchased,'%Y-%d-%m') datePurchased,date_format(o.date_of_delivery,'%Y-%d-%m') "
-                + " dateOfDelivery , gvd.invoice_num invoiceNum , o.orders_status status , thp.orders_id as paymentCheckOrderId "
+                + " dateOfDelivery , gvd.invoice_num invoiceNum , thp.orders_id as paymentCheckOrderId "
                 + " , min(case when op.orders_product_status = 'Processed' then 1 when op.orders_product_status = 'Confirmed' "
                 + " then 2 when op.orders_product_status = 'Shipped' then 3 else 4 end ) status, max(op.delivery_status) "
                 + " deliveryStatus from orders o  left join tax_handels_payout thp on o.orders_id = thp.orders_id "
@@ -69,7 +69,7 @@ public class PayoutAndTaxesReport {
             logger.debug("sql query in getPayoutAndTaxes "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()){
-                int status=resultSet.getInt("status");
+                String status=resultSet.getString("status");
                 int deliveryStatusFlag=resultSet.getInt("deliveryStatus");
 
                 logger.debug("status "+status+"  and deliveryStatusFlag "+deliveryStatusFlag);
@@ -83,34 +83,22 @@ public class PayoutAndTaxesReport {
                 orderTaxReport.setDatePurchased(resultSet.getString("datePurchased"));
                 orderTaxReport.setInvoiceNumber(resultSet.getString("invoiceNum"));
 
-                if(status==3){
+
+                if(status.equalsIgnoreCase("3")){
                     if(deliveryStatusFlag==1){
                         orderTaxReport.setOrderStatus("Delivered");
                     }else {
                         orderTaxReport.setOrderStatus("Out For Delivery");
                     }
-                }else if(status==2){
+                }else if(status.equalsIgnoreCase("2")){
                     orderTaxReport.setOrderStatus("Confirmed");
-                }else if(status==1){
+                }else if(status.equalsIgnoreCase("1")){
                     orderTaxReport.setOrderStatus("Processed");
                 }else {
                     orderTaxReport.setOrderStatus("");
                 }
 
 
-//                if(status.equalsIgnoreCase("3")){
-//                    if(deliveryStatusFlag==1){
-//                        orderTaxReport.setOrderStatus("Delivered");
-//                    }else {
-//                        orderTaxReport.setOrderStatus("Out For Delivery");
-//                    }
-//                }else if(status.equalsIgnoreCase("2")){
-//                    orderTaxReport.setOrderStatus("Confirmed");
-//                }else if(status.equalsIgnoreCase("1")){
-//                    orderTaxReport.setOrderStatus("Processed");
-//                }else {
-//                    orderTaxReport.setOrderStatus("");
-//                }
                 orderTaxReport.setDeliveryDate(resultSet.getString("dateOfDelivery"));
                 if(resultSet.getInt("paymentCheckOrderId")==0){
                     orderTaxReport.setPaymentStatus("Pending");
