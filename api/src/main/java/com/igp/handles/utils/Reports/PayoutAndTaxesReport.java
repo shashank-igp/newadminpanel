@@ -69,7 +69,7 @@ public class PayoutAndTaxesReport {
             logger.debug("sql query in getPayoutAndTaxes "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()){
-                String status=resultSet.getString("status");
+                int status=resultSet.getInt("status");
                 int deliveryStatusFlag=resultSet.getInt("deliveryStatus");
 
                 logger.debug("status "+status+"  and deliveryStatusFlag "+deliveryStatusFlag);
@@ -83,19 +83,34 @@ public class PayoutAndTaxesReport {
                 orderTaxReport.setDatePurchased(resultSet.getString("datePurchased"));
                 orderTaxReport.setInvoiceNumber(resultSet.getString("invoiceNum"));
 
-                if(status.equalsIgnoreCase("3")){
+                if(status==3){
                     if(deliveryStatusFlag==1){
                         orderTaxReport.setOrderStatus("Delivered");
                     }else {
                         orderTaxReport.setOrderStatus("Out For Delivery");
                     }
-                }else if(status.equalsIgnoreCase("2")){
+                }else if(status==2){
                     orderTaxReport.setOrderStatus("Confirmed");
-                }else if(status.equalsIgnoreCase("1")){
+                }else if(status==1){
                     orderTaxReport.setOrderStatus("Processed");
                 }else {
                     orderTaxReport.setOrderStatus("");
                 }
+
+
+//                if(status.equalsIgnoreCase("3")){
+//                    if(deliveryStatusFlag==1){
+//                        orderTaxReport.setOrderStatus("Delivered");
+//                    }else {
+//                        orderTaxReport.setOrderStatus("Out For Delivery");
+//                    }
+//                }else if(status.equalsIgnoreCase("2")){
+//                    orderTaxReport.setOrderStatus("Confirmed");
+//                }else if(status.equalsIgnoreCase("1")){
+//                    orderTaxReport.setOrderStatus("Processed");
+//                }else {
+//                    orderTaxReport.setOrderStatus("");
+//                }
                 orderTaxReport.setDeliveryDate(resultSet.getString("dateOfDelivery"));
                 if(resultSet.getInt("paymentCheckOrderId")==0){
                     orderTaxReport.setPaymentStatus("Pending");
