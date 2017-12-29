@@ -53,18 +53,25 @@ public class PayoutAndTaxesReport {
             }
 
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = "select o.orders_id  as orderId, sum(gvd.taxable) as taxableAmount ,sum(gvd.amt) as totalAmount, "
-                + " (sum(gvd.igst)+sum(gvd.sgst)+sum(gvd.cgst)) as tax , o.delivery_postcode as pincode, "
-                + " date_format(o.date_purchased,'%Y-%d-%m') datePurchased,date_format(o.date_of_delivery,'%Y-%d-%m') dateOfDelivery , "
-                + " gvd.invoice_num invoiceNum , o.orders_status status , thp.orders_id as paymentCheckOrderId from orders o "
-                + " left join tax_handels_payout thp on o.orders_id = thp.orders_id   join gst_vendors_dom gvd on o.orders_id = "
-                + " gvd.order_id where gvd.vendorID = "+fkAssociateId+"  "+sb.toString()+" group by o.orders_id  limit "+startLimit+","+endLimit+" ";
+            statement = "select o.orders_id as orderId, sum(gvd.taxable) as taxableAmount ,sum(gvd.amt) as totalAmount, "
+                + "(sum(gvd.igst)+sum(gvd.sgst)+sum(gvd.cgst)) as tax , o.delivery_postcode as pincode,  "
+                + "date_format(o.date_purchased,'%Y-%d-%m') datePurchased,date_format(o.date_of_delivery,'%Y-%d-%m') "
+                + " dateOfDelivery , gvd.invoice_num invoiceNum , o.orders_status status , thp.orders_id as paymentCheckOrderId "
+                + " , min(case when op.orders_product_status = 'Processed' then 1 when op.orders_product_status = 'Confirmed' "
+                + " then 2 when op.orders_product_status = 'Shipped' then 3 else 4 end ) status, max(op.delivery_status) "
+                + " deliveryStatus from orders o  left join tax_handels_payout thp on o.orders_id = thp.orders_id "
+                + " join gst_vendors_dom gvd on o.orders_id =gvd.order_id join orders_products op on op.orders_id = o.orders_id "
+                + "  where gvd.vendorID = "+fkAssociateId+"  "+sb.toString()+" group by o.orders_id "
+                + "  limit "+startLimit+","+endLimit+" ";
 
 
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in getPayoutAndTaxes "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()){
+                String status=resultSet.getString("status");
+                int deliveryStatusFlag=resultSet.getInt("deliveryStatus");
+
                 OrderTaxReport orderTaxReport=new OrderTaxReport();
                 orderTaxReport.setOrderId(resultSet.getInt("orderId"));
                 orderTaxReport.setTaxableAmount(resultSet.getDouble("taxableAmount"));
@@ -73,7 +80,20 @@ public class PayoutAndTaxesReport {
                 orderTaxReport.setPincode(resultSet.getString("pincode"));
                 orderTaxReport.setDatePurchased(resultSet.getString("datePurchased"));
                 orderTaxReport.setInvoiceNumber(resultSet.getString("invoiceNum"));
-                orderTaxReport.setOrderStatus(resultSet.getString("status"));
+                
+                if(status.equalsIgnoreCase("3")){
+                    if(deliveryStatusFlag==1){
+                        orderTaxReport.setOrderStatus("Delivered");
+                    }else {
+                        orderTaxReport.setOrderStatus("Out For Delivery");
+                    }
+                }else if(status.equalsIgnoreCase("2")){
+                    orderTaxReport.setOrderStatus("Confirmed");
+                }else if(status.equalsIgnoreCase("1")){
+                    orderTaxReport.setOrderStatus("Processed");
+                }else {
+                    orderTaxReport.setOrderStatus("");
+                }
                 orderTaxReport.setDeliveryDate(resultSet.getString("dateOfDelivery"));
                 if(resultSet.getInt("paymentCheckOrderId")==0){
                     orderTaxReport.setPaymentStatus("Pending");
