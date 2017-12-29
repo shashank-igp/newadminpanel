@@ -72,6 +72,8 @@ public class PayoutAndTaxesReport {
                 String status=resultSet.getString("status");
                 int deliveryStatusFlag=resultSet.getInt("deliveryStatus");
 
+                logger.debug("status "+status+"  and deliveryStatusFlag "+deliveryStatusFlag);
+
                 OrderTaxReport orderTaxReport=new OrderTaxReport();
                 orderTaxReport.setOrderId(resultSet.getInt("orderId"));
                 orderTaxReport.setTaxableAmount(resultSet.getDouble("taxableAmount"));
@@ -80,7 +82,7 @@ public class PayoutAndTaxesReport {
                 orderTaxReport.setPincode(resultSet.getString("pincode"));
                 orderTaxReport.setDatePurchased(resultSet.getString("datePurchased"));
                 orderTaxReport.setInvoiceNumber(resultSet.getString("invoiceNum"));
-                
+
                 if(status.equalsIgnoreCase("3")){
                     if(deliveryStatusFlag==1){
                         orderTaxReport.setOrderStatus("Delivered");
