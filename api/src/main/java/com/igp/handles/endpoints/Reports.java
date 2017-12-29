@@ -173,7 +173,7 @@ public class Reports {
         PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
         try{
             reportResponse.setTableHeaders(new String[]{"invoice number","orderId","date purchased","delivery date"
-                ,"pincode","order status","delivery date","taxable amount","tax","total amount","payment status"});
+                ,"pincode","order status","taxable amount","tax","total amount","payment status"});
 
 
             orderDateFrom=getTimestampString(orderDateFrom,0);
