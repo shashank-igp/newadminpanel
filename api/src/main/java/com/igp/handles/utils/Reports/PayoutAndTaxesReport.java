@@ -1,9 +1,7 @@
 package com.igp.handles.utils.Reports;
 
 import com.igp.config.instance.Database;
-import com.igp.handles.models.Report.OrderTaxReport;
-import com.igp.handles.models.Report.PayoutAndTaxReportSummaryModel;
-import com.igp.handles.models.Report.SummaryModel;
+import com.igp.handles.models.Report.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +9,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by shanky on 27/12/17.
@@ -20,15 +20,14 @@ public class PayoutAndTaxesReport {
 
     private static final Logger logger = LoggerFactory.getLogger(PayoutAndTaxesReport.class);
 
-    public PayoutAndTaxReportSummaryModel getPayoutAndTaxes(int fkAssociateId,int orderId,String orderDateFrom,
-        String orderDateTo,String startLimit,String endLimit){
+    public PayoutAndTaxReportSummaryModel getPayoutAndTaxes(int fkAssociateId,int orderId,String orderDateFrom, String orderDateTo,
+        String orderDeliveryDateFrom, String orderDeliveryDateTo,String startLimit,String endLimit){
+
         PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel = new PayoutAndTaxReportSummaryModel();
         Connection connection = null;
         String statement;
-        String whereClause="";
         List <SummaryModel> summaryModelList=new ArrayList<>();
         ResultSet resultSet = null;
-        String queryTotal="";
         PreparedStatement preparedStatement = null;
         List<OrderTaxReport> orderReportObjectModelList=new ArrayList<>();
         double totaltaxableAmount=0.0,totalAmount=0.0;
@@ -41,19 +40,25 @@ public class PayoutAndTaxesReport {
                 sb.append(" and o.orders_id = "+orderId+" ");
             }
             if(orderDateFrom != null && !orderDateFrom.isEmpty()){
-                sb.append(" and date_format(vsp.assign_time,'%Y-%d-%m') >= '"+orderDateFrom+"' ");
+                sb.append(" and date_format(o.date_purchased,'%Y-%d-%m') >= '"+orderDateFrom+"' ");
             }
             if(orderDateTo != null && !orderDateTo.isEmpty()){
-                sb.append(" and date_format(vsp.assign_time,'%Y-%d-%m') <= '"+orderDateTo+"' ");
+                sb.append(" and date_format(o.date_purchased,'%Y-%d-%m') <= '"+orderDateTo+"' ");
+            }
+            if(orderDeliveryDateFrom != null && !orderDeliveryDateFrom.isEmpty()){
+                sb.append(" and date_format(o.date_of_delivery,'%Y-%d-%m') >= '"+orderDeliveryDateFrom+"' ");
+            }
+            if(orderDeliveryDateTo != null && !orderDeliveryDateTo.isEmpty()){
+                sb.append(" and date_format(o.date_of_delivery,'%Y-%d-%m') <= '"+orderDeliveryDateTo+"' ");
             }
 
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement = "select o.orders_id  as orderId, sum(gvd.taxable) as taxableAmount ,sum(gvd.amt) as totalAmount, "
                 + " (sum(gvd.igst)+sum(gvd.sgst)+sum(gvd.cgst)) as tax , o.delivery_postcode as pincode, "
-                + " date_format(vsp.assign_time,'%Y-%d-%m') datePurchased, gvd.invoice_num invoiceNum , o.orders_status status "
-                + " , thp.orders_id as paymentCheckOrderId from orders o left join tax_handels_payout thp on o.orders_id = thp.orders_id   join gst_vendors_dom gvd "
-                + " on o.orders_id = gvd.order_id join vendor_assign_price vsp on o.orders_id = vsp.orders_id where "
-                + " gvd.vendorID = "+fkAssociateId+"  "+sb.toString()+" group by o.orders_id  limit "+startLimit+","+endLimit+" ";
+                + " date_format(o.date_purchased,'%Y-%d-%m') datePurchased,date_format(o.date_of_delivery,'%Y-%d-%m') dateOfDelivery , "
+                + " gvd.invoice_num invoiceNum , o.orders_status status , thp.orders_id as paymentCheckOrderId from orders o "
+                + " left join tax_handels_payout thp on o.orders_id = thp.orders_id   join gst_vendors_dom gvd on o.orders_id = "
+                + " gvd.order_id where gvd.vendorID = "+fkAssociateId+"  "+sb.toString()+" group by o.orders_id  limit "+startLimit+","+endLimit+" ";
 
 
             preparedStatement = connection.prepareStatement(statement);
@@ -69,10 +74,11 @@ public class PayoutAndTaxesReport {
                 orderTaxReport.setDatePurchased(resultSet.getString("datePurchased"));
                 orderTaxReport.setInvoiceNumber(resultSet.getString("invoiceNum"));
                 orderTaxReport.setOrderStatus(resultSet.getString("status"));
+                orderTaxReport.setDeliveryDate(resultSet.getString("dateOfDelivery"));
                 if(resultSet.getInt("paymentCheckOrderId")==0){
                     orderTaxReport.setPaymentStatus("Pending");
                 }else {
-                    orderTaxReport.setPaymentStatus("paid");
+                    orderTaxReport.setPaymentStatus("Paid");
                 }
                 orderReportObjectModelList.add(orderTaxReport);
                 totalOrderId++;
@@ -84,10 +90,10 @@ public class PayoutAndTaxesReport {
             SummaryModel summaryModel2=new SummaryModel();
 
 
-            summaryModel.setLabel("Total Orders");
+            summaryModel.setLabel("Orders");
             summaryModel.setValue(totalOrderId+"");
 
-            summaryModel1.setLabel("Total Taxable Amount");
+            summaryModel1.setLabel("Taxable Amount");
             summaryModel1.setValue(totaltaxableAmount+"");
 
             summaryModel2.setLabel("Total Amount");
@@ -102,7 +108,115 @@ public class PayoutAndTaxesReport {
 
         }catch (Exception exception){
             logger.error("Error in getPayoutAndTaxes ",exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
         }
         return payoutAndTaxReportSummaryModel;
+    }
+
+    public VendorInvoiceModel getInvoicePdfDate(int fkAssociateId,int orderId){
+        VendorInvoiceModel vendorInvoiceModel=new VendorInvoiceModel();
+
+        Connection connection = null;
+        String statement,invoiceNumber="",datePurchased="";
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        VendorInfoModel vendorInfoModel=new VendorInfoModel(),mumbaiWarehouseInfoModel=new VendorInfoModel();
+        List<OrderProductInvoiceModel> orderProductInvoiceModelList=new ArrayList<>();
+        double taxableAmount=0.0,unitPrice=0.0,igst=0.0,cgst=0.0,sgst=0.0,taxRate=0.0,grandTotal=0.0;
+
+
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            getVendorInfo(fkAssociateId,connection,vendorInfoModel);
+            getVendorInfo(354,connection,mumbaiWarehouseInfoModel);
+
+            statement = "select * from orders o join gst_vendors_dom gvd on o.orders_id = gvd.order_id where o.orders_id = ? "
+                + " and gvd.vendorId = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,orderId);
+            preparedStatement.setInt(2,fkAssociateId);
+            logger.debug("sql query in getInvoicePdfDate "+preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()){
+                Map<String,Double> taxTypeMap=new HashMap<>();
+
+                taxableAmount=resultSet.getDouble("gvd.taxable");
+                taxRate=resultSet.getDouble("gvd.comp_tax_rate");
+                int quantity=1;
+                unitPrice=taxableAmount/quantity;
+                igst=resultSet.getDouble("gvd.igst");
+                cgst=resultSet.getDouble("gvd.cgst");
+                sgst=resultSet.getDouble("gvd.sgst");
+                invoiceNumber=resultSet.getString("gvd.invoice_num");
+                datePurchased=resultSet.getString("date_format(o.date_purchased,'%Y-%m-%d')");
+
+                if(igst!=0.000){
+                    taxTypeMap.put("igst",taxRate);
+                }else {
+                    taxTypeMap.put("cgst",(taxRate/2));
+                    taxTypeMap.put("sgst",(taxRate/2));
+                }
+
+                OrderProductInvoiceModel orderProductInvoiceModel=new OrderProductInvoiceModel();
+
+                orderProductInvoiceModel.setProductName(resultSet.getString("gvd.tax_cat"));
+                orderProductInvoiceModel.setUnitPrice(unitPrice);
+                orderProductInvoiceModel.setQuantity(quantity);
+                orderProductInvoiceModel.setNetAmount(taxableAmount);
+                orderProductInvoiceModel.setTaxCode(resultSet.getString("gvd.hsn_no"));
+                orderProductInvoiceModel.setTaxTypeMap(taxTypeMap);
+                orderProductInvoiceModel.setTaxrate(taxRate);
+                orderProductInvoiceModel.setTaxAmount(igst+sgst+cgst);
+                orderProductInvoiceModel.setTotalAmount(resultSet.getDouble("gvd.amt"));
+                orderProductInvoiceModelList.add(orderProductInvoiceModel);
+
+                grandTotal+=orderProductInvoiceModel.getTotalAmount();
+            }
+            vendorInvoiceModel.setOrderId(orderId);
+            vendorInvoiceModel.setInvoiceNumber(invoiceNumber);
+            vendorInvoiceModel.setDatePurchased(datePurchased);
+            vendorInvoiceModel.setBillingAddressModel(mumbaiWarehouseInfoModel);
+            vendorInvoiceModel.setSellerAddressModel(vendorInfoModel);
+            vendorInvoiceModel.setOrderProductInvoiceModelList(orderProductInvoiceModelList);
+            vendorInvoiceModel.setTotal(grandTotal);
+
+        }catch (Exception exception){
+            logger.error("Error in getInvoicePdfDate ",exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return vendorInvoiceModel;
+    }
+    public void getVendorInfo(int fkAssociateId,Connection connection,VendorInfoModel vendorInfoModel){
+        String statement;
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        try{
+            statement = "select * from associate a left join associate_finance_info afi on a.associate_id = afi.fk_associate_id "
+                + " where a.associate_id = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,fkAssociateId);
+            logger.debug("sql query in getVendorInfo "+preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+                vendorInfoModel.setName(resultSet.getString("a.associate_name"));
+                vendorInfoModel.setEmail(resultSet.getString("a.associate_email"));
+                vendorInfoModel.setAddress(resultSet.getString("a.associate_address"));
+                vendorInfoModel.setContactDetails(resultSet.getString("a.associate_phone"));
+                vendorInfoModel.setGstNumber(resultSet.getString("afi.associate_gstn")==null ? "":resultSet.getString("afi.associate_gstn"));
+                vendorInfoModel.setPan(resultSet.getString("afi.associate_pan") ==null ? "" : resultSet.getString("afi.associate_pan"));
+            }
+
+        }catch (Exception exception){
+            logger.error("Error in getVendorInfo ",exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
     }
 }

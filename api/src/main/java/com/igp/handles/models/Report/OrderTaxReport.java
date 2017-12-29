@@ -7,20 +7,23 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 public class OrderTaxReport {
 
+    @JsonProperty("invoice number")
+    private String invoiceNumber;
+
     @JsonProperty("orderId")
     private int orderId;
 
     @JsonProperty("date purchased")
     private String datePurchased;
 
+    @JsonProperty("delivery date")
+    private String deliveryDate;
+
     @JsonProperty("pincode")
     private String pincode;
 
-    @JsonProperty("status")
+    @JsonProperty("order status")
     private String orderStatus;
-
-    @JsonProperty("invoice number")
-    private String invoiceNumber;
 
     @JsonProperty("taxable amount")
     private double taxableAmount;
@@ -123,5 +126,15 @@ public class OrderTaxReport {
     public void setPaymentStatus(String paymentStatus)
     {
         this.paymentStatus = paymentStatus;
+    }
+
+    public String getDeliveryDate()
+    {
+        return deliveryDate;
+    }
+
+    public void setDeliveryDate(String deliveryDate)
+    {
+        this.deliveryDate = deliveryDate;
     }
 }
