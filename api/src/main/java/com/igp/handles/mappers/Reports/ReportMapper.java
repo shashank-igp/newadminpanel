@@ -4,10 +4,7 @@ package com.igp.handles.mappers.Reports;
  * Created by shal on 22/9/17.
  */
 
-import com.igp.handles.models.Report.PayoutAndTaxReportSummaryModel;
-import com.igp.handles.models.Report.PincodeModelListWithSummary;
-import com.igp.handles.models.Report.ReportOrderWithSummaryModel;
-import com.igp.handles.models.Report.VendorModelListWithSummary;
+import com.igp.handles.models.Report.*;
 import com.igp.handles.utils.Order.OrderStatusUpdateUtil;
 import com.igp.handles.utils.Reports.PayoutAndTaxesReport;
 import org.slf4j.Logger;
@@ -60,19 +57,29 @@ public class ReportMapper {
     }
 
 
-    public PayoutAndTaxReportSummaryModel getPayoutAndTaxes(int fkAssociateId,int orderId,String orderDateFrom,
-                                                        String orderDateTo,String startLimit,String endLimit){
+    public PayoutAndTaxReportSummaryModel getPayoutAndTaxes(int fkAssociateId,int orderId,String orderDateFrom,String orderDeliveryDateFrom,
+                                                        String orderDeliveryDateTo,String orderDateTo,String startLimit,String endLimit){
         PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
         PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=null;
         try{
             payoutAndTaxReportSummaryModel=payoutAndTaxesReport.getPayoutAndTaxes(fkAssociateId,
-                                            orderId,orderDateFrom,orderDateTo,startLimit,endLimit);
+                                            orderId,orderDateFrom,orderDateTo,orderDeliveryDateFrom,orderDeliveryDateTo,startLimit,endLimit);
         }catch (Exception exception){
             logger.error("Error in getPayoutAndTaxes ",exception);
         }
         return payoutAndTaxReportSummaryModel;
     }
 
+    public VendorInvoiceModel getInvoicePdfDate(int fkAssociateId,int orderId){
+        VendorInvoiceModel vendorInvoiceModel =null;
+        PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
+        try {
+            vendorInvoiceModel=payoutAndTaxesReport.getInvoicePdfDate(fkAssociateId,orderId);
+        }catch (Exception exception){
+            logger.error("Error in getInvoicePdfDate ",exception);
+        }
+        return vendorInvoiceModel;
+    }
 
     public static boolean addVendorPincode(String fkAssociateId,int pincode,int cityId,int shipType,int shipCharge){
         Map<Integer,String> map= new HashMap<>();

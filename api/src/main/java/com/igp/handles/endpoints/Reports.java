@@ -167,19 +167,22 @@ public class Reports {
     @Path("/v1/handels/getPayoutAndTaxesReport")
     public ReportResponse getPayoutAndTaxes(@QueryParam("fkAssociateId") int fkAssociateId, @QueryParam("orderId")int orderId,
                                         @QueryParam("orderDateFrom") String orderDateFrom, @QueryParam("orderDateTo")String orderDateTo,
+                                        @QueryParam("orderDeliveryDateFrom") String orderDeliveryDateFrom,@QueryParam("orderDeliveryDateTo") String orderDeliveryDateTo,
                                         @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
         ReportResponse reportResponse=new ReportResponse();
         PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
         try{
-            reportResponse.setTableHeaders(new String[]{"orderId","date purchased","pincode","delivery date","invoice number","taxable amount"
-                ,"tax","total amount","payment status"});
+            reportResponse.setTableHeaders(new String[]{"invoice number","orderId","date purchased","delivery date"
+                ,"pincode","order status","delivery date","taxable amount","tax","total amount","payment status"});
 
 
             orderDateFrom=getTimestampString(orderDateFrom,0);
             orderDateTo=getTimestampString(orderDateTo,0);
+            orderDeliveryDateFrom=getTimestampString(orderDeliveryDateFrom,0);
+            orderDeliveryDateTo=getTimestampString(orderDeliveryDateTo,0);
 
             PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=payoutAndTaxesReport.getPayoutAndTaxes(fkAssociateId,
-                                                                        orderId,orderDateFrom,orderDateTo,startLimit,endLimit);
+                                                                        orderId,orderDateFrom,orderDateTo,orderDeliveryDateFrom,orderDeliveryDateTo,startLimit,endLimit);
             reportResponse.setSummary(payoutAndTaxReportSummaryModel.getSummaryModelList());
             List<Object> objectList = new ArrayList<Object>(payoutAndTaxReportSummaryModel.getOrderTaxReportList());
             reportResponse.setTableData(objectList);
@@ -188,6 +191,19 @@ public class Reports {
             logger.error("Error occured at getPayoutAndTaxes ",exception);
         }
         return reportResponse;
+    }
+    @GET
+    @Path("/v1/handels/getInvoicePdfData")
+    public HandleServiceResponse getInvoicePdfDate(@QueryParam("fkAssociateId") int fkAssociateId, @QueryParam("orderId")int orderId){
+
+        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        ReportMapper reportMapper=new ReportMapper();
+        try {
+            handleServiceResponse.setResult(reportMapper.getInvoicePdfDate(fkAssociateId,orderId));
+        }catch (Exception exception){
+            logger.error("Error occured at getInvoicePdfDate ",exception);
+        }
+        return handleServiceResponse;
     }
 
 }
