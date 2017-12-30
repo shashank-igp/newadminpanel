@@ -167,7 +167,7 @@ public class Reports {
     @Path("/v1/handels/getPayoutAndTaxesReport")
     public ReportResponse getPayoutAndTaxes(@QueryParam("fkAssociateId") int fkAssociateId, @QueryParam("orderId")int orderId,
                                         @QueryParam("orderDateFrom") String orderDateFrom, @QueryParam("orderDateTo")String orderDateTo,
-                                        @QueryParam("orderDeliveryDateFrom") String orderDeliveryDateFrom,@QueryParam("orderDeliveryDateTo") String orderDeliveryDateTo,
+                                        @QueryParam("deliveryDateFrom") String orderDeliveryDateFrom,@QueryParam("deliveryDateTo") String orderDeliveryDateTo,
                                         @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
         ReportResponse reportResponse=new ReportResponse();
         PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
@@ -176,10 +176,10 @@ public class Reports {
                 ,"pincode","order status","taxable amount","tax","total amount","payment status"});
 
 
-            orderDateFrom=getTimestampString(orderDateFrom,0);
-            orderDateTo=getTimestampString(orderDateTo,0);
-            orderDeliveryDateFrom=getTimestampString(orderDeliveryDateFrom,0);
-            orderDeliveryDateTo=getTimestampString(orderDeliveryDateTo,0);
+            orderDateFrom=getTimestampString(orderDateFrom,2);
+            orderDateTo=getTimestampString(orderDateTo,2);
+            orderDeliveryDateFrom=getTimestampString(orderDeliveryDateFrom,2);
+            orderDeliveryDateTo=getTimestampString(orderDeliveryDateTo,2);
 
             PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=payoutAndTaxesReport.getPayoutAndTaxes(fkAssociateId,
                                                                         orderId,orderDateFrom,orderDateTo,orderDeliveryDateFrom,orderDeliveryDateTo,startLimit,endLimit);

@@ -440,9 +440,14 @@ public class SummaryFunctionsUtil
     }
 
     public  static String getTimestampString (String date,Integer flag){
+
+        //flag ==0 yyyy/MM/dd to yyyy-MM-dd 00:00:00.0    and flag==1 same but add day+1
+        //   and flag==2  yyyy/MM/dd to yyyy-MM-dd   no time stam
+
         Timestamp timestamp = null;
         if (date ==null || date.isEmpty()){return "";}
         DateFormat df = new SimpleDateFormat("yyyy/MM/dd");
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
         try {
             timestamp = new Timestamp(((java.util.Date)df.parse(date)).getTime());
             if (flag==1){
@@ -451,13 +456,20 @@ public class SummaryFunctionsUtil
                 cal.add(Calendar.DAY_OF_WEEK, 1);
                 timestamp.setTime(cal.getTime().getTime()); // or
                 timestamp = new Timestamp(cal.getTime().getTime());
+
+                return timestamp.toString();
+            }
+            else if (flag==0){
+                return timestamp.toString();
+            }else if(flag==2) {
+                return simpleDateFormat.format(df.parse(date));
             }
 
         } catch (ParseException e) {
             e.printStackTrace();
         }
 
-         return  timestamp.toString();
+         return  "";
     }
 
     public static Integer getCount(String query){
