@@ -9,9 +9,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by shanky on 27/12/17.
@@ -164,8 +162,7 @@ public class PayoutAndTaxesReport {
             logger.debug("sql query in getInvoicePdfDate "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()){
-                String taxType="";
-                Map<String,Double> taxTypeMap=new HashMap<>();
+                String taxType="",taxAmount="";
 
                 taxableAmount=resultSet.getDouble("gvd.taxable");
                 taxRate=resultSet.getDouble("gvd.comp_tax_rate");
@@ -179,12 +176,13 @@ public class PayoutAndTaxesReport {
 
                 if(igst!=0.000){
                     taxType+="igst "+taxRate+" %";
-                    taxTypeMap.put("igst",taxRate);
+                    taxAmount+=igst+"";
                 }else {
                     taxType+="cgst "+(taxRate/2)+" %<Br>";
                     taxType+="sgst "+(taxRate/2)+" %";
-                    taxTypeMap.put("cgst",(taxRate/2));
-                    taxTypeMap.put("sgst",(taxRate/2));
+
+                    taxAmount+=cgst+" <Br>";
+                    taxAmount+=sgst+" <Br>";
                 }
 
                 OrderProductInvoiceModel orderProductInvoiceModel=new OrderProductInvoiceModel();
@@ -196,13 +194,13 @@ public class PayoutAndTaxesReport {
                 orderProductInvoiceModel.setTaxCode(resultSet.getString("gvd.hsn_no"));
                 orderProductInvoiceModel.setTaxTypeMap(taxType);
                 orderProductInvoiceModel.setTaxrate(taxRate);
-                orderProductInvoiceModel.setTaxAmount(igst+sgst+cgst);
+                orderProductInvoiceModel.setTaxAmount(taxAmount);
                 orderProductInvoiceModel.setTotalAmount(resultSet.getDouble("gvd.amt"));
                 orderProductInvoiceModelList.add(orderProductInvoiceModel);
 
                 grandTotal+=orderProductInvoiceModel.getTotalAmount();
                 totalNetAmount+=orderProductInvoiceModel.getNetAmount();
-                totalTaxAmount+=orderProductInvoiceModel.getTaxAmount();
+                totalTaxAmount+=igst+sgst+cgst;
             }
             vendorInvoiceModel.setOrderId(orderId);
             vendorInvoiceModel.setInvoiceNumber(invoiceNumber);

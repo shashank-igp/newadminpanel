@@ -28,7 +28,7 @@ public class OrderProductInvoiceModel {
     private double taxrate;
 
     @JsonProperty("taxAmount")
-    private double taxAmount;
+    private String taxAmount;
 
     @JsonProperty("totalAmount")
     private double totalAmount;
@@ -103,12 +103,12 @@ public class OrderProductInvoiceModel {
         this.taxrate = taxrate;
     }
 
-    public double getTaxAmount()
+    public String getTaxAmount()
     {
         return taxAmount;
     }
 
-    public void setTaxAmount(double taxAmount)
+    public void setTaxAmount(String taxAmount)
     {
         this.taxAmount = taxAmount;
     }
