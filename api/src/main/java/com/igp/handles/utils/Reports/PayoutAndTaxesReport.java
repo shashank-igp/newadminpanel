@@ -72,8 +72,6 @@ public class PayoutAndTaxesReport {
                 String status=resultSet.getString("status");
                 int deliveryStatusFlag=resultSet.getInt("deliveryStatus");
 
-                logger.debug("status "+status+"  and deliveryStatusFlag "+deliveryStatusFlag);
-
                 OrderTaxReport orderTaxReport=new OrderTaxReport();
                 orderTaxReport.setOrderId(resultSet.getInt("orderId"));
                 orderTaxReport.setTaxableAmount(resultSet.getDouble("taxableAmount"));
@@ -158,7 +156,7 @@ public class PayoutAndTaxesReport {
             getVendorInfo(fkAssociateId,connection,vendorInfoModel);
             getVendorInfo(354,connection,mumbaiWarehouseInfoModel);
 
-            statement = "select * from orders o join gst_vendors_dom gvd on o.orders_id = gvd.order_id where o.orders_id = ? "
+            statement = "select o.*,gvd.*,date_format(o.date_purchased,'%Y-%m-%d') as datePurchased from orders o join gst_vendors_dom gvd on o.orders_id = gvd.order_id where o.orders_id = ? "
                 + " and gvd.vendorId = ? ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,orderId);
@@ -176,7 +174,7 @@ public class PayoutAndTaxesReport {
                 cgst=resultSet.getDouble("gvd.cgst");
                 sgst=resultSet.getDouble("gvd.sgst");
                 invoiceNumber=resultSet.getString("gvd.invoice_num");
-                datePurchased=resultSet.getString("date_format(o.date_purchased,'%Y-%m-%d')");
+                datePurchased=resultSet.getString("datePurchased");
 
                 if(igst!=0.000){
                     taxTypeMap.put("igst",taxRate);
