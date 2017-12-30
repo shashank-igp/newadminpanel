@@ -143,7 +143,7 @@ public class PayoutAndTaxesReport {
         VendorInvoiceModel vendorInvoiceModel=new VendorInvoiceModel();
 
         Connection connection = null;
-        String statement,invoiceNumber="",datePurchased="",taxType="";
+        String statement,invoiceNumber="",datePurchased="";
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         VendorInfoModel vendorInfoModel=new VendorInfoModel(),mumbaiWarehouseInfoModel=new VendorInfoModel();
@@ -164,6 +164,7 @@ public class PayoutAndTaxesReport {
             logger.debug("sql query in getInvoicePdfDate "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()){
+                String taxType="";
                 Map<String,Double> taxTypeMap=new HashMap<>();
 
                 taxableAmount=resultSet.getDouble("gvd.taxable");
@@ -177,11 +178,11 @@ public class PayoutAndTaxesReport {
                 datePurchased=resultSet.getString("datePurchased");
 
                 if(igst!=0.000){
-                    taxType+="igst "+taxRate;
+                    taxType+="igst "+taxRate+" %";
                     taxTypeMap.put("igst",taxRate);
                 }else {
-                    taxType+="cgst "+(taxRate/2)+" <Br>";
-                    taxType+="sgst "+(taxRate/2)+" <Br>";
+                    taxType+="cgst "+(taxRate/2)+" %<Br>";
+                    taxType+="sgst "+(taxRate/2)+" %";
                     taxTypeMap.put("cgst",(taxRate/2));
                     taxTypeMap.put("sgst",(taxRate/2));
                 }
