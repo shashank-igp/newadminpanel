@@ -2,8 +2,6 @@ package com.igp.handles.models.Report;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import java.util.Map;
-
 /**
  * Created by shanky on 28/12/17.
  */
@@ -24,7 +22,7 @@ public class OrderProductInvoiceModel {
     private String taxCode;
 
     @JsonProperty("taxType")
-    private Map<String,Double> taxTypeMap;
+    private String taxTypeMap;
 
     @JsonProperty("taxrate")
     private double taxrate;
@@ -85,12 +83,12 @@ public class OrderProductInvoiceModel {
         this.taxCode = taxCode;
     }
 
-    public Map<String, Double> getTaxTypeMap()
+    public String getTaxTypeMap()
     {
         return taxTypeMap;
     }
 
-    public void setTaxTypeMap(Map<String, Double> taxTypeMap)
+    public void setTaxTypeMap(String taxTypeMap)
     {
         this.taxTypeMap = taxTypeMap;
     }

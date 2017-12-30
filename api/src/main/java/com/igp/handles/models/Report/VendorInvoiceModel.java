@@ -29,7 +29,31 @@ public class VendorInvoiceModel {
     @JsonProperty("total")
     private double total;
 
+    @JsonProperty("totalNetAmount")
+    private double totalNetAmount;
 
+    @JsonProperty("totalTaxAmount")
+    private double totalTaxAmount;
+
+    public double getTotalNetAmount()
+    {
+        return totalNetAmount;
+    }
+
+    public void setTotalNetAmount(double totalNetAmount)
+    {
+        this.totalNetAmount = totalNetAmount;
+    }
+
+    public double getTotalTaxAmount()
+    {
+        return totalTaxAmount;
+    }
+
+    public void setTotalTaxAmount(double totalTaxAmount)
+    {
+        this.totalTaxAmount = totalTaxAmount;
+    }
 
     public int getOrderId()
     {

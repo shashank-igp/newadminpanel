@@ -143,12 +143,12 @@ public class PayoutAndTaxesReport {
         VendorInvoiceModel vendorInvoiceModel=new VendorInvoiceModel();
 
         Connection connection = null;
-        String statement,invoiceNumber="",datePurchased="";
+        String statement,invoiceNumber="",datePurchased="",taxType="";
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         VendorInfoModel vendorInfoModel=new VendorInfoModel(),mumbaiWarehouseInfoModel=new VendorInfoModel();
         List<OrderProductInvoiceModel> orderProductInvoiceModelList=new ArrayList<>();
-        double taxableAmount=0.0,unitPrice=0.0,igst=0.0,cgst=0.0,sgst=0.0,taxRate=0.0,grandTotal=0.0;
+        double taxableAmount=0.0,unitPrice=0.0,igst=0.0,cgst=0.0,sgst=0.0,taxRate=0.0,grandTotal=0.0,totalNetAmount=0.0,totalTaxAmount=0.0;
 
 
         try{
@@ -177,8 +177,11 @@ public class PayoutAndTaxesReport {
                 datePurchased=resultSet.getString("datePurchased");
 
                 if(igst!=0.000){
+                    taxType+="igst "+taxRate;
                     taxTypeMap.put("igst",taxRate);
                 }else {
+                    taxType+="cgst "+(taxRate/2)+" <Br>";
+                    taxType+="sgst "+(taxRate/2)+" <Br>";
                     taxTypeMap.put("cgst",(taxRate/2));
                     taxTypeMap.put("sgst",(taxRate/2));
                 }
@@ -190,13 +193,15 @@ public class PayoutAndTaxesReport {
                 orderProductInvoiceModel.setQuantity(quantity);
                 orderProductInvoiceModel.setNetAmount(taxableAmount);
                 orderProductInvoiceModel.setTaxCode(resultSet.getString("gvd.hsn_no"));
-                orderProductInvoiceModel.setTaxTypeMap(taxTypeMap);
+                orderProductInvoiceModel.setTaxTypeMap(taxType);
                 orderProductInvoiceModel.setTaxrate(taxRate);
                 orderProductInvoiceModel.setTaxAmount(igst+sgst+cgst);
                 orderProductInvoiceModel.setTotalAmount(resultSet.getDouble("gvd.amt"));
                 orderProductInvoiceModelList.add(orderProductInvoiceModel);
 
                 grandTotal+=orderProductInvoiceModel.getTotalAmount();
+                totalNetAmount+=orderProductInvoiceModel.getNetAmount();
+                totalTaxAmount+=orderProductInvoiceModel.getTaxAmount();
             }
             vendorInvoiceModel.setOrderId(orderId);
             vendorInvoiceModel.setInvoiceNumber(invoiceNumber);
@@ -205,6 +210,8 @@ public class PayoutAndTaxesReport {
             vendorInvoiceModel.setSellerAddressModel(vendorInfoModel);
             vendorInvoiceModel.setOrderProductInvoiceModelList(orderProductInvoiceModelList);
             vendorInvoiceModel.setTotal(grandTotal);
+            vendorInvoiceModel.setTotalNetAmount(totalNetAmount);
+            vendorInvoiceModel.setTotalTaxAmount(totalTaxAmount);
 
         }catch (Exception exception){
             logger.error("Error in getInvoicePdfDate ",exception);
