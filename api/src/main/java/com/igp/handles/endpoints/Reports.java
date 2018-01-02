@@ -165,7 +165,7 @@ public class Reports {
 
     @GET
     @Path("/v1/handels/getPayoutAndTaxesReport")
-    public ReportResponse getPayoutAndTaxes(@QueryParam("fkAssociateId") int fkAssociateId, @QueryParam("orderId")int orderId,
+    public ReportResponse getPayoutAndTaxes(@QueryParam("fkAssociateId") int fkAssociateId, @QueryParam("orderNumber")int orderId,
                                         @QueryParam("orderDateFrom") String orderDateFrom, @QueryParam("orderDateTo")String orderDateTo,
                                         @QueryParam("deliveryDateFrom") String orderDeliveryDateFrom,@QueryParam("deliveryDateTo") String orderDeliveryDateTo,
                                         @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
