@@ -89,6 +89,7 @@ public class SummaryFunctionsUtil
                 + " inner join  orders_occasions  as oo  on o.orders_occasionid=oo.occasion_id    where "
                 + " vap.fk_associate_id="+fkAssociateId+"  "+sb.toString()+" limit "+startLimit+","+endLimit+" ";
             preparedStatement = connection.prepareStatement(statement);
+            logger.debug("sql query in getSummaryDetailsForVendor "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             Double totalPrice=0.00;
             Double value=0.00;
@@ -166,6 +167,8 @@ public class SummaryFunctionsUtil
                 + " join AA_master_components as mc on vc.fk_component_id=mc.component_id "
                 + " where vc.fk_associate_id='"+fkAssociateId+"' limit "+startLimit+","+endLimit+" ";
             preparedStatement = connection.prepareStatement(statement);
+            logger.debug("sql query in getVendorDetailsFunction "+preparedStatement);
+
             queryTotal="select count(*) as totalno from AA_vendor_to_components as vc inner join AA_master_components as mc on vc.fk_component_id=mc.component_id where vc.fk_associate_id='"+fkAssociateId+"'";
 
             resultSet = preparedStatement.executeQuery();
@@ -212,6 +215,7 @@ public class SummaryFunctionsUtil
             connection = Database.INSTANCE.getReadWriteConnection();
             statement = "update AA_vendor_to_components set flag_change="+flag+" where fk_associate_id="+fk_associate_id+" and fk_component_id="+componentId+" ";
             preparedStatement = connection.prepareStatement(statement);
+            logger.debug("sql query in updateVendorComponet "+preparedStatement);
             Integer nums = preparedStatement.executeUpdate();
             if (nums!=null){result = true;}
 
@@ -327,6 +331,7 @@ public class SummaryFunctionsUtil
             connection = Database.INSTANCE.getReadWriteConnection();
             statement = "update AA_vendor_pincode set flag_change="+flag+""+updateClause+" where vendor_id="+fk_associate_id+" and pincode="+pincode+" and  ship_type="+shipType+" ";
             preparedStatement = connection.prepareStatement(statement);
+            logger.debug("sql query in updateVendorPincode "+preparedStatement);
             Integer nums = preparedStatement.executeUpdate();
             if (nums!=null){result = true;}
         } catch (Exception exception) {
@@ -351,6 +356,7 @@ public class SummaryFunctionsUtil
             statement = " SELECT * from AA_master_components where component_id = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1,componentId);
+            logger.debug("sql query in getComponentName "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             if(resultSet.next()){
                 result=resultSet.getString("component_name");
@@ -423,7 +429,7 @@ public class SummaryFunctionsUtil
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement = "select   count(*) as total,sum((vap.vendor_price+vap.shipping)) as Amount from vendor_assign_price as  vap  inner join  orders_products as op on vap.orders_id=op.orders_id  and  vap.products_id=op.products_id  inner join order_product_extra_info as oe on op.orders_products_id=oe.order_product_id inner  join  orders as o on  vap.orders_id=o.orders_id inner join  orders_occasions  as oo  on o.orders_occasionid=oo.occasion_id  where vap.fk_associate_id="+fkAssociateId+"   "+query.toString()+" "  ;
             preparedStatement = connection.prepareStatement(statement);
-
+            logger.debug("sql query in getTotalAndOrder "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             if(resultSet.next()){
                 result=""+resultSet.getInt("total")+"-"+resultSet.getInt("Amount")+"";
