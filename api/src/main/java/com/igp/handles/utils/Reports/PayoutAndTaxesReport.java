@@ -154,7 +154,7 @@ public class PayoutAndTaxesReport {
             getVendorInfo(fkAssociateId,connection,vendorInfoModel);
             getVendorInfo(354,connection,mumbaiWarehouseInfoModel);
 
-            statement = "select o.*,gvd.*,date_format(o.date_purchased,'%Y-%m-%d') as datePurchased from orders o join gst_vendors_dom gvd on o.orders_id = gvd.order_id where o.orders_id = ? "
+            statement = "select o.*,gvd.*,date_format(o.date_purchased,'%Y-%m-%d') as datePurchased from orders o join gst_vendors_dom_new gvd on o.orders_id = gvd.order_id where o.orders_id = ? "
                 + " and gvd.vendorId = ? ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,orderId);
@@ -166,7 +166,7 @@ public class PayoutAndTaxesReport {
 
                 taxableAmount=resultSet.getDouble("gvd.taxable");
                 taxRate=resultSet.getDouble("gvd.comp_tax_rate");
-                int quantity=1;
+                int quantity=resultSet.getInt("gvd.quantity");
                 unitPrice=taxableAmount/quantity;
                 igst=resultSet.getDouble("gvd.igst");
                 cgst=resultSet.getDouble("gvd.cgst");
