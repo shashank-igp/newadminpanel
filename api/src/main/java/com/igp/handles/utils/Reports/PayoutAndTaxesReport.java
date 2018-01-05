@@ -58,7 +58,7 @@ public class PayoutAndTaxesReport {
                 + " , min(case when op.orders_product_status = 'Processed' then 1 when op.orders_product_status = 'Confirmed' "
                 + " then 2 when op.orders_product_status = 'Shipped' then 3 else 4 end ) status, max(op.delivery_status) "
                 + " deliveryStatus from orders o  left join tax_handels_payout thp on o.orders_id = thp.orders_id "
-                + " join gst_vendors_dom gvd on o.orders_id =gvd.order_id join orders_products op on op.orders_id = o.orders_id "
+                + " join gst_vendors_dom_new gvd on o.orders_id =gvd.order_id join orders_products op on op.orders_id = o.orders_id "
                 + "  where gvd.vendorID = "+fkAssociateId+"  "+sb.toString()+" group by o.orders_id "
                 + "  limit "+startLimit+","+endLimit+" ";
 
