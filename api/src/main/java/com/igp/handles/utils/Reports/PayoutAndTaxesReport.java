@@ -10,6 +10,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by shanky on 27/12/17.
@@ -28,10 +29,10 @@ public class PayoutAndTaxesReport {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         List<OrderTaxReport> orderReportObjectModelList=new ArrayList<>();
-        double totaltaxableAmount=0.0,totalAmount=0.0;
-        int totalOrderId=0;
-        StringBuilder sb=new StringBuilder("");
+        List<Double> amountList=new ArrayList<>();
 
+        StringBuilder sb=new StringBuilder("");
+        AtomicInteger totalOrderCount=new AtomicInteger();
         try{
 
             if(orderId!=0){
@@ -102,23 +103,24 @@ public class PayoutAndTaxesReport {
                     orderTaxReport.setPaymentStatus("Paid");
                 }
                 orderReportObjectModelList.add(orderTaxReport);
-                totalOrderId++;
-                totaltaxableAmount=totaltaxableAmount+orderTaxReport.getTaxableAmount();
-                totalAmount=totalAmount+orderTaxReport.getTotalAmount();
             }
+
+            amountList=getSummaryDataForPayoutAndTaxes(totalOrderCount,fkAssociateId);
+
+
             SummaryModel summaryModel=new SummaryModel();
             SummaryModel summaryModel1=new SummaryModel();
             SummaryModel summaryModel2=new SummaryModel();
 
 
             summaryModel.setLabel("Orders");
-            summaryModel.setValue(totalOrderId+"");
+            summaryModel.setValue(totalOrderCount.intValue()+"");
 
             summaryModel1.setLabel("Taxable Amount");
-            summaryModel1.setValue(totaltaxableAmount+"");
+            summaryModel1.setValue(amountList.get(0).doubleValue()+"");
 
             summaryModel2.setLabel("Total Amount");
-            summaryModel2.setValue(totalAmount+"");
+            summaryModel2.setValue(amountList.get(0).doubleValue()+"");
 
             summaryModelList.add(summaryModel);
             summaryModelList.add(summaryModel1);
@@ -247,5 +249,39 @@ public class PayoutAndTaxesReport {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeResultSet(resultSet);
         }
+    }
+    public List<Double> getSummaryDataForPayoutAndTaxes(AtomicInteger totalOrders,int fkAssociateId){
+
+        String statement;
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        Connection connection=null;
+        int totalOrderCount=0;
+        Double totaltaxableAmount=0.0,totalAmount=0.0;
+        List<Double> amountList = new ArrayList<>();
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement = "select  sum(gvd.taxable) as taxableAmount,sum(gvd.amt) as totalAmount  "
+                + " from  gst_vendors_dom_new gvd where gvd.vendorID = ? group by gvd.order_id ";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,fkAssociateId);
+            logger.debug("sql query in getSummaryDataForPayoutAndTaxes "+preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()){
+                totalOrderCount++;
+                totaltaxableAmount+=resultSet.getDouble("taxableAmount");
+                totalAmount+=resultSet.getDouble("totalAmount");
+            }
+            totalOrders.set(totalOrderCount);
+            amountList.add(totaltaxableAmount);
+            amountList.add(totalAmount);
+        }catch (Exception exception){
+            logger.error("Error in getSummaryDataForPayoutAndTaxes ",exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return amountList;
     }
 }
