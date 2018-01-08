@@ -261,16 +261,16 @@ public class PayoutAndTaxesReport {
         List<Double> amountList = new ArrayList<>();
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = "select  sum(gvd.taxable) as taxableAmount,sum(gvd.amt) as totalAmount  "
-                + " from  gst_vendors_dom_new gvd where gvd.vendorID = ? group by gvd.order_id ";
+            statement = "select count(distinct order_id) as distinctDrderIdCount, sum(gvd.taxable) as taxableAmount, "
+                + " sum(gvd.amt) as totalAmount from  gst_vendors_dom_new gvd where gvd.vendorID = ? ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,fkAssociateId);
             logger.debug("sql query in getSummaryDataForPayoutAndTaxes "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
-            while(resultSet.next()){
-                totalOrderCount++;
-                totaltaxableAmount+=resultSet.getDouble("taxableAmount");
-                totalAmount+=resultSet.getDouble("totalAmount");
+            if(resultSet.next()){
+                totalOrderCount=resultSet.getInt("distinctDrderIdCount");
+                totaltaxableAmount=resultSet.getDouble("taxableAmount");
+                totalAmount=resultSet.getDouble("totalAmount");
             }
             totalOrders.set(totalOrderCount);
             amountList.add(totaltaxableAmount);
