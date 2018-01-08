@@ -1,8 +1,8 @@
 package com.igp.server.filters;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.igp.handles.response.ResponseModel;
-import com.igp.handles.response.Status;
+import com.igp.handles.vendorpanel.response.ResponseModel;
+import com.igp.handles.vendorpanel.response.Status;
 import com.igp.config.Environment;
 import com.igp.config.ResponseProperties;
 import com.igp.server.utils.RequestHeader;
