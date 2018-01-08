@@ -32,7 +32,8 @@ public class App {
         context.setContextPath("/");
         ServletHolder servletHolder = new ServletHolder(ServletContainer.class);
         servletHolder.setInitOrder(0);
-        servletHolder.setInitParameter("jersey.config.server.provider.packages", "com.igp.api;com.igp.handles");
+        servletHolder.setInitParameter("jersey.config.server.provider.packages", "com.igp.api;com.igp.admin;com.igp.handles");
+
         servletHolder.setInitParameter(org.glassfish.jersey.server.ServerProperties.PROVIDER_CLASSNAMES,
             MultiPartFeature.class.getCanonicalName());
         context.addServlet(servletHolder, "/*");
