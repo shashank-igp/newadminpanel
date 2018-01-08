@@ -17,8 +17,6 @@ public class TokenUtil
     {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        ResultSet resultSet = null;
-
         try
         {
             connection = Database.INSTANCE.getReadWriteConnection();
@@ -36,7 +34,6 @@ public class TokenUtil
         finally
         {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
     }

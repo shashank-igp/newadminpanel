@@ -131,7 +131,6 @@ public class UploadUtil {
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
-            Database.INSTANCE.closeConnection(connection);
         }
         return ifUpdationSucessfull;
     }
@@ -189,7 +188,6 @@ public class UploadUtil {
             logger.error("Exception in connection", exception);
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeConnection(connection);
             Database.INSTANCE.closeConnection(connection);
         }
         return ifUpdationSucessfull;
