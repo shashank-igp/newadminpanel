@@ -131,7 +131,6 @@ public class OrderStatusUpdateUtil {
     public static Boolean   markOutForDelivery(int orderId, String fkAssociateId, String status, String orderProductIds){
         Connection connection = null;
         String statement;
-        ResultSet resultSet = null;
         Boolean ifUpdationSucessfull=false;
         PreparedStatement preparedStatement = null;
         try{
@@ -155,7 +154,6 @@ public class OrderStatusUpdateUtil {
             logger.error("Exception in connection", exception);
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
         return ifUpdationSucessfull;
@@ -166,7 +164,6 @@ public class OrderStatusUpdateUtil {
 
         Connection connection = null;
         String statement;
-        ResultSet resultSet = null;
         Boolean ifUpdationSucessfull=false;
         PreparedStatement preparedStatement = null;
         try{
@@ -191,7 +188,6 @@ public class OrderStatusUpdateUtil {
             logger.error("Exception in connection", exception);
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
         return ifUpdationSucessfull;
@@ -275,7 +271,6 @@ public class OrderStatusUpdateUtil {
 
         Connection connection = null;
         String statement;
-        ResultSet resultSet = null;
         Boolean ifUpdationSucessfull=false;
         PreparedStatement preparedStatement = null;
         try{
@@ -299,8 +294,6 @@ public class OrderStatusUpdateUtil {
             logger.error("Exception in connection", exception);
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeResultSet(resultSet);
-            Database.INSTANCE.closeConnection(connection);
             Database.INSTANCE.closeConnection(connection);
         }
         return ifUpdationSucessfull;
@@ -310,8 +303,6 @@ public class OrderStatusUpdateUtil {
 
         Connection connection = null;
         String statement;
-        ResultSet resultSet = null;
-        Boolean ifUpdationSucessfull=false;
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
@@ -322,12 +313,10 @@ public class OrderStatusUpdateUtil {
             logger.debug("sql query "+preparedStatement);
             int rows=preparedStatement.executeUpdate();
 
-
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
 
@@ -341,8 +330,6 @@ public class OrderStatusUpdateUtil {
 
         Connection connection = null;
         String statement;
-        ResultSet resultSet = null;
-        Boolean ifUpdationSucessfull=false;
         PreparedStatement preparedStatement = null;
         Map<Integer,String> rejectionTypeToReasonMap=new HashMap<>();
         rejectionTypeToReasonMap.put(1,"Delivery location not serviceable");
@@ -393,8 +380,6 @@ public class OrderStatusUpdateUtil {
             logger.error("Exception in connection", exception);
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-
-            Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
 
@@ -405,7 +390,6 @@ public class OrderStatusUpdateUtil {
         Connection connection = null;
         String statement;
         String stringToUpdate="";
-        ResultSet resultSet = null;
         if (status.equals("Delivered")){
 
             stringToUpdate="Products delivered : "+ordersProductsIds+" for orderId "+orderId+" using Vendor Upload Panel ";
@@ -443,7 +427,6 @@ public class OrderStatusUpdateUtil {
             logger.error("Exception in connection", exception);
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
 

@@ -104,7 +104,6 @@ public class VendorUtil
         boolean result=false;
         Connection connection = null;
         String statement;
-        ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         int rejectionType=9; // for alternate number/address issue
         try{
@@ -133,8 +132,6 @@ public class VendorUtil
             logger.error("Exception in connection", exception);
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-
-            Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
 
