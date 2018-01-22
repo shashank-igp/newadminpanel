@@ -41,7 +41,7 @@ public class OrderMapper
 
         try{
             List<OrdersProducts> orderProductList = orderUtil.getOrderProducts(scopeId, orderId, fkAssociateId,ordersProductExtraInfoMap,orderProductIds);
-            orders=prepareOrders(scopeId,Integer.parseInt(fkAssociateId),"all",orderProductList,ordersProductExtraInfoMap,"");
+            orders=prepareOrders("all",orderProductList,ordersProductExtraInfoMap,"",false);
 
         }
         catch (Exception e){
@@ -58,8 +58,8 @@ public class OrderMapper
         Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap = new HashMap<>();
         try{
             List<OrdersProducts> orderProductList = orderUtil.getOrderProductsByStatusDate(scopeId,fkassociateId,status,date,
-                section,  isfuture,ordersProductExtraInfoMap);
-            orders=prepareOrders(scopeId,fkassociateId,orderAction,orderProductList,ordersProductExtraInfoMap,status);
+                section,  isfuture,ordersProductExtraInfoMap,false,null);
+            orders=prepareOrders(orderAction,orderProductList,ordersProductExtraInfoMap,status,false);
         }
         catch (Exception e){
             logger.error("Exception while generating orders",e);
@@ -67,8 +67,9 @@ public class OrderMapper
         return orders;
 
     }
-    public List<Order> prepareOrders(String scopeId, int fkassociateId, String orderAction,
-                                     List<OrdersProducts> orderProductList,Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap,String status){
+    public List<Order> prepareOrders( String orderAction,
+                                        List<OrdersProducts> orderProductList,Map<Integer,
+                                        OrderProductExtraInfo> ordersProductExtraInfoMap,String status,boolean forAdminPanelOrNot){
 
 
         List<Order> orders=new ArrayList<>();
@@ -81,6 +82,7 @@ public class OrderMapper
         Map<String, String> orderShippingTypeMap = new HashMap<>();
         Map<Integer, String> orderProductDeliveryDateMap = new HashMap<>();
         OrderUtil orderUtil=new OrderUtil();
+        int fkassociateId=0;
 
         for (OrdersProducts orderProducts : orderProductList){
             try{
@@ -98,6 +100,7 @@ public class OrderMapper
                     // means standard delivery product so ignore
                     continue;
                 }
+                fkassociateId=Integer.parseInt(orderProducts.getFkAssociateId());
                 String key = orderProducts.getOrderId() + "," + orderProductExtraInfo.getDeliveryDate() + ","
                     + orderProductExtraInfo.getDeliveryType() + ","
                     + orderProductExtraInfo.getDeliveryTime().replaceAll(":|\\shrs", "");
@@ -159,7 +162,7 @@ public class OrderMapper
                 if (orderProductExtraInfo.getDeliveryType() == 4) {
                     Order order = tempOrderProductsMap.get(key);
                     if (order == null) {
-                        order = orderUtil.gerOrderOnly( orderProducts.getOrderId(),fkassociateId);
+                        order = orderUtil.gerOrderOnly( orderProducts.getOrderId(),fkassociateId,forAdminPanelOrNot);
                         order.getOrderProducts().add(orderProducts);
                         tempOrderProductsMap.put(key, order);
                         logger.debug("adding order product id :" + orderProducts.getOrderProductId());
@@ -172,7 +175,7 @@ public class OrderMapper
                     || orderProductExtraInfo.getDeliveryType() == 3) {
                     Order order = originalOrderMap.get(key);
                     if (order == null) {
-                        order = orderUtil.gerOrderOnly( orderProducts.getOrderId(),fkassociateId);
+                        order = orderUtil.gerOrderOnly( orderProducts.getOrderId(),fkassociateId,forAdminPanelOrNot);
                         originalOrderMap.put(key, order);
                     }
                     if (orderShippingChargeMap.get(orderProducts.getOrderId()) != null) {
@@ -232,7 +235,7 @@ public class OrderMapper
                     }
                     originalOrderMap.put(newKey, order);
                 } else {
-                    order = orderUtil.gerOrderOnly(Integer.parseInt(data[0]),fkassociateId);
+                    order = orderUtil.gerOrderOnly(Integer.parseInt(data[0]),fkassociateId,forAdminPanelOrNot);
                     for (OrdersProducts orderProducts : entry.getValue().getOrderProducts()) {
                         order.getOrderProducts().add(orderProducts);
                         order.setVendorOrderTotal(order.getVendorOrderTotal() + orderProducts.getVendorPrice());

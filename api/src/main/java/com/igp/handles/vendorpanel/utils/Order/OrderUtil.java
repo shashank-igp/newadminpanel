@@ -129,11 +129,13 @@ public class OrderUtil
     }
 
     public List<OrdersProducts> getOrderProductsByStatusDate(String scopeId, int fkAssociateId, String status,
-        Date date, String section, boolean isfuture,Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap){
+        Date date, String section, boolean isfuture,Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap,
+        boolean forAdminPanelOrNot,String slaClause){
 
+        //  forAdminPanelOrNot  == true i.e request comes from admin panel and if == false then request is for vendor Panel
         Connection connection = null;
         ResultSet resultSet = null;
-        String statement="";
+        String statement="",fkAssociateIdWhereClause="";
         PreparedStatement preparedStatement = null;
 
         List<OrdersProducts> listOfOrderProducts=new ArrayList<>();
@@ -141,8 +143,43 @@ public class OrderUtil
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             String operator = isfuture ? " >= " : " = ";
+            if(forAdminPanelOrNot==true ){
+                if(fkAssociateId==72){
+                    fkAssociateIdWhereClause="op.fk_associate_id = 72 and ";
+                }else {
+                    fkAssociateIdWhereClause="op.fk_associate_id != 72 and ";
+                }
+            }else {
+                fkAssociateIdWhereClause="op.fk_associate_id = "+fkAssociateId+" and ";
+            }
+            if(slaClause!=null){
+                slaClause="and op.sla_code in "+slaClause;
+            }else {
+                slaClause="";
+            }
             switch (status)
             {
+                case "Processing":
+                    if (section.equals("past"))
+                    {
+                        Date todayDate = new Date();
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op  "
+                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                            + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
+                            + " where opei.product_id = op.products_id and " + fkAssociateIdWhereClause +  "  opei.delivery_date "
+                            + " >= ? and  opei.delivery_date < '" + new SimpleDateFormat("yyyy-MM-dd").format(todayDate)
+                            + "' and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc ";
+                    }
+                    else
+                    {
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op  "
+                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                            + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
+                            + " where opei.product_id = op.products_id and " + fkAssociateIdWhereClause +  " opei.delivery_date "
+                            + operator + " ? and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc";
+
+                    }
+                    break;
                 case "Processed":
                 case "Confirmed":
                     if (section.equals("past"))
@@ -151,18 +188,17 @@ public class OrderUtil
                         statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
                             + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                            + " where vap.products_id = op.products_id and op.fk_associate_id = ? and   vap.delivery_date "
+                            + " where vap.products_id = op.products_id and " + fkAssociateIdWhereClause +  " vap.delivery_date "
                             + " >= ? and  vap.delivery_date < '" + new SimpleDateFormat("yyyy-MM-dd").format(todayDate)
-                            + "' and op.orders_product_status= '" + status + "' order by vap.delivery_date asc ";
+                            + "' and op.orders_product_status= '" + status + "' "+ slaClause +" order by vap.delivery_date asc ";
                     }
                     else
                     {
                         statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
                             + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                            + " where vap.products_id = op.products_id and op.fk_associate_id = ?  and  vap.delivery_date "
-                            + operator + " ? and op.orders_product_status= '" + status
-                            + "' order by vap.delivery_date asc";
+                            + " where vap.products_id = op.products_id and " + fkAssociateIdWhereClause +  " vap.delivery_date "
+                            + operator + " ? and op.orders_product_status= '" + status + "' "+ slaClause +" order by vap.delivery_date asc";
 
                     }
                     break;
@@ -172,12 +208,12 @@ public class OrderUtil
                     statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products as op inner join trackorders as track on op.orders_id = track.orders_id "
                         + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                         + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                        + " where op.products_id = track.products_id and op.fk_associate_id = ? and  op.delivery_status = 0 and  "
+                        + " where op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 0 and  "
                         + " DATE_FORMAT(track.outForDeliveryDate,'%Y-%m-%d') <= ? and DATE_FORMAT(track.outForDeliveryDate,'%Y-%m-%d') >='"
                         + new SimpleDateFormat("yyyy-MM-dd").format(pastDate)
                         + "' and DATE_FORMAT(track.date_of_delivery,'%Y-%m-%d') >='"
                         +new SimpleDateFormat("yyyy-MM-dd").format(pastDate)
-                        + "' and op.orders_product_status='Shipped' order by track.deliveryDate asc ";
+                        + "' and op.orders_product_status='Shipped' "+slaClause+" order by track.deliveryDate asc ";
 
                 }
                 break;
@@ -185,22 +221,22 @@ public class OrderUtil
                     statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize   from orders_products as op inner join trackorders as track on op.orders_id = track.orders_id "
                         + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                         + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                        + " where op.products_id = track.products_id and op.fk_associate_id = ?  and  op.delivery_status = 1 and  "
+                        + " where op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 1 and  "
                         + " DATE_FORMAT(track.deliveredDate,'%Y-%m-%d') = ? and op.orders_product_status='Shipped' order by track.deliveryDate asc ";
                     break;
                 case "all":
                     statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
                         + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                         + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                        + " where vap.products_id = op.products_id and op.fk_associate_id = ?  and  vap.delivery_date "
+                        + " where vap.products_id = op.products_id and " + fkAssociateIdWhereClause +  " vap.delivery_date "
                         + operator + " ? and op.orders_product_status in ('Processed','Confirmed','Shipped') order by vap.delivery_date asc";
                     break;
                 default:
                     break;
             }
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setString(1,String.valueOf(fkAssociateId));
-            preparedStatement.setString(2,new SimpleDateFormat("yyyy-MM-dd").format(date));
+            //preparedStatement.setString(1,String.valueOf(fkAssociateId));
+            preparedStatement.setString(1,new SimpleDateFormat("yyyy-MM-dd").format(date));
 
             logger.debug("sql query "+preparedStatement);
 
@@ -256,14 +292,14 @@ public class OrderUtil
                     orderProductExtraInfo.setDeliveryTime(ordersProducts.getTimeSlaVoilates());
                 }
 
-                if(orderProductExtraInfo.getDeliveryType()==2){
-                    String[] timeSlotArray=orderProductExtraInfo.getDeliveryTime().split(" hrs - ");
-                    int secondTimeSlot=Integer.parseInt(timeSlotArray[1].substring(0,2))-1;
-                    orderProductExtraInfo.setDeliveryTime(timeSlotArray[0]+" hrs - "+
-                        secondTimeSlot+timeSlotArray[1].substring(2,timeSlotArray[1].length()));
+                if(forAdminPanelOrNot==false){
+                    if(orderProductExtraInfo.getDeliveryType()==2){
+                        String[] timeSlotArray=orderProductExtraInfo.getDeliveryTime().split(" hrs - ");
+                        int secondTimeSlot=Integer.parseInt(timeSlotArray[1].substring(0,2))-1;
+                        orderProductExtraInfo.setDeliveryTime(timeSlotArray[0]+" hrs - "+
+                            secondTimeSlot+timeSlotArray[1].substring(2,timeSlotArray[1].length()));
+                    }
                 }
-
-
                 ordersProductExtraInfoMap.put(Integer.valueOf(ordersProducts.getOrderProductId()),orderProductExtraInfo);
                 listOfOrderProducts.add(ordersProducts);
             }
@@ -410,7 +446,7 @@ public class OrderUtil
         return componentTotal;
     }
 
-    public Order gerOrderOnly(int orderId,int fkassociateId){
+    public Order gerOrderOnly(int orderId,int fkassociateId,boolean forAdminPanelOrNot){
 
         Connection connection = null;
         ResultSet resultSet = null;
@@ -420,12 +456,21 @@ public class OrderUtil
         int addressType=0;
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement="select o.*,group_concat(vi.instruction_msg SEPARATOR ' \n ') as instruction_msg,( case when  ab.address_type is not null then ab.address_type else 0 end )  as address_type  from orders as o join orders_temp ot on o.orders_temp_id=ot.orders_temp_id "
-                + " left join address_book ab on  ab.address_book_id=ot.address_book_id left join vendor_instructions as vi ON "
-                + " o.orders_id=vi.orders_id where o.orders_id = ?  and  vi.associate_id = ? limit 1";
-            preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1,orderId);
-            preparedStatement.setInt(2,fkassociateId);
+            if(forAdminPanelOrNot==true){
+                statement="select o.*,( case when  ab.address_type is not null then ab.address_type else 0 end )  as "
+                    + " address_type  from orders as o join orders_temp ot on o.orders_temp_id=ot.orders_temp_id "
+                    + " left join address_book ab on  ab.address_book_id=ot.address_book_id where o.orders_id = ? limit 1";
+                preparedStatement = connection.prepareStatement(statement);
+                preparedStatement.setInt(1,orderId);
+            }else {
+                statement="select o.*,group_concat(vi.instruction_msg SEPARATOR ' \n ') as instruction_msg,( case when  ab.address_type is not null then ab.address_type else 0 end )  as address_type  from orders as o join orders_temp ot on o.orders_temp_id=ot.orders_temp_id "
+                    + " left join address_book ab on  ab.address_book_id=ot.address_book_id left join vendor_instructions as vi ON "
+                    + " o.orders_id=vi.orders_id where o.orders_id = ?  and  vi.associate_id = ? limit 1";
+                preparedStatement = connection.prepareStatement(statement);
+                preparedStatement.setInt(1,orderId);
+                preparedStatement.setInt(2,fkassociateId);
+            }
+
 
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
