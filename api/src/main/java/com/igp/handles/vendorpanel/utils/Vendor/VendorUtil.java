@@ -1,7 +1,7 @@
 package com.igp.handles.vendorpanel.utils.Vendor;
 
 import com.igp.config.instance.Database;
-import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerVendor;
+import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerOrderProduct;
 import com.igp.handles.vendorpanel.models.Vendor.VendorInstruction;
 import com.igp.handles.vendorpanel.utils.Order.OrderStatusUpdateUtil;
 import org.apache.commons.lang3.time.DateUtils;
@@ -22,7 +22,7 @@ public class VendorUtil
 
     private static final Logger logger = LoggerFactory.getLogger(VendorUtil.class);
 
-    public List<OrderDetailsPerVendor> getOrderListForVendor(String fkAssociateId, Date date,int flag){
+    public List<OrderDetailsPerOrderProduct> getOrderListForVendor(String fkAssociateId, Date date,int flag){
         //flag=0  vap.delivery_date>=date , include Shipped    , flag=1 vap.delivery_date==date , exclude Shipped
         Connection connection = null;
         String statement,pStatus= flag==0 ? ",'Shipped'":""  , dateComapareSymbol= flag==0 ? ">=":"=";
@@ -30,7 +30,7 @@ public class VendorUtil
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         PreparedStatement preparedStatement = null;
 
-        List<OrderDetailsPerVendor> listOfOrderIdAsPerVendor=new ArrayList<>();
+        List<OrderDetailsPerOrderProduct> listOfOrderIdAsPerVendor=new ArrayList<>();
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement = "select torder.orders_id, ( CASE WHEN torder.deliveredDate!='0000-00-00 00:00:00' THEN torder.deliveredDate END ) as deliveredDate,"
@@ -49,18 +49,18 @@ public class VendorUtil
                 Date deliveryDate=resultSet.getString("deliveredDate")== null ? null : DateUtils.truncate(dateFormat.parse(resultSet.getString("deliveredDate")), Calendar.DAY_OF_MONTH);
                 Date outOfDeliryDate=resultSet.getString("outForDeliveryDate")== null ? null : DateUtils.truncate(dateFormat.parse(resultSet.getString("outForDeliveryDate")), Calendar.DAY_OF_MONTH);
 
-                OrderDetailsPerVendor orderDetailsPerVendor=new OrderDetailsPerVendor();
-                orderDetailsPerVendor.setOrdersId(resultSet.getLong("torder.orders_id"));
-                orderDetailsPerVendor.setDeliveredDate(deliveryDate);
-                orderDetailsPerVendor.setDeliveryDate(DateUtils.truncate(dateFormat.parse(resultSet.getString("vap.delivery_date")), Calendar.DAY_OF_MONTH));
-                orderDetailsPerVendor.setOutForDeliveryDate(outOfDeliryDate);
-                orderDetailsPerVendor.setOrderProductStatus(resultSet.getString("op.orders_product_status"));
-                orderDetailsPerVendor.setDeliveryStatus(resultSet.getBoolean("op.delivery_status"));
-                orderDetailsPerVendor.setDeliveryTime(resultSet.getString("vap.delivery_time"));
-                orderDetailsPerVendor.setShippingType(resultSet.getString("vap.shipping_type"));
-                orderDetailsPerVendor.setSlaCode(resultSet.getInt("op.sla_code"));
-                orderDetailsPerVendor.setOrdersProductsId(resultSet.getLong("op.orders_products_id"));
-                listOfOrderIdAsPerVendor.add(orderDetailsPerVendor);
+                OrderDetailsPerOrderProduct orderDetailsPerOrderProduct =new OrderDetailsPerOrderProduct();
+                orderDetailsPerOrderProduct.setOrdersId(resultSet.getLong("torder.orders_id"));
+                orderDetailsPerOrderProduct.setDeliveredDate(deliveryDate);
+                orderDetailsPerOrderProduct.setDeliveryDate(DateUtils.truncate(dateFormat.parse(resultSet.getString("vap.delivery_date")), Calendar.DAY_OF_MONTH));
+                orderDetailsPerOrderProduct.setOutForDeliveryDate(outOfDeliryDate);
+                orderDetailsPerOrderProduct.setOrderProductStatus(resultSet.getString("op.orders_product_status"));
+                orderDetailsPerOrderProduct.setDeliveryStatus(resultSet.getBoolean("op.delivery_status"));
+                orderDetailsPerOrderProduct.setDeliveryTime(resultSet.getString("vap.delivery_time"));
+                orderDetailsPerOrderProduct.setShippingType(resultSet.getString("vap.shipping_type"));
+                orderDetailsPerOrderProduct.setSlaCode(resultSet.getInt("op.sla_code"));
+                orderDetailsPerOrderProduct.setOrdersProductsId(resultSet.getLong("op.orders_products_id"));
+                listOfOrderIdAsPerVendor.add(orderDetailsPerOrderProduct);
             }
 
         } catch (Exception exception) {
@@ -87,7 +87,7 @@ public class VendorUtil
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             if(resultSet.next()) {
-                festivalDate=resultSet.getString("festival_date")== null ? null : DateUtils.truncate(dateFormat.parse(resultSet.getString("festival_date")), Calendar.DAY_OF_MONTH);
+                festivalDate=resultSet.getString("festival_date")== null ? todayDate : DateUtils.truncate(dateFormat.parse(resultSet.getString("festival_date")), Calendar.DAY_OF_MONTH);
             }
 
         } catch (Exception exception) {

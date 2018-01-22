@@ -5,7 +5,8 @@ import java.util.Date;
 /**
  * Created by shanky on 8/7/17.
  */
-public class OrderDetailsPerVendor {
+public class OrderDetailsPerOrderProduct
+{
     private Long ordersId;
 
     private Date deliveredDate;
@@ -25,6 +26,18 @@ public class OrderDetailsPerVendor {
     private int slaCode;
 
     private Long ordersProductsId;
+
+    private int vendorId;
+
+    public int getVendorId()
+    {
+        return vendorId;
+    }
+
+    public void setVendorId(int vendorId)
+    {
+        this.vendorId = vendorId;
+    }
 
     public Long getOrdersProductsId()
     {

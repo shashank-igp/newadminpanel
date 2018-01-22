@@ -1,6 +1,6 @@
 package com.igp.handles.vendorpanel.mappers.Vendor;
 
-import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerVendor;
+import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerOrderProduct;
 import com.igp.handles.vendorpanel.models.Vendor.VendorCountDetail;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
 import com.igp.handles.vendorpanel.utils.Vendor.VendorUtil;
@@ -44,7 +44,7 @@ public class HandlesVendorMapper {
 
             Map<String,Set<String>> uniqueUnitsMap=new HashMap<>();
 
-            List<OrderDetailsPerVendor> listOfOrderIdAsPerVendor=handleVendorUtil.getOrderListForVendor( fkAssociateId,  pastDate,0);
+            List<OrderDetailsPerOrderProduct> listOfOrderIdAsPerVendor=handleVendorUtil.getOrderListForVendor( fkAssociateId,  pastDate,0);
 
 //            Set<Map<String, String>> dataOrderIdMap = new HashMap<>();
 //            dataOrderIdMap.put("all",new HashSet<>());
@@ -226,29 +226,29 @@ public class HandlesVendorMapper {
             leftOutOrderIdMap4.put("Confirmed", new HashMap<>());
             leftOutOrderToOrderProductIdMap2.put("future",leftOutOrderIdMap4);
 
-            for (OrderDetailsPerVendor orderDetailsPerVendor : listOfOrderIdAsPerVendor){
+            for (OrderDetailsPerOrderProduct orderDetailsPerOrderProduct : listOfOrderIdAsPerVendor){
                 try
                 {
-                    Long orderId = orderDetailsPerVendor.getOrdersId();
-                    Long orderProductId=orderDetailsPerVendor.getOrdersProductsId();
+                    Long orderId = orderDetailsPerOrderProduct.getOrdersId();
+                    Long orderProductId= orderDetailsPerOrderProduct.getOrdersProductsId();
                     // unique order Ids
 
-                    if (orderDetailsPerVendor.getDeliveredDate() != null)
-                        deliveredDate = orderDetailsPerVendor.getDeliveredDate();
-                    if (orderDetailsPerVendor.getDeliveryDate() != null)
-                        deliveryDate = orderDetailsPerVendor.getDeliveryDate();
-                    if (orderDetailsPerVendor.getOutForDeliveryDate() != null)
+                    if (orderDetailsPerOrderProduct.getDeliveredDate() != null)
+                        deliveredDate = orderDetailsPerOrderProduct.getDeliveredDate();
+                    if (orderDetailsPerOrderProduct.getDeliveryDate() != null)
+                        deliveryDate = orderDetailsPerOrderProduct.getDeliveryDate();
+                    if (orderDetailsPerOrderProduct.getOutForDeliveryDate() != null)
                     {
-                        outForDeliveryDate = orderDetailsPerVendor.getOutForDeliveryDate();
+                        outForDeliveryDate = orderDetailsPerOrderProduct.getOutForDeliveryDate();
                     }
 
-                    String status = orderDetailsPerVendor.getOrderProductStatus();
-                    String deliveryTime = orderDetailsPerVendor.getDeliveryTime();
-                    String shippingType = orderDetailsPerVendor.getShippingType();
-                    boolean deliverystatus = (boolean) orderDetailsPerVendor.getDeliveryStatus();
+                    String status = orderDetailsPerOrderProduct.getOrderProductStatus();
+                    String deliveryTime = orderDetailsPerOrderProduct.getDeliveryTime();
+                    String shippingType = orderDetailsPerOrderProduct.getShippingType();
+                    boolean deliverystatus = (boolean) orderDetailsPerOrderProduct.getDeliveryStatus();
                     boolean flagForUniqueness=false;
                     Map<String, String> orderIdData = new HashMap<>();
-                    int slaCode=orderDetailsPerVendor.getSlaCode();
+                    int slaCode= orderDetailsPerOrderProduct.getSlaCode();
                     if (status.equals("Processed") && deliverystatus == false)
                     {
                         orderIdData.put("orderId", orderId + "");
@@ -759,26 +759,26 @@ public class HandlesVendorMapper {
             Set<String> uniqueCombinations = new HashSet<>();
             specificDate = DateUtils.truncate(specificDate, Calendar.DAY_OF_MONTH);
 
-            List<OrderDetailsPerVendor> listOfOrderIdAsPerVendor=handleVendorUtil.getOrderListForVendor( fkAssociateId,  specificDate,1);
+            List<OrderDetailsPerOrderProduct> listOfOrderIdAsPerVendor=handleVendorUtil.getOrderListForVendor( fkAssociateId,  specificDate,1);
 
             // orders_id | deliveredDate | deliveryDate | orders_product_status
             // |
             // delivery_status | delivery_time | shipping_type
             // | sla code
-            for (OrderDetailsPerVendor orderDetailsPerVendor : listOfOrderIdAsPerVendor)
+            for (OrderDetailsPerOrderProduct orderDetailsPerOrderProduct : listOfOrderIdAsPerVendor)
             {
-                Long orderId = orderDetailsPerVendor.getOrdersId();
-                Long orderProductId=orderDetailsPerVendor.getOrdersProductsId();
-                if (orderDetailsPerVendor.getDeliveredDate() != null)
-                    deliveredDate = orderDetailsPerVendor.getDeliveredDate();
-                if (orderDetailsPerVendor.getDeliveryDate() != null)
-                    deliveryDate = orderDetailsPerVendor.getDeliveryDate();
-                String status = orderDetailsPerVendor.getOrderProductStatus();
-                String deliveryTime = orderDetailsPerVendor.getDeliveryTime();
-                String shippingType = orderDetailsPerVendor.getShippingType();
+                Long orderId = orderDetailsPerOrderProduct.getOrdersId();
+                Long orderProductId= orderDetailsPerOrderProduct.getOrdersProductsId();
+                if (orderDetailsPerOrderProduct.getDeliveredDate() != null)
+                    deliveredDate = orderDetailsPerOrderProduct.getDeliveredDate();
+                if (orderDetailsPerOrderProduct.getDeliveryDate() != null)
+                    deliveryDate = orderDetailsPerOrderProduct.getDeliveryDate();
+                String status = orderDetailsPerOrderProduct.getOrderProductStatus();
+                String deliveryTime = orderDetailsPerOrderProduct.getDeliveryTime();
+                String shippingType = orderDetailsPerOrderProduct.getShippingType();
                 boolean flagForUniqueness=false;
 
-                int slaCode = orderDetailsPerVendor.getSlaCode();
+                int slaCode = orderDetailsPerOrderProduct.getSlaCode();
                 Map<String, String> orderIdData = new HashMap<>();
                 // boolean deliverystatus = (boolean) orderArray[4];
                 orderIdData.put("orderId", orderId + "");
@@ -849,7 +849,7 @@ public class HandlesVendorMapper {
     }
 
 
-    private boolean checkUniqueUnit(Long orderId,Date deliveryDate,String shippingType,String deliveryTime,Map<String,Set<String>> uniqueUnitsMap){
+    public boolean checkUniqueUnit(Long orderId,Date deliveryDate,String shippingType,String deliveryTime,Map<String,Set<String>> uniqueUnitsMap){
         boolean flagForUniqueness=false;
 
 
@@ -905,7 +905,7 @@ public class HandlesVendorMapper {
         }
         return flagForUniqueness;
     }
-    private Map<String, String> copyMap(Map<String, String> map)
+    public Map<String, String> copyMap(Map<String, String> map)
     {
         Map<String, String> copyMap = new HashMap<>();
         for (Map.Entry<String, String> entry : map.entrySet())
@@ -914,7 +914,7 @@ public class HandlesVendorMapper {
         }
         return copyMap;
     }
-    private Map<String, Set<Map<String, String>>> copyMapOfSet(Map<String, Set<Map<String, String>>> map)
+    public Map<String, Set<Map<String, String>>> copyMapOfSet(Map<String, Set<Map<String, String>>> map)
     {
         Map<String, Set<Map<String, String>>> copyMap = new HashMap<>();
         for (Map.Entry<String, Set<Map<String, String>>> entry : map.entrySet())
