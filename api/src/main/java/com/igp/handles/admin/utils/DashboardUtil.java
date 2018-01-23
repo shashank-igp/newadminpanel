@@ -31,7 +31,7 @@ public class DashboardUtil {
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement = "select * from orders o join orders_products op on o.orders_id = op.orders_id join "
-                + " order_products_extra_info opei on opei.order_id=op.orders_id join products p on p.products_id = op.products_id "
+                + " order_product_extra_info opei on opei.order_id=op.orders_id join products p on p.products_id = op.products_id "
                 + " where date_format(opei.delivery_date,'%Y-%m-%d') "+dateComapareSymbol+" ? and p.fk_associate_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
 
