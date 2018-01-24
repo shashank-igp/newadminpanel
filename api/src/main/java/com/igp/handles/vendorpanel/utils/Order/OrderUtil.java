@@ -157,7 +157,6 @@ public class OrderUtil
             }else {
                 slaClause="";
             }
-            logger.debug("just for first time "+operator+" , "+fkAssociateIdWhereClause+" , "+slaClause);
             switch (status)
             {
                 case "Processing":
@@ -202,7 +201,6 @@ public class OrderUtil
                             + operator + " ? and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc";
 
                     }
-                    logger.debug("sql query "+statement);
                     break;
                 case "OutForDelivery":
                 {
