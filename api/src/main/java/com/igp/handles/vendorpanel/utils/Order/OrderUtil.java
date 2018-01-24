@@ -157,6 +157,7 @@ public class OrderUtil
             }else {
                 slaClause="";
             }
+            logger.debug("just for first time "+operator+" , "+fkAssociateIdWhereClause+" , "+slaClause);
             switch (status)
             {
                 case "Processing":
@@ -530,8 +531,6 @@ public class OrderUtil
                     .orderProducts(ordersProductsList)
                     .build();
             }
-
-
         }
         catch (Exception exception) {
             logger.error("Exception in connection", exception);
