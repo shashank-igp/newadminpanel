@@ -202,6 +202,7 @@ public class OrderUtil
                             + operator + " ? and op.orders_product_status= '" + status + "' "+ slaClause +" order by vap.delivery_date asc";
 
                     }
+                    logger.debug("sql query "+statement);
                     break;
                 case "OutForDelivery":
                 {
