@@ -262,6 +262,7 @@ public class DashboardMapper {
             }
             dashboardDetail.setFestivalDate(specificDate);
 
+            getHandelOrderCountDetailForDate(dashboardDetail);
 
             for (OrderDetailsPerOrderProduct orderDetailsPerOrderProduct : listOfHandelsOrderId){
                 try {
