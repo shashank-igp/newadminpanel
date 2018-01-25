@@ -517,7 +517,7 @@ public class DashboardMapper {
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
-                                    int alertCount = Integer.parseInt(statusCountMap9.get("notConfirmed").get("total").get("count"));
+                                    int alertCount = Integer.parseInt(statusCountMap9.get("notConfirmed").get("pending").get("count"));
                                     alertCount++;
                                     statusCountMap9.get("notConfirmed").get("pending").put("count", alertCount + "");
                                     statusCountMap9.get("notConfirmed").get("pending").put("sla", true + "");
