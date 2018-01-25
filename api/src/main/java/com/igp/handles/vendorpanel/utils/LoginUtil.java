@@ -23,7 +23,7 @@ public class LoginUtil
         try
         {
             connection = Database.INSTANCE.getReadOnlyConnection();
-            String statement = "select * from igp_users where  name = ? and password = ?";
+            String statement = "select * from associate_user  where  associate_user_name = ? and associate_user_pass = ? ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, userName);
             preparedStatement.setString(2, password);
@@ -31,17 +31,10 @@ public class LoginUtil
             while(resultSet.next())
             {
                 userModel = new UserModel.Builder()
-                    .id(resultSet.getLong("user_id"))
-                    .name(resultSet.getString("name"))
-                    .password(resultSet.getString("password"))
-                    .fkAssociateId(resultSet.getString("fkAssociateId"))
-                    .associateName(resultSet.getString("associateName"))
-                    .phoneNumber(resultSet.getString("phone_number"))
-                    .expires(resultSet.getDate("expires"))
-                    .accountExpired(resultSet.getBoolean("account_expired"))
-                    .credentialExpired(resultSet.getBoolean("credentials_expired"))
-                    .accountLocked(resultSet.getBoolean("account_locked"))
-                    .accountEnabled(resultSet.getBoolean("account_enabled"))
+                    .id(resultSet.getLong("associate_user_id"))
+                    .name(resultSet.getString("associate_user_name"))
+                    .fkAssociateId(resultSet.getString("fk_associate_login_id"))
+                    .expires(resultSet.getDate("associate_user_status"))
                     .build();
             }
         }
