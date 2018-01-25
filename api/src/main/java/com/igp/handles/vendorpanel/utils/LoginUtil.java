@@ -23,7 +23,8 @@ public class LoginUtil
         try
         {
             connection = Database.INSTANCE.getReadOnlyConnection();
-            String statement = "select * from associate_user  where  associate_user_name = ? and associate_user_pass = ? ";
+            String statement = "select * from associate_user au join associate a on au.fk_associate_login_id=a.associate_id "
+                + " where  au.associate_user_name = ? and au.associate_user_pass = ? ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, userName);
             preparedStatement.setString(2, password);
@@ -31,10 +32,11 @@ public class LoginUtil
             while(resultSet.next())
             {
                 userModel = new UserModel.Builder()
-                    .id(resultSet.getLong("associate_user_id"))
-                    .name(resultSet.getString("associate_user_name"))
-                    .fkAssociateId(resultSet.getString("fk_associate_login_id"))
-                    .expires(resultSet.getDate("associate_user_status"))
+                    .id(resultSet.getLong("au.associate_user_id"))
+                    .name(resultSet.getString("au.associate_user_name"))
+                    .fkAssociateId(resultSet.getString("au.fk_associate_login_id"))
+                    .accountEnabled(resultSet.getInt("au.associate_user_status"))
+                    .associateName(resultSet.getString("a.associate_name"))
                     .build();
             }
         }
