@@ -22,30 +22,30 @@ public class OrderMapper {
         Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap = new HashMap<>();
         try{
 
-            if(Category.equals("unassigned")){
-                if(subCategory.equals("notalloted")){
+            if(Category.equals("unAssigned")){
+                if(subCategory.equals("notAlloted")){
                     status="Processed";
                     fkassociateId=72;
                 }else if(subCategory.equals("processing")) {
                     status="Processing";
                     fkassociateId=72;
                 }
-            }else if(Category.equals("notconfirmed")){
-                if(subCategory.equals("Pending")){
+            }else if(Category.equals("notConfirmed")){
+                if(subCategory.equals("pending")){
                     status="Processed";
                     slaClause="(100,101,102)";
                 }else if(subCategory.equals("total")){
                     status="Processed";
                 }
-            }else if(Category.equals("notshipped")){
-                if(subCategory.equals("Pending")){
+            }else if(Category.equals("notShipped")){
+                if(subCategory.equals("pending")){
                     status="Confirmed";
                     slaClause="(201,202,203,204)";
                 }else if(subCategory.equals("total")){
                     status="Confirmed";
                 }
-            }else if(Category.equals("notdelivered")){
-                if(subCategory.equals("Pending")){
+            }else if(Category.equals("notDelivered")){
+                if(subCategory.equals("pending")){
                     status="OutForDelivery";
                     slaClause="(401,402,403,404)";
                 }else if(subCategory.equals("total")){
