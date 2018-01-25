@@ -249,17 +249,10 @@ public class DashboardMapper {
         alertStatusCountAllMap.put("future",statusCountMap11);
 
 
-        Map<String,String> notShippedTotalOrderCount=dashboardDetail.getNotShippedTotalOrderCount();
-        notShippedTotalOrderCount=hp.copyMap(dataMap);
-        Map<String,String> notShippedPendingOrderCount=dashboardDetail.getNotShippedPendingOrderCount();
-        notShippedPendingOrderCount=hp.copyMap(dataMap);
-        Map<String,String> notDeliveredTotalOrderCount=dashboardDetail.getNotDeliveredTotalOrderCount();
-        notDeliveredTotalOrderCount=hp.copyMap(dataMap);
-        Map<String,String> notDeliveredPendingOrderCount=dashboardDetail.getNotDeliveredPendingOrderCount();
-        notDeliveredPendingOrderCount=hp.copyMap(dataMap);
-
-
-
+        Map<String,String> notShippedTotalOrderCount = hp.copyMap(dataMap);
+        Map<String,String> notShippedPendingOrderCount = hp.copyMap(dataMap);
+        Map<String,String> notDeliveredTotalOrderCount = hp.copyMap(dataMap);
+        Map<String,String> notDeliveredPendingOrderCount = hp.copyMap(dataMap);
 
         try{
             List<OrderDetailsPerOrderProduct> listOfHandelsOrderId=dashboardUtil.getHandelsOrderList(pastDate,0);
@@ -599,8 +592,10 @@ public class DashboardMapper {
 
                         }
                     }
-
-
+                    dashboardDetail.setNotShippedTotalOrderCount(notShippedTotalOrderCount);
+                    dashboardDetail.setNotShippedPendingOrderCount(notShippedPendingOrderCount);
+                    dashboardDetail.setNotDeliveredTotalOrderCount(notDeliveredTotalOrderCount);
+                    dashboardDetail.setNotDeliveredPendingOrderCount(notDeliveredPendingOrderCount);
                 }catch (Exception exception){
                     logger.error("Exception occured ",exception);
                 }
