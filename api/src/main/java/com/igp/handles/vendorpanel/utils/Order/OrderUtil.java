@@ -450,7 +450,7 @@ public class OrderUtil
 
         Connection connection = null;
         ResultSet resultSet = null;
-        String statement;
+        String statement,orderInstr="";
         PreparedStatement preparedStatement = null;
         Order order=null;
         int addressType=0;
@@ -484,6 +484,9 @@ public class OrderUtil
 
             if(resultSet.next()){
                 addressType=resultSet.getInt("address_type");
+                if(forAdminPanelOrNot==false){
+                    orderInstr=resultSet.getString("instruction_msg")==null ? "":resultSet.getString("instruction_msg");
+                }
                 order=new Order.Builder()
                     .orderId(resultSet.getInt("orders_id"))
                     .customerId(resultSet.getLong("customers_id"))
@@ -525,7 +528,7 @@ public class OrderUtil
                     .themeId(resultSet.getInt("themeid"))
                     .ordersOccasionId(resultSet.getInt("orders_occasionid"))
                     .ordersIsGenerated(resultSet.getInt("orders_isgenerated"))
-                    .orderInstruction(resultSet.getString("instruction_msg")==null ? "":resultSet.getString("instruction_msg"))
+                    .orderInstruction(orderInstr)
                     .addressType(addressTypeMap.get(addressType))
                     .orderProducts(ordersProductsList)
                     .build();
