@@ -196,11 +196,7 @@ public class OrderMapper
 
         }
 
-        logger.debug("original order map before processing "+originalOrderMap.toString());
 
-        logger.debug("Temp Order Products Map  "+tempOrderProductsMap.toString());
-
-        logger.debug("order Shipping Type Map "+orderShippingTypeMap.toString());
 
 
         for (Map.Entry<String, Order> entry : tempOrderProductsMap.entrySet()) {
@@ -262,7 +258,7 @@ public class OrderMapper
                 e.printStackTrace();
             }
         }
-        logger.debug("original order map before processing "+originalOrderMap.toString());
+
         Map<Long, Order> sortedOrderMap = new TreeMap<>();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         UploadUtil uploadUtil=new UploadUtil();

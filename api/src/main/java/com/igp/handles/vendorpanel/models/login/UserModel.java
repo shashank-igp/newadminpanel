@@ -1,6 +1,7 @@
 package com.igp.handles.vendorpanel.models.login;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
@@ -8,6 +9,7 @@ import com.fasterxml.jackson.databind.annotation.JsonPOJOBuilder;
 import java.util.Date;
 
 @JsonDeserialize(builder = UserModel.Builder.class)
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class UserModel implements Cloneable {
     @JsonProperty("user_id")
     private long id;
@@ -31,7 +33,7 @@ public class UserModel implements Cloneable {
     @JsonProperty("accountLocked")
     private boolean accountLocked;
     @JsonProperty("accountEnabled")
-    private boolean accountEnabled;
+    private int accountEnabled;
 
     private UserModel(Builder builder) {
         setId(builder.id);
@@ -91,7 +93,8 @@ public class UserModel implements Cloneable {
         return accountLocked;
     }
 
-    public boolean isAccountEnabled() {
+    public int getAccountEnabled()
+    {
         return accountEnabled;
     }
 
@@ -141,7 +144,7 @@ public class UserModel implements Cloneable {
         @JsonProperty("accountLocked")
         private boolean accountLocked;
         @JsonProperty("accountEnabled")
-        private boolean accountEnabled;
+        private int accountEnabled;
 
         public Builder() {
         }
@@ -196,7 +199,7 @@ public class UserModel implements Cloneable {
             return this;
         }
 
-        public Builder accountEnabled(boolean val) {
+        public Builder accountEnabled(int val) {
             accountEnabled = val;
             return this;
         }
