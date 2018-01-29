@@ -359,7 +359,6 @@ public class MarketPlaceMapper {
                                         extraInfoModel.getRelId() != "") {
                                         // all info is good so create temp model and create temp order.
                                         marketPlaceTempOrderModel = fillTempModelAndCreateTempOrder(validationModel);
-                                        marketPlaceTempOrderModel.setTempOrderId(2536392);
                                         if (marketPlaceTempOrderModel.getTempOrderId() != 0) {
                                             // create order by hitting api
                                             orderId = marketPlaceOrderUtil.createOrder(marketPlaceTempOrderModel, validationModel.getExtraInfoModel());
