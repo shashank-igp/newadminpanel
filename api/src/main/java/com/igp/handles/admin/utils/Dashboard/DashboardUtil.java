@@ -1,4 +1,4 @@
-package com.igp.handles.admin.utils;
+package com.igp.handles.admin.utils.Dashboard;
 
 import com.igp.config.instance.Database;
 import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerOrderProduct;

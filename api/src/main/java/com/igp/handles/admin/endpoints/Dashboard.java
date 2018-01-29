@@ -1,7 +1,7 @@
 package com.igp.handles.admin.endpoints;
 
-import com.igp.handles.admin.mappers.DashboardMapper;
-import com.igp.handles.admin.models.DashboardDetail;
+import com.igp.handles.admin.mappers.Dashboard.DashboardMapper;
+import com.igp.handles.admin.models.Dashboard.DashboardDetail;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 
 import javax.servlet.http.HttpServletRequest;

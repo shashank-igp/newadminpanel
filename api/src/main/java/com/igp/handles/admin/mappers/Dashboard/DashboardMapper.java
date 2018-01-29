@@ -1,7 +1,7 @@
-package com.igp.handles.admin.mappers;
+package com.igp.handles.admin.mappers.Dashboard;
 
-import com.igp.handles.admin.models.DashboardDetail;
-import com.igp.handles.admin.utils.DashboardUtil;
+import com.igp.handles.admin.models.Dashboard.DashboardDetail;
+import com.igp.handles.admin.utils.Dashboard.DashboardUtil;
 import com.igp.handles.vendorpanel.mappers.Vendor.HandlesVendorMapper;
 import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerOrderProduct;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;

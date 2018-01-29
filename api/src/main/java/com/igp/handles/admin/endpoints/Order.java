@@ -1,6 +1,6 @@
 package com.igp.handles.admin.endpoints;
 
-import com.igp.handles.admin.mappers.OrderMapper;
+import com.igp.handles.admin.mappers.Order.OrderMapper;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
