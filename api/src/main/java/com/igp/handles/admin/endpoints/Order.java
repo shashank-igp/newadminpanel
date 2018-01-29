@@ -66,6 +66,26 @@ public class Order {
         return handleServiceResponse;
     }
 
+    @POST
+    @Path("/v1/admin/handels/assignReassignOrder")
+    public HandleServiceResponse assignReassignOrder(@QueryParam("action")String action , @QueryParam("orderId") int orderId,
+        @QueryParam("fkAssociateId") int vendorId,@QueryParam("orderProductId") int orderProductId){
+        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        OrderMapper orderMapper=new OrderMapper();
+        try{
+            if(orderMapper.assignReassignOrder(action,orderId,orderProductId,vendorId)){
+                handleServiceResponse.setResult(true);
+            }else{
+                handleServiceResponse.setError(true);
+                handleServiceResponse.setResult(false);
+                handleServiceResponse.setErrorMessage("could not assign the order to this vendor please try again !!");
+            }
+        }catch (Exception exception){
+            logger.error("error while assignReassignOrder",exception);
+        }
+
+        return handleServiceResponse;
+    }
 
 
 }

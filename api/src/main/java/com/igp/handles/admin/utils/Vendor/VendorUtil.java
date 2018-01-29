@@ -3,6 +3,7 @@ package com.igp.handles.admin.utils.Vendor;
 import com.igp.config.instance.Database;
 import com.igp.handles.admin.models.Vendor.VendorAssignModel;
 import com.igp.handles.admin.models.Vendor.VendorInfoModel;
+import com.igp.handles.admin.utils.Order.OrderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,13 +52,15 @@ public class VendorUtil
         return vendorInfoModelList;
     }
 
-    public boolean insertIntoVendorAssignPrice(VendorAssignModel vendorAssignModel){
+    public boolean insertIntoVendorAssignPrice(VendorAssignModel vendorAssignModel,int orderProductId){
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         String statement;
         boolean result=false;
+        OrderUtil orderUtil=new OrderUtil();
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
+            connection.setAutoCommit(false);
             statement="insert into vendor_assign_price (orders_id,fk_associate_id,order_subtotal,shipping,vendor_price , "
                 + " products_id,Product_name,Product_code,city,mail_reminder_flag,assign_time,assign_through,assign_by_user , "
                 + " shipping_type,delivery_date,delivery_time,flag_eggless,delivery_boy_ID) "
@@ -85,7 +88,13 @@ public class VendorUtil
             if (status == 0) {
                 logger.error("Failed to insert in vendor_assign_price ");
             } else {
-                result=true;
+                if(orderUtil.updateOrderProduct(orderProductId,vendorAssignModel.getFkAssociateId(),connection)){
+                    connection.commit();
+                    result=true;
+                }else {
+                    connection.rollback();
+                    throw new Exception("Exception in orderProduct Updation");
+                }
             }
         }catch (Exception exception){
             logger.error("Exception in connection", exception);
@@ -94,5 +103,32 @@ public class VendorUtil
             Database.INSTANCE.closeConnection(connection);
         }
         return result;
+    }
+    public double getShippingChnargeForVendorOnPincode(int vendorId,String pincode,int shippingType){
+        double shippingCharge=0.0;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            String statement = "select * from AA_vendor_pincode where vendor_id = ? and pincode = ? and ship_type= ?  and flag_enabled = 1";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,vendorId);
+            preparedStatement.setString(2,pincode);
+            preparedStatement.setInt(3,shippingType);
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+               shippingCharge=resultSet.getDouble("ship_charge");
+            }
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+
+        return shippingCharge;
     }
 }

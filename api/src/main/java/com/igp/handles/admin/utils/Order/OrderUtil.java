@@ -1,7 +1,11 @@
 package com.igp.handles.admin.utils.Order;
 
 import com.igp.config.instance.Database;
+import com.igp.handles.admin.mappers.Dashboard.DashboardMapper;
+import com.igp.handles.admin.models.Vendor.VendorAssignModel;
+import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import com.igp.handles.vendorpanel.models.Order.Order;
+import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
 import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
 import org.slf4j.Logger;
@@ -19,19 +23,19 @@ import java.util.List;
 public class OrderUtil {
     private static final Logger logger = LoggerFactory.getLogger(OrderUtil.class);
     
-    public boolean updateOrderProduct(){
-        Connection connection = null;
+    public boolean updateOrderProduct(int orderProductId,int vendorId,Connection connection){
+        //Connection connection = null;
         PreparedStatement preparedStatement = null;
         String statement;
         boolean result=false;
         try{
-            connection = Database.INSTANCE.getReadWriteConnection();
+//            connection = Database.INSTANCE.getReadWriteConnection();
             statement="UPDATE orders_products set orders_product_status = ? , fk_associate_id = ? , delivery_status = ? where "
-                + " orders_id = ? and orders_prodcuts_id = ? ";
+                + " orders_prodcuts_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1,0); // orderID
-            preparedStatement.setInt(2,0); // fk_associateId
-            preparedStatement.setDouble(3,0.0); //order_subtotal
+            preparedStatement.setString(1,"Processed"); // orderID
+            preparedStatement.setInt(2,vendorId); // fk_associateId
+            preparedStatement.setInt(3,orderProductId); //order_subtotal
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
@@ -39,13 +43,11 @@ public class OrderUtil {
             } else {
                 result=true;
             }
-
-
         }catch (Exception exception){
             logger.error("Exception in connection", exception);
         }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeConnection(connection);
+            //Database.INSTANCE.closeConnection(connection);
         }
         return result;
     }
@@ -178,6 +180,91 @@ public class OrderUtil {
         }
 
         return order;
+    }
+    public boolean assignOrderToVendor(int orderId,int orderproductId,int vendorId){
+        boolean result=false;
+        Order order=null;
+        VendorUtil vendorUtil=new VendorUtil();
+        VendorAssignModel vendorAssignModel=new VendorAssignModel();
+        List<OrderComponent> componentListForNewVendor=new ArrayList<>();
+        List<OrderComponent> componentListForOldVendor=new ArrayList<>();
+        double componentTotal=0.0,ordersubTotal=0.0,shippingCharge=0.0,vendorPrice=0.0;
+        com.igp.handles.vendorpanel.utils.Order.OrderUtil orderUtil=new com.igp.handles.vendorpanel.utils.Order.OrderUtil();
+
+        DashboardMapper dashboardMapper=new DashboardMapper();
+        OrdersProducts ordersProducts=null;
+        OrderProductExtraInfo orderProductExtraInfo=null;
+
+        try {
+            order=getOrderRelatedInfo(orderId,orderproductId);
+            ordersProducts=order.getOrderProducts().get(0);
+            orderProductExtraInfo=ordersProducts.getOrderProductExtraInfo();
+
+            orderUtil.getProductComponents(ordersProducts.getProductId(),Integer.parseInt(ordersProducts.getFkAssociateId()),
+                                ordersProducts.getProducts_code(),componentListForOldVendor, orderProductExtraInfo);
+
+            componentTotal=orderUtil.getProductComponents(ordersProducts.getProductId(),vendorId,
+                ordersProducts.getProducts_code(),componentListForNewVendor,orderProductExtraInfo);
+            vendorPrice=componentTotal*ordersProducts.getProductQuantity();
+            shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
+                                                            orderProductExtraInfo.getDeliveryType());
+
+            if(checkComponentListSimilarity(componentListForNewVendor,componentListForOldVendor)==false){
+                return false;
+            }
+
+
+            ordersubTotal=vendorPrice+shippingCharge;
+
+            vendorAssignModel.setOrderId(orderId);
+            vendorAssignModel.setFkAssociateId(vendorId);
+            vendorAssignModel.setOrderSubtotal(ordersubTotal);
+            vendorAssignModel.setShipping(shippingCharge);
+            vendorAssignModel.setVendorPrice(vendorPrice);
+            vendorAssignModel.setProductId(ordersProducts.getProductId());
+            vendorAssignModel.setProductName(ordersProducts.getProductName());
+            vendorAssignModel.setProductCode(ordersProducts.getProducts_code());
+            vendorAssignModel.setCity(order.getDeliveryCity());
+            vendorAssignModel.setMailRemainderFlag(0);
+            vendorAssignModel.setAssignThrough(3);
+            vendorAssignModel.setAssignByUser("NewHandelsPanel");
+            vendorAssignModel.setShipppingType(dashboardMapper.getDeliveryType(orderProductExtraInfo.getDeliveryType()+""));
+            vendorAssignModel.setDeliveryDate(orderProductExtraInfo.getDeliveryDate().toString());
+            vendorAssignModel.setDeliveryTime(orderProductExtraInfo.getDeliveryTime());
+            vendorAssignModel.setFlagEggless(0); //
+
+            result=vendorUtil.insertIntoVendorAssignPrice(vendorAssignModel,orderproductId);
+
+        }catch (Exception exception){
+            logger.error("Exception while assigning a order to vendor ", exception);
+        }
+        return result;
+    }
+
+    public boolean checkComponentListSimilarity(List<OrderComponent> componentListForNewVendor,List<OrderComponent> componentListForOldVendor){
+        boolean result=true;
+
+        if(componentListForNewVendor.size() != componentListForOldVendor.size()){
+            result=false;
+        }else{
+            for(int i=0;i<componentListForNewVendor.size();i++){
+
+                int newComponentId=componentListForNewVendor.get(i).getComponentId();
+                boolean flag=false;
+                for(int j=0;j<componentListForOldVendor.size();j++){
+                        if(newComponentId==componentListForOldVendor.get(j).getComponentId()){
+                            flag=true;
+                            break;
+                        }
+                }
+                if(flag==false){
+                    result=false;
+                    break;
+                }
+
+            }
+        }
+        return result;
     }
 
 }

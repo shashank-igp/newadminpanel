@@ -399,6 +399,7 @@ public class OrderUtil
                     .quantity(resultSet.getString("bc.quantity"))
                     .type(resultSet.getString("mc.type"))
                     .timestamp(dateFormat.format(dateFormat.parse(resultSet.getString("mc.mod_time"))))
+                    .componentId(resultSet.getInt("mc.component_id"))
                     .build();
 
 
