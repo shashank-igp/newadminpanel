@@ -16,6 +16,7 @@ public class OrderComponent implements Serializable{
     private String				componentPrice		= "N/A";
     private boolean				eggless				= false;
     private String              timestamp           =null;
+    private int                 componentId         =0;
 
     public String getTimestamp()
     {
@@ -72,6 +73,11 @@ public class OrderComponent implements Serializable{
         this.componentPrice = componentPrice;
     }
 
+    public int getComponentId()
+    {
+        return componentId;
+    }
+
     private OrderComponent(Builder builder)
     {
         productId = builder.productId;
@@ -83,6 +89,7 @@ public class OrderComponent implements Serializable{
         componentPrice = builder.componentPrice;
         eggless = builder.eggless;
         timestamp=builder.timestamp;
+        componentId=builder.componentId;
     }
 
     public static final class Builder
@@ -96,6 +103,7 @@ public class OrderComponent implements Serializable{
         private String  componentPrice;
         private boolean eggless;
         private String  timestamp;
+        private int     componentId;
 
         public Builder()
         {
@@ -151,6 +159,12 @@ public class OrderComponent implements Serializable{
         public Builder timestamp(String val)
         {
             timestamp = val;
+            return this;
+        }
+
+        public Builder componentId(int val)
+        {
+            componentId = val;
             return this;
         }
 

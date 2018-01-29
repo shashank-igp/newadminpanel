@@ -4,6 +4,8 @@ import com.igp.handles.vendorpanel.models.Order.Order;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
 import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -11,6 +13,7 @@ import java.util.*;
  * Created by shanky on 22/1/18.
  */
 public class OrderMapper {
+    private static final Logger logger = LoggerFactory.getLogger(OrderMapper.class);
     public List<Order> getOrderByStatusDate(String Category ,String subCategory, Date date,
         String orderAction, String section, boolean isfuture){
 
@@ -58,9 +61,25 @@ public class OrderMapper {
             orders=orderMapperVendorPanel.prepareOrders(orderAction,orderProductList,ordersProductExtraInfoMap,"",true);
 
         }catch (Exception exception){
-
+            logger.error("error while getOrderByStatusDate",exception);
         }
 
         return orders;
+    }
+    public boolean assignReassignOrder(String action,int orderId,int orderproductId,int vendorId){
+        boolean result=false;
+        com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
+        try{
+            if(action.equalsIgnoreCase("assign")){
+                result=orderUtil.assignOrderToVendor(orderId,orderproductId,vendorId);
+            }else if(action.equalsIgnoreCase("reassign")) {
+
+            }
+
+        }catch (Exception exception){
+            logger.error("error while assignReassignOrder",exception);
+        }
+
+        return result;
     }
 }

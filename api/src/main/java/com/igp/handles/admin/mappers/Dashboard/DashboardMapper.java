@@ -25,11 +25,6 @@ public class DashboardMapper {
         HandlesVendorMapper hp=new HandlesVendorMapper();
         VendorUtil handelVendorUtil=new VendorUtil();
         DashboardUtil dashboardUtil=new DashboardUtil();
-        Map<String,String> deliveryTypeMap=new HashMap<>();
-        deliveryTypeMap.put("1","Any time");
-        deliveryTypeMap.put("2","Fix Time");
-        deliveryTypeMap.put("3","Midnight");
-        deliveryTypeMap.put("4","Same Day");
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date deliveryDate = null;
 
@@ -275,7 +270,7 @@ public class DashboardMapper {
 
                     String status = orderDetailsPerOrderProduct.getOrderProductStatus();
                     String deliveryTime = orderDetailsPerOrderProduct.getDeliveryTime();
-                    String shippingType = deliveryTypeMap.get(orderDetailsPerOrderProduct.getShippingType());
+                    String shippingType = getDeliveryType(orderDetailsPerOrderProduct.getShippingType());
                     int vendorId=orderDetailsPerOrderProduct.getVendorId();
                     boolean deliverystatus = (boolean) orderDetailsPerOrderProduct.getDeliveryStatus();
                     boolean flagForUniqueness=false;
@@ -615,12 +610,6 @@ public class DashboardMapper {
         dataMap.put("alert", false + "");
         Date deliveryDate = null;
 
-        Map<String,String> deliveryTypeMap=new HashMap<>();
-        deliveryTypeMap.put("1","Any time");
-        deliveryTypeMap.put("2","Fix Time");
-        deliveryTypeMap.put("3","Midnight");
-        deliveryTypeMap.put("4","Same Day");
-
         Map<String,Set<String>> uniqueUnitsMap=new HashMap<>();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         DashboardUtil dashboardUtil=new DashboardUtil();
@@ -686,7 +675,7 @@ public class DashboardMapper {
 
                     String status = orderDetailsPerOrderProduct.getOrderProductStatus();
                     String deliveryTime = orderDetailsPerOrderProduct.getDeliveryTime();
-                    String shippingType = deliveryTypeMap.get(orderDetailsPerOrderProduct.getShippingType());
+                    String shippingType = getDeliveryType(orderDetailsPerOrderProduct.getShippingType());
                     int vendorId=orderDetailsPerOrderProduct.getVendorId();
                     boolean deliverystatus = (boolean) orderDetailsPerOrderProduct.getDeliveryStatus();
                     boolean flagForUniqueness=false;
@@ -782,5 +771,18 @@ public class DashboardMapper {
             logger.error("Error in preparing order for specific date in handel panel dashboard",exception);
         }
 
+    }
+
+    public String getDeliveryType(String deliveryTypeIntValue){
+        String deliveryType="";
+        Map<String,String> deliveryTypeMap=new HashMap<>();
+        deliveryTypeMap.put("1","Any time");
+        deliveryTypeMap.put("2","Fix Time");
+        deliveryTypeMap.put("3","Midnight");
+        deliveryTypeMap.put("4","Same Day");
+
+        deliveryType=deliveryTypeMap.get(deliveryTypeIntValue);
+
+        return deliveryType;
     }
 }
