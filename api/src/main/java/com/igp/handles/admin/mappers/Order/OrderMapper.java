@@ -1,4 +1,4 @@
-package com.igp.handles.admin.mappers;
+package com.igp.handles.admin.mappers.Order;
 
 import com.igp.handles.vendorpanel.models.Order.Order;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;

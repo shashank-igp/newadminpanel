@@ -1,7 +1,7 @@
 package com.igp.handles.admin.endpoints;
 
-import com.igp.handles.admin.mappers.VendorMapper;
-import com.igp.handles.admin.models.VendorInfoModel;
+import com.igp.handles.admin.mappers.Vendor.VendorMapper;
+import com.igp.handles.admin.models.Vendor.VendorInfoModel;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

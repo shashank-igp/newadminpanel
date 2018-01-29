@@ -1,7 +1,8 @@
-package com.igp.handles.admin.mappers;
+package com.igp.handles.admin.mappers.Vendor;
 
 import com.igp.handles.admin.endpoints.Vendor;
-import com.igp.handles.admin.models.VendorInfoModel;
+import com.igp.handles.admin.models.Vendor.VendorInfoModel;
+import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +17,7 @@ public class VendorMapper {
 
     public List<VendorInfoModel> getVendorList(int pincode,int shippingType){
         List<VendorInfoModel> vendorInfoModelList=new ArrayList<>();
-         com.igp.handles.admin.utils.VendorUtil vendorUtil=new com.igp.handles.admin.utils.VendorUtil();
+         VendorUtil vendorUtil=new VendorUtil();
         try {
             vendorInfoModelList=vendorUtil.getVendorList(pincode,shippingType);
         }catch (Exception exception){

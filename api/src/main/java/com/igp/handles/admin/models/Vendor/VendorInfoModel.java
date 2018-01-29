@@ -1,4 +1,4 @@
-package com.igp.handles.admin.models;
+package com.igp.handles.admin.models.Vendor;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
