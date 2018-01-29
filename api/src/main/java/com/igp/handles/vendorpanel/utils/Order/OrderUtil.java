@@ -321,7 +321,8 @@ public class OrderUtil
         try
         {
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement="select shipping, vendor_price , delivery_date from vendor_assign_price where fk_associate_id = ? and orders_id = ? and products_id = ?";
+            statement="select shipping, vendor_price , delivery_date from vendor_assign_price where "
+                + " fk_associate_id = ? and orders_id = ? and products_id = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,fkAssociateId);
             preparedStatement.setInt(2, orderId);
