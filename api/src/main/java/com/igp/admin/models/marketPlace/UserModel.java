@@ -1,5 +1,6 @@
 package com.igp.admin.models.marketPlace;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -90,7 +91,7 @@ public class UserModel implements Cloneable {
     @JsonProperty("add2")
     private String addressField2;
 
-    @JsonProperty("zip")
+    @JsonIgnore
     private String postcode;
 
     @JsonProperty("city")

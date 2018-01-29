@@ -64,6 +64,10 @@ public class MarketPlaceOrderUtil {
                         // updated the customer.
                         validationModel.setUserModel(userModel);
                     }
+                    else {
+                        validationModel.setError(true);
+                        validationModel.setMessage("Error at updating Customer Details.");
+                    }
                 } else {
                     userModel.setId(null);
                     // customer doesn't exist therefore create a new customer.
@@ -143,12 +147,16 @@ public class MarketPlaceOrderUtil {
                 // create new address entry.
                 String postData1 = objectMapper.writeValueAsString(shippingAddress);
                 String createAddress = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/user/address");
-                generalCustomerAddressMapResponseModel = objectMapper.readValue(createAddress, GeneralCustomerAddressMapResponseModel.class);
-                Map<String, UserAddressModel> addressResponse = generalCustomerAddressMapResponseModel.getData();
-                UserAddressModel userAddressModel = addressResponse.get("addr");
-                shippingAddress.setAid(userAddressModel.getAddressId().toString());
+                if(createAddress.contains("error")){
+                    validationModel.setError(Boolean.TRUE);
+                    validationModel.setMessage("Problem in Shipping Details. ");
 
-                shippingAddress.setAid("1614158");
+                }else {
+                    generalCustomerAddressMapResponseModel = objectMapper.readValue(createAddress, GeneralCustomerAddressMapResponseModel.class);
+                    Map<String, UserAddressModel> addressResponse = generalCustomerAddressMapResponseModel.getData();
+                    UserAddressModel userAddressModel = addressResponse.get("addr");
+                    shippingAddress.setAid(userAddressModel.getAddressId().toString());
+                }
                 if (shippingAddress.getAid() == "" || shippingAddress.getAid() == null) {
                     validationModel.setError(Boolean.TRUE);
                     validationModel.setMessage("Couldn't get proper address from database.");
@@ -192,15 +200,12 @@ public class MarketPlaceOrderUtil {
     }
 
     public static ValidationModel validateAndGetProductDetails(ValidationModel validationModel) {
-        ProductModel productModel1 = validationModel.getProductModel();
+        ProductModel productModel = validationModel.getProductModel();
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        String prodCode = productModel1.getProductCode();
-        Integer qty = productModel1.getQuantity();
-        Integer price = productModel1.getDisplayPrice();
-        String date = productModel1.getServiceDate();
+        String prodCode = productModel.getProductCode();
         validationModel.setError(Boolean.FALSE);
         try {
             connection = Database.INSTANCE.getReadOnlyConnection();
@@ -215,12 +220,15 @@ public class MarketPlaceOrderUtil {
                 BigDecimal inrPrice = resultSet.getBigDecimal("products.products_mrp");
                 //- INR-USD conversion completed
 
-                productModel1 = new ProductModel.Builder()
+               ProductModel productModel1 = new ProductModel.Builder()
                     .id(resultSet.getInt("products.products_id"))
-                    .quantity(qty)
+                    .quantity(productModel.getQuantity())
                     .name(resultSet.getString("newigp_product_extra_info.display_name"))
-                    .displayPrice(price)
-                    .serviceDate(date)
+                    .sellingPrice(productModel.getSellingPrice())
+                    .serviceDate(productModel.getServiceDate())
+                    .giftBox(productModel.getGiftBox())
+                    .perProductDiscount(productModel.getPerProductDiscount())
+                    .serviceCharge(productModel.getServiceCharge())
                     .fkId(new Integer(resultSet.getString("products.fk_associate_id")))
                     .image(resultSet.getString("newigp_product_extra_info.m_img"))
                     .shortDescription(resultSet.getString("products.products_description_small"))
@@ -228,13 +236,20 @@ public class MarketPlaceOrderUtil {
                     .lbh(resultSet.getString("newigp_product_extra_info.lbh"))
                     .volumeWeight(Integer.parseInt(resultSet.getString("products.products_volume_weight")))
                     .productCode(prodCode)
+                    .displayAttrList(productModel.getDisplayAttrList())
+                    .serviceTypeId(productModel.getServiceTypeId())
+                    .serviceType(productModel.getServiceType())
                     .build();
+                if(productModel1.getId() == null || productModel1.getId() == 0){
+                    validationModel.setError(Boolean.TRUE);
+                    validationModel.setMessage("Product is not available.");
+                }
                 validationModel.setProductModel(productModel1);
             }
         } catch (Exception exception) {
             logger.error("Exception on sql query for products : ", exception);
             validationModel.setError(Boolean.TRUE);
-            validationModel.setMessage("Exception on sql query for products.");
+            validationModel.setMessage("Product is not available.");
 
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
@@ -484,9 +499,14 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setString(1, user.getEmail());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.first()) {
-                user.setId(resultSet.getInt("c.customers_id") + "");
+                user.setId(resultSet.getString("c.customers_id"));
                 user.setIdHash(resultSet.getString("n.id_hash"));
-                user.setDob(resultSet.getString("DATE_FORMAT(c.customers_dob,'%d-%b-%Y')"));
+                if(resultSet.getString("c.customers_dob").equals("none")){
+                    // don't take dob.
+                }
+                else {
+                    user.setDob(resultSet.getString("DATE_FORMAT(c.customers_dob,'%d-%b-%Y')"));
+                }
             }
         } catch (Exception exception) {
             logger.error("Exception getting user from database : ", exception);
