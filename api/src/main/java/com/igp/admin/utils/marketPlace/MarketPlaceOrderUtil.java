@@ -501,7 +501,7 @@ public class MarketPlaceOrderUtil {
             if (resultSet.first()) {
                 user.setId(resultSet.getString("c.customers_id"));
                 user.setIdHash(resultSet.getString("n.id_hash"));
-                if(resultSet.getString("c.customers_dob").equals("none")){
+                if(resultSet.getString("c.customers_dob").equals("none") || resultSet.getString("c.customers_dob").equals("") || resultSet.getString("c.customers_dob").equals(null)){
                     // don't take dob.
                 }
                 else {
