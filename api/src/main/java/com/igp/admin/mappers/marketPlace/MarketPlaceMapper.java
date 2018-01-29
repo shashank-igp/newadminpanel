@@ -119,6 +119,11 @@ public class MarketPlaceMapper {
                 validationModel.setError(Boolean.FALSE);
                 validationModel.setId(0);
                 long millis = System.currentTimeMillis();
+                String phone =  new BigDecimal(column.get("Contact No")).toPlainString();
+                String zipCode = column.get("Zip");
+                String zip = zipCode.substring(0,6);
+                String quant = column.get("QTY");
+                String qty = quant.substring(0,1);
 
 
                 // take out all the values and fill the models.
@@ -154,9 +159,9 @@ public class MarketPlaceMapper {
                         .addressField2(column.get("AddressLine2"))
                         .state(column.get("State"))
                         .city(column.get("City"))
-                        .postcode(column.get("Zip"))
+                        .postcode(zip)
                         .email(column.get("Email"))
-                        .mobile(column.get("Contact No"))
+                        .mobile(phone)
                         .mobilePrefix(mprefix)
                         .password(millis+"")
                         .countryId(99)
@@ -180,9 +185,6 @@ public class MarketPlaceMapper {
                     addressModel.setMobilePrefix(mprefix);
                     addressModel.setAddressType(0); // home
 
-                    String quant = column.get("QTY");
-
-                    String qty = quant.substring(0,1);
 
                     productModel = new ProductModel.Builder()
                         .productCode(column.get("Item Code"))
@@ -192,6 +194,7 @@ public class MarketPlaceMapper {
                         .serviceDate("1970-01-01")
                         .serviceTypeId(1+"")
                         .serviceType(serviceType.get(1))
+                        .serviceCharge(new BigDecimal(0))
                         .displayAttrList(new HashMap<>())
                         .perProductDiscount(new BigDecimal(0))
                         .giftBox(0)
@@ -334,7 +337,11 @@ public class MarketPlaceMapper {
                         addressModel.setId(validationModel.getUserModel().getIdHash());
                         validationModel.setAddressModel(addressModel);
                         // validate address details.
-                        validationModel = marketPlaceOrderUtil.validateSelectedAddress(validationModel);
+
+                     //  addressModel.setAid("1614158");
+                    //   validationModel.setAddressModel(addressModel);
+
+                       validationModel = marketPlaceOrderUtil.validateSelectedAddress(validationModel);
                         if (validationModel.getError() == Boolean.TRUE) {
 
                         } else {
