@@ -6,7 +6,6 @@ import com.igp.handles.admin.models.Reports.ProductModelListHavingSummary;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import com.igp.handles.vendorpanel.response.ReportResponse;
 import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -22,7 +21,7 @@ import java.util.Map;
  */
 public class Reports {
     @GET
-    @Path("/v1/admin/getPincodeReport")
+    @Path("/v1/admin/handels/getPincodeReport")
     public ReportResponse getPincodeReport(@QueryParam("fkAssociateId") @DefaultValue("565") String fkAssociateId,
                                            @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
         ReportResponse reportResponse=new ReportResponse();
@@ -38,7 +37,7 @@ public class Reports {
     }
 
     @PUT
-    @Path("/v1/admin/handlePincodeChange")
+    @Path("/v1/admin/handels/handlePincodeChange")
     public HandleServiceResponse updatePincodeDetail(@QueryParam("fkAssociateId") String fkAssociateId,
                                                      @QueryParam("pincode") String pincode, @QueryParam("shipCharge")Integer updatePrice ,
                                                      @QueryParam("shipType") Integer shipType, @QueryParam("updateStatus") Integer updateStatus){
@@ -62,7 +61,7 @@ public class Reports {
     }
 
     @GET
-    @Path("/v1/admin/getProductReport")
+    @Path("/v1/admin/handels/getProductReport")
     public ReportResponse getVendorReport(@QueryParam("fkAssociateId") @DefaultValue("565") String fkAssociateId,
                                           @QueryParam("startLimit") String startLimit,
                                           @QueryParam("endLimit") String endLimit ){
@@ -84,7 +83,7 @@ public class Reports {
 
 
     @PUT
-    @Path("/v1/admin/handleComponentChange")
+    @Path("/v1/admin/handels/handleComponentChange")
     public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") String fkAssociateId,
                                                        @QueryParam("componentId") String componentId,
                                                        @QueryParam("price")String updatePrice,
