@@ -40,7 +40,7 @@ public class OrderMapper
         Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap = new HashMap<>();
 
         try{
-            List<OrdersProducts> orderProductList = orderUtil.getOrderProducts(scopeId, orderId, fkAssociateId,ordersProductExtraInfoMap,orderProductIds);
+            List<OrdersProducts> orderProductList = orderUtil.getOrderProducts(scopeId, orderId, fkAssociateId,ordersProductExtraInfoMap,orderProductIds,false);
             orders=prepareOrders("all",orderProductList,ordersProductExtraInfoMap,"",false);
 
         }

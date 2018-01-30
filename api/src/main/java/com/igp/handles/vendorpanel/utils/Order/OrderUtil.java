@@ -25,7 +25,7 @@ public class OrderUtil
     private static final Logger logger = LoggerFactory.getLogger(OrderUtil.class);
 
     public List<OrdersProducts> getOrderProducts(String scopeId, int orderId, String fkAssociateId,Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap
-                                                , String orderProductIds){
+                                                , String orderProductIds,boolean forAdminPanelOrNot){
         Connection connection = null;
         ResultSet resultSet = null;
         String statement;
@@ -33,25 +33,30 @@ public class OrderUtil
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         UploadUtil uploadUtil=new UploadUtil();
         List<OrdersProducts> listOfOrderProducts=new ArrayList<>();
+        String vendorIdClaus="";
         try{
+
+            if(forAdminPanelOrNot == false){
+                vendorIdClaus=" op.fk_associate_id = "+fkAssociateId+" AND ";
+            }
+
             connection = Database.INSTANCE.getReadOnlyConnection();
             if(orderProductIds.equalsIgnoreCase("0")){
                 statement = "select op.*,opei.*,npei.m_img , p.update_date_time, p.products_name_for_url,npei.flag_personalize from"
                     + " orders_products as op join  order_product_extra_info as opei on op.orders_products_id "
                     + " = opei.order_product_id  join products as p on op.products_id=p.products_id join "
-                    + "newigp_product_extra_info as  npei on npei.products_id=p.products_id where  op.orders_id=? AND op.fk_associate_id=?";
+                    + "newigp_product_extra_info as  npei on npei.products_id=p.products_id where "+vendorIdClaus+" op.orders_id=? ";
 
             }else {
                 statement = "select op.*,opei.*,npei.m_img , p.update_date_time, p.products_name_for_url,npei.flag_personalize from"
                     + " orders_products as op join  order_product_extra_info as opei on op.orders_products_id "
                     + " = opei.order_product_id  join products as p on op.products_id=p.products_id join "
                     + "newigp_product_extra_info as  npei on npei.products_id=p.products_id where  op.orders_id=? AND "
-                    + " op.fk_associate_id=? AND op.orders_products_id IN ( "+orderProductIds+" )";
+                    + vendorIdClaus + " op.orders_products_id IN ( "+orderProductIds+" )";
 
             }
            preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,orderId);
-            preparedStatement.setString(2, fkAssociateId);
 
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
@@ -107,13 +112,14 @@ public class OrderUtil
                 if(!ordersProducts.getTimeSlaVoilates().equalsIgnoreCase("")&&orderProductExtraInfo.getDeliveryTime().equalsIgnoreCase("")){
                     orderProductExtraInfo.setDeliveryTime(ordersProducts.getTimeSlaVoilates());
                 }
-                if(orderProductExtraInfo.getDeliveryType()==2){
-                    String[] timeSlotArray=orderProductExtraInfo.getDeliveryTime().split(" hrs - ");
-                    int secondTimeSlot=Integer.parseInt(timeSlotArray[1].substring(0,2))-1;
-                    orderProductExtraInfo.setDeliveryTime(timeSlotArray[0]+" hrs - "+
-                        secondTimeSlot+timeSlotArray[1].substring(2,timeSlotArray[1].length()));
+                if(forAdminPanelOrNot==false){
+                    if(orderProductExtraInfo.getDeliveryType()==2){
+                        String[] timeSlotArray=orderProductExtraInfo.getDeliveryTime().split(" hrs - ");
+                        int secondTimeSlot=Integer.parseInt(timeSlotArray[1].substring(0,2))-1;
+                        orderProductExtraInfo.setDeliveryTime(timeSlotArray[0]+" hrs - "+
+                            secondTimeSlot+timeSlotArray[1].substring(2,timeSlotArray[1].length()));
+                    }
                 }
-                logger.debug("orderProductExtraInfo "+orderProductExtraInfo.toString());
                 ordersProductExtraInfoMap.put(Integer.valueOf(ordersProducts.getOrderProductId()),orderProductExtraInfo);
                 listOfOrderProducts.add(ordersProducts);
             }
