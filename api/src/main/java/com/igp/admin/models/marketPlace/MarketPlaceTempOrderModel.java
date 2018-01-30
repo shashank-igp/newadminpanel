@@ -9,7 +9,7 @@ import java.math.BigDecimal;
  */
 public class MarketPlaceTempOrderModel {
     @JsonProperty("custid")
-    private String customerId;
+    private Integer customerId;
 
     @JsonProperty("cid")
     private String idHash;
@@ -79,11 +79,11 @@ public class MarketPlaceTempOrderModel {
     }
 
 
-    public String getCustomerId() {
+    public Integer getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(String customerId) {
+    public void setCustomerId(Integer customerId) {
         this.customerId = customerId;
     }
 

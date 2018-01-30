@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 public class OrderTempBasketModel {
 
     @JsonProperty("cid")
-    private String customerId;
+    private Integer customerId;
 
     @JsonProperty("pid")
     private Integer productId;
@@ -57,11 +57,11 @@ public class OrderTempBasketModel {
     @JsonProperty("sdate")
     private String serviceDate;
 
-    public String getCustomerId() {
+    public Integer getCustomerId() {
         return customerId;
     }
 
-    public void setCustomerId(String customerId) {
+    public void setCustomerId(Integer customerId) {
         this.customerId = customerId;
     }
 

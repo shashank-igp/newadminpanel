@@ -299,7 +299,7 @@ public class MarketPlaceOrderUtil {
                 "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())";
 
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, orderTempModel.getCustomerId());
+            preparedStatement.setInt(1, orderTempModel.getCustomerId());
             preparedStatement.setInt(2, orderTempModel.getAddressBookId());
             if (orderTempModel.getShippingAddressModel().getTitle().equalsIgnoreCase("Mr.") || orderTempModel.getShippingAddressModel().getTitle().equalsIgnoreCase("m"))
                 preparedStatement.setString(3, "m");
@@ -375,7 +375,7 @@ public class MarketPlaceOrderUtil {
                         connection.commit();
                     } else {
                         connection.rollback();
-                        throw new Exception("Exception in order temp creation.");
+                        throw new Exception("Exception in connection while creation of temp order.");
                     }
                 }
             }
@@ -420,7 +420,7 @@ public class MarketPlaceOrderUtil {
                 "special_charges, shipping_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, orderTempBasketModel.getCustomerId());
+            preparedStatement.setInt(1, orderTempBasketModel.getCustomerId());
             preparedStatement.setInt(2, orderTempBasketModel.getProductId());
             preparedStatement.setInt(3, orderTempBasketModel.getQuantity());
             preparedStatement.setInt(4, orderTempBasketModel.getOrderTempId());
