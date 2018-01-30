@@ -249,6 +249,10 @@ public class DashboardMapper {
         Map<String,String> notDeliveredTotalOrderCount = hp.copyMap(dataMap);
         Map<String,String> notDeliveredPendingOrderCount = hp.copyMap(dataMap);
 
+        int orderTotalWhole=0;
+        int notAssignedOrdersTotalWhole=0;
+        int notConfirmedOrdersTotalWhole=0;
+
         try{
             List<OrderDetailsPerOrderProduct> listOfHandelsOrderId=dashboardUtil.getHandelsOrderList(pastDate,0);
             if (specificDate == null)
@@ -280,9 +284,11 @@ public class DashboardMapper {
                     flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap);
 
                     if (flagForUniqueness){
+                        orderTotalWhole++;
 
                         if(status.equals("Processing") && vendorId==72){ // unassigned -> not alloted
                             //past
+                            notAssignedOrdersTotalWhole++;
                             if (deliveryDate.getTime() < todayDate.getTime()){
                                 int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("notAlloted").get("count"));
                                 count++;
@@ -375,6 +381,7 @@ public class DashboardMapper {
                         }
                         else if(status.equals("Processed") && vendorId==72){ // unassigned -> Processing
                             //past
+                            notAssignedOrdersTotalWhole++;
                             if (deliveryDate.getTime() < todayDate.getTime()){
                                 int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("processing").get("count"));
                                 count++;
@@ -469,6 +476,7 @@ public class DashboardMapper {
                             // all orders which are in Processed state of that vendor ,  not Confirmed Yet -> Total
 
                             //past
+                            notConfirmedOrdersTotalWhole++;
                             if (deliveryDate.getTime() < todayDate.getTime()){
                                 int count=Integer.parseInt(statusCountMap0.get("notConfirmed").get("total").get("count"));
                                 count++;
@@ -592,6 +600,9 @@ public class DashboardMapper {
                     dashboardDetail.setNotShippedPendingOrderCount(notShippedPendingOrderCount);
                     dashboardDetail.setNotDeliveredTotalOrderCount(notDeliveredTotalOrderCount);
                     dashboardDetail.setNotDeliveredPendingOrderCount(notDeliveredPendingOrderCount);
+                    dashboardDetail.setOrderTotalWhole(dashboardDetail.getOrderTotalWhole()+orderTotalWhole);
+                    dashboardDetail.setNotAssignedOrdersTotalWhole(dashboardDetail.getNotAssignedOrdersTotalWhole()+notAssignedOrdersTotalWhole);
+                    dashboardDetail.setNotConfirmedOrdersTotalWhole(dashboardDetail.getNotConfirmedOrdersTotalWhole()+notConfirmedOrdersTotalWhole);
                 }catch (Exception exception){
                     logger.error("Exception occured ",exception);
                 }
@@ -663,6 +674,7 @@ public class DashboardMapper {
 
             specificDate = DateUtils.truncate(specificDate, Calendar.DAY_OF_MONTH);
             List<OrderDetailsPerOrderProduct> listOfHandelsOrderId=dashboardUtil.getHandelsOrderList(specificDate,1);
+
 
             for (OrderDetailsPerOrderProduct orderDetailsPerOrderProduct : listOfHandelsOrderId){
                 try{

@@ -17,17 +17,8 @@ public class DashboardDetail {
     private Date                     festivalDate               = null;
 
     private int orderTotalWhole=0;
-    private int newOrderTotalWhole=0;
-    private int confirmOrderTotalWhole=0;
-    private int outOfDeliveryOrderTotalWhole=0;
-    private int orderTotalActionRequired=0;
-    private int newOrderTotalActionRequired=0;
-    private int confirmOrderTotalWholeActionRequired=0;
-    private int outOfDeliveryOrderTotalActionRequired=0;
-    private int orderTotalHighAlert=0;
-    private int newOrderTotalHighAlert=0;
-    private int confirmOrderTotalWholeHighAlert=0;
-    private int outOfDeliveryOrderTotalHighAlert=0;
+    private int notAssignedOrdersTotalWhole=0;
+    private int notConfirmedOrdersTotalWhole=0;
 
     private Map<String,String> notShippedTotalOrderCount=new HashMap<>();
     private Map<String,String> notShippedPendingOrderCount=new HashMap<>();
@@ -137,114 +128,24 @@ public class DashboardDetail {
         this.orderTotalWhole = orderTotalWhole;
     }
 
-    public int getNewOrderTotalWhole()
+    public int getNotAssignedOrdersTotalWhole()
     {
-        return newOrderTotalWhole;
+        return notAssignedOrdersTotalWhole;
     }
 
-    public void setNewOrderTotalWhole(int newOrderTotalWhole)
+    public void setNotAssignedOrdersTotalWhole(int notAssignedOrdersTotalWhole)
     {
-        this.newOrderTotalWhole = newOrderTotalWhole;
+        this.notAssignedOrdersTotalWhole = notAssignedOrdersTotalWhole;
     }
 
-    public int getConfirmOrderTotalWhole()
+    public int getNotConfirmedOrdersTotalWhole()
     {
-        return confirmOrderTotalWhole;
+        return notConfirmedOrdersTotalWhole;
     }
 
-    public void setConfirmOrderTotalWhole(int confirmOrderTotalWhole)
+    public void setNotConfirmedOrdersTotalWhole(int notConfirmedOrdersTotalWhole)
     {
-        this.confirmOrderTotalWhole = confirmOrderTotalWhole;
-    }
-
-    public int getOutOfDeliveryOrderTotalWhole()
-    {
-        return outOfDeliveryOrderTotalWhole;
-    }
-
-    public void setOutOfDeliveryOrderTotalWhole(int outOfDeliveryOrderTotalWhole)
-    {
-        this.outOfDeliveryOrderTotalWhole = outOfDeliveryOrderTotalWhole;
-    }
-
-    public int getOrderTotalActionRequired()
-    {
-        return orderTotalActionRequired;
-    }
-
-    public void setOrderTotalActionRequired(int orderTotalActionRequired)
-    {
-        this.orderTotalActionRequired = orderTotalActionRequired;
-    }
-
-    public int getNewOrderTotalActionRequired()
-    {
-        return newOrderTotalActionRequired;
-    }
-
-    public void setNewOrderTotalActionRequired(int newOrderTotalActionRequired)
-    {
-        this.newOrderTotalActionRequired = newOrderTotalActionRequired;
-    }
-
-    public int getConfirmOrderTotalWholeActionRequired()
-    {
-        return confirmOrderTotalWholeActionRequired;
-    }
-
-    public void setConfirmOrderTotalWholeActionRequired(int confirmOrderTotalWholeActionRequired)
-    {
-        this.confirmOrderTotalWholeActionRequired = confirmOrderTotalWholeActionRequired;
-    }
-
-    public int getOutOfDeliveryOrderTotalActionRequired()
-    {
-        return outOfDeliveryOrderTotalActionRequired;
-    }
-
-    public void setOutOfDeliveryOrderTotalActionRequired(int outOfDeliveryOrderTotalActionRequired)
-    {
-        this.outOfDeliveryOrderTotalActionRequired = outOfDeliveryOrderTotalActionRequired;
-    }
-
-    public int getOrderTotalHighAlert()
-    {
-        return orderTotalHighAlert;
-    }
-
-    public void setOrderTotalHighAlert(int orderTotalHighAlert)
-    {
-        this.orderTotalHighAlert = orderTotalHighAlert;
-    }
-
-    public int getNewOrderTotalHighAlert()
-    {
-        return newOrderTotalHighAlert;
-    }
-
-    public void setNewOrderTotalHighAlert(int newOrderTotalHighAlert)
-    {
-        this.newOrderTotalHighAlert = newOrderTotalHighAlert;
-    }
-
-    public int getConfirmOrderTotalWholeHighAlert()
-    {
-        return confirmOrderTotalWholeHighAlert;
-    }
-
-    public void setConfirmOrderTotalWholeHighAlert(int confirmOrderTotalWholeHighAlert)
-    {
-        this.confirmOrderTotalWholeHighAlert = confirmOrderTotalWholeHighAlert;
-    }
-
-    public int getOutOfDeliveryOrderTotalHighAlert()
-    {
-        return outOfDeliveryOrderTotalHighAlert;
-    }
-
-    public void setOutOfDeliveryOrderTotalHighAlert(int outOfDeliveryOrderTotalHighAlert)
-    {
-        this.outOfDeliveryOrderTotalHighAlert = outOfDeliveryOrderTotalHighAlert;
+        this.notConfirmedOrdersTotalWhole = notConfirmedOrdersTotalWhole;
     }
 
     /**
