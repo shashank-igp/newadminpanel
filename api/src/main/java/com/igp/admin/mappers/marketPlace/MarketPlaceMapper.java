@@ -440,7 +440,7 @@ public class MarketPlaceMapper {
         try {
             // Everything went well,fill the tempmodel.
             marketPlaceTempOrderModel.setAddressBookId(new Integer(addressModel.getAid()));
-            marketPlaceTempOrderModel.setCustomerId(userModel.getId());
+            marketPlaceTempOrderModel.setCustomerId(new Integer(userModel.getId()));
             marketPlaceTempOrderModel.setAssociateId(validationModel.getFkAssociateId());
             marketPlaceTempOrderModel.setShippingAddressModel(addressModel);
             marketPlaceTempOrderModel.setDeliveryInstr("  ");
@@ -459,7 +459,7 @@ public class MarketPlaceMapper {
             }
         }
         catch (Exception e){
-            logger.error("Exception getting user from database: ", e);
+            logger.error("Exception in Filling Temp Order Details : ", e);
         }
         marketPlaceTempOrderModel.setTempOrderId(orderTempId);
         return marketPlaceTempOrderModel;
