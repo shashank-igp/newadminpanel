@@ -72,10 +72,21 @@ public class Order {
         @QueryParam("fkAssociateId") int vendorId,@QueryParam("orderProductId") int orderProductId){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
+        int result;
         try{
-            if(orderMapper.assignReassignOrder(action,orderId,orderProductId,vendorId)){
+             result=orderMapper.assignReassignOrder(action,orderId,orderProductId,vendorId);
+            if(result==1){
                 handleServiceResponse.setResult(true);
-            }else{
+            }else if(result==2){
+                handleServiceResponse.setError(true);
+                handleServiceResponse.setResult(false);
+                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because all required components are not available !!");
+            }else if(result==3){
+                handleServiceResponse.setError(true);
+                handleServiceResponse.setResult(false);
+                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because already assigned to this vendor !!");
+            }
+            else{
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setResult(false);
                 handleServiceResponse.setErrorMessage("could not assign the order to this vendor please try again !!");
