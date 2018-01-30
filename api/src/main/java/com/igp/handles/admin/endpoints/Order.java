@@ -13,7 +13,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.text.ParseException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by shanky on 22/1/18.
@@ -98,5 +100,86 @@ public class Order {
         return handleServiceResponse;
     }
 
+    @POST
+    @Path("/v1/admin/handels/orderPriceChanges")
+    public HandleServiceResponse orderPriceChanges(@QueryParam("orderId")int orderId,@QueryParam("orderproductId")
+        int orderProductId,@QueryParam("componentId") int componentId,@QueryParam("componentPrice") Double componentPrice,
+        @QueryParam("shippingCharge") Double shippingCharge){
+        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        OrderMapper orderMapper=new OrderMapper();
+        boolean result=false;
+        try{
+            result=orderMapper.orderPriceChanges(orderId,orderProductId,componentId,componentPrice,shippingCharge);
+            if(result==false){
+                handleServiceResponse.setError(true);
+                handleServiceResponse.setResult(false);
+                handleServiceResponse.setErrorMessage("some technical error occured while updating price try again !!");
+            }else {
+                handleServiceResponse.setResult(result);
+            }
+
+        }catch (Exception exception){
+            logger.error("error while orderComponentPriceChange",exception);
+        }
+
+        return handleServiceResponse;
+    }
+    @POST
+    @Path("/v1/admin/handels/deliveryDetailChanges")
+    public HandleServiceResponse deliveryDetailChanges(@QueryParam("orderId")int orderId,@QueryParam("orderProductId") int orderProductId
+    ,@QueryParam("deliveryDate") String deliveryDate,@QueryParam("deliveryTime")String deliveryTime,@QueryParam("deliveryType") int deliveryType ){
+        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        OrderMapper orderMapper=new OrderMapper();
+        boolean result=false;
+        try{
+
+            result=orderMapper.deliveryDetailChanges(orderId,orderProductId,deliveryDate,deliveryTime,deliveryType);
+            if(result==false){
+                handleServiceResponse.setError(true);
+                handleServiceResponse.setResult(false);
+                handleServiceResponse.setErrorMessage("some technical error occured while updating deliveryDetails try again !!");
+            }else {
+                handleServiceResponse.setResult(result);
+            }
+
+        }catch (Exception exception){
+            logger.error("error while deliveryDetailChanges",exception);
+        }
+
+        return handleServiceResponse;
+    }
+    @GET
+    @Path("/v1/admin/handels/getOrderLog")
+    public HandleServiceResponse getOrderLog(@QueryParam("orderId") int orderId){
+        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        OrderMapper orderMapper=new OrderMapper();
+        try{
+            Map<String,String> orderLog=new HashMap<>();
+            orderLog.put("logs",orderMapper.getOrderLog(orderId));
+            handleServiceResponse.setResult(orderLog);
+
+        }catch (Exception exception){
+            logger.error("error while getting OrderLog",exception);
+        }
+
+        return handleServiceResponse;
+    }
+
+    @GET
+    @Path("/v1/admin/handels/getOrder")
+    public HandleServiceResponse getOrder(@Context HttpServletResponse response,@Context HttpServletRequest request,
+                                                @QueryParam("orderId") int orderId,
+                                                @DefaultValue("0") @QueryParam("orderProductIs") String orderProductIdList) {
+
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
+        OrderMapper orderMapper=new OrderMapper();
+        try{
+           handleServiceResponse.setResult(orderMapper.getOrder(orderId,orderProductIdList));
+        }catch (Exception exception){
+            logger.error("error while getting OrderLog",exception);
+        }
+
+        return handleServiceResponse;
+    }
 
 }

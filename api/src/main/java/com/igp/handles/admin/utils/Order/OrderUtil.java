@@ -359,7 +359,7 @@ public class OrderUtil {
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement="update vendor_assign_price set shipping = ? where orders_id = ? and products_id = ? ";
+            statement="update vendor_assign_price set shipping = ? , order_subtotal = shipping + vendor_price where orders_id = ? and products_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
 
             preparedStatement.setDouble(1,shippingCharge);
@@ -368,7 +368,77 @@ public class OrderUtil {
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
-                logger.error("Failed to insert Into OrderHistory ");
+                logger.error("Failed to update shipping in vendor_assign_price ");
+            } else {
+                result=true;
+            }
+
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+
+        return result;
+    }
+    public boolean updateVendorAssignPrice(int orderId,int productId,
+                                                            Double vendorPrice,Double shippingCharge){
+        boolean result=true;
+        Connection connection = null;
+        String statement,shippingChargeClause="",vendorPriceClause="";
+        PreparedStatement preparedStatement = null;
+        try{
+            if(shippingCharge!=null){
+                shippingChargeClause+=" shipping = "+shippingCharge+" , ";
+            }
+            if(vendorPrice!=null){
+                vendorPriceClause+=" vendor_price = vendor_price + "+vendorPrice+" , ";
+            }
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement="update vendor_assign_price set "+vendorPriceClause+shippingChargeClause
+                + "order_subtotal = shipping + vendor_price    where orders_id = ? and products_id = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+
+            preparedStatement.setInt(1,orderId);
+            preparedStatement.setInt(2,productId);
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            Integer status = preparedStatement.executeUpdate();
+            if (status == 0) {
+                logger.error("Failed to update vendor_price in vendor_assign_price ");
+            } else {
+                result=true;
+            }
+
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+
+        return result;
+    }
+
+    public boolean updateComponentPriceOrderLevel(int orderId,int productId,int componentId,double componentPrice){
+        boolean result=true;
+        Connection connection = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        try{
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement="update orders_products_components_info set vendor_to_component_price = ? where orders_id = ? "
+                + " and products_id = ? and component_id = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+
+            preparedStatement.setDouble(1,componentPrice);
+            preparedStatement.setInt(2,orderId);
+            preparedStatement.setInt(3,productId);
+            preparedStatement.setInt(4,componentId);
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            Integer status = preparedStatement.executeUpdate();
+            if (status == 0) {
+                logger.error("Failed to update vendor_to_component_price in orders_products_components_info ");
             } else {
                 result=true;
             }
@@ -462,6 +532,178 @@ public class OrderUtil {
         }
 
         return result;
+    }
+
+    public OrderComponent getOrderComponent(int orderId,int productId,int componentId){
+
+        Connection connection = null;
+        ResultSet resultSet = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        OrderComponent orderComponent=null;
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement="SELECT  * from orders_products_components_info where orders_id = ? and products_id = ? and component_id = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,orderId);
+            preparedStatement.setInt(2,productId);
+            preparedStatement.setInt(3,componentId);
+
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+                orderComponent=new OrderComponent.Builder()
+                    .componentId(resultSet.getInt("component_id"))
+                    .componentCode(resultSet.getString("component_code"))
+                    .quantity(resultSet.getString("quantity"))
+                    .componentPrice(resultSet.getString("vendor_to_component_price"))
+                    .productId(resultSet.getString("products_id"))
+                    .build();
+            }
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+
+        return orderComponent;
+    }
+    public int getProductId(int orderProductId){
+        int productId=0;
+        Connection connection = null;
+        ResultSet resultSet = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement="SELECT  * from orders_products where orders_products_id = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,orderProductId);
+
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+                productId=resultSet.getInt("products_id");
+            }
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+
+        return productId;
+    }
+    public boolean updateDeliveryDetails(int orderId,int orderProductId,int productId,String deliveryDate,String deliveryTime,
+                                        int deliveryType){
+        boolean result=false;
+        Connection connection = null;
+        String statement,deliveryDateClause="",deliveryTimeClause="",deliveryTypeClause="";
+        PreparedStatement preparedStatement = null;
+        DashboardMapper dashboardMapper=new DashboardMapper();
+        Integer status=null;
+        try{
+
+            if(deliveryDate!=null){
+                deliveryDateClause=" delivery_date = '"+deliveryDate+"' , ";
+            }
+            if(deliveryTime != null && deliveryType == 2){
+                deliveryTimeClause=" delivery_time = '"+deliveryTime+"' , ";
+            }
+            if(deliveryType!=0){
+                deliveryTypeClause=" delivery_type = "+deliveryType+" , ";
+            }
+
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement=" UPDATE order_product_extra_info set "+deliveryDateClause+deliveryTimeClause+deliveryTypeClause
+                        +" attributes = attributes where order_id = ? and order_product_id = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+
+            preparedStatement.setInt(1,orderId);
+            preparedStatement.setInt(2,orderProductId);
+
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            status = preparedStatement.executeUpdate();
+
+            if (status == 0) {
+                logger.error("Failed to update order_product_extra_info while updateDeliveryDetails ");
+            } else {
+
+                if(deliveryTime != null && deliveryType == 2){
+                    deliveryTimeClause=" delivery_time = '"+deliveryTime.split(" - ")[0]+"' , ";
+                }
+                if(deliveryType!=0){
+                    deliveryTypeClause=" shipping_type = '"+dashboardMapper.getDeliveryType(deliveryType+"")+"' , ";
+                }
+
+
+                statement="UPDATE  vendor_assign_price set "+deliveryDateClause+deliveryTimeClause+deliveryTypeClause
+                    +" assign_by_user = assign_by_user where orders_id = ? and  products_id = ? ";
+
+                preparedStatement = connection.prepareStatement(statement);
+
+                preparedStatement.setInt(1,orderId);
+                preparedStatement.setInt(2,productId);
+                logger.debug("STATEMENT CHECK: " + preparedStatement);
+                status = preparedStatement.executeUpdate();
+
+                if (status == 0) {
+                    logger.error("Failed to update vendor_assign_price while updateDeliveryDetails ");
+                } else{
+                    if(deliveryDate!=null){
+                        statement="UPDATE trackorders set date_of_delivery = ? where orders_id = ? and orders_products_id = ? ";
+                        preparedStatement = connection.prepareStatement(statement);
+
+                        preparedStatement.setString(1,deliveryDate);
+                        preparedStatement.setInt(2,orderId);
+                        preparedStatement.setInt(3,productId);
+                        logger.debug("STATEMENT CHECK: " + preparedStatement);
+                        status = preparedStatement.executeUpdate();
+
+                        if (status == 0) {
+                            logger.error("Failed to update trackorders while updateDeliveryDetails ");
+                        } else{
+                            result=true;
+                        }
+                    }
+                }
+            }
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
+    }
+    public String getOrderLog(int orderId){
+        String logs="";
+        Connection connection = null;
+        ResultSet resultSet = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement="SELECT  * from orders_history where fk_orders_id = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,orderId);
+
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()){
+                logs+=resultSet.getString("orders_history_comment");
+            }
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return logs;
     }
 
 }
