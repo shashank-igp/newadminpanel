@@ -22,20 +22,59 @@ import java.util.List;
  */
 public class OrderUtil {
     private static final Logger logger = LoggerFactory.getLogger(OrderUtil.class);
-    
+
+
+    public boolean insertIntoOrderHistory(Order order,int vendorId){
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        String statement,ordersHistoryComment="",previousVendorName="";
+        boolean result=false;
+        VendorUtil vendorUtil=new VendorUtil();
+        try{
+            previousVendorName=vendorUtil.getVendorInfo(Integer.parseInt(order.getOrderProducts().get(0).getFkAssociateId())).getAssociateName();
+            ordersHistoryComment="The vendor of product "+order.getOrderProducts().get(0).getProductName()+" has been changed "
+                + "from "+previousVendorName+" To "
+                + vendorUtil.getVendorInfo(vendorId).getAssociateName()+" By New Handels Panel<Br>";
+
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement="insert into orders_history (fk_orders_id,fk_associate_login_id,fk_associate_user_id,orders_history_comment, "
+                + " orders_history_time,fk_associate_id,fk_payout_reason_id,deliver_date) VALUES  ( ?,?,?,?,now(),?,0,'0000-00-00')";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,order.getOrderId()); // orderID
+            preparedStatement.setString(2,"Handels"); //fk_associate_login_id
+            preparedStatement.setString(3,"Handels"); //fk_associate_user_id
+            preparedStatement.setString(4,ordersHistoryComment);
+            preparedStatement.setInt(5,vendorId);
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            Integer status = preparedStatement.executeUpdate();
+            if (status == 0) {
+                logger.error("Failed to insert Into OrderHistory ");
+            } else {
+                result=true;
+            }
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
+    }
+
     public boolean updateOrderProduct(int orderProductId,int vendorId,Connection connection){
         //Connection connection = null;
         PreparedStatement preparedStatement = null;
         String statement;
         boolean result=false;
         try{
-//            connection = Database.INSTANCE.getReadWriteConnection();
+            //            connection = Database.INSTANCE.getReadWriteConnection();
             statement="UPDATE orders_products set orders_product_status = ? , fk_associate_id = ? , delivery_status = ? where "
-                + " orders_prodcuts_id = ? ";
+                + " orders_products_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setString(1,"Processed"); // orderID
-            preparedStatement.setInt(2,vendorId); // fk_associateId
-            preparedStatement.setInt(3,orderProductId); //order_subtotal
+            preparedStatement.setString(1,"Processed");
+            preparedStatement.setInt(2,vendorId);
+            preparedStatement.setInt(3,0);
+            preparedStatement.setInt(4,orderProductId);
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
@@ -51,16 +90,15 @@ public class OrderUtil {
         }
         return result;
     }
-    public boolean updateTrackorder(){
-        Connection connection = null;
+    public boolean updateTrackorder(int vendorId,int orderProductId,Connection connection){
         PreparedStatement preparedStatement = null;
         String statement;
         boolean result=false;
         try{
-            connection = Database.INSTANCE.getReadWriteConnection();
-            statement="UPDATE trackorders set fk_associate_id = ? where orders_id = ? and orders_prodcuts_id = ? ";
+            statement="UPDATE trackorders set fk_associate_id = ? where orders_products_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1,0); // orderID
+            preparedStatement.setInt(1,vendorId); // orderID
+            preparedStatement.setInt(2,orderProductId);
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
@@ -74,20 +112,20 @@ public class OrderUtil {
             logger.error("Exception in connection", exception);
         }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeConnection(connection);
         }
         return result;
     }
-    public boolean deleteEntryFromVendorAssignPrice(){
+    public boolean deleteEntryFromVendorAssignPrice(int orderId,int productId){
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         String statement;
         boolean result=false;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement="DELETE vendor_assign_price where orders_id = ? and products_id = ? ";
+            statement="DELETE from vendor_assign_price where orders_id = ? and products_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1,0); // orderID
+            preparedStatement.setInt(1,orderId); // orderID
+            preparedStatement.setInt(2,productId);
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
@@ -150,7 +188,7 @@ public class OrderUtil {
                     .fkAssociateId(resultSet.getString("op.fk_associate_id"))
                     .ordersProductStatus(resultSet.getString("op.orders_product_status"))
                     .deliveryStatus(resultSet.getInt("op.delivery_status"))
-                   .orderProductExtraInfo(orderProductExtraInfo)
+                    .orderProductExtraInfo(orderProductExtraInfo)
                     .build();
                 ordersProductsList.add(ordersProducts);
 
@@ -181,13 +219,25 @@ public class OrderUtil {
 
         return order;
     }
-    public boolean assignOrderToVendor(int orderId,int orderproductId,int vendorId){
-        boolean result=false;
+
+
+    public int reassignOrderToVendor(int orderId,int orderproductId,int vendorId){
+        int result=0;
+        try{
+            result=assignOrderToVendor(orderId,orderproductId,vendorId);
+        }catch (Exception exeception){
+
+        }
+        return result;
+    }
+
+
+    public int assignOrderToVendor(int orderId,int orderproductId,int vendorId){
+        int result=0;
         Order order=null;
         VendorUtil vendorUtil=new VendorUtil();
         VendorAssignModel vendorAssignModel=new VendorAssignModel();
-        List<OrderComponent> componentListForNewVendor=new ArrayList<>();
-        List<OrderComponent> componentListForOldVendor=new ArrayList<>();
+        List<OrderComponent> componentList=new ArrayList<>();
         double componentTotal=0.0,ordersubTotal=0.0,shippingCharge=0.0,vendorPrice=0.0;
         com.igp.handles.vendorpanel.utils.Order.OrderUtil orderUtil=new com.igp.handles.vendorpanel.utils.Order.OrderUtil();
 
@@ -200,17 +250,16 @@ public class OrderUtil {
             ordersProducts=order.getOrderProducts().get(0);
             orderProductExtraInfo=ordersProducts.getOrderProductExtraInfo();
 
-            orderUtil.getProductComponents(ordersProducts.getProductId(),Integer.parseInt(ordersProducts.getFkAssociateId()),
-                                ordersProducts.getProducts_code(),componentListForOldVendor, orderProductExtraInfo);
-
             componentTotal=orderUtil.getProductComponents(ordersProducts.getProductId(),vendorId,
-                ordersProducts.getProducts_code(),componentListForNewVendor,orderProductExtraInfo);
+                ordersProducts.getProducts_code(),componentList,orderProductExtraInfo);
             vendorPrice=componentTotal*ordersProducts.getProductQuantity();
             shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
-                                                            orderProductExtraInfo.getDeliveryType());
+                orderProductExtraInfo.getDeliveryType());
 
-            if(checkComponentListSimilarity(componentListForNewVendor,componentListForOldVendor)==false){
-                return false;
+            if(checkIfVendorHasAllProductComponent(vendorId,ordersProducts.getProducts_code())==false){
+                return 2; // that means vendor could not process this order since vendor does not have all components needed
+            }else if(checkIfCurrentVendorAlreadyAssignedToOrder(vendorId,orderId,ordersProducts.getProductId())){
+                return 3; // cant allow to assign same order to same vendor again
             }
 
 
@@ -233,7 +282,11 @@ public class OrderUtil {
             vendorAssignModel.setDeliveryTime(orderProductExtraInfo.getDeliveryTime());
             vendorAssignModel.setFlagEggless(0); //
 
-            result=vendorUtil.insertIntoVendorAssignPrice(vendorAssignModel,orderproductId);
+            if(vendorUtil.insertIntoVendorAssignPrice(vendorAssignModel,orderproductId)){
+                result= 1;
+                insertIntoOrderHistory(order,vendorId);
+                createOrdersProductsComponentsInfo(componentList,order);
+            }
 
         }catch (Exception exception){
             logger.error("Exception while assigning a order to vendor ", exception);
@@ -241,29 +294,173 @@ public class OrderUtil {
         return result;
     }
 
-    public boolean checkComponentListSimilarity(List<OrderComponent> componentListForNewVendor,List<OrderComponent> componentListForOldVendor){
+    public boolean checkIfVendorHasAllProductComponent(int vendorId,String barcode){
         boolean result=true;
+        Connection connection = null;
+        ResultSet resultSet = null,resultSet1 = null;
+        String statement,statement1,componentIds="";
+        PreparedStatement preparedStatement = null,preparedStatement1 = null;
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement="select concat('(',concat(group_concat(fk_component_id,''),')')) as componentIds "
+                + " from AA_barcode_to_components where barcode = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1,barcode);
 
-        if(componentListForNewVendor.size() != componentListForOldVendor.size()){
-            result=false;
-        }else{
-            for(int i=0;i<componentListForNewVendor.size();i++){
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+                componentIds=resultSet.getString("componentIds");
 
-                int newComponentId=componentListForNewVendor.get(i).getComponentId();
-                boolean flag=false;
-                for(int j=0;j<componentListForOldVendor.size();j++){
-                        if(newComponentId==componentListForOldVendor.get(j).getComponentId()){
-                            flag=true;
-                            break;
+                if(!componentIds.equals("")){
+
+                    try{
+                        statement1="select * from AA_vendor_to_components where fk_associate_id = ? and fk_component_id in "+componentIds ;
+                        preparedStatement1 = connection.prepareStatement(statement1);
+                        preparedStatement1.setInt(1,vendorId);
+
+                        logger.debug("STATEMENT CHECK: " + preparedStatement1);
+                        resultSet1 = preparedStatement1.executeQuery();
+
+                        while (resultSet1.next()){
+                            String vendorComponentID=resultSet1.getString("fk_component_id");
+                            if(!componentIds.contains(vendorComponentID)){
+                                result=false;
+                                break;
+                            }
                         }
-                }
-                if(flag==false){
+                    }catch (Exception exception){
+                        logger.error("Exception in connection", exception);
+                    }finally {
+                        Database.INSTANCE.closeStatement(preparedStatement1);
+                        Database.INSTANCE.closeResultSet(resultSet1);
+                    }
+
+                }else {
                     result=false;
-                    break;
                 }
 
             }
+
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
         }
+
+        return result;
+    }
+    public boolean updateShippingInVendorAssignPrice(int orderId,int productId,double shippingCharge){
+        boolean result=true;
+        Connection connection = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        try{
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement="update vendor_assign_price set shipping = ? where orders_id = ? and products_id = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+
+            preparedStatement.setDouble(1,shippingCharge);
+            preparedStatement.setInt(2,orderId);
+            preparedStatement.setInt(3,productId);
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            Integer status = preparedStatement.executeUpdate();
+            if (status == 0) {
+                logger.error("Failed to insert Into OrderHistory ");
+            } else {
+                result=true;
+            }
+
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+
+        return result;
+    }
+
+    public boolean createOrdersProductsComponentsInfo(List<OrderComponent> componentList,Order order){
+        boolean result=false;
+        try {
+            for(int i=0;i<componentList.size();i++){
+                insertIntoOrdersProductsComponentsInfo(componentList.get(i),order);
+            }
+        }catch (Exception exception){
+
+        }
+        return result;
+    }
+    public boolean insertIntoOrdersProductsComponentsInfo(OrderComponent orderComponent,Order order){
+        boolean result=false;
+        OrdersProducts ordersProducts=null;
+
+        Connection connection = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        try {
+            ordersProducts=order.getOrderProducts().get(0);
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement="insert into orders_products_components_info (orders_products_id,orders_id,products_id,products_code, "
+                + " component_id,component_code,quantity,vendor_to_component_price) VALUES  ( ?,?,?,?,?,?,?,?) ON DUPLICATE "
+                + " KEY update quantity= ? , vendor_to_component_price = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,ordersProducts.getOrderProductId()); // orderID
+            preparedStatement.setInt(2,order.getOrderId()); //fk_associate_login_id
+            preparedStatement.setInt(3,ordersProducts.getProductId()); //fk_associate_user_id
+            preparedStatement.setString(4,ordersProducts.getProducts_code());
+            preparedStatement.setInt(5,orderComponent.getComponentId());
+            preparedStatement.setString(6,orderComponent.getComponentCode());
+            preparedStatement.setDouble(7,Double.valueOf(orderComponent.getQuantity()));
+            preparedStatement.setDouble(8,Double.valueOf(orderComponent.getComponentPrice()));
+            preparedStatement.setDouble(9,Double.valueOf(orderComponent.getQuantity()));
+            preparedStatement.setDouble(10,Double.valueOf(orderComponent.getComponentPrice()));
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            Integer status = preparedStatement.executeUpdate();
+            if (status == 0) {
+                logger.error("Failed to insert Into OrderHistory ");
+            } else {
+                result=true;
+            }
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
+    }
+    public boolean checkIfCurrentVendorAlreadyAssignedToOrder(int vendorId,int orderId,int productId){
+        boolean result=false;
+        Connection connection = null;
+        ResultSet resultSet = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement="SELECT  * from vendor_assign_price where orders_id = ? and products_id = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,orderId);
+            preparedStatement.setInt(2,productId);
+
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+                if(resultSet.getInt("fk_associate_id")==vendorId){
+                    result=true;
+                }
+            }
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+
         return result;
     }
 

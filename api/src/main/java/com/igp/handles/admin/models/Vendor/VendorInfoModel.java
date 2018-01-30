@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * Created by shanky on 26/1/18.
  */
 public class VendorInfoModel {
-    @JsonProperty("vendorId")
+    @JsonProperty("fkAssociateId")
     private int vendorId;
 
     @JsonProperty("associateName")

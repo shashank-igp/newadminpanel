@@ -64,7 +64,9 @@ public class VendorUtil
             statement="insert into vendor_assign_price (orders_id,fk_associate_id,order_subtotal,shipping,vendor_price , "
                 + " products_id,Product_name,Product_code,city,mail_reminder_flag,assign_time,assign_through,assign_by_user , "
                 + " shipping_type,delivery_date,delivery_time,flag_eggless,delivery_boy_ID) "
-                + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), ?, ?, ?, ?, ?, ?, ? ) ";
+                + " values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now(), ?, ?, ?, ?, ?, ?, ? ) ON DUPLICATE KEY UPDATE "
+                + " fk_associate_id = ? , order_subtotal = ? , shipping = ? , vendor_price = ? , assign_time = now() ,"
+                + " assign_by_user = ? ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,vendorAssignModel.getOrderId()); // orderID
             preparedStatement.setInt(2,vendorAssignModel.getFkAssociateId()); // fk_associateId
@@ -80,20 +82,29 @@ public class VendorUtil
             preparedStatement.setString(12,vendorAssignModel.getAssignByUser()); // assign_by_user
             preparedStatement.setString(13,vendorAssignModel.getShipppingType()); // shipping_type
             preparedStatement.setString(14,vendorAssignModel.getDeliveryDate()); // delivery_date
-            preparedStatement.setString(15,vendorAssignModel.getDeliveryTime());  // delivery_time
+            preparedStatement.setString(15,vendorAssignModel.getDeliveryTime().split(" - ")[0]);  // delivery_time
             preparedStatement.setInt(16,vendorAssignModel.getFlagEggless()); // flag_eggless
             preparedStatement.setInt(17,0); // delivery_boy_ID
+            preparedStatement.setInt(18,vendorAssignModel.getFkAssociateId());
+            preparedStatement.setDouble(19,vendorAssignModel.getOrderSubtotal());
+            preparedStatement.setDouble(20,vendorAssignModel.getShipping());
+            preparedStatement.setDouble(21,vendorAssignModel.getVendorPrice());
+            preparedStatement.setString(22,vendorAssignModel.getAssignByUser());
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Failed to insert in vendor_assign_price ");
             } else {
                 if(orderUtil.updateOrderProduct(orderProductId,vendorAssignModel.getFkAssociateId(),connection)){
-                    connection.commit();
-                    result=true;
-                }else {
+                    if(orderUtil.updateTrackorder(vendorAssignModel.getFkAssociateId(),orderProductId,connection)){
+                        connection.commit();
+                        result=true;
+                    }
+                }
+
+                if(result==false) {
                     connection.rollback();
-                    throw new Exception("Exception in orderProduct Updation");
+                    throw new Exception("Exception in orderProduct/trackorders Updation");
                 }
             }
         }catch (Exception exception){
@@ -130,5 +141,31 @@ public class VendorUtil
         }
 
         return shippingCharge;
+    }
+    public VendorInfoModel getVendorInfo(int vendorId){
+        VendorInfoModel vendorInfoModel=new VendorInfoModel();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            String statement = "select * from associate where associate_id = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,vendorId);
+
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.next()){
+                vendorInfoModel.setVendorId(vendorId);
+                vendorInfoModel.setAssociateName(resultSet.getString("associate_name"));
+            }
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return vendorInfoModel;
     }
 }

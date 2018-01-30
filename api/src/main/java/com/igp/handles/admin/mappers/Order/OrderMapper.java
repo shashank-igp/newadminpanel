@@ -66,14 +66,14 @@ public class OrderMapper {
 
         return orders;
     }
-    public boolean assignReassignOrder(String action,int orderId,int orderproductId,int vendorId){
-        boolean result=false;
+    public int assignReassignOrder(String action,int orderId,int orderproductId,int vendorId){
+        int result=0;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         try{
             if(action.equalsIgnoreCase("assign")){
                 result=orderUtil.assignOrderToVendor(orderId,orderproductId,vendorId);
             }else if(action.equalsIgnoreCase("reassign")) {
-
+                result=orderUtil.reassignOrderToVendor(orderId,orderproductId,vendorId);
             }
 
         }catch (Exception exception){
