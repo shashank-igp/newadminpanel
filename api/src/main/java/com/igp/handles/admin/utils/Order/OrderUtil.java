@@ -716,7 +716,7 @@ public class OrderUtil {
             statement="update orders_products set orders_product_status = ?  where orders_products_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
 
-            preparedStatement.setString(1,"Cancelled");
+            preparedStatement.setString(1,"Rejected");
             preparedStatement.setInt(2,orderProductId);
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             Integer status = preparedStatement.executeUpdate();
