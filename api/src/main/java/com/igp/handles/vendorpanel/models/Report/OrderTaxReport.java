@@ -1,11 +1,18 @@
 package com.igp.handles.vendorpanel.models.Report;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by shanky on 27/12/17.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class OrderTaxReport {
+    @JsonProperty("vendorId")
+    private Integer vendorId;
+
+    @JsonProperty("vendor")
+    private String vendor;
 
     @JsonProperty("invoice number")
     private String invoiceNumber;
@@ -36,6 +43,26 @@ public class OrderTaxReport {
 
     @JsonProperty("payment status")
     private String paymentStatus;
+
+    public Integer getVendorId()
+    {
+        return vendorId;
+    }
+
+    public void setVendorId(Integer vendorId)
+    {
+        this.vendorId = vendorId;
+    }
+
+    public String getVendor()
+    {
+        return vendor;
+    }
+
+    public void setVendor(String vendor)
+    {
+        this.vendor = vendor;
+    }
 
     public int getOrderId()
     {

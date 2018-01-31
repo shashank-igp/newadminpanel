@@ -3,11 +3,19 @@ package com.igp.handles.admin.mappers.Reports;
 import com.igp.handles.admin.models.Reports.PincodeModelListHavingSummary;
 import com.igp.handles.admin.models.Reports.ProductModelListHavingSummary;
 import com.igp.handles.admin.utils.Reports.ReportUtil;
+import com.igp.handles.admin.utils.Vendor.VendorUtil;
+import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
+import com.igp.handles.vendorpanel.utils.Reports.PayoutAndTaxesReport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by suditi on 30/1/18.
  */
 public class ReportMapper {
+
+    private static final Logger logger = LoggerFactory.getLogger(ReportMapper.class);
+
     public static PincodeModelListHavingSummary getPincodeSummaryDetails(String fkAssociateId, String startLimit, String endLimit){
 
         PincodeModelListHavingSummary pincodeModelListHavingSummary=null;
@@ -37,5 +45,21 @@ public class ReportMapper {
             result = reportUtil.setVendorGeneralInstruction(fk_associate_id,1,componentId,message+"Done");
         }
         return result;
+    }
+    public PayoutAndTaxReportSummaryModel getPayoutAndTaxes(int fkAssociateId,int orderId,String orderDateFrom,String orderDeliveryDateFrom,
+        String orderDeliveryDateTo,String orderDateTo,String startLimit,String endLimit){
+        PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
+        PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=null;
+        VendorUtil vendorUtil=new VendorUtil();
+        String vendorName="";
+        try{
+            vendorName=vendorUtil.getVendorInfo(fkAssociateId).getAssociateName();
+            payoutAndTaxReportSummaryModel=payoutAndTaxesReport.getPayoutAndTaxes(
+                fkAssociateId,orderId,orderDateFrom,orderDateTo,orderDeliveryDateFrom,
+                orderDeliveryDateTo,startLimit,endLimit,true,vendorName);
+        }catch (Exception exception){
+            logger.error("Error in getPayoutAndTaxes ",exception);
+        }
+        return payoutAndTaxReportSummaryModel;
     }
 }

@@ -181,5 +181,18 @@ public class Order {
 
         return handleServiceResponse;
     }
+    @POST
+    @Path("/v1/admin/handels/cancelOrder")
+    public HandleServiceResponse cancelOrder(@QueryParam("orderId") int orderId,@QueryParam("orderProductId")int orderProductId){
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
+        OrderMapper orderMapper=new OrderMapper();
+        try{
+
+        }catch (Exception exception){
+            logger.error("error while getting OrderLog",exception);
+        }
+
+        return handleServiceResponse;
+    }
 
 }

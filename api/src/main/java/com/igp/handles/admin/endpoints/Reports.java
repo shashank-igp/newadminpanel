@@ -3,15 +3,20 @@ package com.igp.handles.admin.endpoints;
 import com.igp.handles.admin.mappers.Reports.ReportMapper;
 import com.igp.handles.admin.models.Reports.PincodeModelListHavingSummary;
 import com.igp.handles.admin.models.Reports.ProductModelListHavingSummary;
+import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import com.igp.handles.vendorpanel.response.ReportResponse;
 import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import static com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil.getTimestampString;
 
 @Path("/")
 @Produces(MediaType.APPLICATION_JSON)
@@ -20,6 +25,9 @@ import java.util.Map;
  * Created by suditi on 30/1/18.
  */
 public class Reports {
+
+    private static final Logger logger = LoggerFactory.getLogger(Reports.class);
+
     @GET
     @Path("/v1/admin/handels/getPincodeReport")
     public ReportResponse getPincodeReport(@QueryParam("fkAssociateId") @DefaultValue("565") String fkAssociateId,
@@ -108,6 +116,42 @@ public class Reports {
         int result=reportMapper.updateComponentMapper(updateflag,fkAssociateId,componentId,message);
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
+    }
+
+    @GET
+    @Path("/v1/admin/handels/getPayoutAndTaxesReport")
+    public ReportResponse getPayoutAndTaxes(@DefaultValue("565")@QueryParam("fkAssociateId") int fkAssociateId, @QueryParam("orderNumber")int orderId,
+        @QueryParam("orderDateFrom") String orderDateFrom, @QueryParam("orderDateTo")String orderDateTo,
+        @QueryParam("deliveryDateFrom") String orderDeliveryDateFrom,@QueryParam("deliveryDateTo") String orderDeliveryDateTo,
+        @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
+
+
+        ReportResponse reportResponse=new ReportResponse();
+        ReportMapper reportMapper=new ReportMapper();
+        try{
+            reportResponse.setTableHeaders(new String[]{"vendorId","vendor","invoice number","orderId","date purchased","delivery date"
+                ,"pincode","order status","taxable amount","tax","total amount","payment status"});
+
+
+            orderDateFrom=getTimestampString(orderDateFrom,2);
+            orderDateTo=getTimestampString(orderDateTo,2);
+            orderDeliveryDateFrom=getTimestampString(orderDeliveryDateFrom,2);
+            orderDeliveryDateTo=getTimestampString(orderDeliveryDateTo,2);
+
+            PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=reportMapper.getPayoutAndTaxes
+                                                                        (fkAssociateId,orderId,orderDateFrom,orderDateTo,
+                                                                            orderDeliveryDateFrom,orderDeliveryDateTo,
+                                                                            startLimit,endLimit);
+            reportResponse.setSummary(payoutAndTaxReportSummaryModel.getSummaryModelList());
+            List<Object> objectList = new ArrayList<Object>(payoutAndTaxReportSummaryModel.getOrderTaxReportList());
+            reportResponse.setTableData(objectList);
+
+        }catch (Exception exception){
+            logger.error("Error occured at getPayoutAndTaxes ",exception);
+        }
+        return reportResponse;
+
+
     }
 
 

@@ -8,7 +8,6 @@ import com.igp.handles.vendorpanel.models.Report.VendorModelListWithSummary;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import com.igp.handles.vendorpanel.response.ReportResponse;
 import com.igp.handles.vendorpanel.utils.Order.OrderStatusUpdateUtil;
-import com.igp.handles.vendorpanel.utils.Reports.PayoutAndTaxesReport;
 import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -170,7 +169,8 @@ public class Reports {
                                         @QueryParam("deliveryDateFrom") String orderDeliveryDateFrom,@QueryParam("deliveryDateTo") String orderDeliveryDateTo,
                                         @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
         ReportResponse reportResponse=new ReportResponse();
-        PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
+        ReportMapper reportMapper=new ReportMapper();
+
         try{
             reportResponse.setTableHeaders(new String[]{"invoice number","orderId","date purchased","delivery date"
                 ,"pincode","order status","taxable amount","tax","total amount","payment status"});
@@ -181,8 +181,9 @@ public class Reports {
             orderDeliveryDateFrom=getTimestampString(orderDeliveryDateFrom,2);
             orderDeliveryDateTo=getTimestampString(orderDeliveryDateTo,2);
 
-            PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=payoutAndTaxesReport.getPayoutAndTaxes(fkAssociateId,
-                                                                        orderId,orderDateFrom,orderDateTo,orderDeliveryDateFrom,orderDeliveryDateTo,startLimit,endLimit);
+            PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=reportMapper.getPayoutAndTaxes(fkAssociateId,
+                                                                        orderId,orderDateFrom,orderDateTo,orderDeliveryDateFrom,
+                                                                        orderDeliveryDateTo,startLimit,endLimit);
             reportResponse.setSummary(payoutAndTaxReportSummaryModel.getSummaryModelList());
             List<Object> objectList = new ArrayList<Object>(payoutAndTaxReportSummaryModel.getOrderTaxReportList());
             reportResponse.setTableData(objectList);
