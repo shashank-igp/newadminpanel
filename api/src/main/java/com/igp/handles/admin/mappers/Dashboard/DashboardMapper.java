@@ -397,7 +397,7 @@ public class DashboardMapper {
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
-                                    int alertCount = Integer.parseInt(statusCountMap8.get("unAssigned").get("notAlloted").get("count"));
+                                    int alertCount = Integer.parseInt(statusCountMap8.get("unAssigned").get("processing").get("count"));
                                     alertCount++;
                                     statusCountMap8.get("unAssigned").get("processing").put("count", alertCount + "");
                                     statusCountMap8.get("unAssigned").get("processing").put("sla", true + "");
@@ -433,7 +433,7 @@ public class DashboardMapper {
                                 statusCountMap2.get("unAssigned").get("processing").put("count", count + "");
                                 if (OrderUtil.isSLASatisfied(slaCode)){
 
-                                    int noBreachCount=Integer.parseInt(statusCountMap6.get("unAssigned").get("notAlloted").get("count"));
+                                    int noBreachCount=Integer.parseInt(statusCountMap6.get("unAssigned").get("processing").get("count"));
                                     noBreachCount++;
                                     statusCountMap6.get("unAssigned").get("processing").put("count", noBreachCount + "");
                                     statusCountMap6.get("unAssigned").get("processing").put("sla", true + "");
@@ -463,7 +463,7 @@ public class DashboardMapper {
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
-                                    int alertCount = Integer.parseInt(statusCountMap11.get("unAssigned").get("notAlloted").get("count"));
+                                    int alertCount = Integer.parseInt(statusCountMap11.get("unAssigned").get("processing").get("count"));
                                     alertCount++;
                                     statusCountMap11.get("unAssigned").get("processing").put("count", alertCount + "");
                                     statusCountMap11.get("unAssigned").get("processing").put("sla", true + "");
@@ -600,9 +600,9 @@ public class DashboardMapper {
                     dashboardDetail.setNotShippedPendingOrderCount(notShippedPendingOrderCount);
                     dashboardDetail.setNotDeliveredTotalOrderCount(notDeliveredTotalOrderCount);
                     dashboardDetail.setNotDeliveredPendingOrderCount(notDeliveredPendingOrderCount);
-                    dashboardDetail.setOrderTotalWhole(dashboardDetail.getOrderTotalWhole()+orderTotalWhole);
-                    dashboardDetail.setNotAssignedOrdersTotalWhole(dashboardDetail.getNotAssignedOrdersTotalWhole()+notAssignedOrdersTotalWhole);
-                    dashboardDetail.setNotConfirmedOrdersTotalWhole(dashboardDetail.getNotConfirmedOrdersTotalWhole()+notConfirmedOrdersTotalWhole);
+                    dashboardDetail.setOrderTotalWhole(orderTotalWhole);
+                    dashboardDetail.setNotAssignedOrdersTotalWhole(notAssignedOrdersTotalWhole);
+                    dashboardDetail.setNotConfirmedOrdersTotalWhole(notConfirmedOrdersTotalWhole);
                 }catch (Exception exception){
                     logger.error("Exception occured ",exception);
                 }
