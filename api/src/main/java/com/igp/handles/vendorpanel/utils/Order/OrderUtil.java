@@ -336,6 +336,9 @@ public class OrderUtil
 
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
+            resultArray[0]="0.00";
+            resultArray[1]="0.00";
+            resultArray[2]="";
             if(resultSet.next()){
                 resultArray[0]=resultSet.getString("shipping");
                 resultArray[1]=resultSet.getString("vendor_price");
