@@ -60,6 +60,10 @@ public class Order {
             default:
                 break;
         }
+        if(category.equals("notShipped") || category.equals("notDelivered")){
+            date1 = DateUtils.addDays(date1, -7);
+            isfuture=true;
+        }
 
         List<com.igp.handles.vendorpanel.models.Order.Order> orders= orderMapper.getOrderByStatusDate(category,subCategory,date1,orderAction,section,isfuture);
         response.addHeader("token",request.getHeader("token"));

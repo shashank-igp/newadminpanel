@@ -17,7 +17,7 @@ import static java.lang.Math.abs;
  */
 public class OrderMapper {
     private static final Logger logger = LoggerFactory.getLogger(OrderMapper.class);
-    public List<Order> getOrderByStatusDate(String Category ,String subCategory, Date date,
+    public List<Order> getOrderByStatusDate(String category ,String subCategory, Date date,
         String orderAction, String section, boolean isfuture){
 
         List<Order> orders=new ArrayList<>();
@@ -28,7 +28,7 @@ public class OrderMapper {
         Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap = new HashMap<>();
         try{
 
-            if(Category.equals("unAssigned")){
+            if(category.equals("unAssigned")){
                 if(subCategory.equals("notAlloted")){
                     status="Processed";
                     fkassociateId=72;
@@ -36,21 +36,21 @@ public class OrderMapper {
                     status="Processing";
                     fkassociateId=72;
                 }
-            }else if(Category.equals("notConfirmed")){
+            }else if(category.equals("notConfirmed")){
                 if(subCategory.equals("pending")){
                     status="Processed";
                     slaClause="(100,101,102)";
                 }else if(subCategory.equals("total")){
                     status="Processed";
                 }
-            }else if(Category.equals("notShipped")){
+            }else if(category.equals("notShipped")){
                 if(subCategory.equals("pending")){
                     status="Confirmed";
                     slaClause="(201,202,203,204)";
                 }else if(subCategory.equals("total")){
                     status="Confirmed";
                 }
-            }else if(Category.equals("notDelivered")){
+            }else if(category.equals("notDelivered")){
                 if(subCategory.equals("pending")){
                     status="OutForDelivery";
                     slaClause="(401,402,403,404)";
