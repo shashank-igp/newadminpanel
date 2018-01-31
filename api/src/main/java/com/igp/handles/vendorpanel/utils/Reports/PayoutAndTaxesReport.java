@@ -20,7 +20,7 @@ public class PayoutAndTaxesReport {
     private static final Logger logger = LoggerFactory.getLogger(PayoutAndTaxesReport.class);
 
     public PayoutAndTaxReportSummaryModel getPayoutAndTaxes(int fkAssociateId,int orderId,String orderDateFrom, String orderDateTo,
-        String orderDeliveryDateFrom, String orderDeliveryDateTo,String startLimit,String endLimit){
+        String orderDeliveryDateFrom, String orderDeliveryDateTo,String startLimit,String endLimit,boolean forAdminPanelOrNot,String vendorName){
 
         PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel = new PayoutAndTaxReportSummaryModel();
         Connection connection = null;
@@ -72,6 +72,10 @@ public class PayoutAndTaxesReport {
                 int deliveryStatusFlag=resultSet.getInt("deliveryStatus");
 
                 OrderTaxReport orderTaxReport=new OrderTaxReport();
+                if(forAdminPanelOrNot==true){
+                    orderTaxReport.setVendorId(fkAssociateId);
+                    orderTaxReport.setVendor(vendorName);
+                }
                 orderTaxReport.setOrderId(resultSet.getInt("orderId"));
                 orderTaxReport.setTaxableAmount(resultSet.getDouble("taxableAmount"));
                 orderTaxReport.setTotalAmount(resultSet.getDouble("totalAmount"));

@@ -61,9 +61,11 @@ public class ReportMapper {
                                                         String orderDeliveryDateTo,String orderDateTo,String startLimit,String endLimit){
         PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
         PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=null;
+        String vendorName="";
         try{
-            payoutAndTaxReportSummaryModel=payoutAndTaxesReport.getPayoutAndTaxes(fkAssociateId,
-                                            orderId,orderDateFrom,orderDateTo,orderDeliveryDateFrom,orderDeliveryDateTo,startLimit,endLimit);
+            payoutAndTaxReportSummaryModel=payoutAndTaxesReport.getPayoutAndTaxes(
+                                                        fkAssociateId,orderId,orderDateFrom,orderDateTo,orderDeliveryDateFrom,
+                                                        orderDeliveryDateTo,startLimit,endLimit,false,vendorName);
         }catch (Exception exception){
             logger.error("Error in getPayoutAndTaxes ",exception);
         }
