@@ -148,6 +148,15 @@ public class OrderMapper {
             logger.error("Exception while generating orders",e);
         }
         return orders;
-
+    }
+    public boolean cancelOrder(int orderId,int orderProductId,String comment){
+        boolean result=false;
+        com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
+        try {
+            result=orderUtil.cancelOrder(orderId,orderProductId,comment);
+        }catch (Exception exception){
+            logger.error("error while deliveryDetailChanges",exception);
+        }
+        return result;
     }
 }

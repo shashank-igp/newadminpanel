@@ -73,7 +73,7 @@ public class OrderMapper
 
 
         List<Order> orders=new ArrayList<>();
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Map<String, Order> originalOrderMap = new LinkedHashMap<>();
         Map<String, Order> tempOrderProductsMap = new LinkedHashMap<>();
         // map of orderId vs max shipping charge
@@ -81,6 +81,7 @@ public class OrderMapper
 //        Map<String, Integer> orderShippingTypeMap = new HashMap<>();
         Map<String, String> orderShippingTypeMap = new HashMap<>();
         Map<Integer, String> orderProductDeliveryDateMap = new HashMap<>();
+        String deliveryDate="";
         OrderUtil orderUtil=new OrderUtil();
         int fkassociateId=0;
 
@@ -126,7 +127,8 @@ public class OrderMapper
                 orderProducts.setOrderProductExtraInfo(orderProductExtraInfo);
                 String[] vendorAssignPriceArray=orderUtil.getOrderProductVendorPrice(fkassociateId,orderProducts.getOrderId(),String.valueOf(orderProducts.getProductId()));
 
-                orderProductDeliveryDateMap.put(orderProducts.getOrderProductId(), vendorAssignPriceArray[2]);
+                deliveryDate=dateFormat.format(orderProductExtraInfo.getDeliveryDate());
+                orderProductDeliveryDateMap.put(orderProducts.getOrderProductId(), deliveryDate);
                 orderProducts.setVendorPrice((int)Double.parseDouble(vendorAssignPriceArray[1]));
                 Double shippingCharge = orderShippingChargeMap.get(orderProducts.getOrderId());
                 if (shippingCharge == null
@@ -181,7 +183,7 @@ public class OrderMapper
                     if (orderShippingChargeMap.get(orderProducts.getOrderId()) != null) {
                         order.setVendorDeliveryCharge(orderShippingChargeMap.get(orderProducts.getOrderId()));
                     }
-                    order.setDeliverWhen(OrderUtil.getDeliverWhen(vendorAssignPriceArray[2]));
+                    order.setDeliverWhen(OrderUtil.getDeliverWhen(deliveryDate));
                     order.getOrderProducts().add(orderProducts);
                     order.setVendorOrderTotal(order.getVendorOrderTotal() + orderProducts.getVendorPrice());
                     order.setOrderNetProductPrice(order.getOrderNetProductPrice()+orderProducts.getVendorPrice());

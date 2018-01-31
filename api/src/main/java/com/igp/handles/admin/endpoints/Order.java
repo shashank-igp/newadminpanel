@@ -183,10 +183,20 @@ public class Order {
     }
     @POST
     @Path("/v1/admin/handels/cancelOrder")
-    public HandleServiceResponse cancelOrder(@QueryParam("orderId") int orderId,@QueryParam("orderProductId")int orderProductId){
+    public HandleServiceResponse cancelOrder(@QueryParam("orderId") int orderId,@QueryParam("orderProductId")int orderProductId
+                                        ,@QueryParam("comment")String comment){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
+        boolean result=false;
         try{
+            result=orderMapper.cancelOrder(orderId,orderProductId,comment);
+            if(result){
+                handleServiceResponse.setResult(result);
+            }else{
+                handleServiceResponse.setError(true);
+                handleServiceResponse.setResult(false);
+                handleServiceResponse.setErrorMessage("some technical error occured while updating order status try again !!");
+            }
 
         }catch (Exception exception){
             logger.error("error while getting OrderLog",exception);

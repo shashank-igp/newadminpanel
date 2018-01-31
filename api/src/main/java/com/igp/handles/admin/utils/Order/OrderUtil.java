@@ -24,18 +24,12 @@ public class OrderUtil {
     private static final Logger logger = LoggerFactory.getLogger(OrderUtil.class);
 
 
-    public boolean insertIntoOrderHistory(Order order,int vendorId){
+    public boolean insertIntoOrderHistory(Order order,int vendorId,String ordersHistoryComment){
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        String statement,ordersHistoryComment="",previousVendorName="";
+        String statement;
         boolean result=false;
-        VendorUtil vendorUtil=new VendorUtil();
         try{
-            previousVendorName=vendorUtil.getVendorInfo(Integer.parseInt(order.getOrderProducts().get(0).getFkAssociateId())).getAssociateName();
-            ordersHistoryComment="The vendor of product "+order.getOrderProducts().get(0).getProductName()+" has been changed "
-                + "from "+previousVendorName+" To "
-                + vendorUtil.getVendorInfo(vendorId).getAssociateName()+" By New Handels Panel<Br>";
-
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="insert into orders_history (fk_orders_id,fk_associate_login_id,fk_associate_user_id,orders_history_comment, "
                 + " orders_history_time,fk_associate_id,fk_payout_reason_id,deliver_date) VALUES  ( ?,?,?,?,now(),?,0,'0000-00-00')";
@@ -244,6 +238,7 @@ public class OrderUtil {
         DashboardMapper dashboardMapper=new DashboardMapper();
         OrdersProducts ordersProducts=null;
         OrderProductExtraInfo orderProductExtraInfo=null;
+        String ordersHistoryComment="",previousVendorName="";
 
         try {
             order=getOrderRelatedInfo(orderId,orderproductId);
@@ -284,7 +279,11 @@ public class OrderUtil {
 
             if(vendorUtil.insertIntoVendorAssignPrice(vendorAssignModel,orderproductId)){
                 result= 1;
-                insertIntoOrderHistory(order,vendorId);
+                previousVendorName=vendorUtil.getVendorInfo(Integer.parseInt(order.getOrderProducts().get(0).getFkAssociateId())).getAssociateName();
+                ordersHistoryComment="The vendor of product "+order.getOrderProducts().get(0).getProductName()+" has been changed "
+                    + "from "+previousVendorName+" To "
+                    + vendorUtil.getVendorInfo(vendorId).getAssociateName()+" By New Handels Panel<Br>";
+                insertIntoOrderHistory(order,vendorId,ordersHistoryComment);
                 createOrdersProductsComponentsInfo(componentList,order);
             }
 
@@ -704,6 +703,39 @@ public class OrderUtil {
             Database.INSTANCE.closeConnection(connection);
         }
         return logs;
+    }
+    public boolean cancelOrder(int orderId,int orderProductId,String comment){
+        boolean result=false;
+        Connection connection = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        Order order=null;
+        try{
+            order=getOrderRelatedInfo(orderId,orderProductId);
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement="update orders_products set orders_product_status = ?  where orders_products_id = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+
+            preparedStatement.setString(1,"Cancelled");
+            preparedStatement.setInt(2,orderProductId);
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            Integer status = preparedStatement.executeUpdate();
+            if (status == 0) {
+                logger.error("Failed to update orders_products while marking that orderProduct as cancelled ");
+            } else {
+                if(insertIntoOrderHistory(order,0,comment)){
+                    result=true;
+                }
+            }
+
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+
+        return result;
     }
 
 }
