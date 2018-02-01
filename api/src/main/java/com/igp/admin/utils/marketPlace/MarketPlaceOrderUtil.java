@@ -101,6 +101,7 @@ public class MarketPlaceOrderUtil {
             validationModel.setError(Boolean.TRUE);
             validationModel.setMessage("Customer Details are wrong.");
         }
+        logger.debug("Customer Id : " + userModel.getId());
         return validationModel;
     }
 
@@ -620,8 +621,9 @@ public class MarketPlaceOrderUtil {
             }else{
                 Integer status;
                 orderId = apiOrderResponseModel.getOrderId();
+                logger.debug("Orders Created successfully : " + orderId);
                 connection = Database.INSTANCE.getReadWriteConnection();
-                statement = "UPDATE orders SET rl_req_ID = ? and marketplace_data = ? and marketplace_name = ? WHERE orders_id = ?";
+                statement = "UPDATE orders SET rl_req_ID = ? , marketplace_data = ? , marketplace_name = ? WHERE orders_id = ?";
                 preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
                 preparedStatement.setString(1, extraInfoModel.getRelId());
                 preparedStatement.setString(2, extraInfoModel.getMarketData());

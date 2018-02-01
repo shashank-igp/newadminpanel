@@ -368,7 +368,8 @@ public class MarketPlaceMapper {
                                         marketPlaceTempOrderModel = fillTempModelAndCreateTempOrder(validationModel);
                                         if (marketPlaceTempOrderModel.getTempOrderId() != 0) {
                                             // create order by hitting api
-                                            orderId = marketPlaceOrderUtil.createOrder(marketPlaceTempOrderModel, validationModel.getExtraInfoModel());
+                                            logger.debug("Temp Order Created successfully : " + marketPlaceTempOrderModel.getTempOrderId());
+                                            orderId = marketPlaceOrderUtil.createOrder(marketPlaceTempOrderModel, extraInfoModel);
                                             if (orderId == 0) {
                                                 validationModel.setError(Boolean.TRUE);
                                                 validationModel.setMessage("Error at order creation.");
