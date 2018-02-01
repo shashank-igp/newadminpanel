@@ -439,6 +439,7 @@ public class MarketPlaceMapper {
         MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
         try {
             // Everything went well,fill the tempmodel.
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setAddressBookId " +addressModel.getAid());
             marketPlaceTempOrderModel.setAddressBookId(new Integer(addressModel.getAid()));
             logger.debug("TEMP-ORDER DEBUGGING : " + "setAddressBookId " +addressModel.getAid());
             marketPlaceTempOrderModel.setCustomerId(new Integer(userModel.getId()));
