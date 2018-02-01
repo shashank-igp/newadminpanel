@@ -440,20 +440,46 @@ public class MarketPlaceMapper {
         try {
             // Everything went well,fill the tempmodel.
             marketPlaceTempOrderModel.setAddressBookId(new Integer(addressModel.getAid()));
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setAddressBookId " +addressModel.getAid());
             marketPlaceTempOrderModel.setCustomerId(new Integer(userModel.getId()));
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setCustomerId "+userModel.getId());
             marketPlaceTempOrderModel.setAssociateId(validationModel.getFkAssociateId());
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setAssociateId "+validationModel.getFkAssociateId());
+
             marketPlaceTempOrderModel.setShippingAddressModel(addressModel);
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setShippingAddressModel");
+
             marketPlaceTempOrderModel.setDeliveryInstr("  ");
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setDeliveryInstr"+"   ");
+
             marketPlaceTempOrderModel.setDeliveryMessageModel(deliveryMessageModel); // change it later
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setDeliveryMessageModel");
+
             marketPlaceTempOrderModel.setComment("0");
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setComment"+"0");
+
             marketPlaceTempOrderModel.setDeliveryDate(productModel.getServiceDate());
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setDeliveryDate "+productModel.getServiceDate());
+
             marketPlaceTempOrderModel.setExtraValue("CartID:0");
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setExtraValue "+"CartID:0");
+
             marketPlaceTempOrderModel.setRelation(addressModel.getRelation());
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setRelation "+addressModel.getRelation());
+
             marketPlaceTempOrderModel.setVoucher(productModel.getVoucher());
+            logger.debug("TEMP-ORDER CREATED SUCCESSFULLY: " + "setVoucher "+productModel.getVoucher());
+
             marketPlaceTempOrderModel.setDiscount(productModel.getPerProductDiscount()); // change it later
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setDiscount "+productModel.getPerProductDiscount());
+
             marketPlaceTempOrderModel.setIdHash(userModel.getIdHash());
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setIdHash "+userModel.getIdHash());
+
 
             orderTempId  = marketPlaceOrderUtil.createTempOrder(marketPlaceTempOrderModel, validationModel.getProductModel());
+            logger.debug("Retruned from function DEBUGGING : " + "createTempOrder "+orderTempId);
+
             if (orderTempId!=0) {
                 logger.debug("TEMP-ORDER CREATED SUCCESSFULLY: " + orderTempId);
             }
