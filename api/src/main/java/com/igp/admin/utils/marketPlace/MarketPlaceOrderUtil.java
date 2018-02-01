@@ -156,6 +156,7 @@ public class MarketPlaceOrderUtil {
                     Map<String, UserAddressModel> addressResponse = generalCustomerAddressMapResponseModel.getData();
                     UserAddressModel userAddressModel = addressResponse.get("addr");
                     shippingAddress.setAid(userAddressModel.getAddressId().toString());
+                    logger.debug("Address id is : "+shippingAddress.getAid());
                 }
                 if (shippingAddress.getAid() == "" || shippingAddress.getAid() == null) {
                     validationModel.setError(Boolean.TRUE);
@@ -168,6 +169,8 @@ public class MarketPlaceOrderUtil {
             validationModel.setMessage("Shipping Details are wrong. ");
 
         }
+        logger.debug("Address id is : "+shippingAddress.getAid());
+        validationModel.setAddressModel(shippingAddress);
         return validationModel;
     }
 
