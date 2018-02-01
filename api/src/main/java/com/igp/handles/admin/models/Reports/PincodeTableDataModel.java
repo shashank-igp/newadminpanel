@@ -7,7 +7,7 @@ import java.util.Map;
 /**
  * Created by suditi on 30/1/18.
  */
-public class PincodeTableData {
+public class PincodeTableDataModel {
 
     @JsonProperty("Vendor Id")
     private String  vendorId;

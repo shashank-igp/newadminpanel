@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Created by suditi on 30/1/18.
  */
-public class ProductTableData {
+public class ProductTableDataModel {
     @JsonIgnore
     private String associateId;
 

@@ -149,7 +149,8 @@ public class VendorUtil
         ResultSet resultSet = null;
         try {
             connection = Database.INSTANCE.getReadOnlyConnection();
-            String statement = "select * from associate where associate_id = ?";
+            String statement = "select * from associate as a JOIN associate_user as au ON " +
+                "a.associate_id = au.fk_associate_login_id where a.associate_id = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,vendorId);
 
@@ -157,7 +158,14 @@ public class VendorUtil
             resultSet = preparedStatement.executeQuery();
             if(resultSet.next()){
                 vendorInfoModel.setVendorId(vendorId);
-                vendorInfoModel.setAssociateName(resultSet.getString("associate_name"));
+                vendorInfoModel.setAssociateName(resultSet.getString("a.associate_name"));
+                vendorInfoModel.setLoginId(resultSet.getString("a.associate_login_id"));
+                vendorInfoModel.setPhone(resultSet.getString("a.associate_phone"));
+                vendorInfoModel.setAddress(resultSet.getString("a.associate_address"));
+                vendorInfoModel.setStatus(resultSet.getInt("a.associate_status"));
+                vendorInfoModel.setContactPerson(resultSet.getString("a.associate_contact_person"));
+                vendorInfoModel.setEmail(resultSet.getString("a.associate_email"));
+                vendorInfoModel.setPassword(resultSet.getString("au.associate_user_pass"));
             }
         }catch (Exception exception){
             logger.error("Exception in connection", exception);
