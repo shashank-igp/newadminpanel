@@ -8,19 +8,19 @@ import java.util.List;
 /**
  * Created by suditi on 30/1/18.
  */
-public class ProductModelListHavingSummary {
+public class ProductModelListHavingSummaryModel {
     @JsonProperty("tableData")
-    private List<ProductTableData> productTableDataList;
+    private List<ProductTableDataModel> productTableDataModelList;
 
     @JsonProperty("tableSummary")
     private  List<SummaryModel> summaryModelList;
 
-    public List<ProductTableData> getProductTableDataList() {
-        return productTableDataList;
+    public List<ProductTableDataModel> getProductTableDataModelList() {
+        return productTableDataModelList;
     }
 
-    public void setProductTableDataList(List<ProductTableData> productTableDataList) {
-        this.productTableDataList = productTableDataList;
+    public void setProductTableDataModelList(List<ProductTableDataModel> productTableDataModelList) {
+        this.productTableDataModelList = productTableDataModelList;
     }
 
     public List<SummaryModel> getSummaryModelList() {
