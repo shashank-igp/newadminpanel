@@ -193,19 +193,19 @@ public class OrderUtil
                     if (section.equals("past"))
                     {
                         Date todayDate = new Date();
-                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op  "
                             + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                            + " where vap.products_id = op.products_id and " + fkAssociateIdWhereClause +  " opei.delivery_date "
+                            + " where  " + fkAssociateIdWhereClause +  " opei.delivery_date "
                             + " >= ? and  opei.delivery_date < '" + new SimpleDateFormat("yyyy-MM-dd").format(todayDate)
                             + "' and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc ";
                     }
                     else
                     {
-                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op "
                             + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                            + " where vap.products_id = op.products_id and " + fkAssociateIdWhereClause +  " opei.delivery_date "
+                            + " where " + fkAssociateIdWhereClause +  " opei.delivery_date "
                             + operator + " ? and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc";
 
                     }
