@@ -288,12 +288,12 @@ public class DashboardMapper {
 
                         if(status.equals("Processed") && vendorId==72){ // unassigned -> not alloted
                             //past
+                            logger.debug("just for test  key :- "+key);
                             notAssignedOrdersTotalWhole++;
                             if (deliveryDate.getTime() < todayDate.getTime()){
                                 int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("notAlloted").get("count"));
                                 count++;
                                 statusCountMap0.get("unAssigned").get("notAlloted").put("count", count + "");
-
                                 if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap4.get("unAssigned").get("notAlloted").get("count"));
@@ -432,7 +432,7 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap2.get("unAssigned").get("processing").put("count", count + "");
 
-                                logger.debug("just for test  key :- "+key);
+
 
                                 if (OrderUtil.isSLASatisfied(slaCode)){
 
@@ -457,7 +457,6 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap3.get("unAssigned").get("processing").put("count", count + "");
 
-                                logger.debug("just for test  key :- "+key);
                                 if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap7.get("unAssigned").get("processing").get("count"));
