@@ -46,14 +46,14 @@ public class OrderMapper {
             }else if(category.equals("notShipped")){
                 if(subCategory.equals("pending")){
                     status="Confirmed";
-                    slaClause="(201,202,203,204)";
+                    slaClause="(100,201,202,203,204)";
                 }else if(subCategory.equals("total")){
                     status="Confirmed";
                 }
             }else if(category.equals("notDelivered")){
                 if(subCategory.equals("pending")){
                     status="OutForDelivery";
-                    slaClause="(401,402,403,404)";
+                    slaClause="(100,401,402,403,404)";
                 }else if(subCategory.equals("total")){
                     status="OutForDelivery";
                 }
