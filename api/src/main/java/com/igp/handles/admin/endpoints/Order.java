@@ -60,7 +60,7 @@ public class Order {
             default:
                 break;
         }
-        if(category.equals("notShipped") || category.equals("notDelivered")){
+        if(category.equals("notShipped")){
             date1 = DateUtils.addDays(date1, -7);
             isfuture=true;
         }
