@@ -56,7 +56,7 @@ public class ReportMapper {
 
     public boolean addNewComponentMapper(int fkAssociateId,String componentCode,String componentName,int type,int price){
         boolean result=true;
-        ReportUtil reportUtil =  null;
+        ReportUtil reportUtil =  new ReportUtil();
         String message="Added new Component : Name :- "+componentName+" With Price :- "+price+" : ";
         result = SummaryFunctionsUtil.addVendorComponent(fkAssociateId+"",componentCode,componentName,type,"dummy.jpg",price);
         if(result==true){
@@ -71,9 +71,9 @@ public class ReportMapper {
         return productModelListHavingSummaryModel;
     }
 
-    public int updateComponentMapper(Integer flag,int fk_associate_id,String  componentId, String message){
+    public int updateComponentMapper(Integer flag,int fk_associate_id,String  componentId, String message, int updatePrice,String inStock){
         ReportUtil reportUtil = new ReportUtil();
-        int result=reportUtil.updateProductComponent(flag,fk_associate_id,componentId);
+        int result=reportUtil.updateProductComponent(flag,fk_associate_id,componentId,updatePrice,inStock);
         if(result==1){
             result = reportUtil.setVendorGeneralInstruction(fk_associate_id,1,componentId,message+"Done");
         }

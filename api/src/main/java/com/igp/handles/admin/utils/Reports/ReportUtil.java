@@ -235,7 +235,7 @@ public class ReportUtil {
                 ProductTableDataModel productTableData=new ProductTableDataModel();
                 productTableData.setAssociateId("fkId");
                 productTableData.setComponent_Id_Hide(resultSet.getString("cId"));
-                productTableData.setComponentImage(resultSet.getString("cImage")+"?timestamp="+resultSet.getString("cTimestamp"));
+                productTableData.setComponentImage(resultSet.getString("cImage"));
                 productTableData.setComponentName(resultSet.getString("cName"));
                 productTableData.setPrice(resultSet.getDouble("price"));
                 productTableData.setReqPrice(resultSet.getDouble("req_price"));
@@ -260,14 +260,23 @@ public class ReportUtil {
         }
         return productModelListHavingSummaryModel;
     }
-    public int updateProductComponent(Integer flag,int fk_associate_id,String  componentId ) {
+    public int updateProductComponent(Integer flag,int fk_associate_id,String  componentId,int updatePrice, String inStock ) {
         Connection connection = null;
         String statement;
         int result = 0;
+        String column,value;
         PreparedStatement preparedStatement = null;
         try {
+            if(flag==1){
+                column="InStock=";
+                value=inStock;
+            }
+            else {
+                column="price=";
+                value=updatePrice+"";
+            }
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "update AA_vendor_to_components set flag_change="+flag+" where fk_associate_id="+fk_associate_id+" and fk_component_id="+componentId+" ";
+            statement = "update AA_vendor_to_components set "+column+value+" where fk_associate_id="+fk_associate_id+" and fk_component_id="+componentId+" ";
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in updateVendorComponent "+preparedStatement);
             result = preparedStatement.executeUpdate();
