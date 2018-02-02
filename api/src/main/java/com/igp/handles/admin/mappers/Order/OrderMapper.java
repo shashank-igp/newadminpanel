@@ -39,21 +39,21 @@ public class OrderMapper {
             }else if(category.equals("notConfirmed")){
                 if(subCategory.equals("pending")){
                     status="Processed";
-                    slaClause="(0,100,101,102)";
+                    slaClause="(100,101,102)";
                 }else if(subCategory.equals("total")){
                     status="Processed";
                 }
             }else if(category.equals("notShipped")){
                 if(subCategory.equals("pending")){
                     status="Confirmed";
-                    slaClause="(0,201,202,203,204)";
+                    slaClause="(201,202,203,204)";
                 }else if(subCategory.equals("total")){
                     status="Confirmed";
                 }
             }else if(category.equals("notDelivered")){
                 if(subCategory.equals("pending")){
                     status="OutForDelivery";
-                    slaClause="(0,401,402,403,404)";
+                    slaClause="(401,402,403,404)";
                 }else if(subCategory.equals("total")){
                     status="OutForDelivery";
                 }
