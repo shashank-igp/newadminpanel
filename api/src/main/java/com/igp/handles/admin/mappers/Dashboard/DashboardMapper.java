@@ -431,6 +431,9 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(statusCountMap2.get("unAssigned").get("processing").get("count"));
                                 count++;
                                 statusCountMap2.get("unAssigned").get("processing").put("count", count + "");
+
+                                logger.debug("just for test  key :- "+key);
+
                                 if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap6.get("unAssigned").get("processing").get("count"));
@@ -453,6 +456,8 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(statusCountMap3.get("unAssigned").get("processing").get("count"));
                                 count++;
                                 statusCountMap3.get("unAssigned").get("processing").put("count", count + "");
+
+                                logger.debug("just for test  key :- "+key);
                                 if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap7.get("unAssigned").get("processing").get("count"));
