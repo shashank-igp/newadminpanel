@@ -110,6 +110,17 @@ public class OrdersProducts implements Serializable{
 
     private boolean					personalized									= false;
 
+    private String vendorName=null;
+
+    public String getVendorName()
+    {
+        return vendorName;
+    }
+
+    public void setVendorName(String vendorName)
+    {
+        this.vendorName = vendorName;
+    }
 
     private List<OrderComponent> componentList = new ArrayList<>();
 

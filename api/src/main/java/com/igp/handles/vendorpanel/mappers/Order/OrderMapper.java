@@ -104,7 +104,7 @@ public class OrderMapper
                 fkassociateId=Integer.parseInt(orderProducts.getFkAssociateId());
                 String key = orderProducts.getOrderId() + "," + orderProductExtraInfo.getDeliveryDate() + ","
                     + orderProductExtraInfo.getDeliveryType() + ","
-                    + orderProductExtraInfo.getDeliveryTime().replaceAll(":|\\shrs", "");
+                    + orderProductExtraInfo.getDeliveryTime().replaceAll(":|\\shrs", "")+ "," +fkassociateId;
 
                 orderProducts.setSlaFlag(OrderUtil.isSLASatisfied(orderProducts.getSlaCode()));
                 orderProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(orderProducts.getSlaCode()));
@@ -204,13 +204,13 @@ public class OrderMapper
         for (Map.Entry<String, Order> entry : tempOrderProductsMap.entrySet()) {
             String key = entry.getKey();
             try {
-                // orderID , deliveryDate , deliveryType , deliveryTime
+                // orderID , deliveryDate , deliveryType , deliveryTime , fkAssociateId
                 String[] data = key.split(",");
                 String newKey = "";
                 String time = orderShippingTypeMap.get(data[0] + "," + data[1]);
 
                 if (time != null) {
-                    newKey = data[0] + "," + data[1] + ",2," + time;
+                    newKey = data[0] + "," + data[1] + ",2," + time + "," +data[4];
                 }
                 Order order=null;
 //                for(Map.Entry<String,Order> originalOrderMapEntry:originalOrderMap.entrySet()){

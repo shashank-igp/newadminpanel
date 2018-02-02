@@ -1,11 +1,11 @@
 package com.igp.handles.vendorpanel.utils.Order;
 
 import com.igp.config.instance.Database;
+import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import com.igp.handles.vendorpanel.models.Order.Order;
 import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
 import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
-import com.igp.handles.vendorpanel.utils.FileUpload.UploadUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -31,7 +31,7 @@ public class OrderUtil
         String statement;
         PreparedStatement preparedStatement = null;
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        UploadUtil uploadUtil=new UploadUtil();
+        VendorUtil vendorUtil=new VendorUtil();
         List<OrdersProducts> listOfOrderProducts=new ArrayList<>();
         String vendorIdClaus="";
         try{
@@ -96,6 +96,7 @@ public class OrderUtil
                     .timeSlaVoilates(getTimeWhenColorChangesforOrderProduct(resultSet.getInt("op.sla_code")))
                     .build();
 
+                    ordersProducts.setVendorName(vendorUtil.getVendorInfo(Integer.parseInt(ordersProducts.getFkAssociateId())).getAssociateName());
 
                 OrderProductExtraInfo orderProductExtraInfo=new OrderProductExtraInfo.Builder()
                     .orderProductId(resultSet.getInt("opei.order_product_id"))
@@ -143,6 +144,7 @@ public class OrderUtil
         ResultSet resultSet = null;
         String statement="",fkAssociateIdWhereClause="";
         PreparedStatement preparedStatement = null;
+        VendorUtil vendorUtil=new VendorUtil();
 
         List<OrdersProducts> listOfOrderProducts=new ArrayList<>();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -281,6 +283,10 @@ public class OrderUtil
                     .personalized(resultSet.getBoolean("npei.flag_personalize"))
                     .timeSlaVoilates(getTimeWhenColorChangesforOrderProduct(resultSet.getInt("op.sla_code")))
                     .build();
+
+                ordersProducts.setVendorName(vendorUtil.getVendorInfo(Integer.parseInt(ordersProducts.getFkAssociateId())).getAssociateName());
+
+
                 OrderProductExtraInfo orderProductExtraInfo=new OrderProductExtraInfo.Builder()
                     .orderProductId(resultSet.getInt("opei.order_product_id"))
                     .orderId(resultSet.getInt("opei.order_id"))
