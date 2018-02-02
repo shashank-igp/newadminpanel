@@ -701,7 +701,7 @@ public class DashboardMapper {
                     flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId);
 
                     if (flagForUniqueness && deliveryDate.getTime() == specificDate.getTime()){
-                        if(status.equals("Processing") && vendorId==72){ // unassigned -> not alloted
+                        if(status.equals("Processed") && vendorId==72){ // unassigned -> not alloted
                             int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("notAlloted").get("count"));
                             count++;
                             statusCountMap0.get("unAssigned").get("notAlloted").put("count", count + "");
@@ -724,7 +724,7 @@ public class DashboardMapper {
 
                             }
                         }
-                        else if(status.equals("Processed") && vendorId==72){ // unassigned -> Processing
+                        else if(status.equals("Processing") && vendorId==72){ // unassigned -> Processing
                             int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("processing").get("count"));
                             count++;
                             statusCountMap0.get("unAssigned").get("processing").put("count", count + "");
