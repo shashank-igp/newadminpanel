@@ -286,7 +286,7 @@ public class DashboardMapper {
                     if (flagForUniqueness){
                         orderTotalWhole++;
 
-                        if(status.equals("Processing") && vendorId==72){ // unassigned -> not alloted
+                        if(status.equals("Processed") && vendorId==72){ // unassigned -> not alloted
                             //past
                             notAssignedOrdersTotalWhole++;
                             if (deliveryDate.getTime() < todayDate.getTime()){
@@ -379,7 +379,7 @@ public class DashboardMapper {
                                 }
                             }
                         }
-                        else if(status.equals("Processed") && vendorId==72){ // unassigned -> Processing
+                        else if(status.equals("Processing") && vendorId==72){ // unassigned -> Processing
                             //past
                             notAssignedOrdersTotalWhole++;
                             if (deliveryDate.getTime() < todayDate.getTime()){
