@@ -5,14 +5,12 @@ import com.igp.handles.vendorpanel.models.Report.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 /**
  * Created by shal on 22/9/17.
@@ -375,7 +373,7 @@ public class SummaryFunctionsUtil
         try {
             connection = Database.INSTANCE.getReadWriteConnection();
             statement = "INSERT INTO AA_master_components (component_code,component_name,type,componentImage) VALUES (?,?,?,?)";
-            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1,componentCode);
             preparedStatement.setString(2,componentName);
             preparedStatement.setInt(3,type);

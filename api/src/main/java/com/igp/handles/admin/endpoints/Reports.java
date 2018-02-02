@@ -4,11 +4,11 @@ import com.igp.handles.admin.mappers.Reports.ReportMapper;
 import com.igp.handles.admin.models.Reports.PincodeModelListHavingSummaryModel;
 import com.igp.handles.admin.models.Reports.ProductModelListHavingSummaryModel;
 import com.igp.handles.admin.models.Reports.VendorDetailsHavingSummaryModel;
-import com.igp.handles.admin.utils.Reports.ReportUtil;
 import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import com.igp.handles.vendorpanel.response.ReportResponse;
 import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -65,7 +65,13 @@ public class Reports {
             message="Update the price of "+shipType+" for Pincode "+pincode+" to "+updatePrice+" : ";
         }
         int status=reportMapper.updatePincodeMapper(updateflag,fkAssociateId,pincode,shipType,updateStatus,updatePrice,message);
-        if(status==1){result=true;}
+        if(status==0){
+            handleServiceResponse.setError(true);
+            handleServiceResponse.setErrorCode("ERROR OCCURRED HANDELING PINCODE");
+        }
+        else {
+            result=true;
+        }
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
@@ -76,9 +82,13 @@ public class Reports {
                                                     @QueryParam("componentName") String componentName,@DefaultValue("0")@QueryParam("type") int type,
                                                     @DefaultValue("0")@QueryParam("price") int price){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
-        ReportMapper reportMapper = null;
+        ReportMapper reportMapper = new ReportMapper();
         boolean result=false;
         result= reportMapper.addNewComponentMapper(fkAssociateId,componentCode,componentName,type, price);
+        if(result==false){
+            handleServiceResponse.setError(true);
+            handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING COMPONENT");
+        }
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
@@ -90,6 +100,10 @@ public class Reports {
         ReportMapper reportMapper = new ReportMapper();
         boolean result=false;
         result= reportMapper.addNewVendorPincodeMapper(fkAssociateId,pincode,cityId,shipType,shipCharge);
+        if(result==false){
+            handleServiceResponse.setError(true);
+            handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING PINCODE");
+        }
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
@@ -106,8 +120,7 @@ public class Reports {
         reportResponse.setTableHeaders(new String[]{"Component_Id_Hide","Component Image","Component_Name","Price","InStock","Required Price"});
         com.igp.handles.vendorpanel.mappers.Reports.ReportMapper.fillDataActionComponent(tableDataAction);
         reportResponse.setTableDataAction(tableDataAction);
-        ProductModelListHavingSummaryModel productModelListHavingSummaryModel =null;
-        productModelListHavingSummaryModel =reportMapper.getProductSummaryDetails(fkAssociateId,startLimit,endLimit);
+        ProductModelListHavingSummaryModel productModelListHavingSummaryModel = reportMapper.getProductSummaryDetails(fkAssociateId,startLimit,endLimit);
         reportResponse.setSummary(productModelListHavingSummaryModel.getSummaryModelList());
         List<Object> objectList = new ArrayList<Object>(productModelListHavingSummaryModel.getProductTableDataModelList());
         reportResponse.setTableData(objectList);
@@ -120,8 +133,8 @@ public class Reports {
     @Path("/v1/admin/handels/handleComponentChange")
     public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") int fkAssociateId,
                                                        @QueryParam("componentId") String componentId,
-                                                       @QueryParam("price")String updatePrice,
-                                                       @QueryParam("inStock") Boolean inStock){
+                                                       @DefaultValue("0") @QueryParam("price")int updatePrice,
+                                                       @QueryParam("inStock") String inStock){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         Integer updateflag=0;
         String message="",componentName="";
@@ -129,17 +142,17 @@ public class Reports {
         componentName= SummaryFunctionsUtil.getComponentName(componentId);
         if (inStock!=null){
             updateflag=1;
-            if(inStock==true){
+            if(inStock.equals(1)){
                 message="Change status of component "+componentName+" to Instock : ";
             }else {
                 message="Change status of component "+componentName+" to Out of stock : ";
             }
         }
-        else if (updatePrice!=null){
+        else if (updatePrice!=0){
             updateflag=2;
             message="Change price of component "+componentName+" to "+updatePrice+" : ";
         }
-        int result=reportMapper.updateComponentMapper(updateflag,fkAssociateId,componentId,message);
+        int result=reportMapper.updateComponentMapper(updateflag,fkAssociateId,componentId,message,updatePrice,inStock);
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
