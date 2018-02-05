@@ -140,7 +140,7 @@ public class OrderMapper
 
                 orderProducts.setComponentTotal(orderUtil.getProductComponents(orderProducts.getProductId(),fkassociateId,
                                                                                 orderProducts.getProducts_code(),componentList,
-                                                                                orderProductExtraInfo));
+                                                                                orderProductExtraInfo,true));
                 orderProducts.setPriceAdjustmentPerProduct(orderProducts.getVendorPrice()-orderProducts.getComponentTotal());
 
 //                statement =" SELECT mc.componentImage componentImage ,opci.component_code,mc.component_name,opci.vendor_to_component_price, "
