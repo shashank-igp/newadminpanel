@@ -5,9 +5,7 @@ import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
+import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 
 /**
@@ -17,13 +15,30 @@ import javax.ws.rs.core.MediaType;
 @Produces(MediaType.APPLICATION_JSON)
 public class Mail {
     private static final Logger logger = LoggerFactory.getLogger(Mail.class);
-    @GET
-    @Path("/v1/admin/handels/sendMailToVendor")
-    public HandleServiceResponse sendMailToVendor(){
+    @POST
+    @Path("/v1/admin/handels/sendEmailToVendor")
+    public HandleServiceResponse sendMailToVendor(@DefaultValue("")@QueryParam("body")String mailBody,
+                                                        @DefaultValue("72")@QueryParam("fkAssociateId") int vendorId,
+                                                    @QueryParam("subject")String subject){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         MailMapper mailMapper=new MailMapper();
         try{
+            handleServiceResponse.setResult(mailMapper.sendMailToVendor(mailBody,vendorId));
+        }catch (Exception exception){
+            logger.error("error occured while sending mail to vendor ",exception);
+        }
 
+        return handleServiceResponse;
+    }
+
+    @POST
+    @Path("/v1/admin/handels/sendSmsToVendor")
+    public HandleServiceResponse sendSmsToVendor(@DefaultValue("")@QueryParam("body")String smsBody,
+        @DefaultValue("72")@QueryParam("fkAssociateId") int vendorId,@QueryParam("subject")String subject){
+        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        MailMapper mailMapper=new MailMapper();
+        try{
+            handleServiceResponse.setResult(mailMapper.sendSmsToVendor(smsBody,vendorId));
         }catch (Exception exception){
             logger.error("error occured while sending mail to vendor ",exception);
         }

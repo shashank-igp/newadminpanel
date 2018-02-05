@@ -246,7 +246,7 @@ public class OrderUtil {
             orderProductExtraInfo=ordersProducts.getOrderProductExtraInfo();
 
             componentTotal=orderUtil.getProductComponents(ordersProducts.getProductId(),vendorId,
-                ordersProducts.getProducts_code(),componentList,orderProductExtraInfo);
+                ordersProducts.getProducts_code(),componentList,orderProductExtraInfo,false);
             vendorPrice=componentTotal*ordersProducts.getProductQuantity();
             shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
                 orderProductExtraInfo.getDeliveryType());

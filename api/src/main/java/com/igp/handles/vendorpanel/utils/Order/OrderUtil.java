@@ -392,7 +392,8 @@ public class OrderUtil
     }
 
     public double getProductComponents(int productId,int fkAssociateId,String productCode,
-                                        List<OrderComponent> componentList ,OrderProductExtraInfo orderProductExtraInfo ){
+                                        List<OrderComponent> componentList ,OrderProductExtraInfo orderProductExtraInfo
+                                        ,boolean clubEgglessComponentFalg){
 
         Connection connection = null;
         ResultSet resultSet = null;
@@ -444,7 +445,7 @@ public class OrderUtil
                     .build();
 
 
-                if (orderComponent.getComponentName().equalsIgnoreCase("Eggless"))
+                if (orderComponent.getComponentName().equalsIgnoreCase("Eggless") && clubEgglessComponentFalg==true)
                 {
                     egglessProductMap.put(orderComponent.getProductId(), orderComponent);
                 }
