@@ -62,6 +62,7 @@ public class Order {
         }
         if(category.equals("notShipped")){
            section="tillToday";
+            date1 = DateUtils.addDays(date1, -7);
         }
 
         List<com.igp.handles.vendorpanel.models.Order.Order> orders= orderMapper.getOrderByStatusDate(category,subCategory,date1,orderAction,section,isfuture);
