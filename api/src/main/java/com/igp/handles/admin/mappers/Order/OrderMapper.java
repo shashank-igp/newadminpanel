@@ -5,6 +5,7 @@ import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
 import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
+import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -158,5 +159,8 @@ public class OrderMapper {
             logger.error("error while deliveryDetailChanges",exception);
         }
         return result;
+    }
+    public List<Order> mergeOrderList(List<Order> orderList,List<Order> orderList1){
+        return ListUtils.union(orderList,orderList1);
     }
 }

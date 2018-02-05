@@ -61,8 +61,7 @@ public class Order {
                 break;
         }
         if(category.equals("notShipped")){
-            date1 = DateUtils.addDays(date1, -7);
-            isfuture=true;
+           section="tillToday";
         }
 
         List<com.igp.handles.vendorpanel.models.Order.Order> orders= orderMapper.getOrderByStatusDate(category,subCategory,date1,orderAction,section,isfuture);
@@ -75,14 +74,19 @@ public class Order {
     @POST
     @Path("/v1/admin/handels/assignReassignOrder")
     public HandleServiceResponse assignReassignOrder(@QueryParam("action")String action , @QueryParam("orderId") int orderId,
-        @QueryParam("fkAssociateId") int vendorId,@QueryParam("orderProductId") int orderProductId){
+        @QueryParam("fkAssociateId") int vendorId,@QueryParam("orderProductId") int orderProductId
+                                                ,@DefaultValue("0")@QueryParam("orderProductIs") String restOrderProductIdList){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         int result;
+        List<com.igp.handles.vendorpanel.models.Order.Order> orderList=null;
         try{
              result=orderMapper.assignReassignOrder(action,orderId,orderProductId,vendorId);
             if(result==1){
-                handleServiceResponse.setResult(true);
+                orderList = orderMapper.mergeOrderList(orderMapper.getOrder(orderId,String.valueOf(orderProductId)),
+                    orderMapper.getOrder(orderId,restOrderProductIdList));
+
+                handleServiceResponse.setResult(orderList);
             }else if(result==2){
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setResult(false);
