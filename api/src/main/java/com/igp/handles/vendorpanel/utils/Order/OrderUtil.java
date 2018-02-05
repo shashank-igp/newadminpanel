@@ -490,6 +490,93 @@ public class OrderUtil
         return componentTotal;
     }
 
+    public double getComponentListFromComponentInfo(int orderId,List<OrderComponent> componentList , OrderProductExtraInfo orderProductExtraInfo
+        ){
+
+        Connection connection = null;
+        ResultSet resultSet = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        Map<String, OrderComponent> egglessProductMap = new HashMap<>();
+        double componentTotal=0.0;
+        String productCodePlusAttribute="",attributeId="";
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try{
+
+            int indexOfColen=orderProductExtraInfo.getAttributes().indexOf(":");
+            int indexOfPipe=orderProductExtraInfo.getAttributes().indexOf("|");
+            if(indexOfColen!=-1){
+                attributeId=orderProductExtraInfo.getAttributes().substring(indexOfColen+1,indexOfPipe);
+            }
+
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement="SELECT  * from orders_products_components_info opci join AA_master_components mc on opci.component_id"
+                + " = mc.component_id where opci.orders_id = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,orderId);
+
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                OrderComponent orderComponent=new OrderComponent.Builder()
+                    .componentCode(resultSet.getString("opci.component_code"))
+                    .componentImage(resultSet.getString("mc.componentImage"))
+                    .componentName(resultSet.getString("mc.component_name"))
+                    .componentPrice(resultSet.getString("opci.vendor_to_component_price"))
+                    .productId(String.valueOf("opci.products_id"))
+                    .quantity(resultSet.getString("opci.quantity"))
+                    .type(resultSet.getString("mc.type"))
+                    .timestamp(dateFormat.format(dateFormat.parse(resultSet.getString("mc.mod_time"))))
+                    .componentId(resultSet.getInt("opci.component_id"))
+                    .build();
+
+
+                if (orderComponent.getComponentName().equalsIgnoreCase("Eggless"))
+                {
+                    egglessProductMap.put(orderComponent.getProductId(), orderComponent);
+                }
+                else
+                {
+                    componentList.add(orderComponent);
+                }
+                componentTotal+=resultSet.getDouble("opci.vendor_to_component_price")*resultSet.getDouble("opci.quantity");
+            }
+
+            for (OrderComponent orderComponent : componentList)
+            {
+                OrderComponent egglessComponent = egglessProductMap.get(orderComponent.getProductId());
+
+
+                if (egglessComponent != null && (orderComponent.getComponentName().contains("Cake")
+                    || orderComponent.getComponentName().contains("cake")))
+                {
+                    orderComponent.setEggless(true);
+                    String productComponentPrice = orderComponent.getComponentPrice();
+                    if (productComponentPrice.equals("N/A"))
+                    {
+                        orderComponent.setComponentPrice(egglessComponent.getComponentPrice());
+                    }
+                    else
+                    {
+                        double total = Double.valueOf(productComponentPrice)
+                            + Double.valueOf(egglessComponent.getComponentPrice());
+                        orderComponent.setComponentPrice(total + "");
+                    }
+                }
+            }
+            Collections.sort(componentList,new componentListComparator());
+        }
+        catch (Exception exception) {
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return componentTotal;
+    }
+
     public Order gerOrderOnly(int orderId,int fkassociateId,boolean forAdminPanelOrNot){
 
         Connection connection = null;
@@ -589,6 +676,8 @@ public class OrderUtil
 
         return order;
     }
+
+
 
     public static String getDeliverWhen(String deliverDate) throws ParseException
     {

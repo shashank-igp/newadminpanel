@@ -284,11 +284,10 @@ public class DashboardMapper {
                     flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId);
 
                     if (flagForUniqueness){
-                        orderTotalWhole++;
 
                         if(status.equals("Processed") && vendorId==72){ // unassigned -> not alloted
                             //past
-                            logger.debug("just for test  key :- "+key);
+                            orderTotalWhole++;
                             notAssignedOrdersTotalWhole++;
                             if (deliveryDate.getTime() < todayDate.getTime()){
                                 int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("notAlloted").get("count"));
@@ -381,6 +380,7 @@ public class DashboardMapper {
                         }
                         else if(status.equals("Processing") && vendorId==72){ // unassigned -> Processing
                             //past
+                            orderTotalWhole++;
                             notAssignedOrdersTotalWhole++;
                             if (deliveryDate.getTime() < todayDate.getTime()){
                                 int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("processing").get("count"));
@@ -480,6 +480,7 @@ public class DashboardMapper {
                             // all orders which are in Processed state of that vendor ,  not Confirmed Yet -> Total
 
                             //past
+                            orderTotalWhole++;
                             notConfirmedOrdersTotalWhole++;
                             if (deliveryDate.getTime() < todayDate.getTime()){
                                 int count=Integer.parseInt(statusCountMap0.get("notConfirmed").get("total").get("count"));
@@ -576,7 +577,9 @@ public class DashboardMapper {
                             // (-ve sla of Confirmed to OutOfDelivery i.e *Shipped* ) not Shipped Yet -> Pending
                             // all orders which are in Confirmed state of that vendor ,  not Shipped Yet -> Total
 
+
                             if (deliveryDate.getTime() <= todayDate.getTime()){
+                                orderTotalWhole++;
                                 int count=Integer.parseInt(notShippedTotalOrderCount.get("count"));
                                 count++;
                                 notShippedTotalOrderCount.put("count",count+"");
@@ -595,6 +598,7 @@ public class DashboardMapper {
                             // all orders which are in Shipped & deliveryStatus=0 state of that vendor ,  not Delivered Yet -> Total
 
                             if (deliveryDate.getTime() <= todayDate.getTime()){
+                                orderTotalWhole++;
                                 int count=Integer.parseInt(notDeliveredTotalOrderCount.get("count"));
                                 count++;
                                 notDeliveredTotalOrderCount.put("count",count+"");

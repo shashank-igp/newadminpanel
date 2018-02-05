@@ -27,7 +27,7 @@ public class MailUtil {
             // CURLOPT_FOLLOWLOCATION
             con.setInstanceFollowRedirects(true);
 
-            postData+="action="+action+"&subject="+subject+"&to="+recipient+"&body="+ URLEncoder.encode(body,"UTF-8");
+            postData+="action="+action+"&sub="+subject+"&to="+recipient+"&body="+ URLEncoder.encode(body,"UTF-8");
 
             con.setRequestProperty("Content-length", String.valueOf(postData.length()));
 
