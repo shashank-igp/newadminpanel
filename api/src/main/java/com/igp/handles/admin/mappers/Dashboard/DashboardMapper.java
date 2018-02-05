@@ -576,27 +576,37 @@ public class DashboardMapper {
                             // (-ve sla of Confirmed to OutOfDelivery i.e *Shipped* ) not Shipped Yet -> Pending
                             // all orders which are in Confirmed state of that vendor ,  not Shipped Yet -> Total
 
-                            int count=Integer.parseInt(notShippedTotalOrderCount.get("count"));
-                            count++;
-                            notShippedTotalOrderCount.put("count",count+"");
-                            if(OrderUtil.isHighAlertActionRequired(slaCode)){
-                                int alertCount=Integer.parseInt(notShippedPendingOrderCount.get("count"));
-                                alertCount++;
-                                notShippedPendingOrderCount.put("count",alertCount+"");
+                            if (deliveryDate.getTime() <= todayDate.getTime()){
+                                int count=Integer.parseInt(notShippedTotalOrderCount.get("count"));
+                                count++;
+                                notShippedTotalOrderCount.put("count",count+"");
+                                notShippedTotalOrderCount.put("sla",true+"");
+                                if(OrderUtil.isHighAlertActionRequired(slaCode)){
+                                    int alertCount=Integer.parseInt(notShippedPendingOrderCount.get("count"));
+                                    alertCount++;
+                                    notShippedPendingOrderCount.put("count",alertCount+"");
+                                    notShippedPendingOrderCount.put("alert", true + "");
+                                }
                             }
+
                         }else if(status.equals("Shipped") && vendorId != 72 && deliverystatus == false){
                             // (-ve sla of OutOfDelivery to Delivered  i.e * [ Shipped & deliveryStatus=0 ] to
                             //  [Shipped & deliveryStatus= 1 ]* ) not Delivered Yet -> Pending
                             // all orders which are in Shipped & deliveryStatus=0 state of that vendor ,  not Delivered Yet -> Total
 
-                            int count=Integer.parseInt(notDeliveredTotalOrderCount.get("count"));
-                            count++;
-                            notDeliveredTotalOrderCount.put("count",count+"");
-                            if(OrderUtil.isHighAlertActionRequired(slaCode)){
-                                int alertCount=Integer.parseInt(notDeliveredPendingOrderCount.get("count"));
-                                alertCount++;
-                                notDeliveredPendingOrderCount.put("count",alertCount+"");
+                            if (deliveryDate.getTime() <= todayDate.getTime()){
+                                int count=Integer.parseInt(notDeliveredTotalOrderCount.get("count"));
+                                count++;
+                                notDeliveredTotalOrderCount.put("count",count+"");
+                                notDeliveredTotalOrderCount.put("sla",true+"");
+                                if(OrderUtil.isHighAlertActionRequired(slaCode)){
+                                    int alertCount=Integer.parseInt(notDeliveredPendingOrderCount.get("count"));
+                                    alertCount++;
+                                    notDeliveredPendingOrderCount.put("count",alertCount+"");
+                                    notDeliveredPendingOrderCount.put("alert", true + "");
+                                }
                             }
+
 
                         }
                     }
