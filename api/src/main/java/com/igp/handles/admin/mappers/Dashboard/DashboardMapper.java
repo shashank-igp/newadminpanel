@@ -585,6 +585,7 @@ public class DashboardMapper {
                                 notShippedTotalOrderCount.put("count",count+"");
                                 notShippedTotalOrderCount.put("sla",true+"");
                                 if(OrderUtil.isHighAlertActionRequired(slaCode)){
+                                    orderTotalWhole++;
                                     int alertCount=Integer.parseInt(notShippedPendingOrderCount.get("count"));
                                     alertCount++;
                                     notShippedPendingOrderCount.put("count",alertCount+"");
@@ -604,6 +605,7 @@ public class DashboardMapper {
                                 notDeliveredTotalOrderCount.put("count",count+"");
                                 notDeliveredTotalOrderCount.put("sla",true+"");
                                 if(OrderUtil.isHighAlertActionRequired(slaCode)){
+                                    orderTotalWhole++;
                                     int alertCount=Integer.parseInt(notDeliveredPendingOrderCount.get("count"));
                                     alertCount++;
                                     notDeliveredPendingOrderCount.put("count",alertCount+"");
