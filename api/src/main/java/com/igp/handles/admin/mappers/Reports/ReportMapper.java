@@ -71,11 +71,11 @@ public class ReportMapper {
         return productModelListHavingSummaryModel;
     }
 
-    public int updateComponentMapper(Integer flag,int fk_associate_id,String  componentId, String message, int updatePrice,String inStock){
+    public boolean updateComponentMapper(Integer flag,int fk_associate_id,String  componentId, String message, int updatePrice,String inStock){
         ReportUtil reportUtil = new ReportUtil();
-        int result=reportUtil.updateProductComponent(flag,fk_associate_id,componentId,updatePrice,inStock);
-        if(result==1){
-            result = reportUtil.setVendorGeneralInstruction(fk_associate_id,1,componentId,message+"Done");
+        boolean result=reportUtil.updateProductComponent(flag,fk_associate_id,componentId,updatePrice,inStock);
+        if(result==true){
+            int response = reportUtil.setVendorGeneralInstruction(fk_associate_id,1,componentId,message+"Done");
         }
         return result;
     }

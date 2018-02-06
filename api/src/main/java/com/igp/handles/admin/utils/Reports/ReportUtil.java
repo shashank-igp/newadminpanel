@@ -260,10 +260,11 @@ public class ReportUtil {
         }
         return productModelListHavingSummaryModel;
     }
-    public int updateProductComponent(Integer flag,int fk_associate_id,String  componentId,int updatePrice, String inStock ) {
+    public boolean updateProductComponent(Integer flag,int fk_associate_id,String  componentId,int updatePrice, String inStock ) {
         Connection connection = null;
         String statement;
-        int result = 0;
+        int status = 0;
+        boolean result = false;
         String column,value;
         PreparedStatement preparedStatement = null;
         try {
@@ -279,7 +280,10 @@ public class ReportUtil {
             statement = "update AA_vendor_to_components set "+column+value+" where fk_associate_id="+fk_associate_id+" and fk_component_id="+componentId+" ";
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in updateVendorComponent "+preparedStatement);
-            result = preparedStatement.executeUpdate();
+            status = preparedStatement.executeUpdate();
+            if(status==1){
+                result=true;
+            }
 
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);
@@ -313,9 +317,7 @@ public class ReportUtil {
 
                 connection = Database.INSTANCE.getReadOnlyConnection();
                 statement = " select * from associate as a JOIN associate_user as au ON " +
-                    "a.associate_id = au.fk_associate_login_id where limit " + startLimit + "," + endLimit + " ";
-                preparedStatement.setInt(1, startLimit);
-                preparedStatement.setInt(2, endLimit);
+                    "a.associate_id = au.fk_associate_login_id limit " + startLimit + "," + endLimit + " ";
                 preparedStatement = connection.prepareStatement(statement);
                 logger.debug("sql query in getVendorDetails " + preparedStatement);
 
