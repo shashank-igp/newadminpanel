@@ -152,7 +152,11 @@ public class Reports {
             updateflag=2;
             message="Change price of component "+componentName+" to "+updatePrice+" : ";
         }
-        int result=reportMapper.updateComponentMapper(updateflag,fkAssociateId,componentId,message,updatePrice,inStock);
+        boolean result=reportMapper.updateComponentMapper(updateflag,fkAssociateId,componentId,message,updatePrice,inStock);
+        if(result==false){
+            handleServiceResponse.setError(true);
+            handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING COMPONENT INFO");
+        }
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
@@ -195,7 +199,8 @@ public class Reports {
     @GET
     @Path("/v1/admin/handels/getVendorDetails")
     public ReportResponse getVendorDetails(@DefaultValue("0") @QueryParam("fkAssociateId") int fkAssociateId,
-                                           @QueryParam("startLimit") int startLimit, @QueryParam("endLimit") int endLimit ){
+                                           @DefaultValue("0") @QueryParam("startLimit") int startLimit,
+                                           @DefaultValue("0") @QueryParam("endLimit") int endLimit ){
         ReportResponse reportResponse=new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
         VendorDetailsHavingSummaryModel vendorDetailsHavingSummaryModel = new VendorDetailsHavingSummaryModel();
