@@ -83,7 +83,7 @@ public class Reports {
                                                     @DefaultValue("0")@QueryParam("price") int price){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
-        boolean result=false;
+        boolean result;
         result= reportMapper.addNewComponentMapper(fkAssociateId,componentCode,componentName,type, price);
         if(result==false){
             handleServiceResponse.setError(true);
@@ -98,7 +98,7 @@ public class Reports {
                                                   @DefaultValue("0")@QueryParam("cityId") int cityId,@QueryParam("shipType") int shipType,@QueryParam("shipCharge")int shipCharge ){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
-        boolean result=false;
+        boolean result;
         result= reportMapper.addNewVendorPincodeMapper(fkAssociateId,pincode,cityId,shipType,shipCharge);
         if(result==false){
             handleServiceResponse.setError(true);
@@ -204,11 +204,13 @@ public class Reports {
         ReportResponse reportResponse=new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
         VendorDetailsHavingSummaryModel vendorDetailsHavingSummaryModel = new VendorDetailsHavingSummaryModel();
-
+        List<Map.Entry<String,List<String>>> tableDataAction=new ArrayList<>();
+        try{
+        reportMapper.fillDataActionVendor(tableDataAction);
+        reportResponse.setTableDataAction(tableDataAction);
         reportResponse.setTableHeaders(new String[]{"fkAssociateId","associateName","contactPerson","emailId",
             "address","phone","userId","password","status"});
 
-        try{
             vendorDetailsHavingSummaryModel = reportMapper.getVendorDetails(fkAssociateId,startLimit,endLimit);
             reportResponse.setSummary(vendorDetailsHavingSummaryModel.getSummaryModelList());
             List<Object> objectList = new ArrayList<Object>(vendorDetailsHavingSummaryModel.getVendorDetailsModels());
@@ -221,19 +223,27 @@ public class Reports {
     @PUT
     @Path("/v1/admin/handels/modifyVendorDetails")
     public HandleServiceResponse modifyVendorDetails(@QueryParam("fkAssociateId") int fkAssociateId,
-                                                     @QueryParam("associateName") String associateName,
-                                                     @QueryParam("contactPerson") String contactPerson,
-                                                     @QueryParam("email") String email,
-                                                     @QueryParam("address") String address,
-                                                     @QueryParam("phone") String phone,
-                                                     @QueryParam("status") int status){
+                                                     @DefaultValue("") @QueryParam("associateName") String associateName,
+                                                     @DefaultValue("") @QueryParam("contactPerson") String contactPerson,
+                                                     @DefaultValue("") @QueryParam("email") String email,
+                                                     @DefaultValue("") @QueryParam("address") String address,
+                                                     @DefaultValue("") @QueryParam("phone") String phone,
+                                                     @DefaultValue("") @QueryParam("userId") String userId,
+                                                     @DefaultValue("") @QueryParam("password") String password,
+                                                     @DefaultValue("0") @QueryParam("status") int status){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper=new ReportMapper();
+        boolean result=false;
         try{
-            handleServiceResponse.setResult(reportMapper.modifyVendorDetails(fkAssociateId,associateName,contactPerson,email,address,phone,status));
+            result = reportMapper.modifyVendorDetails(fkAssociateId,associateName,contactPerson,email,address,phone,userId,password,status);
         }catch (Exception exception){
             logger.error("Error occured at modifyVendorDetails ",exception);
         }
+        if(result==false){
+            handleServiceResponse.setError(true);
+            handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING VENDOR INFO");
+        }
+        handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
 
@@ -246,14 +256,21 @@ public class Reports {
                                               @QueryParam("user") String user,
                                               @QueryParam("password") String password,
                                               @QueryParam("phone") String phone,
-                                              @QueryParam("status") int status){
+                                              @DefaultValue("2") @QueryParam("status") int status){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper=new ReportMapper();
+        boolean result =false;
+
         try{
-            handleServiceResponse.setResult(reportMapper.addNewVendorMapper(associateName,user,password,contactPerson,email,address,phone,status));
+          result =  reportMapper.addNewVendorMapper(associateName,user,password,contactPerson,email,address,phone,status);
         }catch (Exception exception){
             logger.error("Error occured at modifyVendorDetails ",exception);
         }
+        if(result==false){
+            handleServiceResponse.setError(true);
+            handleServiceResponse.setErrorCode("ERROR OCCURRED WHILE ADDING VENDOR");
+        }
+        handleServiceResponse.setResult(result);
         return handleServiceResponse;
 
     }

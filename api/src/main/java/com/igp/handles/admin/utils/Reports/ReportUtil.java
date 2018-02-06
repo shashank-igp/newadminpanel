@@ -356,9 +356,8 @@ public class ReportUtil {
         return vendorDetailsHavingSummaryModel;
     }
 
-    public int modifyVendorDetails(int fkAssociateId,
-                                   String associateName,String contactPerson,String email,
-                                   String address,String phone,int status){
+    public int modifyVendorDetails(int fkAssociateId,String associateName,String contactPerson,String email,
+                                   String address,String phone,String userId,String password,int status){
         Connection connection = null;
         int response=0;
         String statement;
@@ -367,43 +366,58 @@ public class ReportUtil {
         int flag=0;
         PreparedStatement preparedStatement = null;
         try{
-            if(associateName!=null){
+            if(!associateName.equals("")){
                 column="associate_name";
                 value=associateName;
             }
-            else if(contactPerson!=null){
+            else if(!contactPerson.equals("")){
                 column="associate_contact_person";
                 value=contactPerson;
             }
-            else if(email!=null){
+            else if(!email.equals("")){
                 column="associate_email";
                 value=email;
             }
-            else if(address!=null){
+            else if(!address.equals("")){
                 column="associate_address";
                 value=address;
             }
-            else if(phone!=null){
+            else if(!phone.equals("")){
                 column="associate_phone";
                 value=phone;
             }
-            else {
+            else if(status!=0){
                 column="associate_status";
                 flag=1;
             }
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "UPDATE associate SET "+column+"='?' WHERE associate_id = ?";
-            if(flag==0){
-                preparedStatement.setString(1,value);
+            if(!column.equals("")) {
+                statement = "UPDATE associate SET " + column + "=? WHERE associate_id = ?";
+                preparedStatement = connection.prepareStatement(statement);
+                if (flag == 0) {
+                    preparedStatement.setString(1, value);
+                } else {
+                    preparedStatement.setInt(1, status);
+                }
+                preparedStatement.setInt(2, fkAssociateId);
+                logger.debug("STATEMENT CHECK: " + preparedStatement);
+                response = preparedStatement.executeUpdate();
+            }else{
+                if(!userId.equals("")){
+                    column="associate_user_name";
+                    value=userId;
+                }
+                else if(!password.equals("")){
+                    column="associate_user_pass";
+                    value=password;
+                }
+                    String statement1 = "UPDATE associate_user set " +column+"=? WHERE fk_associate_login_id = ?";
+                    preparedStatement = connection.prepareStatement(statement1);
+                    preparedStatement.setString(1, value);
+                    preparedStatement.setInt(2, fkAssociateId);
+                    logger.debug("sql query in addNewVendorUtil " + preparedStatement);
+                    response = preparedStatement.executeUpdate();
             }
-            else {
-                preparedStatement.setInt(1,status);
-            }
-            preparedStatement.setInt(2,fkAssociateId);
-            preparedStatement = connection.prepareStatement(statement);
-            logger.debug("STATEMENT CHECK: " + preparedStatement);
-            response = preparedStatement.executeUpdate();
-
         } catch (Exception exception) {
             logger.error("Exception in connection : ", exception);
         } finally {
@@ -417,8 +431,8 @@ public class ReportUtil {
                                 String address,String phone,int status) {
         Connection connection = null;
         String statement;
-        PreparedStatement preparedStatement = null;
-        PreparedStatement preparedStatement1 = null;
+        PreparedStatement preparedStatement=null;
+        // PreparedStatement preparedStatement1=null;
         int result = 0;
         int fkAssociateId = 0;
         try {
@@ -427,6 +441,9 @@ public class ReportUtil {
                 "associate_contact_person,associate_email,associate_url," +
                 "associate_address,associate_phone,associate_description," +
                 "fk_associate_type_id, associate_status,discount) VALUES (?,?,?,?,?,?,?,?,?,?,?)";
+
+            preparedStatement = connection.prepareStatement(statement,Statement.RETURN_GENERATED_KEYS);
+
             preparedStatement.setString(1,user);
             preparedStatement.setString(2,associateName);
             preparedStatement.setString(3,contactPerson);
@@ -436,10 +453,9 @@ public class ReportUtil {
             preparedStatement.setString(7,phone);
             preparedStatement.setString(8,""); // check description
             preparedStatement.setInt(9,2); //check
-            preparedStatement.setInt(10,1); //check
+            preparedStatement.setInt(10,status);
             preparedStatement.setInt(11,0); //check
 
-            preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in addNewVendorUtil "+preparedStatement);
             result = preparedStatement.executeUpdate();
             if (result == 0) {
@@ -452,15 +468,15 @@ public class ReportUtil {
                     "(fk_associate_login_id,associate_user_name," +
                     "associate_user_status,associate_user_pass," +
                     "associate_user_permission) VALUES (?,?,?,?,?)";
-                preparedStatement1.setInt(1,fkAssociateId);
-                preparedStatement1.setString(2,user);
-                preparedStatement1.setInt(3,1);
-                preparedStatement1.setString(4,password);
-                preparedStatement1.setString(5,null);
+                preparedStatement = connection.prepareStatement(statement1);
+                preparedStatement.setInt(1,fkAssociateId);
+                preparedStatement.setString(2,user);
+                preparedStatement.setInt(3,1);
+                preparedStatement.setString(4,password);
+                preparedStatement.setString(5,null);
 
-                preparedStatement1 = connection.prepareStatement(statement1);
-                logger.debug("sql query in addNewVendorUtil "+preparedStatement1);
-                result = preparedStatement1.executeUpdate();
+                logger.debug("sql query in addNewVendorUtil "+preparedStatement);
+                result = preparedStatement.executeUpdate();
             }
         } catch (Exception exception) {
             logger.error("Exception in connection : ", exception);
