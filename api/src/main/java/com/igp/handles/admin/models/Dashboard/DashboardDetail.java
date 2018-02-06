@@ -14,7 +14,7 @@ public class DashboardDetail {
     private Set<Map<String, String>> slaOutOfDeliveryOrderIds   = new HashSet<>();
     private Set<Map<String, String>> alertOutOfDeliveryOrderIds = new HashSet<>();
     private int                      deliveredTodayOrderCount   = 0;
-    private Date                     festivalDate               = null;
+    private String                     festivalDate               = null;
 
     private int orderTotalWhole=0;
     private int notAssignedOrdersTotalWhole=0;
@@ -221,12 +221,12 @@ public class DashboardDetail {
     /**
      * @return the festivalDate
      */
-    public Date getFestivalDate()
+    public String getFestivalDate()
     {
         return festivalDate;
     }
 
-    public void setFestivalDate(Date festivalDate)
+    public void setFestivalDate(String festivalDate)
     {
         this.festivalDate = festivalDate;
     }

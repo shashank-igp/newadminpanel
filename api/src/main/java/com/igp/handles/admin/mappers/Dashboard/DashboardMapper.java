@@ -26,6 +26,7 @@ public class DashboardMapper {
         VendorUtil handelVendorUtil=new VendorUtil();
         DashboardUtil dashboardUtil=new DashboardUtil();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+
         Date deliveryDate = null;
 
         Map<String, Map<String,Map<String, Set<Map<String, String>>>>> dateStatusOrderIdAllMap      = dashboardDetail.getDateStatusOrderIdAllMap();
@@ -259,7 +260,7 @@ public class DashboardMapper {
             {
                 specificDate = handelVendorUtil.getFestivalDate(todayDate);
             }
-            dashboardDetail.setFestivalDate(specificDate);
+            dashboardDetail.setFestivalDate(dateFormat.format(specificDate));
 
             getHandelOrderCountDetailForDate(dashboardDetail);
 
@@ -647,7 +648,7 @@ public class DashboardMapper {
         HandlesVendorMapper hp=new HandlesVendorMapper();
 
         try{
-            Date specificDate=dashboardDetail.getFestivalDate();
+            Date specificDate=dateFormat.parse(dashboardDetail.getFestivalDate());
 
             Map<String,Map<String, Map<String, Map<String, String>>>> dateStatusCountAllMap = dashboardDetail
                 .getDateStatusCountAllMap();
