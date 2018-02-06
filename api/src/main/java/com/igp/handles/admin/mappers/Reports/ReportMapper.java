@@ -12,8 +12,7 @@ import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by suditi on 30/1/18.
@@ -106,12 +105,12 @@ public class ReportMapper {
         return vendorDetailsHavingSummaryModel;
     }
     public boolean modifyVendorDetails(int fkAssociateId,String associateName,String contactPerson,String email,
-                       String address,String phone,int status){
+                       String address,String phone,String userId, String password,int status){
         boolean result = false;
-        int response = 0;
+        int response;
         ReportUtil reportUtil = new ReportUtil();
         try{
-            response = reportUtil.modifyVendorDetails(fkAssociateId,associateName,contactPerson,email,address,phone,status);
+            response = reportUtil.modifyVendorDetails(fkAssociateId,associateName,contactPerson,email,address,phone,userId,password,status);
        if (response==1){
            result=true;
        }
@@ -124,7 +123,7 @@ public class ReportMapper {
                                       String contactPerson,String email,
                                        String address,String phone,int status){
         boolean result = false;
-        int response = 0;
+        int response;
         ReportUtil reportUtil = new ReportUtil();
         try{
             response = reportUtil.addNewVendorUtil(associateName,user,password,contactPerson,email,address,phone,status);
@@ -135,5 +134,23 @@ public class ReportMapper {
             logger.error("Error at modifyVendorDetails in ReportMapper ",exception);
         }
         return result;
+    }
+    public static void fillDataActionVendor(List<Map.Entry<String,List<String>>> tableDataAction){
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("associateName",new ArrayList<String>(
+            Arrays.asList("Edit"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("contactPerson",new ArrayList<String>(
+            Arrays.asList("Edit"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("email",new ArrayList<String>(
+            Arrays.asList("Edit"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("address",new ArrayList<String>(
+            Arrays.asList("Edit"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("phone",new ArrayList<String>(
+            Arrays.asList("Edit"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("status",new ArrayList<String>(
+            Arrays.asList("Edit"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("userId",new ArrayList<String>(
+            Arrays.asList("Edit"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("password",new ArrayList<String>(
+            Arrays.asList("Edit"))));
     }
 }
