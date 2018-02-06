@@ -208,7 +208,7 @@ public class Reports {
         try{
         reportMapper.fillDataActionVendor(tableDataAction);
         reportResponse.setTableDataAction(tableDataAction);
-        reportResponse.setTableHeaders(new String[]{"fkAssociateId","associateName","contactPerson","emailId",
+        reportResponse.setTableHeaders(new String[]{"fkAssociateId","associateName","contactPerson","email",
             "address","phone","userId","password","status"});
 
             vendorDetailsHavingSummaryModel = reportMapper.getVendorDetails(fkAssociateId,startLimit,endLimit);

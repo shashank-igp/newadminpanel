@@ -302,13 +302,12 @@ public class ReportUtil {
         PreparedStatement preparedStatement = null;
         Connection connection = null;
         ResultSet resultSet = null;
-
+        String queryTotal,count="";
         List<VendorInfoModel> vendorInfoModelList=  new ArrayList<VendorInfoModel>();
-        int queryTotal = 0;
 
         if(fkAssociateId!=0){
             VendorInfoModel vendorInfoModel = vendorUtil.getVendorInfo(fkAssociateId);
-            queryTotal = 1;
+            count="1";
             vendorInfoModelList.add(vendorInfoModel);
         }
         else {
@@ -316,6 +315,7 @@ public class ReportUtil {
                 String statement;
 
                 connection = Database.INSTANCE.getReadOnlyConnection();
+                queryTotal="select count(*) as totalno from associate as a JOIN associate_user as au ON a.associate_id = au.fk_associate_login_id ";
                 statement = " select * from associate as a JOIN associate_user as au ON " +
                     "a.associate_id = au.fk_associate_login_id limit " + startLimit + "," + endLimit + " ";
                 preparedStatement = connection.prepareStatement(statement);
@@ -324,10 +324,9 @@ public class ReportUtil {
                 resultSet = preparedStatement.executeQuery();
                 while (resultSet.next()) {
                     VendorInfoModel vendorInfoModel = new VendorInfoModel();
-                    queryTotal++;
                     vendorInfoModel.setVendorId(resultSet.getInt("a.associate_id"));
                     vendorInfoModel.setAssociateName(resultSet.getString("a.associate_name"));
-                    vendorInfoModel.setLoginId(resultSet.getString("a.associate_login_id"));
+                    vendorInfoModel.setUserId(resultSet.getString("au.associate_user_name"));
                     vendorInfoModel.setPhone(resultSet.getString("a.associate_phone"));
                     vendorInfoModel.setAddress(resultSet.getString("a.associate_address"));
                     vendorInfoModel.setStatus(resultSet.getInt("a.associate_status"));
@@ -336,8 +335,8 @@ public class ReportUtil {
                     vendorInfoModel.setPassword(resultSet.getString("au.associate_user_pass"));
 
                     vendorInfoModelList.add(vendorInfoModel);
-
                 }
+                count = SummaryFunctionsUtil.getCount(queryTotal).toString();
 
             } catch (Exception exception) {
                 logger.error("Error in getPayoutAndTaxes ", exception);
@@ -348,7 +347,7 @@ public class ReportUtil {
                 Database.INSTANCE.closeResultSet(resultSet);
             }
         }
-        summaryModelForVendor.setValue(queryTotal+"");
+        summaryModelForVendor.setValue(count);
         summaryModelForVendor.setLabel("Total Vendors");
         summaryModelList.add(summaryModelForVendor);
         vendorDetailsHavingSummaryModel.setVendorDetailsModels(vendorInfoModelList);

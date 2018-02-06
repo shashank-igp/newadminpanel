@@ -159,7 +159,7 @@ public class VendorUtil
             if(resultSet.next()){
                 vendorInfoModel.setVendorId(vendorId);
                 vendorInfoModel.setAssociateName(resultSet.getString("a.associate_name"));
-                vendorInfoModel.setLoginId(resultSet.getString("a.associate_login_id"));
+                vendorInfoModel.setUserId(resultSet.getString("au.associate_user_name"));
                 vendorInfoModel.setPhone(resultSet.getString("a.associate_phone"));
                 vendorInfoModel.setAddress(resultSet.getString("a.associate_address"));
                 vendorInfoModel.setStatus(resultSet.getInt("a.associate_status"));
