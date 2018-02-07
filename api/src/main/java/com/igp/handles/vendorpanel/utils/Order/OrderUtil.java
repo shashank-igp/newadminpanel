@@ -403,6 +403,7 @@ public class OrderUtil
         double componentTotal=0.0;
         String productCodePlusAttribute="",attributeId="";
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar calendar=Calendar.getInstance();
         try{
 
 
@@ -432,6 +433,9 @@ public class OrderUtil
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()){
+
+                calendar.setTime(dateFormat.parse(resultSet.getString("mc.mod_time")));
+
                 OrderComponent orderComponent=new OrderComponent.Builder()
                     .componentCode(resultSet.getString("mc.component_code"))
                     .componentImage(resultSet.getString("componentImage"))
@@ -440,7 +444,7 @@ public class OrderUtil
                     .productId(String.valueOf(productId))
                     .quantity(resultSet.getString("bc.quantity"))
                     .type(resultSet.getString("mc.type"))
-                    .timestamp(dateFormat.format(dateFormat.parse(resultSet.getString("mc.mod_time"))))
+                    .timestamp(calendar.getTimeInMillis()+"")
                     .componentId(resultSet.getInt("mc.component_id"))
                     .build();
 
@@ -501,6 +505,7 @@ public class OrderUtil
         double componentTotal=0.0;
         String productCodePlusAttribute="",attributeId="";
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Calendar calendar=Calendar.getInstance();
         try{
 
             int indexOfColen=orderProductExtraInfo.getAttributes().indexOf(":");
@@ -519,6 +524,7 @@ public class OrderUtil
             resultSet = preparedStatement.executeQuery();
 
             while (resultSet.next()){
+                calendar.setTime(dateFormat.parse(resultSet.getString("mc.mod_time")));
                 OrderComponent orderComponent=new OrderComponent.Builder()
                     .componentCode(resultSet.getString("opci.component_code"))
                     .componentImage(resultSet.getString("mc.componentImage"))
@@ -527,7 +533,7 @@ public class OrderUtil
                     .productId(String.valueOf("opci.products_id"))
                     .quantity(resultSet.getString("opci.quantity"))
                     .type(resultSet.getString("mc.type"))
-                    .timestamp(dateFormat.format(dateFormat.parse(resultSet.getString("mc.mod_time"))))
+                    .timestamp(calendar.getTimeInMillis()+"")
                     .componentId(resultSet.getInt("opci.component_id"))
                     .build();
 
