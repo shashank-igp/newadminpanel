@@ -24,6 +24,9 @@ public class Vendor {
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         VendorMapper vendorMapper=new VendorMapper();
         try {
+            if(shippingType==4){
+                shippingType=1;
+            }
             List<VendorInfoModel> vendorInfoModelList=vendorMapper.getVendorList(pincode,shippingType);
             handleServiceResponse.setResult(vendorInfoModelList);
         }catch (Exception exception){
