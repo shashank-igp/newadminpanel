@@ -215,10 +215,10 @@ public class OrderUtil {
     }
 
 
-    public int reassignOrderToVendor(int orderId,int orderproductId,int vendorId){
+    public int reassignOrderToVendor(int orderId,int orderproductId,int vendorId,Order order){
         int result=0;
         try{
-            result=assignOrderToVendor(orderId,orderproductId,vendorId);
+            result=assignOrderToVendor(orderId,orderproductId,vendorId,order);
         }catch (Exception exeception){
 
         }
@@ -226,9 +226,8 @@ public class OrderUtil {
     }
 
 
-    public int assignOrderToVendor(int orderId,int orderproductId,int vendorId){
+    public int assignOrderToVendor(int orderId,int orderproductId,int vendorId,Order order){
         int result=0;
-        Order order=null;
         VendorUtil vendorUtil=new VendorUtil();
         VendorAssignModel vendorAssignModel=new VendorAssignModel();
         List<OrderComponent> componentList=new ArrayList<>();
@@ -241,7 +240,6 @@ public class OrderUtil {
         String ordersHistoryComment="",previousVendorName="";
 
         try {
-            order=getOrderRelatedInfo(orderId,orderproductId);
             ordersProducts=order.getOrderProducts().get(0);
             orderProductExtraInfo=ordersProducts.getOrderProductExtraInfo();
 

@@ -4,6 +4,7 @@ import com.igp.handles.vendorpanel.models.Order.Order;
 import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
 import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
+import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
 import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
@@ -70,15 +71,54 @@ public class OrderMapper {
 
         return orders;
     }
-    public int assignReassignOrder(String action,int orderId,int orderproductId,int vendorId){
+    public int assignReassignOrder(String action,int orderId,int orderProductId,int vendorId,String allOrderProductIdList,
+        List<Order> orderList,HandleServiceResponse handleServiceResponse){
         int result=0;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
+
+        String restOrderProductIdList="";
         try{
-            if(action.equalsIgnoreCase("assign")){
-                result=orderUtil.assignOrderToVendor(orderId,orderproductId,vendorId);
-            }else if(action.equalsIgnoreCase("reassign")) {
-                result=orderUtil.reassignOrderToVendor(orderId,orderproductId,vendorId);
+            String[] orderProductIds=allOrderProductIdList.split(",");
+            for(int i=0;i<orderProductIds.length;i++){
+                if(!orderProductIds[i].equals(String.valueOf(orderProductId))){
+                    if(i<orderProductIds.length-1){
+                        restOrderProductIdList+=orderProductIds[i]+",";
+                    }else if(i==orderProductIds.length-1){
+                        restOrderProductIdList+=orderProductIds[i];
+                    }
+                }
             }
+
+            Order order=orderUtil.getOrderRelatedInfo(orderId,orderProductId);
+            OrdersProducts ordersProducts=order.getOrderProducts().get(0);
+            if(action.equalsIgnoreCase("assign")){
+                result=orderUtil.assignOrderToVendor(orderId,orderProductId,vendorId,order);
+                if(result==1){
+                    if(!restOrderProductIdList.equals("")){
+                        orderList=getOrder(orderId,restOrderProductIdList);
+                    }
+                }
+            }else if(action.equalsIgnoreCase("reassign")) {
+
+                result=orderUtil.reassignOrderToVendor(orderId,orderProductId,vendorId,order);
+                if(result==1){
+                    if(ordersProducts.getOrdersProductStatus().equals("Processed")
+                        &&!ordersProducts.getFkAssociateId().equals("72")){
+
+                        if(!restOrderProductIdList.equals("")){
+                            orderList=getOrder(orderId,String.valueOf(orderProductId));
+                            orderList = mergeOrderList(orderList, getOrder(orderId,restOrderProductIdList));
+                        }else {
+                            orderList=getOrder(orderId,String.valueOf(orderProductId));
+                        }
+                    }else {
+                        if(!restOrderProductIdList.equals("")){
+                            orderList=getOrder(orderId,restOrderProductIdList);
+                        }
+                    }
+                }
+            }
+            handleServiceResponse.setResult(orderList);
 
         }catch (Exception exception){
             logger.error("error while assignReassignOrder",exception);
