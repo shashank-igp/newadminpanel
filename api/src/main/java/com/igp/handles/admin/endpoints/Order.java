@@ -12,10 +12,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by shanky on 22/1/18.
@@ -76,18 +73,17 @@ public class Order {
     @Path("/v1/admin/handels/assignReassignOrder")
     public HandleServiceResponse assignReassignOrder(@QueryParam("action")String action , @QueryParam("orderId") int orderId,
         @QueryParam("fkAssociateId") int vendorId,@QueryParam("orderProductId") int orderProductId
-                                                ,@DefaultValue("0")@QueryParam("orderProductIs") String restOrderProductIdList){
+                                                ,@DefaultValue("0")@QueryParam("orderProductIds") String allOrderProductIdList){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         int result;
-        List<com.igp.handles.vendorpanel.models.Order.Order> orderList=null;
-        try{
-             result=orderMapper.assignReassignOrder(action,orderId,orderProductId,vendorId);
-            if(result==1){
-                orderList = orderMapper.mergeOrderList(orderMapper.getOrder(orderId,String.valueOf(orderProductId)),
-                    orderMapper.getOrder(orderId,restOrderProductIdList));
+        List<com.igp.handles.vendorpanel.models.Order.Order> orderList=new ArrayList<>();
 
-                handleServiceResponse.setResult(orderList);
+        try{
+
+             result=orderMapper.assignReassignOrder(action,orderId,orderProductId,vendorId,allOrderProductIdList,orderList,handleServiceResponse);
+            if(result==1){
+//                handleServiceResponse.setResult(orderList);
             }else if(result==2){
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setResult(false);
@@ -113,10 +109,13 @@ public class Order {
     @Path("/v1/admin/handels/orderPriceChanges")
     public HandleServiceResponse orderPriceChanges(@QueryParam("orderId")int orderId,@QueryParam("orderproductId")
         int orderProductId,@QueryParam("componentId") int componentId,@QueryParam("componentPrice") Double componentPrice,
-        @QueryParam("shippingCharge") Double shippingCharge){
+        @QueryParam("shippingCharge") Double shippingCharge,
+        @DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
+
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         boolean result=false;
+        List<com.igp.handles.vendorpanel.models.Order.Order> orderList=new ArrayList<>();
         try{
             result=orderMapper.orderPriceChanges(orderId,orderProductId,componentId,componentPrice,shippingCharge);
             if(result==false){
@@ -124,7 +123,8 @@ public class Order {
                 handleServiceResponse.setResult(false);
                 handleServiceResponse.setErrorMessage("some technical error occured while updating price try again !!");
             }else {
-                handleServiceResponse.setResult(result);
+                orderList=orderMapper.getOrder(orderId,orderProductIdList);
+                handleServiceResponse.setResult(orderList);
             }
 
         }catch (Exception exception){
