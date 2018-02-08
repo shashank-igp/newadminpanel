@@ -315,9 +315,10 @@ public class ReportUtil {
                 String statement;
 
                 connection = Database.INSTANCE.getReadOnlyConnection();
-                queryTotal="select count(*) as totalno from associate as a JOIN associate_user as au ON a.associate_id = au.fk_associate_login_id ";
+                queryTotal="select count(*) as totalno from associate as a JOIN associate_user as au ON a.associate_id = au.fk_associate_login_id JOIN vendor_extra_info as v ON au.fk_associate_login_id = v.associate_id where v.type=2 and a.associate_status=1";
                 statement = " select * from associate as a JOIN associate_user as au ON " +
-                    "a.associate_id = au.fk_associate_login_id limit " + startLimit + "," + endLimit + " ";
+                    "a.associate_id = au.fk_associate_login_id JOIN vendor_extra_info as v ON " +
+                    "au.fk_associate_login_id = v.associate_id where v.type=2 and a.associate_status=1 limit " + startLimit + "," + endLimit + " ";
                 preparedStatement = connection.prepareStatement(statement);
                 logger.debug("sql query in getVendorDetails " + preparedStatement);
 
@@ -385,7 +386,7 @@ public class ReportUtil {
                 column="associate_phone";
                 value=phone;
             }
-            else if(status!=0){
+            else if(status!=-1){
                 column="associate_status";
                 flag=1;
             }
