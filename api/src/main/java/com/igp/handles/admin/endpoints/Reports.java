@@ -208,8 +208,8 @@ public class Reports {
         try{
         reportMapper.fillDataActionVendor(tableDataAction);
         reportResponse.setTableDataAction(tableDataAction);
-        reportResponse.setTableHeaders(new String[]{"fkAssociateId","associateName","contactPerson","email",
-            "address","phone","userId","password","status"});
+        reportResponse.setTableHeaders(new String[]{"Vendor Id","Vendor Name","Contact Person","Email",
+            "Address","Phone","User Id","Password","Status"});
 
             vendorDetailsHavingSummaryModel = reportMapper.getVendorDetails(fkAssociateId,startLimit,endLimit);
             reportResponse.setSummary(vendorDetailsHavingSummaryModel.getSummaryModelList());
@@ -230,7 +230,7 @@ public class Reports {
                                                      @DefaultValue("") @QueryParam("phone") String phone,
                                                      @DefaultValue("") @QueryParam("userId") String userId,
                                                      @DefaultValue("") @QueryParam("password") String password,
-                                                     @DefaultValue("0") @QueryParam("status") int status){
+                                                     @DefaultValue("-1") @QueryParam("status") int status){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper=new ReportMapper();
         boolean result=false;
@@ -256,7 +256,7 @@ public class Reports {
                                               @QueryParam("user") String user,
                                               @QueryParam("password") String password,
                                               @QueryParam("phone") String phone,
-                                              @DefaultValue("2") @QueryParam("status") int status){
+                                              @DefaultValue("1") @QueryParam("status") int status){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper=new ReportMapper();
         boolean result =false;
@@ -264,7 +264,7 @@ public class Reports {
         try{
           result =  reportMapper.addNewVendorMapper(associateName,user,password,contactPerson,email,address,phone,status);
         }catch (Exception exception){
-            logger.error("Error occured at modifyVendorDetails ",exception);
+            logger.error("Error occured at add new vendor ",exception);
         }
         if(result==false){
             handleServiceResponse.setError(true);
