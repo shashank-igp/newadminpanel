@@ -1,24 +1,26 @@
 package com.igp.handles.admin.models.Vendor;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by shanky on 26/1/18.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class VendorInfoModel {
-    @JsonProperty("Vendor Id")
+    @JsonProperty("Vendor_Id")
     private int vendorId;
 
-    @JsonProperty("Vendor Name")
+    @JsonProperty("Vendor_Name")
     private String associateName;
 
-    @JsonProperty("User Id")
+    @JsonProperty("User_Id")
     private String userId;
 
     @JsonProperty("Password")
     private String password;
 
-    @JsonProperty("Contact Person")
+    @JsonProperty("Contact_Person")
     private String contactPerson;
 
     @JsonProperty("Email")

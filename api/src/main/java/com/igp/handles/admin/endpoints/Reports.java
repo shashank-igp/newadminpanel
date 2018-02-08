@@ -8,7 +8,6 @@ import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import com.igp.handles.vendorpanel.response.ReportResponse;
 import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -208,7 +207,7 @@ public class Reports {
         try{
         reportMapper.fillDataActionVendor(tableDataAction);
         reportResponse.setTableDataAction(tableDataAction);
-        reportResponse.setTableHeaders(new String[]{"Vendor Id","Vendor Name","Contact Person","Email",
+        reportResponse.setTableHeaders(new String[]{"Vendor_Id","Vendor_Name","Contact_Person","Email",
             "Address","Phone","User Id","Password","Status"});
 
             vendorDetailsHavingSummaryModel = reportMapper.getVendorDetails(fkAssociateId,startLimit,endLimit);
