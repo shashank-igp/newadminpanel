@@ -150,14 +150,41 @@ public class OrderMapper {
 
         return result;
     }
-    public boolean deliveryDetailChanges(int orderId,int orderProductId,String deliveryDate,String deliveryTime,int deliveryType){
+    public boolean deliveryDetailChanges(int orderId,int orderProductId,String deliveryDate,String deliveryTime,int deliveryType,
+        HandleServiceResponse handleServiceResponse,String orderProductIdList){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         int productId=0;
-        try {
+        List<Order> orderList=new ArrayList<>();
+        String restOrderProductIdList="";
+        try{
+            String[] orderProductIds=orderProductIdList.split(",");
+            for(int i=0;i<orderProductIds.length;i++){
+                if(!orderProductIds[i].equals(String.valueOf(orderProductId))){
+                    if(i<orderProductIds.length-1){
+                        restOrderProductIdList+=orderProductIds[i]+",";
+                    }else if(i==orderProductIds.length-1){
+                        restOrderProductIdList+=orderProductIds[i];
+                    }
+                }
+            }
             productId=orderUtil.getProductId(orderProductId);
             result=orderUtil.updateDeliveryDetails(orderId,orderProductId,productId,deliveryDate,deliveryTime,deliveryType);
-
+            if(result){
+                if(deliveryDate!=null){
+                    if(!restOrderProductIdList.equals("")){
+                        orderList=getOrder(orderId,restOrderProductIdList);
+                    }
+                }else{
+                    if(!restOrderProductIdList.equals("")){
+                        orderList=getOrder(orderId,String.valueOf(orderProductId));
+                        orderList=mergeOrderList(orderList,getOrder(orderId,restOrderProductIdList));
+                    }else {
+                        orderList=getOrder(orderId,String.valueOf(orderProductId));
+                    }
+                }
+                handleServiceResponse.setResult(orderList);
+            }
         }catch (Exception exception){
             logger.error("error while deliveryDetailChanges",exception);
         }

@@ -136,19 +136,20 @@ public class Order {
     @POST
     @Path("/v1/admin/handels/deliveryDetailChanges")
     public HandleServiceResponse deliveryDetailChanges(@QueryParam("orderId")int orderId,@QueryParam("orderProductId") int orderProductId
-    ,@QueryParam("deliveryDate") String deliveryDate,@QueryParam("deliveryTime")String deliveryTime,@QueryParam("deliveryType") int deliveryType ){
+    ,@QueryParam("deliveryDate") String deliveryDate,@QueryParam("deliveryTime")String deliveryTime,@QueryParam("deliveryType") int deliveryType ,
+        @DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         boolean result=false;
         try{
-
-            result=orderMapper.deliveryDetailChanges(orderId,orderProductId,deliveryDate,deliveryTime,deliveryType);
+            result=orderMapper.deliveryDetailChanges(orderId,orderProductId,deliveryDate,deliveryTime,deliveryType
+                ,handleServiceResponse,orderProductIdList);
             if(result==false){
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setResult(false);
                 handleServiceResponse.setErrorMessage("some technical error occured while updating deliveryDetails try again !!");
             }else {
-                handleServiceResponse.setResult(result);
+//                handleServiceResponse.setResult(result);
             }
 
         }catch (Exception exception){
