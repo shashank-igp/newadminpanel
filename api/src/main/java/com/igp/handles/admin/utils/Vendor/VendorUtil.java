@@ -96,7 +96,7 @@ public class VendorUtil
                 logger.error("Failed to insert in vendor_assign_price ");
             } else {
                 if(orderUtil.updateOrderProduct(orderProductId,vendorAssignModel.getFkAssociateId(),connection)){
-                    if(orderUtil.updateTrackorder(vendorAssignModel.getFkAssociateId(),orderProductId,connection)){
+                    if(orderUtil.updateTrackorderAfterAssignReAssign(vendorAssignModel.getFkAssociateId(),orderProductId,connection)){
                         connection.commit();
                         result=true;
                     }
