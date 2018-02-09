@@ -26,7 +26,7 @@ import java.util.Map;
 public class ReportUtil {
     private static final Logger logger = LoggerFactory.getLogger(ReportUtil.class);
 
-    public ReportOrderWithSummaryModel getOrders(String fkAssociateId, String startDate, String endDate, String startLimit, String endLimit, Integer orderNo, String delhiveryDate, String status, String deliveryDateFrom, String deliveryDateTo){
+    public ReportOrderWithSummaryModel getOrders(String fkAssociateId, String startDate, String endDate, String startLimit, String endLimit, Integer orderNo, String status, String deliveryDateFrom, String deliveryDateTo){
         Connection connection = null;
 
         ReportOrderWithSummaryModel reportOrderWithSummaryModel=new ReportOrderWithSummaryModel();
@@ -36,10 +36,7 @@ public class ReportUtil {
         ResultSet resultSet = null;
 
         StringBuilder sb=new StringBuilder("");
-        if ((delhiveryDate != null && !delhiveryDate.isEmpty())){
-            sb.append("and oe.delivery_date='"+delhiveryDate+"'");
 
-        }
         if (startDate!=null && !startDate.isEmpty() ){
             sb.append("and o.date_purchased >='"+startDate+"'");
         }
@@ -92,7 +89,7 @@ public class ReportUtil {
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = " select  vap.fk_associate_id as vendorId,a.associate_name as vendorName,o.date_purchased as datePurchased,o.orders_id as  Order_No,oo.occasion_name as Ocassion , "
+            statement = " select a.associate_name as vendorName,o.date_purchased as datePurchased,o.orders_id as  Order_No,oo.occasion_name as Ocassion , "
                 + " o.delivery_city as City ,o.delivery_postcode as Pincode ,oe.delivery_date  as Delivery_Date , "
                 + " op.orders_product_status as opStatus,op.shipping_type_g as Delivery_Type  , o.delivery_name as "
                 + " Recipient_Name , o.delivery_mobile as Phone  , (vap.vendor_price+vap.shipping) as Amount, "
@@ -120,7 +117,6 @@ public class ReportUtil {
                 orderReportObjectModel.setPrice(resultSet.getDouble("Amount"));
                 orderReportObjectModel.setPhoneNumber(resultSet.getString("Phone"));
                 orderReportObjectModel.setStatus(resultSet.getInt("status"));
-                orderReportObjectModel.setVendorId(resultSet.getString("vendorId"));
                 orderReportObjectModel.setVendorName(resultSet.getString("vendorName"));
 
                 if (resultSet.getString("opStatus").equals("Shipped") && resultSet.getInt("status" )==1){

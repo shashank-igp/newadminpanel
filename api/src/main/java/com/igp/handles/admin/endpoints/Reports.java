@@ -38,7 +38,6 @@ public class Reports {
                                          @QueryParam("startLimit") String startLimit,
                                          @QueryParam("endLimit") String endLimit ,
                                          @QueryParam("orderNumber") Integer orderNo,
-                                         @QueryParam("delhiveryDate") String delhiveryDate,
                                          @QueryParam("status")  String status,
                                          @QueryParam("deliveryDateFrom") String deliveryDateFrom,
                                          @QueryParam("deliveryDateTo") String deliveryDateTo){
@@ -47,19 +46,18 @@ public class Reports {
         ReportMapper reportMapper = new ReportMapper();
         startDate=getTimestampString(startDate,0);
         endDate=getTimestampString(endDate,1);
-        if(delhiveryDate==null){
+        if(deliveryDateFrom==null){
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
             LocalDate localDate = LocalDate.now();
-            delhiveryDate=dtf.format(localDate);
+            deliveryDateFrom=dtf.format(localDate);
             //set today's date by default
         }
-        delhiveryDate=getTimestampString(delhiveryDate,0);
-        deliveryDateTo=getTimestampString(deliveryDateTo,1);
+        deliveryDateTo=getTimestampString(deliveryDateTo,0);
         deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
 
-        reportResponse.setTableHeaders(new String[]{"Vendor_Id","Vendor_Name","Order_No","Date","Occasion","City","Pincode","Delivery_Date"
+        reportResponse.setTableHeaders(new String[]{"Vendor_Name","Order_No","Date","Occasion","City","Pincode","Delivery_Date"
             ,"Delivery_Type","Recipient_Name","Phone","Amount","Status"});
-        ReportOrderWithSummaryModel reportOrderWithSummaryModel1 = reportMapper.getOrderReportMapper(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,delhiveryDate,status,deliveryDateFrom,deliveryDateTo);
+        ReportOrderWithSummaryModel reportOrderWithSummaryModel1 = reportMapper.getOrderReportMapper(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,status,deliveryDateFrom,deliveryDateTo);
         reportResponse.setSummary(reportOrderWithSummaryModel1.getSummaryModelList());
         List<Object> objectList = new ArrayList<Object>(reportOrderWithSummaryModel1.getOrderReportObjectModelList());
         reportResponse.setTableData( objectList);
