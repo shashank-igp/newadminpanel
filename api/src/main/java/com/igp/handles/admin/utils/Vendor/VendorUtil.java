@@ -92,6 +92,8 @@ public class VendorUtil
             preparedStatement.setString(22,vendorAssignModel.getAssignByUser());
 
             Integer status = preparedStatement.executeUpdate();
+
+            logger.debug("step-4 assignReassignOrder after insert into vendor_assign_price with insert status = "+status);
             if (status == 0) {
                 logger.error("Failed to insert in vendor_assign_price ");
             } else {

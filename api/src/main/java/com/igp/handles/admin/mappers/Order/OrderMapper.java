@@ -91,6 +91,9 @@ public class OrderMapper {
 
             Order order=orderUtil.getOrderRelatedInfo(orderId,orderProductId);
             OrdersProducts ordersProducts=order.getOrderProducts().get(0);
+
+            logger.debug("step-2 assignReassignOrder with orderProductId "+orderProductId+" and restOrderProductIdList "+restOrderProductIdList);
+
             if(action.equalsIgnoreCase("assign")){
                 result=orderUtil.assignOrderToVendor(orderId,orderProductId,vendorId,order);
                 if(result==1){
@@ -99,6 +102,7 @@ public class OrderMapper {
                     }
                 }
             }else if(action.equalsIgnoreCase("reassign")) {
+
 
                 result=orderUtil.reassignOrderToVendor(orderId,orderProductId,vendorId,order);
                 if(result==1){
