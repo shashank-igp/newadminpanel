@@ -22,10 +22,10 @@ public class ReportMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(ReportMapper.class);
 
-    public  ReportOrderWithSummaryModel getOrderReportMapper(String fkAssociateId, String startDate, String endDate, String startLimit, String endLimit, Integer orderNo, String delhiveryDate, String status, String deliveryDateFrom, String deliveryDateTo){
-            ReportUtil reportUtil = new ReportUtil();
+    public  ReportOrderWithSummaryModel getOrderReportMapper(String fkAssociateId, String startDate, String endDate, String startLimit, String endLimit, Integer orderNo, String status, String deliveryDateFrom, String deliveryDateTo){
+        ReportUtil reportUtil = new ReportUtil();
         ReportOrderWithSummaryModel reportOrderWithSummaryModel=null;
-        reportOrderWithSummaryModel=reportUtil.getOrders(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,delhiveryDate,status,deliveryDateFrom,deliveryDateTo);
+        reportOrderWithSummaryModel=reportUtil.getOrders(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,status,deliveryDateFrom,deliveryDateTo);
         return reportOrderWithSummaryModel;
     }
 
@@ -87,7 +87,7 @@ public class ReportMapper {
         return result;
     }
     public PayoutAndTaxReportSummaryModel getPayoutAndTaxes(int fkAssociateId,int orderId,String orderDateFrom,String orderDeliveryDateFrom,
-        String orderDeliveryDateTo,String orderDateTo,String startLimit,String endLimit){
+                                                            String orderDeliveryDateTo,String orderDateTo,String startLimit,String endLimit){
         PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
         PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=null;
         VendorUtil vendorUtil=new VendorUtil();
@@ -113,23 +113,23 @@ public class ReportMapper {
         return vendorDetailsHavingSummaryModel;
     }
     public boolean modifyVendorDetails(int fkAssociateId,String associateName,String contactPerson,String email,
-                       String address,String phone,String userId, String password,int status){
+                                       String address,String phone,String userId, String password,int status){
         boolean result = false;
         int response;
         ReportUtil reportUtil = new ReportUtil();
         try{
             response = reportUtil.modifyVendorDetails(fkAssociateId,associateName,contactPerson,email,address,phone,userId,password,status);
-       if (response==1){
-           result=true;
-       }
+            if (response==1){
+                result=true;
+            }
         }catch (Exception exception){
             logger.error("Error at modifyVendorDetails in ReportMapper ",exception);
         }
-    return result;
+        return result;
     }
     public boolean addNewVendorMapper(String associateName,String user, String password,
                                       String contactPerson,String email,
-                                       String address,String phone,int status){
+                                      String address,String phone,int status){
         boolean result = false;
         int response;
         ReportUtil reportUtil = new ReportUtil();

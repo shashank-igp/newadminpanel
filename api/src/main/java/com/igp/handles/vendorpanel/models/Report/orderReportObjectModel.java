@@ -14,12 +14,8 @@ public class orderReportObjectModel {
     @JsonProperty("Order_No")
     private String orderNo;
 
-
     @JsonProperty("Date")
     private String date;
-
-    @JsonProperty("Vendor_Id")
-    private String vendorId;
 
     @JsonProperty("Vendor_Name")
     private String vendorName;
@@ -48,28 +44,14 @@ public class orderReportObjectModel {
     @JsonProperty("Amount")
     private double  price;
 
-
     @JsonProperty("Status")
     private String orderProductStatus;
-
-
-
-
-
-
-
-
-
 
     @JsonIgnore
     private Integer status;
 
-
-
     @JsonIgnore
     private Double totalAmountSummary;
-
-
 
     public String getDate() {
         return date;
@@ -173,14 +155,6 @@ public class orderReportObjectModel {
 
     public void setOrderProductStatus(String orderProductStatus) {
         this.orderProductStatus = orderProductStatus;
-    }
-
-    public String getVendorId() {
-        return vendorId;
-    }
-
-    public void setVendorId(String vendorId) {
-        this.vendorId = vendorId;
     }
 
     public String getVendorName() {
