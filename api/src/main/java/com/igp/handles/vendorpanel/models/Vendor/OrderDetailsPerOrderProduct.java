@@ -29,6 +29,30 @@ public class OrderDetailsPerOrderProduct
 
     private int vendorId;
 
+    private String assignTime;
+
+    private String purchasedTime;
+
+    public String getPurchasedTime()
+    {
+        return purchasedTime;
+    }
+
+    public void setPurchasedTime(String purchasedTime)
+    {
+        this.purchasedTime = purchasedTime;
+    }
+
+    public String getAssignTime()
+    {
+        return assignTime;
+    }
+
+    public void setAssignTime(String assignTime)
+    {
+        this.assignTime = assignTime;
+    }
+
     public int getVendorId()
     {
         return vendorId;

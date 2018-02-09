@@ -32,6 +32,7 @@ public class DashboardUtil {
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement = "select * from orders o join orders_products op on o.orders_id = op.orders_id join "
                 + " order_product_extra_info opei on opei.order_product_id=op.orders_products_id join products p on p.products_id = op.products_id "
+                + " left join vendor_assign_price vap on vap.orders_id = op.orders_id and vap.products_id = op.products_id "
                 + " where date_format(opei.delivery_date,'%Y-%m-%d') "+dateComapareSymbol+" ? and p.fk_associate_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
 
@@ -56,6 +57,8 @@ public class DashboardUtil {
                 orderDetailsPerOrderProduct.setSlaCode(resultSet.getInt("op.sla_code"));
                 orderDetailsPerOrderProduct.setOrdersProductsId(resultSet.getLong("op.orders_products_id"));
                 orderDetailsPerOrderProduct.setVendorId(resultSet.getInt("op.fk_associate_id"));
+                orderDetailsPerOrderProduct.setAssignTime(resultSet.getString("vap.assign_time"));
+                orderDetailsPerOrderProduct.setPurchasedTime(resultSet.getString("o.date_purchased"));
                 listOfOrderIdAsPerVendor.add(orderDetailsPerOrderProduct);
             }
 

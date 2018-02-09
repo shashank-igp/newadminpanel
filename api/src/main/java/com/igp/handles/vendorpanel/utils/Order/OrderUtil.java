@@ -25,7 +25,7 @@ public class OrderUtil
     private static final Logger logger = LoggerFactory.getLogger(OrderUtil.class);
 
     public List<OrdersProducts> getOrderProducts(String scopeId, int orderId, String fkAssociateId,Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap
-                                                , String orderProductIds,boolean forAdminPanelOrNot){
+        , String orderProductIds,boolean forAdminPanelOrNot){
         Connection connection = null;
         ResultSet resultSet = null;
         String statement;
@@ -55,7 +55,7 @@ public class OrderUtil
                     + vendorIdClaus + " op.orders_products_id IN ( "+orderProductIds+" )";
 
             }
-           preparedStatement = connection.prepareStatement(statement);
+            preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,orderId);
 
             logger.debug("STATEMENT CHECK: " + preparedStatement);
@@ -74,19 +74,6 @@ public class OrderUtil
                     .products_weight(resultSet.getString("op.products_weight"))
                     .products_code(resultSet.getString("op.products_code"))
                     .fkAssociateId(resultSet.getString("op.fk_associate_id"))
-                    .orderShippingAssociatewise(resultSet.getBigDecimal("op.order_shipping_associatewise"))
-                    .ordersProductStatus(resultSet.getString("op.orders_product_status"))
-                    .ordersAwbnumberAssociatewise(resultSet.getString("op.orders_awbnumber_associatewise"))
-                    .ordersProductsCourierid(resultSet.getInt("op.orders_products_courierid"))
-                    .ordersProductsCancel_id(resultSet.getString("op.orders_products_cancel_id"))
-                    .airBillWeight(resultSet.getString("op.air_bill_weight"))
-                    .dispatchDate(resultSet.getDate("op.dispatch_date"))
-                    .payoutOnHold(resultSet.getInt("op.payout_on_hold"))
-                    .ordersProductsBaseCurrency(resultSet.getInt("op.orders_products_base_currency"))
-                    .ordersProductsBaseCurrencyConversionRateInUsd(resultSet.getFloat("op.orders_products_base_currency_conversion_rate_in_usd"))
-                    .ordersProductsBaseCurrencyConversionRateInInr(resultSet.getFloat("op.orders_products_base_currency_conversion_rate_in_inr"))
-                    .SpecialChargesShip(resultSet.getLong("op.Special_charges_ship"))
-                    .shippingTypeG(resultSet.getString("op.shipping_type_g"))
                     .deliveryStatus(resultSet.getInt("op.delivery_status"))
                     .productImage(resultSet.getString("npei.m_img"))
                     .productUpdateDateTime(dateFormat.parse(resultSet.getString("p.update_date_time")))
@@ -96,7 +83,7 @@ public class OrderUtil
                     .timeSlaVoilates(getTimeWhenColorChangesforOrderProduct(resultSet.getInt("op.sla_code")))
                     .build();
 
-                    ordersProducts.setVendorName(vendorUtil.getVendorInfo(Integer.parseInt(ordersProducts.getFkAssociateId())).getAssociateName());
+                ordersProducts.setVendorName(vendorUtil.getVendorInfo(Integer.parseInt(ordersProducts.getFkAssociateId())).getAssociateName());
 
                 OrderProductExtraInfo orderProductExtraInfo=new OrderProductExtraInfo.Builder()
                     .orderProductId(resultSet.getInt("opei.order_product_id"))
@@ -284,21 +271,9 @@ public class OrderUtil
                     .productPrice(resultSet.getBigDecimal("op.products_price"))
                     .productPrice_inr(resultSet.getFloat("op.products_price_inr"))
                     .productQuantity(resultSet.getInt("op.products_quantity"))
-                    .productSize(resultSet.getString("op.products_size"))
-                    .products_weight(resultSet.getString("op.products_weight"))
                     .products_code(resultSet.getString("op.products_code"))
                     .fkAssociateId(resultSet.getString("op.fk_associate_id"))
-                    .orderShippingAssociatewise(resultSet.getBigDecimal("op.order_shipping_associatewise"))
                     .ordersProductStatus(resultSet.getString("op.orders_product_status"))
-                    .ordersAwbnumberAssociatewise(resultSet.getString("op.orders_awbnumber_associatewise"))
-                    .ordersProductsCourierid(resultSet.getInt("op.orders_products_courierid"))
-                    .ordersProductsCancel_id(resultSet.getString("op.orders_products_cancel_id"))
-                    .airBillWeight(resultSet.getString("op.air_bill_weight"))
-                    .dispatchDate(resultSet.getDate("op.dispatch_date"))
-                    .payoutOnHold(resultSet.getInt("op.payout_on_hold"))
-                    .ordersProductsBaseCurrency(resultSet.getInt("op.orders_products_base_currency"))
-                    .ordersProductsBaseCurrencyConversionRateInUsd(resultSet.getFloat("op.orders_products_base_currency_conversion_rate_in_usd"))
-                    .ordersProductsBaseCurrencyConversionRateInInr(resultSet.getFloat("op.orders_products_base_currency_conversion_rate_in_inr"))
                     .SpecialChargesShip(resultSet.getLong("op.Special_charges_ship"))
                     .shippingTypeG(resultSet.getString("op.shipping_type_g"))
                     .deliveryStatus(resultSet.getInt("op.delivery_status"))
@@ -351,7 +326,7 @@ public class OrderUtil
         return listOfOrderProducts;
     }
     public String[] getOrderProductVendorPrice(int fkAssociateId, int orderId, String productId){
-        String[] resultArray=new String[3];
+        String[] resultArray=new String[4];
         Connection connection = null;
         ResultSet resultSet = null;
         String statement;
@@ -359,7 +334,7 @@ public class OrderUtil
         try
         {
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement="select shipping, vendor_price , delivery_date from vendor_assign_price where "
+            statement="select shipping, vendor_price , delivery_date , assign_time from vendor_assign_price where "
                 + " fk_associate_id = ? and orders_id = ? and products_id = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,fkAssociateId);
@@ -371,10 +346,12 @@ public class OrderUtil
             resultArray[0]="0.00";
             resultArray[1]="0.00";
             resultArray[2]="";
+            resultArray[3]=null;
             if(resultSet.next()){
                 resultArray[0]=resultSet.getString("shipping");
                 resultArray[1]=resultSet.getString("vendor_price");
                 resultArray[2]=resultSet.getString("delivery_date");
+                resultArray[3]=resultSet.getString("assign_time");
             }
 
         }
@@ -392,8 +369,8 @@ public class OrderUtil
     }
 
     public double getProductComponents(int productId,int fkAssociateId,String productCode,
-                                        List<OrderComponent> componentList ,OrderProductExtraInfo orderProductExtraInfo
-                                        ,boolean clubEgglessComponentFalg){
+        List<OrderComponent> componentList ,OrderProductExtraInfo orderProductExtraInfo
+        ,boolean clubEgglessComponentFalg){
 
         Connection connection = null;
         ResultSet resultSet = null;
@@ -423,8 +400,8 @@ public class OrderUtil
                 + " dbc.fk_associate_id=?  where bc.barcode in "+productCodePlusAttribute; //  order by dbc.price * bc.quantity desc
 
 
-//            statement =" SELECT  mc.componentImage componentImage ,opci.component_code,mc.component_name,opci.vendor_to_component_price, "
-//                + " opci.products_id,opci.quantity FROM  orders_products_components_info opci join AA_master_components mc ";
+            //            statement =" SELECT  mc.componentImage componentImage ,opci.component_code,mc.component_name,opci.vendor_to_component_price, "
+            //                + " opci.products_id,opci.quantity FROM  orders_products_components_info opci join AA_master_components mc ";
 
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,fkAssociateId);
@@ -495,7 +472,7 @@ public class OrderUtil
     }
 
     public double getComponentListFromComponentInfo(int orderId,List<OrderComponent> componentList , OrderProductExtraInfo orderProductExtraInfo
-        ){
+    ){
 
         Connection connection = null;
         ResultSet resultSet = null;
@@ -647,24 +624,12 @@ public class OrderUtil
                     .deliveryEmail(resultSet.getString("delivery_email_address"))
                     .deliveryMobile(resultSet.getString("delivery_mobile"))
                     .datePurchased(resultSet.getDate("date_purchased"))
-                    .shippingCost(resultSet.getBigDecimal("shipping_cost"))
-                    .shippingCostInInr(resultSet.getBigDecimal("shipping_cost_in_inr"))
-                    .ordersProductDiscount(resultSet.getBigDecimal("orders_product_discount"))
-                    .ordersProductTotal(resultSet.getBigDecimal("orders_product_total"))
-                    .ordersProductTotalInr(resultSet.getBigDecimal("orders_product_total_inr"))
                     .ordersStatus(resultSet.getString("orders_status"))
                     .commments(resultSet.getString("comments"))
                     .delivery_instruction(resultSet.getString("delivery_instruction"))
-                    .currency(resultSet.getString("currency"))
-                    .currencyValue(resultSet.getBigDecimal("currency_value"))
-                    .ordersTempId(resultSet.getInt("orders_temp_id"))
-                    .dateOfDelivery(resultSet.getDate("date_of_delivery"))
-                    .bankTransactionId(resultSet.getString("BankTransactionId"))
-                    .bankAuthorisationCode(resultSet.getString("BankAuthorisationCode"))
                     .fkAssociateId(resultSet.getInt("fk_associate_id"))
                     .themeId(resultSet.getInt("themeid"))
                     .ordersOccasionId(resultSet.getInt("orders_occasionid"))
-                    .ordersIsGenerated(resultSet.getInt("orders_isgenerated"))
                     .orderInstruction(orderInstr)
                     .addressType(addressTypeMap.get(addressType))
                     .orderProducts(ordersProductsList)
@@ -756,6 +721,7 @@ public class OrderUtil
             case 42:
             case 43:
             case 44:
+            case 6:
                 slaSatisfied = true;
                 break;
         }
@@ -779,6 +745,7 @@ public class OrderUtil
             case 402:
             case 403:
             case 404:
+            case 601:
                 alertActionRequired = true;
                 break;
         }

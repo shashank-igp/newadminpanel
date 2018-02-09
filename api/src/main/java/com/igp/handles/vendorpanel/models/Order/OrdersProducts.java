@@ -131,6 +131,18 @@ public class OrdersProducts implements Serializable{
 
     private String timeSlaVoilates=null;
 
+    private String assignTime=null;
+
+    public String getAssignTime()
+    {
+        return assignTime;
+    }
+
+    public void setAssignTime(String assignTime)
+    {
+        this.assignTime = assignTime;
+    }
+
     public String getTimeSlaVoilates()
     {
         return timeSlaVoilates;
