@@ -19,16 +19,13 @@ public class PincodeTableDataModel {
     private String pincode;
 
     @JsonProperty("Standard Delivery")
-    private String  standardDeliveryCharge;
+    private TableDataActionHandels  standardDeliveryCharge;
 
     @JsonProperty("Fixed Time Delivery")
-    private String  fixedTimeDeliveryCharge;
+    private TableDataActionHandels  fixedTimeDeliveryCharge;
 
     @JsonProperty("Midnight Delivery")
-    private String  midnightDeliveryCharge;
-
-    @JsonProperty("Change Required")
-    private Map<String,Map<String,String>> changeRequired;
+    private TableDataActionHandels  midnightDeliveryCharge;
 
     public String getPincode() {
         return pincode;
@@ -38,27 +35,27 @@ public class PincodeTableDataModel {
         this.pincode = pincode;
     }
 
-    public String getStandardDeliveryCharge() {
+    public TableDataActionHandels getStandardDeliveryCharge() {
         return standardDeliveryCharge;
     }
 
-    public void setStandardDeliveryCharge(String standardDeliveryCharge) {
+    public void setStandardDeliveryCharge(TableDataActionHandels standardDeliveryCharge) {
         this.standardDeliveryCharge = standardDeliveryCharge;
     }
 
-    public String getFixedTimeDeliveryCharge() {
+    public TableDataActionHandels getFixedTimeDeliveryCharge() {
         return fixedTimeDeliveryCharge;
     }
 
-    public void setFixedTimeDeliveryCharge(String fixedTimeDeliveryCharge) {
+    public void setFixedTimeDeliveryCharge(TableDataActionHandels fixedTimeDeliveryCharge) {
         this.fixedTimeDeliveryCharge = fixedTimeDeliveryCharge;
     }
 
-    public String getMidnightDeliveryCharge() {
+    public TableDataActionHandels getMidnightDeliveryCharge() {
         return midnightDeliveryCharge;
     }
 
-    public void setMidnightDeliveryCharge(String midnightDeliveryCharge) {
+    public void setMidnightDeliveryCharge(TableDataActionHandels midnightDeliveryCharge) {
         this.midnightDeliveryCharge = midnightDeliveryCharge;
     }
 
@@ -78,11 +75,5 @@ public class PincodeTableDataModel {
         this.vendorName = vendorName;
     }
 
-    public Map<String,Map<String,String>> getChangeRequired() {
-        return changeRequired;
-    }
 
-    public void setChangeRequired(Map<String,Map<String,String>> changeRequired) {
-        this.changeRequired = changeRequired;
-    }
 }

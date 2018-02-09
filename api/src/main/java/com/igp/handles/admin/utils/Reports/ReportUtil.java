@@ -5,8 +5,12 @@ import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.admin.models.Vendor.VendorInfoModel;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import com.igp.handles.vendorpanel.endpoints.Vendor;
+import com.igp.handles.vendorpanel.models.Report.OrderReportModel;
+import com.igp.handles.vendorpanel.models.Report.ReportOrderWithSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.SummaryModel;
+import com.igp.handles.vendorpanel.models.Report.orderReportObjectModel;
 import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
+import javafx.scene.control.Tab;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,6 +29,143 @@ import java.util.Map;
 public class ReportUtil {
     private static final Logger logger = LoggerFactory.getLogger(ReportUtil.class);
 
+    public ReportOrderWithSummaryModel getOrders(String fkAssociateId, String startDate, String endDate, String startLimit, String endLimit, Integer orderNo, String delhiveryDate, String status, String deliveryDateFrom, String deliveryDateTo){
+        Connection connection = null;
+
+        ReportOrderWithSummaryModel reportOrderWithSummaryModel=new ReportOrderWithSummaryModel();
+        List <orderReportObjectModel>  orderReportObjectList= new ArrayList<>();
+        String statement;
+        List <SummaryModel> summaryModelList=new ArrayList<>();
+        ResultSet resultSet = null;
+
+        StringBuilder sb=new StringBuilder("");
+        if ((delhiveryDate != null && !delhiveryDate.isEmpty())){
+            sb.append("and oe.delivery_date='"+delhiveryDate+"'");
+
+        }
+        if (startDate!=null && !startDate.isEmpty() ){
+            sb.append("and o.date_purchased >='"+startDate+"'");
+        }
+
+        if (endDate!=null && !endDate.isEmpty()){
+            sb.append("and o.date_purchased <='"+endDate+"'");
+        }
+
+        if(deliveryDateFrom!=null && !deliveryDateFrom.isEmpty() ){
+            sb.append(" and oe.delivery_date >='"+deliveryDateFrom+"'");
+        }
+
+        if (deliveryDateTo!=null && !deliveryDateTo.isEmpty()){
+            sb.append("  and oe.delivery_date <='"+deliveryDateTo+"' ");
+        }
+
+        if (fkAssociateId!=null && !fkAssociateId.isEmpty()){
+            sb.append("  and vap.fk_associate_id ='"+fkAssociateId+"' ");
+        }
+
+        if (orderNo!=null )
+        {
+            sb.append("and op.orders_id="+orderNo+"");
+        }
+        else if (status !=null && !status.isEmpty() ){
+            if (status.equals("Delivered")){
+                sb.append("and op.delivery_status=1");
+            }
+            else if(status.equals("OutForDelivery")){
+                sb.append("and  op.orders_product_status='Shipped' and op.delivery_status=0 ");
+            }
+            else
+            {
+                sb.append("and op.orders_product_status='"+status+"'");
+            }
+        }
+        String queryCount = "select count(*) as totalNo  from orders_products as op LEFT JOIN vendor_assign_price as  vap "
+            + " on op.orders_id=vap.orders_id  and  op.products_id=vap.products_id  inner join order_product_extra_info "
+            + " as oe on op.orders_products_id=oe.order_product_id inner  join  orders as o on  vap.orders_id=o.orders_id" +
+            " inner join  orders_occasions  as oo  on o.orders_occasionid=oo.occasion_id where " +
+            "(op.fk_associate_id=72 OR op.fk_associate_id=vap.fk_associate_id) "+sb.toString();
+        int count =SummaryFunctionsUtil.getCount(queryCount);
+        String amount = "select sum((vap.vendor_price+vap.shipping)) as totalNo  from orders_products as op LEFT JOIN vendor_assign_price as  vap "
+            + " on op.orders_id=vap.orders_id  and  op.products_id=vap.products_id  inner join order_product_extra_info "
+            + " as oe on op.orders_products_id=oe.order_product_id inner  join  orders as o on  vap.orders_id=o.orders_id" +
+            " inner join  orders_occasions  as oo  on o.orders_occasionid=oo.occasion_id where " +
+            "(op.fk_associate_id=72 OR op.fk_associate_id=vap.fk_associate_id) "+sb.toString();
+        int amt =SummaryFunctionsUtil.getCount(amount);
+
+        PreparedStatement preparedStatement = null;
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement = " select  vap.fk_associate_id as vendorId,a.associate_name as vendorName,o.date_purchased as datePurchased,o.orders_id as  Order_No,oo.occasion_name as Ocassion , "
+                + " o.delivery_city as City ,o.delivery_postcode as Pincode ,oe.delivery_date  as Delivery_Date , "
+                + " op.orders_product_status as opStatus,op.shipping_type_g as Delivery_Type  , o.delivery_name as "
+                + " Recipient_Name , o.delivery_mobile as Phone  , (vap.vendor_price+vap.shipping) as Amount, "
+                + " op.delivery_status as status  from orders_products as op LEFT JOIN vendor_assign_price as  vap "
+                + " on op.orders_id=vap.orders_id  and  op.products_id=vap.products_id  LEFT JOIN associate as a on vap.fk_associate_id=a.associate_id" +
+                " inner join order_product_extra_info as oe on op.orders_products_id=oe.order_product_id inner  join  orders as o on  vap.orders_id=o.orders_id "
+                + " inner join  orders_occasions  as oo  on o.orders_occasionid=oo.occasion_id where " +
+                "(op.fk_associate_id=72 OR op.fk_associate_id=vap.fk_associate_id) "
+                +sb.toString()+" limit "+startLimit+","+endLimit+" ";
+            preparedStatement = connection.prepareStatement(statement);
+            logger.debug("sql query in getSummaryDetailsForVendor "+preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            Double totalPrice=0.00;
+            Double value=0.00;
+            while(resultSet.next()) {
+                orderReportObjectModel orderReportObjectModel = new orderReportObjectModel();
+                orderReportObjectModel.setDate(resultSet.getString("datePurchased"));
+                orderReportObjectModel.setOrderNo(resultSet.getString("Order_No"));
+                orderReportObjectModel.setOccasion(resultSet.getString("Ocassion"));
+                orderReportObjectModel.setCity(resultSet.getString("City"));
+                orderReportObjectModel.setPincode(resultSet.getInt("Pincode"));
+                orderReportObjectModel.setDelivery_Date(resultSet.getString("Delivery_Date"));
+                orderReportObjectModel.setDeliveryType(resultSet.getString("Delivery_Type"));
+                orderReportObjectModel.setRecipienName(resultSet.getString("Recipient_Name"));
+                orderReportObjectModel.setPrice(resultSet.getDouble("Amount"));
+                orderReportObjectModel.setPhoneNumber(resultSet.getString("Phone"));
+                orderReportObjectModel.setStatus(resultSet.getInt("status"));
+                orderReportObjectModel.setVendorId(resultSet.getString("vendorId"));
+                orderReportObjectModel.setVendorName(resultSet.getString("vendorName"));
+
+                if (resultSet.getString("opStatus").equals("Shipped") && resultSet.getInt("status" )==1){
+
+                    orderReportObjectModel.setOrderProductStatus("Delivered");
+                }
+                else if (resultSet.getString("opStatus").equals("Shipped") && resultSet.getInt("status" )==0 ){
+
+                    orderReportObjectModel.setOrderProductStatus("Out For Delivery");
+                }
+
+
+                else {
+                    orderReportObjectModel.setOrderProductStatus(resultSet.getString("opStatus"));
+                }
+                orderReportObjectList.add(orderReportObjectModel);
+                value=resultSet.getDouble("Amount");
+                totalPrice=totalPrice+value;
+            }
+            reportOrderWithSummaryModel.setOrderReportObjectModelList(orderReportObjectList);
+            SummaryModel summaryModelTotalOrders= new SummaryModel();
+            summaryModelTotalOrders.setLabel("Total orders");
+            summaryModelTotalOrders.setValue(count+"");
+            summaryModelList.add(summaryModelTotalOrders);
+            SummaryModel summaryModelTotalAmount= new SummaryModel();
+            summaryModelTotalAmount.setLabel("Total Amount");
+            summaryModelTotalAmount.setValue(amt+"");
+            summaryModelList.add(summaryModelTotalAmount);
+            reportOrderWithSummaryModel.setSummaryModelList(summaryModelList);
+            reportOrderWithSummaryModel.setTotalAmountSummary(totalPrice);
+            reportOrderWithSummaryModel.setTotalNumber(orderReportObjectList.size());
+        } catch (Exception exception) {
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return  reportOrderWithSummaryModel;
+    }
+
+
     public static PincodeModelListHavingSummaryModel getPincodeDetailsFunctionAdmin (String fkAssociateId, String startLimit, String endLimit)
     {
         Connection connection = null;
@@ -35,7 +176,7 @@ public class ReportUtil {
         String totalQuery="";
         List <SummaryModel> summaryModelList=new ArrayList<>();
         ResultSet resultSet = null;
-        Map<String,Map<String,Map<String,String>>> pincodeShipTypeAndShipChargeMap=new HashMap<>();
+        Map<String,Map<String,TableDataActionHandels>> pincodeShipTypeAndShipChargeMap=new HashMap<>();
 
         PreparedStatement preparedStatement = null;
         try{
@@ -50,54 +191,52 @@ public class ReportUtil {
             totalQuery = " select count(distinct pincode) as totalno from AA_vendor_pincode where vendor_id="+fkAssociateId+"";
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()) {
+                Map<String,TableDataActionHandels> shipTypeAndTableMap = new HashMap<>();
                 String pincode=resultSet.getString("a.pincode").trim();
                 String shipType=resultSet.getString("a.ship_type").trim();
                 String shipCharge=resultSet.getString("a.ship_charge").trim();
                 String reqPrice=resultSet.getString("a.req_price").trim();
+                TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
+                tableDataActionHandels.setValue(shipCharge);
+                tableDataActionHandels.setRequestValue(reqPrice);
+                if(!reqPrice.equals("-1")){
+                    tableDataActionHandels.setRequestType("Approve/Reject");
+                }
+                shipTypeAndTableMap.put(shipType,tableDataActionHandels);
                 if(pincodeShipTypeAndShipChargeMap.get(pincode)==null){
-                    Map<String,Map<String,String>> shipTypeToChargeAndRequiredMap=new HashMap<>();
-                    Map<String,String> chargeToChangeChargeMap = new HashMap<>();
-                    chargeToChangeChargeMap.put(shipCharge,reqPrice);
-                    shipTypeToChargeAndRequiredMap.put(shipType,chargeToChangeChargeMap);
-                    pincodeShipTypeAndShipChargeMap.put(pincode,shipTypeToChargeAndRequiredMap);
+                    pincodeShipTypeAndShipChargeMap.put(pincode,shipTypeAndTableMap);
                 }else {
-                    Map<String,String> chargeToChangeChargeMap = new HashMap<>();
-                    chargeToChangeChargeMap.put(shipCharge,reqPrice);
-                    pincodeShipTypeAndShipChargeMap.get(pincode).put(shipType,chargeToChangeChargeMap);
+                    pincodeShipTypeAndShipChargeMap.get(pincode).put(shipType,tableDataActionHandels);
                 }
                 vendorName  = resultSet.getString("aso.associate_name");
             }
-            for(Map.Entry<String,Map<String,Map<String,String>>> entry:pincodeShipTypeAndShipChargeMap.entrySet()){
+            for(Map.Entry<String,Map<String,TableDataActionHandels>> entry:pincodeShipTypeAndShipChargeMap.entrySet()){
                 PincodeTableDataModel pincodeTableDataModel =new PincodeTableDataModel();
                 String pincode = entry.getKey();
                 pincodeTableDataModel.setPincode(pincode);
-                Map<String,Map<String,String>> shipTypeToChargeMap=entry.getValue();
-                for (Map.Entry<String,Map<String,String>> entry1:shipTypeToChargeMap.entrySet()){
-                    String shipType=entry1.getKey();
-                    Map<String,String> charges = entry1.getValue();
-                    String shipCharge=charges.keySet().toString();
+                Map<String,TableDataActionHandels> shipTypeAndTableMap = entry.getValue();
+                for (Map.Entry<String,TableDataActionHandels> entry1: shipTypeAndTableMap.entrySet()){
+                    String shipType=entry1.getKey();  // this will have shiptype
+                    TableDataActionHandels tableDataActionHandels = entry1.getValue();
                     if(shipType.equalsIgnoreCase("1")){
-                        pincodeTableDataModel.setStandardDeliveryCharge(shipCharge);
-                        pincodeTableDataModel.setChangeRequired(shipTypeToChargeMap);
+                        pincodeTableDataModel.setStandardDeliveryCharge(tableDataActionHandels);
                     }else if(shipType.equalsIgnoreCase("2")){
-                        pincodeTableDataModel.setFixedTimeDeliveryCharge(shipCharge);
-                        pincodeTableDataModel.setChangeRequired(shipTypeToChargeMap);
+                        pincodeTableDataModel.setFixedTimeDeliveryCharge(tableDataActionHandels);
                     }else if(shipType.equalsIgnoreCase("3")){
-                        pincodeTableDataModel.setMidnightDeliveryCharge(shipCharge);
-                        pincodeTableDataModel.setChangeRequired(shipTypeToChargeMap);
+                        pincodeTableDataModel.setMidnightDeliveryCharge(tableDataActionHandels);
                     }
                 }
+                TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
+                tableDataActionHandels.setValue("Not Serviceable");
+                tableDataActionHandels.setRequestValue("-1");
                 if(pincodeTableDataModel.getStandardDeliveryCharge()==null){
-                    pincodeTableDataModel.setStandardDeliveryCharge("Not Serviceable");
-                    pincodeTableDataModel.setChangeRequired(null);
+                    pincodeTableDataModel.setStandardDeliveryCharge(tableDataActionHandels);
                 }
                 if(pincodeTableDataModel.getFixedTimeDeliveryCharge()==null){
-                    pincodeTableDataModel.setFixedTimeDeliveryCharge("Not Serviceable");
-                    pincodeTableDataModel.setChangeRequired(null);
+                    pincodeTableDataModel.setFixedTimeDeliveryCharge(tableDataActionHandels);
                 }
                 if(pincodeTableDataModel.getMidnightDeliveryCharge()==null){
-                    pincodeTableDataModel.setMidnightDeliveryCharge("Not Serviceable");
-                    pincodeTableDataModel.setChangeRequired(null);
+                    pincodeTableDataModel.setMidnightDeliveryCharge(tableDataActionHandels);
                 }
                 pincodeTableDataModel.setVendorId(fkAssociateId);
                 pincodeTableDataModel.setVendorName(vendorName);

@@ -5,6 +5,7 @@ import com.igp.handles.admin.models.Reports.PincodeModelListHavingSummaryModel;
 import com.igp.handles.admin.models.Reports.ProductModelListHavingSummaryModel;
 import com.igp.handles.admin.models.Reports.VendorDetailsHavingSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
+import com.igp.handles.vendorpanel.models.Report.ReportOrderWithSummaryModel;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import com.igp.handles.vendorpanel.response.ReportResponse;
 import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
@@ -13,9 +14,9 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 import static com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil.getTimestampString;
 
@@ -30,15 +31,53 @@ public class Reports {
     private static final Logger logger = LoggerFactory.getLogger(Reports.class);
 
     @GET
+    @Path("/v1/admin/handels/getOrderReport")
+    public ReportResponse getOrderReport(@QueryParam("fkAssociateId") String fkAssociateId,
+                                         @QueryParam("orderDateFrom") String startDate,
+                                         @QueryParam("orderDateTo")String endDate ,
+                                         @QueryParam("startLimit") String startLimit,
+                                         @QueryParam("endLimit") String endLimit ,
+                                         @QueryParam("orderNumber") Integer orderNo,
+                                         @QueryParam("delhiveryDate") String delhiveryDate,
+                                         @QueryParam("status")  String status,
+                                         @QueryParam("deliveryDateFrom") String deliveryDateFrom,
+                                         @QueryParam("deliveryDateTo") String deliveryDateTo){
+
+        ReportResponse reportResponse=new ReportResponse();
+        ReportMapper reportMapper = new ReportMapper();
+        startDate=getTimestampString(startDate,0);
+        endDate=getTimestampString(endDate,1);
+        if(delhiveryDate==null){
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            LocalDate localDate = LocalDate.now();
+            delhiveryDate=dtf.format(localDate);
+            //set today's date by default
+        }
+        delhiveryDate=getTimestampString(delhiveryDate,0);
+        deliveryDateTo=getTimestampString(deliveryDateTo,1);
+        deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
+
+        reportResponse.setTableHeaders(new String[]{"Vendor_Id","Vendor_Name","Order_No","Date","Occasion","City","Pincode","Delivery_Date"
+            ,"Delivery_Type","Recipient_Name","Phone","Amount","Status"});
+        ReportOrderWithSummaryModel reportOrderWithSummaryModel1 = reportMapper.getOrderReportMapper(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,delhiveryDate,status,deliveryDateFrom,deliveryDateTo);
+        reportResponse.setSummary(reportOrderWithSummaryModel1.getSummaryModelList());
+        List<Object> objectList = new ArrayList<Object>(reportOrderWithSummaryModel1.getOrderReportObjectModelList());
+        reportResponse.setTableData( objectList);
+        return reportResponse;
+    }
+
+
+    @GET
     @Path("/v1/admin/handels/getPincodeReport")
     public ReportResponse getPincodeReport(@QueryParam("fkAssociateId") @DefaultValue("565") String fkAssociateId,
                                            @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
         ReportResponse reportResponse=new ReportResponse();
+        ReportMapper reportMapper = new ReportMapper();
         List<Map.Entry<String,List<String>>> tableDataAction=new ArrayList<>();
-        reportResponse.setTableHeaders(new String[]{"Vendor ID","Vendor Name","Pincode","Standard Delivery","Fixed Time Delivery","Midnight Delivery","Change Required"});
-        com.igp.handles.vendorpanel.mappers.Reports.ReportMapper.fillDataActionpincode(tableDataAction);
+        reportResponse.setTableHeaders(new String[]{"Vendor Id","Vendor Name","Pincode","Standard Delivery","Fixed Time Delivery","Midnight Delivery"});
+        reportMapper.fillDataActionPincode(tableDataAction);
         reportResponse.setTableDataAction(tableDataAction);
-        PincodeModelListHavingSummaryModel pincodeModelListHavingSummaryModel =ReportMapper.getPincodeSummaryDetails(fkAssociateId,startLimit,endLimit);
+        PincodeModelListHavingSummaryModel pincodeModelListHavingSummaryModel = ReportMapper.getPincodeSummaryDetails(fkAssociateId,startLimit,endLimit);
         reportResponse.setSummary(pincodeModelListHavingSummaryModel.getSummaryModelList());
         List<Object> objectList = new ArrayList<Object>(pincodeModelListHavingSummaryModel.getPincodeTableDataModelList());
         reportResponse.setTableData(objectList);
@@ -205,6 +244,7 @@ public class Reports {
         VendorDetailsHavingSummaryModel vendorDetailsHavingSummaryModel = new VendorDetailsHavingSummaryModel();
         List<Map.Entry<String,List<String>>> tableDataAction=new ArrayList<>();
         try{
+
         reportMapper.fillDataActionVendor(tableDataAction);
         reportResponse.setTableDataAction(tableDataAction);
         reportResponse.setTableHeaders(new String[]{"Vendor_Id","Vendor_Name","Contact_Person","Email",
@@ -261,7 +301,7 @@ public class Reports {
         boolean result =false;
 
         try{
-          result =  reportMapper.addNewVendorMapper(associateName,user,password,contactPerson,email,address,phone,status);
+            result =  reportMapper.addNewVendorMapper(associateName,user,password,contactPerson,email,address,phone,status);
         }catch (Exception exception){
             logger.error("Error occured at add new vendor ",exception);
         }
