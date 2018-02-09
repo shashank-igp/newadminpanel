@@ -81,12 +81,11 @@ public class OrderMapper {
             String[] orderProductIds=allOrderProductIdList.split(",");
             for(int i=0;i<orderProductIds.length;i++){
                 if(!orderProductIds[i].equals(String.valueOf(orderProductId))){
-                    if(i<orderProductIds.length-1){
                         restOrderProductIdList+=orderProductIds[i]+",";
-                    }else if(i==orderProductIds.length-1){
-                        restOrderProductIdList+=orderProductIds[i];
-                    }
                 }
+            }
+            if(!restOrderProductIdList.equals("")){
+                restOrderProductIdList=restOrderProductIdList.substring(0,restOrderProductIdList.length()-1);
             }
 
             Order order=orderUtil.getOrderRelatedInfo(orderId,orderProductId);
@@ -165,12 +164,11 @@ public class OrderMapper {
             String[] orderProductIds=orderProductIdList.split(",");
             for(int i=0;i<orderProductIds.length;i++){
                 if(!orderProductIds[i].equals(String.valueOf(orderProductId))){
-                    if(i<orderProductIds.length-1){
-                        restOrderProductIdList+=orderProductIds[i]+",";
-                    }else if(i==orderProductIds.length-1){
-                        restOrderProductIdList+=orderProductIds[i];
-                    }
+                    restOrderProductIdList+=orderProductIds[i]+",";
                 }
+            }
+            if(!restOrderProductIdList.equals("")){
+                restOrderProductIdList=restOrderProductIdList.substring(0,restOrderProductIdList.length()-1);
             }
             productId=orderUtil.getProductId(orderProductId);
             result=orderUtil.updateDeliveryDetails(orderId,orderProductId,productId,deliveryDate,deliveryTime,deliveryType);
