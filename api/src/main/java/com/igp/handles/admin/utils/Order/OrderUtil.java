@@ -41,6 +41,10 @@ public class OrderUtil {
             preparedStatement.setInt(5,vendorId);
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             Integer status = preparedStatement.executeUpdate();
+
+            logger.debug("step-8 assignReassignOrder after insert into orders_history with insertion status = "+status);
+
+
             if (status == 0) {
                 logger.error("Failed to insert Into OrderHistory ");
             } else {
@@ -71,6 +75,8 @@ public class OrderUtil {
             preparedStatement.setInt(4,orderProductId);
 
             Integer status = preparedStatement.executeUpdate();
+
+            logger.debug("step-5 assignReassignOrder after update in orders_products with update status = "+status);
             if (status == 0) {
                 logger.error("Failed to update orders_products ");
             } else {
@@ -96,6 +102,9 @@ public class OrderUtil {
             preparedStatement.setInt(2,orderProductId);
 
             Integer status = preparedStatement.executeUpdate();
+
+            logger.debug("step-6 assignReassignOrder after update in trackorders with update status = "+status);
+
             if (status == 0) {
                 logger.error("Failed to update trackorders ");
             } else {
@@ -250,11 +259,14 @@ public class OrderUtil {
             shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
                 orderProductExtraInfo.getDeliveryType());
 
+
             if(checkIfVendorHasAllProductComponent(vendorId,ordersProducts.getProducts_code())==false){
                 return 2; // that means vendor could not process this order since vendor does not have all components needed
             }else if(checkIfCurrentVendorAlreadyAssignedToOrder(vendorId,orderId,ordersProducts.getProductId())){
                 return 3; // cant allow to assign same order to same vendor again
             }
+
+            logger.debug("step-3 assignReassignOrder ");
 
 
             ordersubTotal=vendorPrice+shippingCharge;
@@ -282,7 +294,12 @@ public class OrderUtil {
                 ordersHistoryComment="The vendor of product "+order.getOrderProducts().get(0).getProductName()+" has been changed "
                     + "from "+previousVendorName+" To "
                     + vendorUtil.getVendorInfo(vendorId).getAssociateName()+" By New Handels Panel<Br>";
+
+                logger.debug("step-7 assignReassignOrder after complete insertion in VAP,OP,trackorders");
+
+
                 insertIntoOrderHistory(order,vendorId,ordersHistoryComment);
+
                 createOrdersProductsComponentsInfo(componentList,order);
             }
 

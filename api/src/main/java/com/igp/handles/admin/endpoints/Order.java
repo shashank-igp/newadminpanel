@@ -81,6 +81,8 @@ public class Order {
 
         try{
 
+            logger.debug("step-1 assignReassignOrder with "+action);
+
              result=orderMapper.assignReassignOrder(action,orderId,orderProductId,vendorId,allOrderProductIdList,orderList,handleServiceResponse);
             if(result==1){
 //                handleServiceResponse.setResult(orderList);
