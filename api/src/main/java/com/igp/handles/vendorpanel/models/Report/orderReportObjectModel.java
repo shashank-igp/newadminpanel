@@ -1,11 +1,13 @@
 package com.igp.handles.vendorpanel.models.Report;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * Created by shal on 22/9/17.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class orderReportObjectModel {
 
 
@@ -16,7 +18,11 @@ public class orderReportObjectModel {
     @JsonProperty("Date")
     private String date;
 
+    @JsonProperty("Vendor_Id")
+    private String vendorId;
 
+    @JsonProperty("Vendor_Name")
+    private String vendorName;
 
     @JsonProperty("Occasion")
     private String occasion;
@@ -167,5 +173,21 @@ public class orderReportObjectModel {
 
     public void setOrderProductStatus(String orderProductStatus) {
         this.orderProductStatus = orderProductStatus;
+    }
+
+    public String getVendorId() {
+        return vendorId;
+    }
+
+    public void setVendorId(String vendorId) {
+        this.vendorId = vendorId;
+    }
+
+    public String getVendorName() {
+        return vendorName;
+    }
+
+    public void setVendorName(String vendorName) {
+        this.vendorName = vendorName;
     }
 }

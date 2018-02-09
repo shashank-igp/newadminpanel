@@ -7,6 +7,7 @@ import com.igp.handles.admin.models.Vendor.VendorInfoModel;
 import com.igp.handles.admin.utils.Reports.ReportUtil;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
+import com.igp.handles.vendorpanel.models.Report.ReportOrderWithSummaryModel;
 import com.igp.handles.vendorpanel.utils.Reports.PayoutAndTaxesReport;
 import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
 import org.slf4j.Logger;
@@ -20,6 +21,13 @@ import java.util.*;
 public class ReportMapper {
 
     private static final Logger logger = LoggerFactory.getLogger(ReportMapper.class);
+
+    public  ReportOrderWithSummaryModel getOrderReportMapper(String fkAssociateId, String startDate, String endDate, String startLimit, String endLimit, Integer orderNo, String delhiveryDate, String status, String deliveryDateFrom, String deliveryDateTo){
+            ReportUtil reportUtil = new ReportUtil();
+        ReportOrderWithSummaryModel reportOrderWithSummaryModel=null;
+        reportOrderWithSummaryModel=reportUtil.getOrders(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,delhiveryDate,status,deliveryDateFrom,deliveryDateTo);
+        return reportOrderWithSummaryModel;
+    }
 
     public static PincodeModelListHavingSummaryModel getPincodeSummaryDetails(String fkAssociateId, String startLimit, String endLimit){
 
@@ -135,22 +143,34 @@ public class ReportMapper {
         }
         return result;
     }
-    public static void fillDataActionVendor(List<Map.Entry<String,List<String>>> tableDataAction){
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("associateName",new ArrayList<String>(
+    public void fillDataActionPincode(List<Map.Entry<String,List<String>>> tableDataAction){
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Standard Delivery",new ArrayList<String>(
+            Arrays.asList("Edit","Enable/Disable"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Fixed Time Delivery",new ArrayList<String>(
+            Arrays.asList("Edit","Enable/Disable"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Midnight Delivery",new ArrayList<String>(
+            Arrays.asList("Edit","Enable/Disable"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Pincode",new ArrayList<String>(
+            Arrays.asList("Enable/Disable"))));
+    }
+    public void fillDataActionVendor(List<Map.Entry<String,List<String>>> tableDataAction){
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Vendor Id",new ArrayList<String>(
             Arrays.asList("Edit"))));
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("contactPerson",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Vendor Name",new ArrayList<String>(
             Arrays.asList("Edit"))));
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("email",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Contact Person",new ArrayList<String>(
             Arrays.asList("Edit"))));
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("address",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Email",new ArrayList<String>(
             Arrays.asList("Edit"))));
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("phone",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Address",new ArrayList<String>(
             Arrays.asList("Edit"))));
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("status",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Phone",new ArrayList<String>(
             Arrays.asList("Edit"))));
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("userId",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Status",new ArrayList<String>(
             Arrays.asList("Edit"))));
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("password",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("User Id",new ArrayList<String>(
+            Arrays.asList("Edit"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Password",new ArrayList<String>(
             Arrays.asList("Edit"))));
     }
 }
