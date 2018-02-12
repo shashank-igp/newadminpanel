@@ -2,6 +2,7 @@ package com.igp.handles.admin.models.Reports;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import javafx.scene.control.Tab;
 
 /**
  * Created by suditi on 30/1/18.
@@ -19,10 +20,10 @@ public class ProductTableDataModel {
     private String componentName;
 
     @JsonProperty("Price")
-    private double  price;
+    private TableDataActionHandels  price;
 
     @JsonProperty("InStock")
-    private String inStock;
+    private TableDataActionHandels inStock;
 
     public String getAssociateId() {
         return associateId;
@@ -56,19 +57,17 @@ public class ProductTableDataModel {
         this.componentName = componentName;
     }
 
-    public double getPrice() {
-        return price;
-    }
+    public TableDataActionHandels getPrice() {    return price;    }
 
-    public void setPrice(double price) {
+    public void setPrice(TableDataActionHandels price) {
         this.price = price;
     }
 
-    public String getInStock() {
+    public TableDataActionHandels getInStock() {
         return inStock;
     }
 
-    public void setInStock(String inStock) {
+    public void setInStock(TableDataActionHandels inStock) {
         this.inStock = inStock;
     }
 

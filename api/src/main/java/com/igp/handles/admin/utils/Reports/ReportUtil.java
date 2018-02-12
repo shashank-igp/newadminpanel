@@ -383,10 +383,31 @@ public class ReportUtil {
                 productTableData.setComponent_Id_Hide(resultSet.getString("cId"));
                 productTableData.setComponentImage(resultSet.getString("cImage"));
                 productTableData.setComponentName(resultSet.getString("cName"));
-                productTableData.setPrice(resultSet.getDouble("price"));
+
+                String reqPrice = resultSet.getString("vc.req_price");
+
+                TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
+                tableDataActionHandels.setValue(resultSet.getDouble("price")+"");
+                tableDataActionHandels.setRequestValue("-1");
+                if(!reqPrice.equals("-1") && !tableDataActionHandels.getValue().equals(reqPrice)){
+                    tableDataActionHandels.setRequestType("Approve/Reject");
+                    tableDataActionHandels.setRequestValue(reqPrice);
+                }
+                productTableData.setPrice(tableDataActionHandels);
+
+                TableDataActionHandels tableDataActionHandels1 = new TableDataActionHandels();
                 Integer inStock=resultSet.getInt("inStock");
-                if (inStock==1){productTableData.setInStock("In Stock");}
-                else {productTableData.setInStock("Out Of Stock");}
+                tableDataActionHandels1.setRequestValue("-1");
+                if (inStock == 1) {
+                    tableDataActionHandels1.setValue("In Stock");
+                } else {
+                    tableDataActionHandels1.setValue("Out of Stock");
+                }
+                if(tableDataActionHandels.getValue().equals(reqPrice)) {
+                    tableDataActionHandels1.setRequestType("Approve/Reject");
+                    tableDataActionHandels1.setRequestValue("In Stock");
+                }
+                productTableData.setInStock(tableDataActionHandels1);
 
                 productTableDataModelList.add(productTableData);
             }
@@ -682,29 +703,36 @@ public class ReportUtil {
                 }
             }else if(reportName.equals("getVendorReport")){
                 ProductTableDataModel productTableDataModel = objectMapper.readValue(object,ProductTableDataModel.class);
-
-                if(actionHandels.getValue().equals(actionHandels.getRequestValue())){
-                    if(approveReject==true){
-                        // request is to enable.
-                        message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Approved";
-                        result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,1,"");
-                    }
-                    else {
-                        // request to enable rejected.
-                        message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Rejected";
-                        result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,0,"");
+                if(columnName.equals("InStock")){
+                    actionHandels = productTableDataModel.getInStock();
+                    if(actionHandels.getValue().equals(actionHandels.getRequestValue())){
+                        if(approveReject==true){
+                            // request is to enable.
+                            message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Approved";
+                            result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,1,"");
+                        }
+                        else {
+                            // request to enable rejected.
+                            message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Rejected";
+                            result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,0,"");
+                        }
                     }
                 }
                 else {
-                    if(approveReject==true) {
-                        // request is to update the price.
-                        message="Change price of component "+productTableDataModel.getComponentName()+" to "+actionHandels.getRequestValue()+" : Accepted";
-                        result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,Integer.parseInt(actionHandels.getRequestValue()),1,"");
+                    actionHandels = productTableDataModel.getPrice();
+                    //for update price
+                    if(!actionHandels.getValue().equals(actionHandels.getRequestValue())) {
 
-                    } else {
-                        // request to update the price rejected.
-                        message="Change price of component "+productTableDataModel.getComponentName()+" to "+actionHandels.getRequestValue()+" : ";
-                        result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,1,"reqPrice");
+                        if (approveReject == true) {
+                            // request is to update the price.
+                            message = "Change price of component " + productTableDataModel.getComponentName() + " to " + actionHandels.getRequestValue() + " : Accepted";
+                            result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, Integer.parseInt(actionHandels.getRequestValue()), 1, "");
+
+                        } else {
+                            // request to update the price rejected.
+                            message = "Change price of component " + productTableDataModel.getComponentName() + " to " + actionHandels.getRequestValue() + " : ";
+                            result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, -1, 1, "reqPrice");
+                        }
                     }
                 }
 
