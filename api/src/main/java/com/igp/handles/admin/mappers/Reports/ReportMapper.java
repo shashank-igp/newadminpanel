@@ -1,7 +1,9 @@
 package com.igp.handles.admin.mappers.Reports;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.igp.handles.admin.models.Reports.PincodeModelListHavingSummaryModel;
 import com.igp.handles.admin.models.Reports.ProductModelListHavingSummaryModel;
+import com.igp.handles.admin.models.Reports.TableDataActionHandels;
 import com.igp.handles.admin.models.Reports.VendorDetailsHavingSummaryModel;
 import com.igp.handles.admin.models.Vendor.VendorInfoModel;
 import com.igp.handles.admin.utils.Reports.ReportUtil;
@@ -36,13 +38,14 @@ public class ReportMapper {
         return pincodeModelListHavingSummaryModel;
     }
 
-    public int updatePincodeMapper(Integer flag,int fk_associate_id,String pincode,Integer shipType,Integer updateStatus,Integer updatePrice, String message){
+    public boolean updatePincodeMapper(int flag,int fk_associate_id,int pincode,int shipType,int updatePrice, String message, String field){
         ReportUtil reportUtil = new ReportUtil();
-        int result = reportUtil.updateVendorPincode(flag,fk_associate_id+"",pincode,shipType,updateStatus,updatePrice);
+        boolean response=false;
+        int result = reportUtil.updateVendorPincode(flag,fk_associate_id,pincode,shipType,updatePrice,field);
         if(result==1){
-            result = reportUtil.setVendorGeneralInstruction(fk_associate_id,0,pincode,message+"Done");
+            response = reportUtil.setVendorGeneralInstruction(fk_associate_id,0,pincode+"",message+"Done");
         }
-        return result;
+        return response;
     }
 
     public boolean addNewVendorPincodeMapper(int fkAssociateId,int pincode,int cityId,int shipType,int shipCharge){
@@ -51,40 +54,39 @@ public class ReportMapper {
         map.put(1,"Standard Delivery");
         map.put(2,"Fixed Time Delivery");
         map.put(3,"Mid Night Delivery");
-        map.put(4,"Same Day Delivery");
-        boolean result=true;
+        boolean result,response=false;
         String message="Added new pincode :- "+pincode+" with shipping type :- "+map.get(shipType)+" and shipping charge :- "+shipCharge+" : ";
         result = reportUtil.addNewVendorPincodeUtil(fkAssociateId,pincode,cityId,shipType,shipCharge);
         if(result==true){
-            int response = reportUtil.setVendorGeneralInstruction(fkAssociateId,0,pincode+"",message+"Done");
+            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,0,pincode+"",message+"Done");
         }
-        return result;
+        return response;
     }
 
     public boolean addNewComponentMapper(int fkAssociateId,String componentCode,String componentName,int type,int price){
-        boolean result=true;
+        boolean result,response=false;
         ReportUtil reportUtil =  new ReportUtil();
         String message="Added new Component : Name :- "+componentName+" With Price :- "+price+" : ";
         result = SummaryFunctionsUtil.addVendorComponent(fkAssociateId+"",componentCode,componentName,type,"dummy.jpg",price);
         if(result==true){
-            int response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message+"Done");
+             response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message+"Done");
         }
-        return result;
+        return response;
     }
     public ProductModelListHavingSummaryModel getProductSummaryDetails(String fkAssociateId, String startLimit, String endLimit){
         ReportUtil reportUtil = new ReportUtil();
-        ProductModelListHavingSummaryModel productModelListHavingSummaryModel =null;
-        productModelListHavingSummaryModel =reportUtil.getProductDetail(fkAssociateId,startLimit,endLimit);
+        ProductModelListHavingSummaryModel productModelListHavingSummaryModel = reportUtil.getProductDetail(fkAssociateId,startLimit,endLimit);
         return productModelListHavingSummaryModel;
     }
 
-    public boolean updateComponentMapper(Integer flag,int fk_associate_id,String  componentId, String message, int updatePrice,String inStock){
+    public boolean updateComponentMapper(int fkAssociateId,String componentId, String message, int updatePrice,int inStock, String field){
         ReportUtil reportUtil = new ReportUtil();
-        boolean result=reportUtil.updateProductComponent(flag,fk_associate_id,componentId,updatePrice,inStock);
+        boolean response = false;
+        boolean result=reportUtil.updateProductComponent(fkAssociateId,componentId,updatePrice,inStock,field);
         if(result==true){
-            int response = reportUtil.setVendorGeneralInstruction(fk_associate_id,1,componentId,message+"Done");
+            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentId,message+"Done");
         }
-        return result;
+        return response;
     }
     public PayoutAndTaxReportSummaryModel getPayoutAndTaxes(int fkAssociateId,int orderId,String orderDateFrom,String orderDeliveryDateFrom,
                                                             String orderDeliveryDateTo,String orderDateTo,String startLimit,String endLimit){
@@ -142,6 +144,17 @@ public class ReportMapper {
             logger.error("Error at modifyVendorDetails in ReportMapper ",exception);
         }
         return result;
+    }
+    public boolean approveAndRejectMapper(String object, String reportName, String columnName, int fkAssociateId, boolean approveReject){
+        ReportUtil reportUtil = new ReportUtil();
+        boolean response = false;
+        try{
+            response =  reportUtil.approveAndRejectUtil(object,reportName,columnName,fkAssociateId,approveReject);
+
+        }catch (Exception exception){
+            logger.error("Error at modifyVendorDetails in ReportMapper ",exception);
+        }
+        return response;
     }
     public void fillDataActionPincode(List<Map.Entry<String,List<String>>> tableDataAction){
         tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Standard Delivery",new ArrayList<String>(

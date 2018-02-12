@@ -1,6 +1,8 @@
 package com.igp.handles.admin.utils.Reports;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.igp.config.instance.Database;
+import com.igp.handles.admin.mappers.Reports.ReportMapper;
 import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.admin.models.Vendor.VendorInfoModel;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
@@ -253,24 +255,33 @@ public class ReportUtil {
         }
         return pincodeModelListHavingSummaryModel;
     }
-    public int updateVendorPincode(Integer flag,String fk_associate_id,String pincode,Integer shipType,Integer updateStatus,Integer updatePrice) {
+    public int updateVendorPincode(int flag,int fk_associate_id,int pincode,int shipType,int updatePrice, String field) {
         Connection connection = null;
         String statement;
         String updateClause="";
         int result = 0;
         PreparedStatement preparedStatement = null;
         try {
-            if (updateStatus!=null){
-                updateClause=",flag_enabled="+updateStatus+"";
-            }
-            else {
-                updateClause=",ship_charge="+updatePrice+"";
-            }
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "update AA_vendor_pincode set flag_change="+flag+""+updateClause+" where vendor_id="+fk_associate_id+" and pincode="+pincode+" and  ship_type="+shipType+" ";
-            preparedStatement = connection.prepareStatement(statement);
-            logger.debug("sql query in updateVendorPincode "+preparedStatement);
-            result = preparedStatement.executeUpdate();
+            if(field.equals("pincode")){
+                statement = "update AA_vendor_pincode set flag_enabled="+flag+" where vendor_id=" + fk_associate_id + " and pincode=" + pincode;
+                preparedStatement = connection.prepareStatement(statement);
+                logger.debug("sql query in updateVendorPincode " + preparedStatement);
+                result = preparedStatement.executeUpdate();
+            }else {
+                if (field.equals("reqPrice")){
+                    updateClause = "req_price=" + updatePrice;
+                }
+                else if (flag == 1) {
+                    updateClause = "flag_enabled=" + flag+",req_price = -1 ";
+                } else {
+                    updateClause = "ship_charge=" + updatePrice+",req_price = -1 ";
+                }
+                statement = "update AA_vendor_pincode set " + updateClause + " where vendor_id=" + fk_associate_id + " and pincode=" + pincode + " and  ship_type=" + shipType + " ";
+                preparedStatement = connection.prepareStatement(statement);
+                logger.debug("sql query in updateVendorPincode " + preparedStatement);
+                result = preparedStatement.executeUpdate();
+            }
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);
         } finally {
@@ -288,16 +299,16 @@ public class ReportUtil {
         try {
             connection = Database.INSTANCE.getReadWriteConnection();
             statement = "INSERT INTO AA_vendor_pincode (vendor_id,city_id,pincode,ship_type," +
-                "ship_charge,flag_change,req_price) VALUES (?,?,?,?,?,?,?)";
+                "ship_charge,req_price) VALUES (?,?,?,?,?,?)";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,fkAssociateId);
             preparedStatement.setInt(2,cityId);
             preparedStatement.setInt(3,pincode);
             preparedStatement.setInt(4,shipType);
             preparedStatement.setInt(5,shipCharge);
-            preparedStatement.setInt(6,0);
-            preparedStatement.setInt(7,-1);
+            preparedStatement.setInt(6,-1);
             logger.debug("sql statement check: "+preparedStatement);
+            preparedStatement = connection.prepareStatement(statement);
             status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Pincode could not be added, plz check sql query");
@@ -313,9 +324,9 @@ public class ReportUtil {
         }
         return result;
     }
-    public int setVendorGeneralInstruction(int fkAssociateId,int pinOrComp, String value, String message){
+    public boolean setVendorGeneralInstruction(int fkAssociateId,int pinOrComp, String value, String message){
         Connection connection = null;
-        int response=0;
+        boolean response = false;
         String statement;
         String column="";
         PreparedStatement preparedStatement = null;
@@ -330,7 +341,10 @@ public class ReportUtil {
             statement = "INSERT INTO vendor_general_instructions (associate_id,"+column+",instruction_msg) VALUES ("+fkAssociateId+","+value+","+"'"+message+"'"+")";
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("STATEMENT CHECK: " + preparedStatement);
-            response = preparedStatement.executeUpdate();
+            int result = preparedStatement.executeUpdate();
+            if(result==1){
+                response=true;
+            }
 
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);
@@ -370,7 +384,6 @@ public class ReportUtil {
                 productTableData.setComponentImage(resultSet.getString("cImage"));
                 productTableData.setComponentName(resultSet.getString("cName"));
                 productTableData.setPrice(resultSet.getDouble("price"));
-                productTableData.setReqPrice(resultSet.getDouble("req_price"));
                 Integer inStock=resultSet.getInt("inStock");
                 if (inStock==1){productTableData.setInStock("In Stock");}
                 else {productTableData.setInStock("Out Of Stock");}
@@ -392,31 +405,31 @@ public class ReportUtil {
         }
         return productModelListHavingSummaryModel;
     }
-    public boolean updateProductComponent(Integer flag,int fk_associate_id,String  componentId,int updatePrice, String inStock ) {
+    public boolean updateProductComponent(int fkAssociateId,String  componentId,int updatePrice, int inStock , String field) {
         Connection connection = null;
         String statement;
         int status = 0;
         boolean result = false;
-        String column,value;
+        String column;
         PreparedStatement preparedStatement = null;
         try {
-            if(flag==1){
-                column="InStock=";
-                value=inStock;
+            if(field.equals("reqPrice")){
+                column="req_price="+updatePrice;
+            }
+            else if (updatePrice!=-1){
+                column="price="+updatePrice+",req_price = -1 ";
             }
             else {
-                column="price=";
-                value=updatePrice+"";
+                column="InStock="+inStock+",req_price = -1 ";
             }
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "update AA_vendor_to_components set "+column+value+" where fk_associate_id="+fk_associate_id+" and fk_component_id="+componentId+" ";
+            statement = "update AA_vendor_to_components set "+column+" where fk_associate_id="+fkAssociateId+" and fk_component_id="+componentId+" ";
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in updateVendorComponent "+preparedStatement);
             status = preparedStatement.executeUpdate();
             if(status==1){
                 result=true;
             }
-
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);
         } finally {
@@ -543,12 +556,12 @@ public class ReportUtil {
                     column="associate_user_pass";
                     value=password;
                 }
-                    String statement1 = "UPDATE associate_user set " +column+"=? WHERE fk_associate_login_id = ?";
-                    preparedStatement = connection.prepareStatement(statement1);
-                    preparedStatement.setString(1, value);
-                    preparedStatement.setInt(2, fkAssociateId);
-                    logger.debug("sql query in addNewVendorUtil " + preparedStatement);
-                    response = preparedStatement.executeUpdate();
+                String statement1 = "UPDATE associate_user set " +column+"=? WHERE fk_associate_login_id = ?";
+                preparedStatement = connection.prepareStatement(statement1);
+                preparedStatement.setString(1, value);
+                preparedStatement.setInt(2, fkAssociateId);
+                logger.debug("sql query in addNewVendorUtil " + preparedStatement);
+                response = preparedStatement.executeUpdate();
             }
         } catch (Exception exception) {
             logger.error("Exception in connection : ", exception);
@@ -615,6 +628,91 @@ public class ReportUtil {
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
+    }
+    public boolean approveAndRejectUtil(String object, String reportName, String columnName, int fkAssociateId,boolean approveReject){
+        ObjectMapper objectMapper = new ObjectMapper();
+        TableDataActionHandels actionHandels = new TableDataActionHandels();
+        String message;
+        boolean result = false;
+        ReportMapper reportMapper = new ReportMapper();
+        try{
+            if(reportName.equals("getPincodeReport")){
+                int shipType = 0;
+                PincodeTableDataModel pincodeTableDataModel = objectMapper.readValue(object,PincodeTableDataModel.class);
+                switch (columnName){
+                    case "Standard Delivery" :
+                        actionHandels = pincodeTableDataModel.getStandardDeliveryCharge();
+                        shipType = 1;
+                        break;
+                    case "Fixed Time Delivery" :
+                        actionHandels = pincodeTableDataModel.getFixedTimeDeliveryCharge();
+                        shipType = 2;
+                        break;
+                    case "Midnight Delivery" :
+                        actionHandels = pincodeTableDataModel.getFixedTimeDeliveryCharge();
+                        shipType = 3;
+                        break;
+                }
+
+                if(actionHandels.getValue().equals(actionHandels.getRequestValue())){
+                    if(approveReject==true){
+                        // request is to enable.
+                        message="Enable/Disable "+shipType+" for Pincode "+pincodeTableDataModel.getPincode()+" : Request Accepted";
+                        result = reportMapper.updatePincodeMapper(1,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,Integer.parseInt(actionHandels.getRequestValue()),message,"");
+                    }
+                    else {
+                        // request to enable rejected.
+                        message="Enable/Disable "+shipType+" for Pincode "+pincodeTableDataModel.getPincode()+" : Request Rejected";
+                        result = reportMapper.updatePincodeMapper(1,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,-1,message,"reqPrice");
+                    }
+                }
+                else {
+                    if(approveReject==true) {
+                        // request is to update the price.
+                        message = "Update the price of " + shipType + " for Pincode " + pincodeTableDataModel.getPincode() + " to " + actionHandels.getRequestValue() + " : Request Accepted";
+                        result = reportMapper.updatePincodeMapper(0, fkAssociateId, Integer.parseInt(pincodeTableDataModel.getPincode()), shipType, Integer.parseInt(actionHandels.getRequestValue()), message, "");
+
+                    } else {
+                        // request to update the price rejected.
+                        message = "Update the price of " + shipType + " for Pincode " + pincodeTableDataModel.getPincode() + " to " + actionHandels.getRequestValue() + " : Request Rejected";
+                        reportMapper.updatePincodeMapper(0,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,-1,message,"reqPrice");
+                    }
+                }
+            }else if(reportName.equals("getVendorReport")){
+                ProductTableDataModel productTableDataModel = objectMapper.readValue(object,ProductTableDataModel.class);
+
+                if(actionHandels.getValue().equals(actionHandels.getRequestValue())){
+                    if(approveReject==true){
+                        // request is to enable.
+                        message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Approved";
+                        result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,1,"");
+                    }
+                    else {
+                        // request to enable rejected.
+                        message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Rejected";
+                        result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,0,"");
+                    }
+                }
+                else {
+                    if(approveReject==true) {
+                        // request is to update the price.
+                        message="Change price of component "+productTableDataModel.getComponentName()+" to "+actionHandels.getRequestValue()+" : Accepted";
+                        result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,Integer.parseInt(actionHandels.getRequestValue()),1,"");
+
+                    } else {
+                        // request to update the price rejected.
+                        message="Change price of component "+productTableDataModel.getComponentName()+" to "+actionHandels.getRequestValue()+" : ";
+                        result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,1,"reqPrice");
+                    }
+                }
+
+            }
+
+
+        }catch (Exception exception){
+            logger.error("Error at approveAndRejectUtil in ReportUtil : ",exception);
         }
         return result;
     }

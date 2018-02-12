@@ -68,7 +68,8 @@ public class Reports {
     @GET
     @Path("/v1/admin/handels/getPincodeReport")
     public ReportResponse getPincodeReport(@QueryParam("fkAssociateId") @DefaultValue("565") String fkAssociateId,
-                                           @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
+                                           @QueryParam("startLimit") String startLimit,
+                                           @QueryParam("endLimit") String endLimit){
         ReportResponse reportResponse=new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
         List<Map.Entry<String,List<String>>> tableDataAction=new ArrayList<>();
@@ -85,23 +86,23 @@ public class Reports {
     @PUT
     @Path("/v1/admin/handels/handlePincodeChange")
     public HandleServiceResponse updatePincodeDetail(@QueryParam("fkAssociateId") int fkAssociateId,
-                                                     @QueryParam("pincode") String pincode, @QueryParam("shipCharge")Integer updatePrice ,
-                                                     @QueryParam("shipType") Integer shipType, @QueryParam("updateStatus") Integer updateStatus){
+                                                     @QueryParam("pincode") int pincode,
+                                                     @QueryParam("shipCharge")int updatePrice,
+                                                     @QueryParam("field") String field,
+                                                     @QueryParam("shipType") int shipType,
+                                                     @QueryParam("flag") @DefaultValue("0") int flag){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
-        Integer updateflag=0;
         Boolean result = false;
         String message="";
-        if (updateStatus!=null){
-            updateflag=1;
+        if (flag==1){
             message="Enable/Disable "+shipType+" for Pincode "+pincode+" : ";
         }
-        else if (updatePrice!=null){
-            updateflag=2;
+        else {
             message="Update the price of "+shipType+" for Pincode "+pincode+" to "+updatePrice+" : ";
         }
-        int status=reportMapper.updatePincodeMapper(updateflag,fkAssociateId,pincode,shipType,updateStatus,updatePrice,message);
-        if(status==0){
+        boolean status=reportMapper.updatePincodeMapper(flag,fkAssociateId,pincode,shipType,updatePrice,message,field);
+        if(status==false){
             handleServiceResponse.setError(true);
             handleServiceResponse.setErrorCode("ERROR OCCURRED HANDELING PINCODE");
         }
@@ -114,8 +115,10 @@ public class Reports {
 
     @POST
     @Path("/v1/admin/handels/addVendorComponent")
-    public HandleServiceResponse addVendorComponent(@QueryParam("fkAssociateId") int fkAssociateId,@QueryParam("componentCode") String componentCode,
-                                                    @QueryParam("componentName") String componentName,@DefaultValue("0")@QueryParam("type") int type,
+    public HandleServiceResponse addVendorComponent(@QueryParam("fkAssociateId") int fkAssociateId,
+                                                    @QueryParam("componentCode") String componentCode,
+                                                    @QueryParam("componentName") String componentName,
+                                                    @DefaultValue("0")@QueryParam("type") int type,
                                                     @DefaultValue("0")@QueryParam("price") int price){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
@@ -130,8 +133,11 @@ public class Reports {
     }
     @POST
     @Path("/v1/admin/handels/addVendorPincode")
-    public HandleServiceResponse addVendorPincode(@QueryParam("fkAssociateId") int fkAssociateId,@QueryParam("pincode") int pincode,
-                                                  @DefaultValue("0")@QueryParam("cityId") int cityId,@QueryParam("shipType") int shipType,@QueryParam("shipCharge")int shipCharge ){
+    public HandleServiceResponse addVendorPincode(@QueryParam("fkAssociateId") int fkAssociateId,
+                                                  @QueryParam("pincode") int pincode,
+                                                  @DefaultValue("0") @QueryParam("cityId") int cityId,
+                                                  @QueryParam("shipType") int shipType,
+                                                  @QueryParam("shipCharge") int shipCharge){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
         boolean result;
@@ -153,7 +159,7 @@ public class Reports {
         ReportResponse reportResponse=new ReportResponse();
         List<Map.Entry<String,List<String>>> tableDataAction=new ArrayList<>();
         ReportMapper reportMapper = new ReportMapper();
-        reportResponse.setTableHeaders(new String[]{"Component_Id_Hide","Component Image","Component_Name","Price","InStock","Required Price"});
+        reportResponse.setTableHeaders(new String[]{"Component_Id_Hide","Component Image","Component_Name","Price","InStock"});
         com.igp.handles.vendorpanel.mappers.Reports.ReportMapper.fillDataActionComponent(tableDataAction);
         reportResponse.setTableDataAction(tableDataAction);
         ProductModelListHavingSummaryModel productModelListHavingSummaryModel = reportMapper.getProductSummaryDetails(fkAssociateId,startLimit,endLimit);
@@ -169,26 +175,24 @@ public class Reports {
     @Path("/v1/admin/handels/handleComponentChange")
     public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") int fkAssociateId,
                                                        @QueryParam("componentId") String componentId,
-                                                       @DefaultValue("0") @QueryParam("price")int updatePrice,
-                                                       @QueryParam("inStock") String inStock){
+                                                       @DefaultValue("-1") @QueryParam("updatePrice")int updatePrice,
+                                                       @DefaultValue("-1") @QueryParam("inStock") int inStock,
+                                                       @QueryParam("field") String field){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
-        Integer updateflag=0;
         String message="",componentName="";
         ReportMapper reportMapper = new ReportMapper();
         componentName= SummaryFunctionsUtil.getComponentName(componentId);
-        if (inStock!=null){
-            updateflag=1;
-            if(inStock.equals(1)){
-                message="Change status of component "+componentName+" to Instock : ";
-            }else {
-                message="Change status of component "+componentName+" to Out of stock : ";
-            }
-        }
-        else if (updatePrice!=0){
-            updateflag=2;
+        if (updatePrice!=-1){
             message="Change price of component "+componentName+" to "+updatePrice+" : ";
         }
-        boolean result=reportMapper.updateComponentMapper(updateflag,fkAssociateId,componentId,message,updatePrice,inStock);
+        else if(inStock==1){
+            message="Change status of component "+componentName+" to Instock : ";
+        }
+        else {
+            message="Change status of component "+componentName+" to Out of stock : ";
+        }
+
+        boolean result=reportMapper.updateComponentMapper(fkAssociateId,componentId,message,updatePrice,inStock,field);
         if(result==false){
             handleServiceResponse.setError(true);
             handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING COMPONENT INFO");
@@ -204,13 +208,11 @@ public class Reports {
                                             @QueryParam("deliveryDateFrom") String orderDeliveryDateFrom,@QueryParam("deliveryDateTo") String orderDeliveryDateTo,
                                             @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
 
-
         ReportResponse reportResponse=new ReportResponse();
         ReportMapper reportMapper=new ReportMapper();
         try{
             reportResponse.setTableHeaders(new String[]{"vendorId","vendor","invoice number","orderId","date purchased","delivery date"
                 ,"pincode","password","order status","taxable amount","tax","total amount","payment status"});
-
 
             orderDateFrom=getTimestampString(orderDateFrom,2);
             orderDateTo=getTimestampString(orderDateTo,2);
@@ -229,8 +231,6 @@ public class Reports {
             logger.error("Error occured at getPayoutAndTaxes ",exception);
         }
         return reportResponse;
-
-
     }
     @GET
     @Path("/v1/admin/handels/getVendorDetails")
@@ -243,10 +243,10 @@ public class Reports {
         List<Map.Entry<String,List<String>>> tableDataAction=new ArrayList<>();
         try{
 
-        reportMapper.fillDataActionVendor(tableDataAction);
-        reportResponse.setTableDataAction(tableDataAction);
-        reportResponse.setTableHeaders(new String[]{"Vendor_Id","Vendor_Name","Contact_Person","Email",
-            "Address","Phone","User Id","Password","Status"});
+            reportMapper.fillDataActionVendor(tableDataAction);
+            reportResponse.setTableDataAction(tableDataAction);
+            reportResponse.setTableHeaders(new String[]{"Vendor_Id","Vendor_Name","Contact_Person","Email",
+                "Address","Phone","User Id","Password","Status"});
 
             vendorDetailsHavingSummaryModel = reportMapper.getVendorDetails(fkAssociateId,startLimit,endLimit);
             reportResponse.setSummary(vendorDetailsHavingSummaryModel.getSummaryModelList());
@@ -309,7 +309,28 @@ public class Reports {
         }
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
-
+    }
+    @PUT
+    @Path("/v1/admin/handels/approveAndReject")
+    public HandleServiceResponse approveAndReject(@QueryParam("approveReject") boolean approveReject, // true : approve, false : reject
+                                                  @QueryParam("reportType") String reportType,
+                                                  @QueryParam("colName") String columnName,
+                                                  @QueryParam("fkAssociateId") int fkAssociateId,
+                                                  @QueryParam("object") String object){
+        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        ReportMapper reportMapper=new ReportMapper();
+        boolean response = false;
+        try{
+            response =  reportMapper.approveAndRejectMapper(object,reportType,columnName,fkAssociateId,approveReject);
+        }catch (Exception exception){
+            logger.error("Error occured at add acceptAndReject ",exception);
+        }
+        if(response==false){
+            handleServiceResponse.setError(true);
+            handleServiceResponse.setErrorCode("ERROR OCCURRED WHILE APPROVE AND REJECT");
+        }
+        handleServiceResponse.setResult(response);
+        return handleServiceResponse;
     }
 
 }
