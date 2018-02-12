@@ -24,9 +24,6 @@ public class ProductTableDataModel {
     @JsonProperty("InStock")
     private String inStock;
 
-    @JsonProperty("Required Price")
-    private double  reqPrice;
-
     public String getAssociateId() {
         return associateId;
     }
@@ -75,11 +72,4 @@ public class ProductTableDataModel {
         this.inStock = inStock;
     }
 
-    public double getReqPrice() {
-        return reqPrice;
-    }
-
-    public void setReqPrice(double reqPrice) {
-        this.reqPrice = reqPrice;
-    }
 }
