@@ -10,7 +10,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.Date;
 
 /**
  * Created by shal on 22/9/17.
@@ -46,11 +45,11 @@ public class SummaryFunctionsUtil
         }
 
          if(deliveryDateFrom!=null && !deliveryDateFrom.isEmpty() ){
-            sb.append(" and vap.delivery_date >='"+deliveryDateFrom+"'");
+            sb.append(" and oe.delivery_date >='"+deliveryDateFrom+"'");
         }
 
         if (deliveryDateTo!=null && !deliveryDateTo.isEmpty()){
-             sb.append("  and vap.delivery_date <='"+deliveryDateTo+"' ");
+             sb.append("  and oe.delivery_date <='"+deliveryDateTo+"' ");
         }
 
          if (orderNo!=null )
