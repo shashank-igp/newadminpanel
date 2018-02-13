@@ -2,8 +2,6 @@ package com.igp.handles.admin.models.Reports;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import javafx.scene.control.Tab;
-
 /**
  * Created by suditi on 30/1/18.
  */
