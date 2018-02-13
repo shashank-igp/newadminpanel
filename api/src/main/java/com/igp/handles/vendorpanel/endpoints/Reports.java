@@ -37,9 +37,9 @@ public class Reports {
 
         ReportResponse reportResponse=new ReportResponse();
         startDate=getTimestampString(startDate,0);
-        endDate=getTimestampString(endDate,1);
+        endDate=getTimestampString(endDate,0);
         delhiveryDate=getTimestampString(delhiveryDate,0);
-        deliveryDateTo=getTimestampString(deliveryDateTo,1);
+        deliveryDateTo=getTimestampString(deliveryDateTo,0);
         deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
 
         reportResponse.setTableHeaders(new String[]{"Order_No","Date","Occasion","City","Pincode","Delivery_Date"
