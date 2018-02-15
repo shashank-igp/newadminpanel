@@ -312,7 +312,7 @@ public class MarketPlaceOrderUtil {
             else
                 preparedStatement.setString(3, "");
 
-            BigDecimal serviceCharges = productModel.getServiceCharge().add(new BigDecimal(productModel.getGiftBox() * productModel.getQuantity() * Environment.getGiftBoxPrice()));
+            BigDecimal serviceCharges = productModel.getServiceCharge().add(new BigDecimal(productModel.getGiftBox() * productModel.getQuantity()));// * Environment.getGiftBoxPrice()));
             BigDecimal cartValue = productModel.getSellingPrice().add(serviceCharges).subtract(orderTempModel.getDiscount());
 
             preparedStatement.setString(4, orderTempModel.getShippingAddressModel().getFirstname());
@@ -505,11 +505,11 @@ public class MarketPlaceOrderUtil {
             if (resultSet.first()) {
                 user.setId(resultSet.getString("c.customers_id"));
                 user.setIdHash(resultSet.getString("n.id_hash"));
-                if(resultSet.getString("c.customers_dob").equals("none") || resultSet.getString("c.customers_dob").equals("") || resultSet.getString("c.customers_dob").equals(null)){
+                if(resultSet.getString("c.customers_dob").equals("none") || resultSet.getString("c.customers_dob").equals("") || resultSet.getString("c.customers_dob").isEmpty()){
                     // don't take dob.
                 }
                 else {
-                    user.setDob(resultSet.getString("DATE_FORMAT(c.customers_dob,'%d-%b-%Y')"));
+                    user.setDob(resultSet.getString("c.customers_dob"));
                 }
             }
         } catch (Exception exception) {

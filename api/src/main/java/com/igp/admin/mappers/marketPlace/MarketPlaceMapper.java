@@ -332,6 +332,7 @@ public class MarketPlaceMapper {
                     // validate customer details.
                     validationModel = marketPlaceOrderUtil.validateCustomerDetails(validationModel);
                     if (validationModel.getError() == Boolean.TRUE) {
+                        validationModel.setMessage("Error is Customer Details.");
                     } else {
                         // no error in getting customer model.
                         addressModel.setId(validationModel.getUserModel().getIdHash());
@@ -343,7 +344,7 @@ public class MarketPlaceMapper {
 
                        validationModel = marketPlaceOrderUtil.validateSelectedAddress(validationModel);
                         if (validationModel.getError() == Boolean.TRUE) {
-
+                            validationModel.setMessage("Error is Address Validation.");
                         } else {
                             // check product details.
                             String prodCode = productModel.getProductCode();
@@ -357,6 +358,8 @@ public class MarketPlaceMapper {
                                 // product details are not empty so bring product details to the model.
                                 validationModel = marketPlaceOrderUtil.validateAndGetProductDetails(validationModel);
                                 if (validationModel.getError() == Boolean.TRUE) {
+                                    validationModel.setMessage("Error is Product Validation.");
+
                                 } else {
                                     // finally validate extra info values and add in the model
 
@@ -396,6 +399,9 @@ public class MarketPlaceMapper {
                             }
                         }
                     }
+                }
+                else {
+                    validationModel.setMessage("Order exists already");
                 }
 
                 if (validationModel.getError()==true) {
@@ -440,7 +446,6 @@ public class MarketPlaceMapper {
         MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
         try {
             // Everything went well,fill the tempmodel.
-            logger.debug("TEMP-ORDER DEBUGGING : " + "setAddressBookId " +addressModel.getAid());
             marketPlaceTempOrderModel.setAddressBookId(new Integer(addressModel.getAid()));
             logger.debug("TEMP-ORDER DEBUGGING : " + "setAddressBookId " +addressModel.getAid());
             marketPlaceTempOrderModel.setCustomerId(new Integer(userModel.getId()));
