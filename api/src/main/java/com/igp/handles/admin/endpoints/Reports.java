@@ -3,6 +3,7 @@ package com.igp.handles.admin.endpoints;
 import com.igp.handles.admin.mappers.Reports.ReportMapper;
 import com.igp.handles.admin.models.Reports.PincodeModelListHavingSummaryModel;
 import com.igp.handles.admin.models.Reports.ProductModelListHavingSummaryModel;
+import com.igp.handles.admin.models.Reports.BarcodeToComponentListHavingSummary;
 import com.igp.handles.admin.models.Reports.VendorDetailsHavingSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.ReportOrderWithSummaryModel;
@@ -42,10 +43,10 @@ public class Reports {
                                          @QueryParam("deliveryDateFrom") String deliveryDateFrom,
                                          @QueryParam("deliveryDateTo") String deliveryDateTo){
 
-        ReportResponse reportResponse=new ReportResponse();
+        ReportResponse reportResponse = new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
         startDate=getTimestampString(startDate,0);
-        endDate=getTimestampString(endDate,1);
+        endDate=getTimestampString(endDate,0);
         if(deliveryDateFrom==null){
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
             LocalDate localDate = LocalDate.now();
@@ -70,10 +71,10 @@ public class Reports {
     public ReportResponse getPincodeReport(@QueryParam("fkAssociateId") @DefaultValue("565") String fkAssociateId,
                                            @QueryParam("startLimit") String startLimit,
                                            @QueryParam("endLimit") String endLimit){
-        ReportResponse reportResponse=new ReportResponse();
+        ReportResponse reportResponse = new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
-        List<Map.Entry<String,List<String>>> tableDataAction=new ArrayList<>();
-        reportResponse.setTableHeaders(new String[]{"Vendor Id","Vendor Name","Pincode","Standard Delivery","Fixed Time Delivery","Midnight Delivery"});
+        List<Map.Entry<String,List<String>>> tableDataAction = new ArrayList<>();
+        reportResponse.setTableHeaders(new String[]{"Vendor Name","Pincode","Standard Delivery","Fixed Time Delivery","Midnight Delivery"});
         reportMapper.fillDataActionPincode(tableDataAction);
         reportResponse.setTableDataAction(tableDataAction);
         PincodeModelListHavingSummaryModel pincodeModelListHavingSummaryModel = ReportMapper.getPincodeSummaryDetails(fkAssociateId,startLimit,endLimit);
@@ -91,23 +92,23 @@ public class Reports {
                                                      @QueryParam("field") String field,
                                                      @QueryParam("shipType") int shipType,
                                                      @QueryParam("flag") @DefaultValue("0") int flag){
-        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
         Boolean result = false;
         String message="";
-        if (flag==1){
-            message="Enable/Disable "+shipType+" for Pincode "+pincode+" : ";
+        if (flag == 1){
+            message = "Enable/Disable "+shipType+" for Pincode "+pincode+" : ";
         }
         else {
-            message="Update the price of "+shipType+" for Pincode "+pincode+" to "+updatePrice+" : ";
+            message = "Update the price of "+shipType+" for Pincode "+pincode+" to "+updatePrice+" : ";
         }
-        boolean status=reportMapper.updatePincodeMapper(flag,fkAssociateId,pincode,shipType,updatePrice,message,field);
-        if(status==false){
+        boolean status = reportMapper.updatePincodeMapper(flag,fkAssociateId,pincode,shipType,updatePrice,message,field);
+        if(status == false){
             handleServiceResponse.setError(true);
             handleServiceResponse.setErrorCode("ERROR OCCURRED HANDELING PINCODE");
         }
         else {
-            result=true;
+            result = true;
         }
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
@@ -123,8 +124,8 @@ public class Reports {
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
         boolean result;
-        result= reportMapper.addNewComponentMapper(fkAssociateId,componentCode,componentName,type, price);
-        if(result==false){
+        result = reportMapper.addNewComponentMapper(fkAssociateId,componentCode,componentName,type, price);
+        if(result == false){
             handleServiceResponse.setError(true);
             handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING COMPONENT");
         }
@@ -138,11 +139,11 @@ public class Reports {
                                                   @DefaultValue("0") @QueryParam("cityId") int cityId,
                                                   @QueryParam("shipType") int shipType,
                                                   @QueryParam("shipCharge") int shipCharge){
-        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
         boolean result;
-        result= reportMapper.addNewVendorPincodeMapper(fkAssociateId,pincode,cityId,shipType,shipCharge);
-        if(result==false){
+        result = reportMapper.addNewVendorPincodeMapper(fkAssociateId,pincode,cityId,shipType,shipCharge);
+        if(result == false){
             handleServiceResponse.setError(true);
             handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING PINCODE");
         }
@@ -156,8 +157,8 @@ public class Reports {
                                           @QueryParam("startLimit") String startLimit,
                                           @QueryParam("endLimit") String endLimit ){
 
-        ReportResponse reportResponse=new ReportResponse();
-        List<Map.Entry<String,List<String>>> tableDataAction=new ArrayList<>();
+        ReportResponse reportResponse = new ReportResponse();
+        List<Map.Entry<String,List<String>>> tableDataAction = new ArrayList<>();
         ReportMapper reportMapper = new ReportMapper();
         reportResponse.setTableHeaders(new String[]{"Component_Id_Hide","Component Image","Component_Name","Price","InStock"});
         com.igp.handles.vendorpanel.mappers.Reports.ReportMapper.fillDataActionComponent(tableDataAction);
@@ -178,8 +179,8 @@ public class Reports {
                                                        @DefaultValue("-1") @QueryParam("updatePrice")int updatePrice,
                                                        @DefaultValue("-1") @QueryParam("inStock") int inStock,
                                                        @QueryParam("field") String field){
-        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
-        String message="",componentName="";
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
+        String message = "",componentName = "";
         ReportMapper reportMapper = new ReportMapper();
         componentName= SummaryFunctionsUtil.getComponentName(componentId);
         if (updatePrice!=-1){
@@ -192,8 +193,8 @@ public class Reports {
             message="Change status of component "+componentName+" to Out of stock : ";
         }
 
-        boolean result=reportMapper.updateComponentMapper(fkAssociateId,componentId,message,updatePrice,inStock,field);
-        if(result==false){
+        boolean result = reportMapper.updateComponentMapper(fkAssociateId,componentId,message,updatePrice,inStock,field);
+        if(result == false){
             handleServiceResponse.setError(true);
             handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING COMPONENT INFO");
         }
@@ -237,16 +238,16 @@ public class Reports {
     public ReportResponse getVendorDetails(@DefaultValue("0") @QueryParam("fkAssociateId") int fkAssociateId,
                                            @DefaultValue("0") @QueryParam("startLimit") int startLimit,
                                            @DefaultValue("0") @QueryParam("endLimit") int endLimit ){
-        ReportResponse reportResponse=new ReportResponse();
+        ReportResponse reportResponse = new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
         VendorDetailsHavingSummaryModel vendorDetailsHavingSummaryModel = new VendorDetailsHavingSummaryModel();
-        List<Map.Entry<String,List<String>>> tableDataAction=new ArrayList<>();
+        List<Map.Entry<String,List<String>>> tableDataAction = new ArrayList<>();
         try{
 
             reportMapper.fillDataActionVendor(tableDataAction);
             reportResponse.setTableDataAction(tableDataAction);
             reportResponse.setTableHeaders(new String[]{"Vendor_Id","Vendor_Name","Contact_Person","Email",
-                "Address","Phone","User Id","Password","Status"});
+                "Address","Phone","User_Id","Password","Status"});
 
             vendorDetailsHavingSummaryModel = reportMapper.getVendorDetails(fkAssociateId,startLimit,endLimit);
             reportResponse.setSummary(vendorDetailsHavingSummaryModel.getSummaryModelList());
@@ -260,23 +261,23 @@ public class Reports {
     @PUT
     @Path("/v1/admin/handels/modifyVendorDetails")
     public HandleServiceResponse modifyVendorDetails(@QueryParam("fkAssociateId") int fkAssociateId,
-                                                     @DefaultValue("") @QueryParam("associateName") String associateName,
-                                                     @DefaultValue("") @QueryParam("contactPerson") String contactPerson,
-                                                     @DefaultValue("") @QueryParam("email") String email,
-                                                     @DefaultValue("") @QueryParam("address") String address,
-                                                     @DefaultValue("") @QueryParam("phone") String phone,
-                                                     @DefaultValue("") @QueryParam("userId") String userId,
-                                                     @DefaultValue("") @QueryParam("password") String password,
-                                                     @DefaultValue("-1") @QueryParam("status") int status){
-        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
-        ReportMapper reportMapper=new ReportMapper();
-        boolean result=false;
+                                                     @DefaultValue("") @QueryParam("Vendor_Name") String vendorName,
+                                                     @DefaultValue("") @QueryParam("Contact_Person") String contactPerson,
+                                                     @DefaultValue("") @QueryParam("Email") String email,
+                                                     @DefaultValue("") @QueryParam("Address") String address,
+                                                     @DefaultValue("") @QueryParam("Phone") String phone,
+                                                     @DefaultValue("") @QueryParam("User_Id") String userId,
+                                                     @DefaultValue("") @QueryParam("Password") String password,
+                                                     @DefaultValue("-1") @QueryParam("Status") int status){
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
+        ReportMapper reportMapper = new ReportMapper();
+        boolean result = false;
         try{
-            result = reportMapper.modifyVendorDetails(fkAssociateId,associateName,contactPerson,email,address,phone,userId,password,status);
+            result = reportMapper.modifyVendorDetails(fkAssociateId,vendorName,contactPerson,email,address,phone,userId,password,status);
         }catch (Exception exception){
             logger.error("Error occured at modifyVendorDetails ",exception);
         }
-        if(result==false){
+        if(result == false){
             handleServiceResponse.setError(true);
             handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING VENDOR INFO");
         }
@@ -286,24 +287,24 @@ public class Reports {
 
     @POST
     @Path("/v1/admin/handels/addNewVendor")
-    public HandleServiceResponse addNewVendor(@QueryParam("associateName") String associateName,
-                                              @QueryParam("contactPerson") String contactPerson,
-                                              @QueryParam("email") String email,
-                                              @QueryParam("address") String address,
-                                              @QueryParam("user") String user,
-                                              @QueryParam("password") String password,
-                                              @QueryParam("phone") String phone,
-                                              @DefaultValue("1") @QueryParam("status") int status){
-        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
-        ReportMapper reportMapper=new ReportMapper();
-        boolean result =false;
+    public HandleServiceResponse addNewVendor(@QueryParam("Vendor_Name") String vendorName,
+                                              @QueryParam("Contact_Person") String contactPerson,
+                                              @QueryParam("Email") String email,
+                                              @QueryParam("Address") String address,
+                                              @QueryParam("User_Id") String user,
+                                              @QueryParam("Password") String password,
+                                              @QueryParam("Phone") String phone,
+                                              @DefaultValue("1") @QueryParam("Status") int status){
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
+        ReportMapper reportMapper = new ReportMapper();
+        boolean result = false;
 
         try{
-            result =  reportMapper.addNewVendorMapper(associateName,user,password,contactPerson,email,address,phone,status);
+            result =  reportMapper.addNewVendorMapper(vendorName,user,password,contactPerson,email,address,phone,status);
         }catch (Exception exception){
             logger.error("Error occured at add new vendor ",exception);
         }
-        if(result==false){
+        if(result == false){
             handleServiceResponse.setError(true);
             handleServiceResponse.setErrorCode("ERROR OCCURRED WHILE ADDING VENDOR");
         }
@@ -318,19 +319,95 @@ public class Reports {
                                                   @QueryParam("fkAssociateId") int fkAssociateId,
                                                   @QueryParam("object") String object){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
-        ReportMapper reportMapper=new ReportMapper();
+        ReportMapper reportMapper = new ReportMapper();
         boolean response = false;
         try{
             response =  reportMapper.approveAndRejectMapper(object,reportType,columnName,fkAssociateId,approveReject);
         }catch (Exception exception){
             logger.error("Error occured at add acceptAndReject ",exception);
         }
-        if(response==false){
+        if(response == false){
             handleServiceResponse.setError(true);
             handleServiceResponse.setErrorCode("ERROR OCCURRED WHILE APPROVE AND REJECT");
         }
         handleServiceResponse.setResult(response);
         return handleServiceResponse;
     }
+    @GET
+    @Path("/v1/admin/handels/getBarcodeToComponentReport")
+    public ReportResponse getBarcodeToComponentReport(@QueryParam("Product_Code") @DefaultValue("0") String productCode,
+                                                      @QueryParam("startLimit") @DefaultValue("0") int startLimit,
+                                                      @QueryParam("endLimit") @DefaultValue("0") int endLimit){
+
+        ReportResponse reportResponse = new ReportResponse();
+        ReportMapper reportMapper = new ReportMapper();
+        List<Map.Entry<String,List<String>>> tableDataAction = new ArrayList<>();
+        try{
+            reportMapper.fillDataActionBarcode(tableDataAction);
+            reportResponse.setTableDataAction(tableDataAction);
+            reportResponse.setTableHeaders(new String[]{"Product_Code","Product_Name","Product_Image","Component_Code",
+                "Component_Name","Quantity","Component_Image"});
+            BarcodeToComponentListHavingSummary barcodeToComponentListHavingSummary = reportMapper.getBarcodeToComponentsMapper(productCode,startLimit,endLimit);
+            reportResponse.setSummary(barcodeToComponentListHavingSummary.getSummaryModelList());
+            List<Object> objectList = new ArrayList<Object>(barcodeToComponentListHavingSummary.getBarcodeToComponentDataModelList());
+            reportResponse.setTableData(objectList);
+        }catch (Exception exception){
+            logger.error("Error occured at getVendorDetails ",exception);
+        }
+        return reportResponse;
+    }
+    @PUT
+    @Path("/v1/admin/handels/deleteBarcode")
+    public HandleServiceResponse deleteBarcode(@QueryParam("Product_Code") String productCode){
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
+        ReportMapper reportMapper = new ReportMapper();
+        boolean response = false;
+        try{
+            response = reportMapper.deleteBarcodeMapper(productCode);
+        }catch (Exception exception){
+            logger.error("Error occured at deleteBarcode ",exception);
+        }
+        if(response == false){
+            handleServiceResponse.setError(true);
+            handleServiceResponse.setErrorCode("ERROR OCCURRED WHILE DELETING BARCODE");
+        }
+        handleServiceResponse.setResult(response);
+        return handleServiceResponse;
+    }
+    @PUT
+    @Path("/v1/admin/handels/changeBarcodeComponent")
+    public HandleServiceResponse changeBarcodeComponent(@QueryParam("Product_Code") String productCode,
+                                                        @QueryParam("Component_Code") String componentCode,
+                                                        @QueryParam("Quantity") int quantity){
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
+        ReportMapper reportMapper = new ReportMapper();
+        boolean response = false;
+        try{
+            response = reportMapper.changeBarcodeComponentMapper(productCode,componentCode,quantity);
+        }catch (Exception exception){
+            logger.error("Error occured at changeBarcodeComponent ",exception);
+        }
+        if(response == false){
+            handleServiceResponse.setError(true);
+            handleServiceResponse.setErrorCode("ERROR OCCURRED WHILE CHANGING BARCODE COMPONENT");
+        }
+        handleServiceResponse.setResult(response);
+        return handleServiceResponse;
+    }
+    @GET
+    @Path("/v1/admin/handels/getListOfBarcodes")
+    public HandleServiceResponse getListOfBarcodes(@QueryParam("startLimit") @DefaultValue("0") int startLimit,
+                                                   @QueryParam("endLimit") @DefaultValue("0") int endLimit){
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
+        ReportMapper reportMapper = new ReportMapper();
+        try{
+            Map<List<String>,Map<String,Integer>> productCodeList = reportMapper.getListOfBarcodesMapper(startLimit,endLimit);
+            handleServiceResponse.setResult(productCodeList);
+        }catch (Exception exception){
+            logger.error("Error occured at getVendorDetails ",exception);
+        }
+        return handleServiceResponse;
+    }
+
 
 }

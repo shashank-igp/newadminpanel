@@ -1,11 +1,6 @@
 package com.igp.handles.admin.mappers.Reports;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.igp.handles.admin.models.Reports.PincodeModelListHavingSummaryModel;
-import com.igp.handles.admin.models.Reports.ProductModelListHavingSummaryModel;
-import com.igp.handles.admin.models.Reports.TableDataActionHandels;
-import com.igp.handles.admin.models.Reports.VendorDetailsHavingSummaryModel;
-import com.igp.handles.admin.models.Vendor.VendorInfoModel;
+import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.admin.utils.Reports.ReportUtil;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
@@ -69,7 +64,7 @@ public class ReportMapper {
         String message="Added new Component : Name :- "+componentName+" With Price :- "+price+" : ";
         result = SummaryFunctionsUtil.addVendorComponent(fkAssociateId+"",componentCode,componentName,type,"dummy.jpg",price);
         if(result==true){
-             response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message+"Done");
+            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message+"Done");
         }
         return response;
     }
@@ -114,13 +109,13 @@ public class ReportMapper {
         }
         return vendorDetailsHavingSummaryModel;
     }
-    public boolean modifyVendorDetails(int fkAssociateId,String associateName,String contactPerson,String email,
+    public boolean modifyVendorDetails(int fkAssociateId,String vendorName,String contactPerson,String email,
                                        String address,String phone,String userId, String password,int status){
         boolean result = false;
         int response;
         ReportUtil reportUtil = new ReportUtil();
         try{
-            response = reportUtil.modifyVendorDetails(fkAssociateId,associateName,contactPerson,email,address,phone,userId,password,status);
+            response = reportUtil.modifyVendorDetails(fkAssociateId,vendorName,contactPerson,email,address,phone,userId,password,status);
             if (response==1){
                 result=true;
             }
@@ -129,14 +124,14 @@ public class ReportMapper {
         }
         return result;
     }
-    public boolean addNewVendorMapper(String associateName,String user, String password,
+    public boolean addNewVendorMapper(String vendorName,String user, String password,
                                       String contactPerson,String email,
                                       String address,String phone,int status){
         boolean result = false;
         int response;
         ReportUtil reportUtil = new ReportUtil();
         try{
-            response = reportUtil.addNewVendorUtil(associateName,user,password,contactPerson,email,address,phone,status);
+            response = reportUtil.addNewVendorUtil(vendorName,user,password,contactPerson,email,address,phone,status);
             if (response==1){
                 result=true;
             }
@@ -156,6 +151,36 @@ public class ReportMapper {
         }
         return response;
     }
+    public BarcodeToComponentListHavingSummary getBarcodeToComponentsMapper(String productCode, int startLimit, int endLimit) {
+        ReportUtil reportUtil = new ReportUtil();
+        BarcodeToComponentListHavingSummary barcodeToComponentListHavingSummary = reportUtil.getBarcodeToComponentsUtil(productCode,startLimit,endLimit);
+        return barcodeToComponentListHavingSummary;
+    }
+    public boolean deleteBarcodeMapper(String productCode){
+        ReportUtil reportUtil = new ReportUtil();
+        boolean response = false;
+        try{
+            response =  reportUtil.deleteBarcode(productCode);
+        }catch (Exception exception){
+            logger.error("Error at deleteBarcodeMapper in ReportMapper ",exception);
+        }
+        return response;
+    }
+    public boolean changeBarcodeComponentMapper(String productCode, String componentCode,int quantity){
+        ReportUtil reportUtil = new ReportUtil();
+        boolean response = false;
+        try{
+            response =  reportUtil.changeBarcodeComponentUtil(productCode,componentCode,quantity);
+        }catch (Exception exception){
+            logger.error("Error at changeBarcodeComponentMapper in ReportMapper ",exception);
+        }
+        return response;
+    }
+    public Map<List<String>,Map<String,Integer>> getListOfBarcodesMapper(int startLimit, int endLimit) {
+        ReportUtil reportUtil = new ReportUtil();
+        Map<List<String>,Map<String,Integer>> productCodeList = reportUtil.getListOfBarcodesUtil(startLimit,endLimit);
+        return productCodeList;
+    }
     public void fillDataActionPincode(List<Map.Entry<String,List<String>>> tableDataAction){
         tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Standard Delivery",new ArrayList<String>(
             Arrays.asList("Edit","Enable/Disable"))));
@@ -167,11 +192,9 @@ public class ReportMapper {
             Arrays.asList("Enable/Disable"))));
     }
     public void fillDataActionVendor(List<Map.Entry<String,List<String>>> tableDataAction){
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Vendor Id",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Vendor_Name",new ArrayList<String>(
             Arrays.asList("Edit"))));
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Vendor Name",new ArrayList<String>(
-            Arrays.asList("Edit"))));
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Contact Person",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Contact_Person",new ArrayList<String>(
             Arrays.asList("Edit"))));
         tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Email",new ArrayList<String>(
             Arrays.asList("Edit"))));
@@ -181,9 +204,15 @@ public class ReportMapper {
             Arrays.asList("Edit"))));
         tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Status",new ArrayList<String>(
             Arrays.asList("Edit"))));
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("User Id",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("User_Id",new ArrayList<String>(
             Arrays.asList("Edit"))));
         tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Password",new ArrayList<String>(
+            Arrays.asList("Edit"))));
+    }
+    public void fillDataActionBarcode(List<Map.Entry<String,List<String>>> tableDataAction){
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("product_Code",new ArrayList<String>(
+            Arrays.asList("Delete"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("quantity",new ArrayList<String>(
             Arrays.asList("Edit"))));
     }
 }
