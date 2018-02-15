@@ -857,12 +857,12 @@ public class ReportUtil {
         }
         return result;
     }
-    public Map<Map<String,List<String>>,Map<String,Integer>> getListOfBarcodesUtil(int startLimit, int endLimit) {
+    public BarcodeReportResponseModel getListOfBarcodesUtil(int startLimit, int endLimit) {
         Connection connection = null;
         ResultSet resultSet=null;
         String statement;
         List<String> productCodeList = new ArrayList<>();
-        Map<Map<String,List<String>>,Map<String,Integer>> result = new HashMap<>();
+        BarcodeReportResponseModel barcodeReportResponseModel = new BarcodeReportResponseModel();
         PreparedStatement preparedStatement = null;
         try {
             String queryTotal="SELECT count(*) as totalNo from AA_barcode_to_components";
@@ -877,11 +877,8 @@ public class ReportUtil {
                 String  productCode = resultSet.getString("barcode");
                 productCodeList.add(productCode);
             }
-            Map<String,Integer> countMap = new HashMap<>();
-            countMap.put("count",count);
-            Map<String,List<String>> barcodeListMap = new HashMap<>();
-            barcodeListMap.put("list",productCodeList);
-            result.put(barcodeListMap,countMap);
+            barcodeReportResponseModel.setList(productCodeList);
+            barcodeReportResponseModel.setCount(count);
         } catch (Exception exception) {
             logger.error("Exception in connection : ", exception);
         } finally {
@@ -889,7 +886,7 @@ public class ReportUtil {
             Database.INSTANCE.closeConnection(connection);
             Database.INSTANCE.closeResultSet(resultSet);
         }
-        return result;
+        return barcodeReportResponseModel;
     }
 
 }

@@ -176,10 +176,10 @@ public class ReportMapper {
         }
         return response;
     }
-    public Map<Map<String,List<String>>,Map<String,Integer>> getListOfBarcodesMapper(int startLimit, int endLimit) {
+    public BarcodeReportResponseModel getListOfBarcodesMapper(int startLimit, int endLimit) {
         ReportUtil reportUtil = new ReportUtil();
-        Map<Map<String,List<String>>,Map<String,Integer>> productCodeList = reportUtil.getListOfBarcodesUtil(startLimit,endLimit);
-        return productCodeList;
+        BarcodeReportResponseModel barcodeReportResponseModel = reportUtil.getListOfBarcodesUtil(startLimit,endLimit);
+        return barcodeReportResponseModel;
     }
     public void fillDataActionPincode(List<Map.Entry<String,List<String>>> tableDataAction){
         tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Standard Delivery",new ArrayList<String>(

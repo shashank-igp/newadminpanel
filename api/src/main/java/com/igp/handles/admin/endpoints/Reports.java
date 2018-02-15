@@ -1,10 +1,7 @@
 package com.igp.handles.admin.endpoints;
 
 import com.igp.handles.admin.mappers.Reports.ReportMapper;
-import com.igp.handles.admin.models.Reports.PincodeModelListHavingSummaryModel;
-import com.igp.handles.admin.models.Reports.ProductModelListHavingSummaryModel;
-import com.igp.handles.admin.models.Reports.BarcodeToComponentListHavingSummary;
-import com.igp.handles.admin.models.Reports.VendorDetailsHavingSummaryModel;
+import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.ReportOrderWithSummaryModel;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
@@ -401,8 +398,8 @@ public class Reports {
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
         try{
-            Map<Map<String,List<String>>,Map<String,Integer>> productCodeList = reportMapper.getListOfBarcodesMapper(startLimit,endLimit);
-            handleServiceResponse.setResult(productCodeList);
+            BarcodeReportResponseModel barcodeReportResponseModel = reportMapper.getListOfBarcodesMapper(startLimit,endLimit);
+            handleServiceResponse.setResult(barcodeReportResponseModel);
         }catch (Exception exception){
             logger.error("Error occured at getVendorDetails ",exception);
         }

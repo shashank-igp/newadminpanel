@@ -475,13 +475,19 @@ public class MarketPlaceMapper {
             logger.debug("TEMP-ORDER DEBUGGING : " + "setRelation "+addressModel.getRelation());
 
             marketPlaceTempOrderModel.setVoucher(productModel.getVoucher());
-            logger.debug("TEMP-ORDER CREATED SUCCESSFULLY: " + "setVoucher "+productModel.getVoucher());
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setVoucher "+productModel.getVoucher());
 
             marketPlaceTempOrderModel.setDiscount(productModel.getPerProductDiscount()); // change it later
             logger.debug("TEMP-ORDER DEBUGGING : " + "setDiscount "+productModel.getPerProductDiscount());
 
             marketPlaceTempOrderModel.setIdHash(userModel.getIdHash());
             logger.debug("TEMP-ORDER DEBUGGING : " + "setIdHash "+userModel.getIdHash());
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setSellingPrice "+productModel.getSellingPrice());
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setQuantity "+productModel.getQuantity());
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setProdId "+productModel.getId());
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setServiceCharge "+productModel.getServiceCharge());
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setGiftBox "+productModel.getGiftBox());
+
 
 
             orderTempId  = marketPlaceOrderUtil.createTempOrder(marketPlaceTempOrderModel, validationModel.getProductModel());
