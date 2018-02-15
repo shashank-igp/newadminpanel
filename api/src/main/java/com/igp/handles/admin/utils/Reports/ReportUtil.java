@@ -6,6 +6,7 @@ import com.igp.handles.admin.mappers.Reports.ReportMapper;
 import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.admin.models.Vendor.VendorInfoModel;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
+import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Report.ReportOrderWithSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.SummaryModel;
 import com.igp.handles.vendorpanel.models.Report.orderReportObjectModel;
@@ -17,10 +18,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by suditi on 30/1/18.
@@ -342,7 +340,7 @@ public class ReportUtil {
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             int result = preparedStatement.executeUpdate();
-            if(result==1){
+            if(result!=0){
                 response=true;
             }
 
@@ -387,7 +385,8 @@ public class ReportUtil {
                 String reqPrice = resultSet.getString("vc.req_price");
 
                 TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
-                tableDataActionHandels.setValue(resultSet.getDouble("price")+"");
+                int price = resultSet.getInt("price");
+                tableDataActionHandels.setValue(price+"");
                 tableDataActionHandels.setRequestValue("-1");
                 if(!reqPrice.equals("-1") && !tableDataActionHandels.getValue().equals(reqPrice)){
                     tableDataActionHandels.setRequestType("Approve/Reject");
@@ -448,7 +447,7 @@ public class ReportUtil {
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in updateVendorComponent "+preparedStatement);
             status = preparedStatement.executeUpdate();
-            if(status==1){
+            if(status!=0){
                 result=true;
             }
         } catch (Exception exception) {
@@ -522,65 +521,50 @@ public class ReportUtil {
         return vendorDetailsHavingSummaryModel;
     }
 
-    public int modifyVendorDetails(int fkAssociateId,String associateName,String contactPerson,String email,
+    public int modifyVendorDetails(int fkAssociateId,String vendorName,String contactPerson,String email,
                                    String address,String phone,String userId,String password,int status){
         Connection connection = null;
         int response=0;
         String statement;
         String column="";
-        String value="";
-        int flag=0;
+        int flag=1;
         PreparedStatement preparedStatement = null;
         try{
-            if(!associateName.equals("")){
-                column="associate_name";
-                value=associateName;
+            if(!vendorName.equals("")){
+                column="associate_name="+vendorName;
             }
             else if(!contactPerson.equals("")){
-                column="associate_contact_person";
-                value=contactPerson;
+                column="associate_contact_person="+contactPerson;
             }
             else if(!email.equals("")){
-                column="associate_email";
-                value=email;
+                column="associate_email="+email;
             }
             else if(!address.equals("")){
-                column="associate_address";
-                value=address;
+                column="associate_address="+address;
             }
             else if(!phone.equals("")){
-                column="associate_phone";
-                value=phone;
+                column="associate_phone="+phone;
             }
             else if(status!=-1){
-                column="associate_status";
-                flag=1;
+                column="associate_status="+flag;
             }
             connection = Database.INSTANCE.getReadWriteConnection();
             if(!column.equals("")) {
-                statement = "UPDATE associate SET " + column + "=? WHERE associate_id = ?";
+                statement = "UPDATE associate SET " + column + " WHERE associate_id = ?";
                 preparedStatement = connection.prepareStatement(statement);
-                if (flag == 0) {
-                    preparedStatement.setString(1, value);
-                } else {
-                    preparedStatement.setInt(1, status);
-                }
-                preparedStatement.setInt(2, fkAssociateId);
+                preparedStatement.setInt(1, fkAssociateId);
                 logger.debug("STATEMENT CHECK: " + preparedStatement);
                 response = preparedStatement.executeUpdate();
             }else{
                 if(!userId.equals("")){
-                    column="associate_user_name";
-                    value=userId;
+                    column="associate_user_name="+userId;
                 }
                 else if(!password.equals("")){
-                    column="associate_user_pass";
-                    value=password;
+                    column="associate_user_pass="+password;
                 }
-                String statement1 = "UPDATE associate_user set " +column+"=? WHERE fk_associate_login_id = ?";
+                String statement1 = "UPDATE associate_user set " +column+" WHERE fk_associate_login_id = ?";
                 preparedStatement = connection.prepareStatement(statement1);
-                preparedStatement.setString(1, value);
-                preparedStatement.setInt(2, fkAssociateId);
+                preparedStatement.setInt(1, fkAssociateId);
                 logger.debug("sql query in addNewVendorUtil " + preparedStatement);
                 response = preparedStatement.executeUpdate();
             }
@@ -592,7 +576,7 @@ public class ReportUtil {
         }
         return response;
     }
-    public int addNewVendorUtil(String associateName,String user, String password,
+    public int addNewVendorUtil(String vendorName,String user, String password,
                                 String contactPerson,String email,
                                 String address,String phone,int status) {
         Connection connection = null;
@@ -611,7 +595,7 @@ public class ReportUtil {
             preparedStatement = connection.prepareStatement(statement,Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setString(1,user);
-            preparedStatement.setString(2,associateName);
+            preparedStatement.setString(2,vendorName);
             preparedStatement.setString(3,contactPerson);
             preparedStatement.setString(4,email);
             preparedStatement.setString(5,""); //check associate_url
@@ -741,6 +725,169 @@ public class ReportUtil {
 
         }catch (Exception exception){
             logger.error("Error at approveAndRejectUtil in ReportUtil : ",exception);
+        }
+        return result;
+    }
+    public BarcodeToComponentListHavingSummary getBarcodeToComponentsUtil(String productCode, int startLimit, int endLimit){
+
+        Connection connection = null;
+        ResultSet resultSet = null;
+        String statement,clause,queryTotal="";
+        int count=0;
+        PreparedStatement preparedStatement = null;
+        SummaryModel summaryModelForBarcodeToComponent =  new SummaryModel();
+        List <SummaryModel> summaryModelList=new ArrayList<>();
+        BarcodeToComponentListHavingSummary barcodeModelListHavingSummaryModel = new BarcodeToComponentListHavingSummary();
+        List<BarcodeToComponentModel> barcodeToComponentModelList = new ArrayList<>();
+        //    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        //    Calendar calendar=Calendar.getInstance();
+        try{
+            if(productCode.equals("0")){
+                clause = " limit "+startLimit+" , "+endLimit;
+                queryTotal="select count(*) as totalno from AA_barcode_to_components bc join AA_master_components mc " +
+                    "on mc.component_id=bc.fk_component_id JOIN products as p on bc.barcode=p.products_code ";
+                count =SummaryFunctionsUtil.getCount(queryTotal);
+            }
+            else {
+                clause = " where bc.barcode = "+productCode;
+                count=1;
+            }
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement="select p.products_code,p.products_name,p.products_image_big,mc.component_code,mc.component_name,mc.type,bc.quantity  "
+                + " quantity, mc.componentImage componentImage , mc.component_id ,bc.fk_component_id,mc.mod_time from  "
+                + " AA_barcode_to_components bc join AA_master_components mc on mc.component_id=bc.fk_component_id LEFT"
+                + " JOIN products as p on bc.barcode=p.products_code "+clause;
+
+            preparedStatement = connection.prepareStatement(statement);
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+
+            while (resultSet.next()){
+                // calendar.setTime(dateFormat.parse(resultSet.getString("mc.mod_time")));
+
+                BarcodeToComponentModel barcodeToComponentModel= new BarcodeToComponentModel.Builder()
+                    .componentCode(resultSet.getString("mc.component_code"))
+                    .componentImage(resultSet.getString("componentImage"))
+                    .componentName(resultSet.getString("mc.component_name"))
+                    .productCode(resultSet.getString("p.products_code"))
+                    .productName(resultSet.getString("p.products_name"))
+                    .productImage(resultSet.getString("p.products_image_big"))
+                    .quantity(resultSet.getInt("bc.quantity")+"")
+                    .componentId(resultSet.getInt("bc.fk_component_id"))
+                    .build();
+                barcodeToComponentModelList.add(barcodeToComponentModel);
+            }
+            summaryModelForBarcodeToComponent.setLabel("Total Products");
+            summaryModelForBarcodeToComponent.setValue(count+"");
+            summaryModelList.add(summaryModelForBarcodeToComponent);
+            barcodeModelListHavingSummaryModel.setBarcodeToComponentDataModelList(barcodeToComponentModelList);
+            barcodeModelListHavingSummaryModel.setSummaryModelList(summaryModelList);
+        }
+        catch (Exception exception) {
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return barcodeModelListHavingSummaryModel;
+    }
+    public boolean deleteBarcode(String productCode) {
+        Connection connection = null;
+        String statement;
+        int status = 0;
+        boolean result = false;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement = "DELETE FROM AA_barcode_to_components where barcode=?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1,productCode);
+            logger.debug("sql query in deleteBarcode "+preparedStatement);
+            status = preparedStatement.executeUpdate();
+            if(status!=0){
+                result=true;
+            }
+        } catch (Exception exception) {
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
+    }
+    public boolean changeBarcodeComponentUtil(String productCode, String componentCode,int quantity) {
+        Connection connection = null;
+        ResultSet resultSet=null;
+        String statement;
+        int status = 0;
+        boolean result = false;
+        int componentId=0;
+        PreparedStatement preparedStatement = null;
+        try {
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement = "SELECT mc.component_id from AA_master_components mc join AA_barcode_to_components" +
+                " bc on mc.component_id=bc.fk_component_id where mc.component_code=? and bc.barcode=?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1,componentCode);
+            preparedStatement.setString(2,productCode);
+            logger.debug("sql query in changeBarcodeComponentUtil "+preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                componentId=resultSet.getInt("mc.component_id");
+                if(componentId!=0){
+                    statement = "UPDATE AA_barcode_to_components set quantity = ? where fk_component_id = ? and barcode = ?";
+                    preparedStatement = connection.prepareStatement(statement);
+                    preparedStatement.setInt(1,quantity);
+                    preparedStatement.setInt(2,componentId);
+                    preparedStatement.setString(3,productCode);
+                    logger.debug("sql query in changeBarcodeComponentUtil "+preparedStatement);
+                    status = preparedStatement.executeUpdate();
+                    if(status!=0) {
+                        result = true;
+                    }
+                }
+            }
+        } catch (Exception exception) {
+            logger.error("Exception in connection : ", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return result;
+    }
+    public Map<Map<String,List<String>>,Map<String,Integer>> getListOfBarcodesUtil(int startLimit, int endLimit) {
+        Connection connection = null;
+        ResultSet resultSet=null;
+        String statement;
+        List<String> productCodeList = new ArrayList<>();
+        Map<Map<String,List<String>>,Map<String,Integer>> result = new HashMap<>();
+        PreparedStatement preparedStatement = null;
+        try {
+            String queryTotal="SELECT count(*) as totalNo from AA_barcode_to_components";
+            int count =SummaryFunctionsUtil.getCount(queryTotal);
+
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement = "SELECT barcode from AA_barcode_to_components limit "+startLimit+","+endLimit;
+            preparedStatement = connection.prepareStatement(statement);
+            logger.debug("sql query in getListOfBarcodesUtil "+preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                String  productCode = resultSet.getString("barcode");
+                productCodeList.add(productCode);
+            }
+            Map<String,Integer> countMap = new HashMap<>();
+            countMap.put("count",count);
+            Map<String,List<String>> barcodeListMap = new HashMap<>();
+            barcodeListMap.put("list",productCodeList);
+            result.put(barcodeListMap,countMap);
+        } catch (Exception exception) {
+            logger.error("Exception in connection : ", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
         }
         return result;
     }

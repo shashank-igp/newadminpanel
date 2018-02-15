@@ -1,5 +1,6 @@
 package com.igp.handles.admin.models.Reports;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Map;
@@ -9,7 +10,7 @@ import java.util.Map;
  */
 public class PincodeTableDataModel {
 
-    @JsonProperty("Vendor Id")
+    @JsonIgnore
     private String  vendorId;
 
     @JsonProperty("Vendor Name")
