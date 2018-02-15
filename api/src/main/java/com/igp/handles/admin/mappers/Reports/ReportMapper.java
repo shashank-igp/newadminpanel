@@ -176,9 +176,9 @@ public class ReportMapper {
         }
         return response;
     }
-    public Map<List<String>,Map<String,Integer>> getListOfBarcodesMapper(int startLimit, int endLimit) {
+    public Map<Map<String,List<String>>,Map<String,Integer>> getListOfBarcodesMapper(int startLimit, int endLimit) {
         ReportUtil reportUtil = new ReportUtil();
-        Map<List<String>,Map<String,Integer>> productCodeList = reportUtil.getListOfBarcodesUtil(startLimit,endLimit);
+        Map<Map<String,List<String>>,Map<String,Integer>> productCodeList = reportUtil.getListOfBarcodesUtil(startLimit,endLimit);
         return productCodeList;
     }
     public void fillDataActionPincode(List<Map.Entry<String,List<String>>> tableDataAction){

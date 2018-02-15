@@ -401,7 +401,7 @@ public class Reports {
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
         try{
-            Map<List<String>,Map<String,Integer>> productCodeList = reportMapper.getListOfBarcodesMapper(startLimit,endLimit);
+            Map<Map<String,List<String>>,Map<String,Integer>> productCodeList = reportMapper.getListOfBarcodesMapper(startLimit,endLimit);
             handleServiceResponse.setResult(productCodeList);
         }catch (Exception exception){
             logger.error("Error occured at getVendorDetails ",exception);
