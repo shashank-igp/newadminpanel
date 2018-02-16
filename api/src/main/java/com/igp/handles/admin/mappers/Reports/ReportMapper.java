@@ -210,9 +210,9 @@ public class ReportMapper {
             Arrays.asList("Edit"))));
     }
     public void fillDataActionBarcode(List<Map.Entry<String,List<String>>> tableDataAction){
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("product_Code",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Product_Code",new ArrayList<String>(
             Arrays.asList("Delete"))));
-        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("quantity",new ArrayList<String>(
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Quantity",new ArrayList<String>(
             Arrays.asList("Edit"))));
     }
 }

@@ -68,6 +68,8 @@ public class MarketPlaceMapper {
 
                     }
                     data.put(row, a);
+                    logger.debug("row : "+row);
+                    logger.debug("values : "+data.get(row));
                 }
             }
         } catch(FileNotFoundException e){
@@ -320,6 +322,7 @@ public class MarketPlaceMapper {
             ValidationModel validationModel = new ValidationModel();
             try {
                 validationModel = validationModelList1.get(i);
+                logger.debug("row number : "+i);
                 i++;
                 AddressModel addressModel = validationModel.getAddressModel();
                 extraInfoModel = validationModel.getExtraInfoModel();
@@ -358,7 +361,6 @@ public class MarketPlaceMapper {
                                 // product details are not empty so bring product details to the model.
                                 validationModel = marketPlaceOrderUtil.validateAndGetProductDetails(validationModel);
                                 if (validationModel.getError() == Boolean.TRUE) {
-                                    validationModel.setMessage("Error is Product Validation.");
 
                                 } else {
                                     // finally validate extra info values and add in the model
@@ -490,7 +492,7 @@ public class MarketPlaceMapper {
 
 
 
-            orderTempId  = marketPlaceOrderUtil.createTempOrder(marketPlaceTempOrderModel, validationModel.getProductModel());
+            orderTempId  = marketPlaceOrderUtil.createTempOrder(marketPlaceTempOrderModel, productModel);
             logger.debug("Retruned from function DEBUGGING : " + "createTempOrder "+orderTempId);
 
             if (orderTempId!=0) {
