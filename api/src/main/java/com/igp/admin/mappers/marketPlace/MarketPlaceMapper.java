@@ -132,9 +132,10 @@ public class MarketPlaceMapper {
                     zipCode = zipCode.substring(0, 6);
                 }
                 String quant = column.get("QTY");
-                int qty = 0;
+                int quantity = 0;
                 if(!quant.isEmpty()) {
-                    qty = Integer.parseInt(quant);
+                    double d = Double.parseDouble(quant);
+                    quantity = (int) d;
                 }
 
                 // take out all the values and fill the models.
@@ -196,11 +197,16 @@ public class MarketPlaceMapper {
                     addressModel.setMobilePrefix(mprefix);
                     addressModel.setAddressType(0); // home
 
-
+                    String sP = column.get("SellingPrice");
+                    int sellingPrice = 0;
+                    if(!sP.isEmpty()) {
+                        double d = Double.parseDouble(sP);
+                        sellingPrice = (int) d;
+                    }
                     productModel = new ProductModel.Builder()
                         .productCode(column.get("Item Code"))
-                        .quantity(qty)
-                        .sellingPrice(new BigDecimal(column.get("SellingPrice")))
+                        .quantity(quantity)
+                        .sellingPrice(new BigDecimal(sellingPrice))
                         .name(column.get("ProductName"))
                         .serviceDate("1970-01-01")
                         .serviceTypeId(1+"")
@@ -216,7 +222,7 @@ public class MarketPlaceMapper {
                     String detail = column.get("PO Number") + "(#)" +
                         column.get("MemberName")  + "(#)" +
                         column.get("Contact No"  + "(#)" +
-                            column.get("Email"))  + "(#)" +
+                        column.get("Email"))  + "(#)" +
                         column.get("AddressLine1") + "(#)" +
                         column.get("AddressLine2") + "(#)" +
                         column.get("State") + "(#)" +
@@ -300,7 +306,7 @@ public class MarketPlaceMapper {
             }catch (Exception e){
                 logger.debug("exception at row : "+rowNum);
                 ValidationModel validationModel = new ValidationModel();
-                validationModel.setError(false);
+                validationModel.setError(true);
                 validationModel.setMessage("Details Inappropriate.");
                 validationModelList.add(validationModel);
                 logger.error("Exception at filling model after reading excel : ", e);
@@ -332,8 +338,9 @@ public class MarketPlaceMapper {
             ValidationModel validationModel = new ValidationModel();
             try {
                 validationModel = validationModelList1.get(i);
-                logger.debug("row number : "+i);
                 i++;
+                logger.debug("row number : "+i);
+                logger.debug("row values : ",validationModel);
                 AddressModel addressModel = validationModel.getAddressModel();
                 extraInfoModel = validationModel.getExtraInfoModel();
                 productModel = validationModel.getProductModel();
