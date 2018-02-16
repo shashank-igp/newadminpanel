@@ -63,7 +63,7 @@ public class MarketPlaceMapper {
                         } else if (currentCell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
                             a.put(list.get(currCol), currentCell.getBooleanCellValue() + "");
                         } else if (currentCell.getCellType() == Cell.CELL_TYPE_BLANK) {
-                            a.put(list.get(currCol), null);
+                            a.put(list.get(currCol), "");
                         }
 
                     }
@@ -88,6 +88,7 @@ public class MarketPlaceMapper {
 
     public List<ValidationModel> refineDataAndPopulateModels( Map<Integer, Map<String, String>> data,String user, Integer fk_associate_id) {
         List<ValidationModel> validationModelList = new ArrayList<>();
+        MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
         Map<Integer, String> serviceType = new HashMap<Integer, String>() {
 
             {
@@ -102,10 +103,11 @@ public class MarketPlaceMapper {
 
 
         for (Map.Entry<Integer, Map<String, String>> entry : data.entrySet()) {
+            // revisiting each map i.e. each row
+            Map<String, String> row = entry.getValue();
+            Iterator<Map.Entry<String, String>> rowNum = row.entrySet().iterator();
+
             try {
-                // revisiting each map i.e. each row
-                Map<String, String> row = entry.getValue();
-                Iterator<Map.Entry<String, String>> rowNum = row.entrySet().iterator();
                 //  while (rowNum.hasNext()) {
                 ValidationModel validationModel = new ValidationModel();
                 UserModel userModel;
@@ -116,17 +118,24 @@ public class MarketPlaceMapper {
                 Map<String, String> column = row;
 
                 // fill few generic values.
-                String mprefix = MarketPlaceOrderUtil.getMobilePrefixByCountryId("99");
+                String mprefix = marketPlaceOrderUtil.getMobilePrefixByCountryId("99");
                 validationModel.setFkAssociateId(fk_associate_id);
                 validationModel.setError(Boolean.FALSE);
                 validationModel.setId(0);
                 long millis = System.currentTimeMillis();
-                String phone =  new BigDecimal(column.get("Contact No")).toPlainString();
+                String phone = column.get("Contact No");
+                if(!phone.isEmpty()) {
+                    phone = new BigDecimal(column.get("Contact No")).toPlainString();
+                }
                 String zipCode = column.get("Zip");
-                String zip = zipCode.substring(0,6);
+                if(!zipCode.isEmpty()) {
+                    zipCode = zipCode.substring(0, 6);
+                }
                 String quant = column.get("QTY");
-                String qty = quant.substring(0,1);
-
+                int qty = 0;
+                if(!quant.isEmpty()) {
+                    qty = Integer.parseInt(quant);
+                }
 
                 // take out all the values and fill the models.
                 // i.e. customer,address,product,extra_info
@@ -161,7 +170,7 @@ public class MarketPlaceMapper {
                         .addressField2(column.get("AddressLine2"))
                         .state(column.get("State"))
                         .city(column.get("City"))
-                        .postcode(zip)
+                        .postcode(zipCode)
                         .email(column.get("Email"))
                         .mobile(phone)
                         .mobilePrefix(mprefix)
@@ -190,7 +199,7 @@ public class MarketPlaceMapper {
 
                     productModel = new ProductModel.Builder()
                         .productCode(column.get("Item Code"))
-                        .quantity(new Integer(qty))
+                        .quantity(qty)
                         .sellingPrice(new BigDecimal(column.get("SellingPrice")))
                         .name(column.get("ProductName"))
                         .serviceDate("1970-01-01")
@@ -289,6 +298,7 @@ public class MarketPlaceMapper {
                 validationModelList.add(validationModel);
 
             }catch (Exception e){
+                logger.debug("exception at row : "+rowNum);
                 ValidationModel validationModel = new ValidationModel();
                 validationModel.setError(false);
                 validationModel.setMessage("Details Inappropriate.");
@@ -328,82 +338,81 @@ public class MarketPlaceMapper {
                 extraInfoModel = validationModel.getExtraInfoModel();
                 productModel = validationModel.getProductModel();
                 // check if order already exists.
-                validationModel = marketPlaceOrderUtil.checkCorpOrderExists(validationModel);
-                if(validationModel.getError() == false){
-                    // order doesn't exist, so create a new order.
+                if(validationModel.getError() == false) {
+                    validationModel = marketPlaceOrderUtil.checkCorpOrderExists(validationModel);
+                    if (validationModel.getError() == false) {
+                        // order doesn't exist, so create a new order.
 
-                    // validate customer details.
-                    validationModel = marketPlaceOrderUtil.validateCustomerDetails(validationModel);
-                    if (validationModel.getError() == Boolean.TRUE) {
-                        validationModel.setMessage("Error is Customer Details.");
-                    } else {
-                        // no error in getting customer model.
-                        addressModel.setId(validationModel.getUserModel().getIdHash());
-                        validationModel.setAddressModel(addressModel);
-                        // validate address details.
-
-                     //  addressModel.setAid("1614158");
-                    //   validationModel.setAddressModel(addressModel);
-
-                       validationModel = marketPlaceOrderUtil.validateSelectedAddress(validationModel);
+                        // validate customer details.
+                        validationModel = marketPlaceOrderUtil.validateCustomerDetails(validationModel);
                         if (validationModel.getError() == Boolean.TRUE) {
-                            validationModel.setMessage("Error is Address Validation.");
+                            validationModel.setMessage("Error is Customer Details.");
                         } else {
-                            // check product details.
-                            String prodCode = productModel.getProductCode();
-                            Integer prodQty = productModel.getQuantity();
-                            if (prodCode == "" || prodCode == null || prodQty <= 0) {
-                                // product details incomplete.
-                                logger.error("Incomplete Product Details.");
-                                validationModel.setError(Boolean.TRUE);
-                                validationModel.setMessage("Incomplete Product Details.");
+                            // no error in getting customer model.
+                            addressModel.setId(validationModel.getUserModel().getIdHash());
+                            validationModel.setAddressModel(addressModel);
+                            // validate address details.
+
+                            //  addressModel.setAid("1614158");
+                            //   validationModel.setAddressModel(addressModel);
+
+                            validationModel = marketPlaceOrderUtil.validateSelectedAddress(validationModel);
+                            if (validationModel.getError() == Boolean.TRUE) {
+                                validationModel.setMessage("Error is Address Validation.");
                             } else {
-                                // product details are not empty so bring product details to the model.
-                                validationModel = marketPlaceOrderUtil.validateAndGetProductDetails(validationModel);
-                                if (validationModel.getError() == Boolean.TRUE) {
-
+                                // check product details.
+                                String prodCode = productModel.getProductCode();
+                                Integer prodQty = productModel.getQuantity();
+                                if (prodCode == "" || prodCode == null || prodQty <= 0) {
+                                    // product details incomplete.
+                                    logger.error("Incomplete Product Details.");
+                                    validationModel.setError(Boolean.TRUE);
+                                    validationModel.setMessage("Incomplete Product Details.");
                                 } else {
-                                    // finally validate extra info values and add in the model
-
-                                    if (extraInfoModel.getGstNo() != null || extraInfoModel.getGstNo() != "" ||
-                                        extraInfoModel.getMarketData() != null || extraInfoModel.getMarketData() != "" ||
-                                        extraInfoModel.getMarketName() != null || extraInfoModel.getMarketName() != "" ||
-                                        extraInfoModel.getRelId() != "") {
-                                        // all info is good so create temp model and create temp order.
-                                        marketPlaceTempOrderModel = fillTempModelAndCreateTempOrder(validationModel);
-                                        if (marketPlaceTempOrderModel.getTempOrderId() != 0) {
-                                            // create order by hitting api
-                                            logger.debug("Temp Order Created successfully : " + marketPlaceTempOrderModel.getTempOrderId());
-                                            orderId = marketPlaceOrderUtil.createOrder(marketPlaceTempOrderModel, extraInfoModel);
-                                            if (orderId == 0) {
-                                                validationModel.setError(Boolean.TRUE);
-                                                validationModel.setMessage("Error at order creation.");
-                                                validationModel.setId(orderId);
-                                            } else {
-                                                validationModel.setError(Boolean.FALSE);
-                                                validationModel.setMessage("Order has been Successfully Created.");
-                                                validationModel.setId(orderId);
-                                            }
-                                        } else {
-                                            logger.error("Error at temp order creation.");
-                                            validationModel.setError(Boolean.TRUE);
-                                            validationModel.setMessage("Error at temp order creation.");
-                                        }
+                                    // product details are not empty so bring product details to the model.
+                                    validationModel = marketPlaceOrderUtil.validateAndGetProductDetails(validationModel);
+                                    if (validationModel.getError() == Boolean.TRUE) {
 
                                     } else {
-                                        // extra info is incomplete.
-                                        logger.error("Incomplete Extra Info.");
-                                        validationModel.setError(Boolean.TRUE);
-                                        validationModel.setMessage("Incomplete Extra Info.");
-                                    }
+                                        // finally validate extra info values and add in the model
 
+                                        if (extraInfoModel.getGstNo() != null || extraInfoModel.getGstNo() != "" ||
+                                            extraInfoModel.getMarketData() != null || extraInfoModel.getMarketData() != "" ||
+                                            extraInfoModel.getMarketName() != null || extraInfoModel.getMarketName() != "" ||
+                                            extraInfoModel.getRelId() != "") {
+                                            // all info is good so create temp model and create temp order.
+                                            marketPlaceTempOrderModel = fillTempModelAndCreateTempOrder(validationModel);
+                                            if (marketPlaceTempOrderModel.getTempOrderId() != 0) {
+                                                // create order by hitting api
+                                                logger.debug("Temp Order Created successfully : " + marketPlaceTempOrderModel.getTempOrderId());
+                                                orderId = marketPlaceOrderUtil.createOrder(marketPlaceTempOrderModel, extraInfoModel);
+                                                if (orderId == 0) {
+                                                    validationModel.setError(Boolean.TRUE);
+                                                    validationModel.setMessage("Error at order creation.");
+                                                    validationModel.setId(orderId);
+                                                } else {
+                                                    validationModel.setError(Boolean.FALSE);
+                                                    validationModel.setMessage("Order has been Successfully Created.");
+                                                    validationModel.setId(orderId);
+                                                }
+                                            } else {
+                                                logger.error("Error at temp order creation.");
+                                                validationModel.setError(Boolean.TRUE);
+                                                validationModel.setMessage("Error at temp order creation.");
+                                            }
+
+                                        } else {
+                                            // extra info is incomplete.
+                                            logger.error("Incomplete Extra Info.");
+                                            validationModel.setError(Boolean.TRUE);
+                                            validationModel.setMessage("Incomplete Extra Info.");
+                                        }
+
+                                    }
                                 }
                             }
                         }
                     }
-                }
-                else {
-                    validationModel.setMessage("Order exists already");
                 }
 
                 if (validationModel.getError()==true) {

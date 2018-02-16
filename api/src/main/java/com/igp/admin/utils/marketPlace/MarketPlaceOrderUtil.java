@@ -211,7 +211,11 @@ public class MarketPlaceOrderUtil {
         String prodCode = productModel.getProductCode();
         validationModel.setError(Boolean.FALSE);
         try {
-            connection = Database.INSTANCE.getReadOnlyConnection();
+            if (prodCode == "" || prodCode == null) {
+                logger.debug("product details : "+productModel);
+                throw new Exception("Product Code is Empty");
+            }
+                connection = Database.INSTANCE.getReadOnlyConnection();
             statement = "SELECT * FROM products INNER JOIN newigp_product_extra_info WHERE " +
                 "products.products_id = newigp_product_extra_info.products_id AND products.products_code = ?";
             preparedStatement = connection.prepareStatement(statement);
@@ -223,7 +227,7 @@ public class MarketPlaceOrderUtil {
                 BigDecimal inrPrice = resultSet.getBigDecimal("products.products_mrp");
                 //- INR-USD conversion completed
 
-               ProductModel productModel1 = new ProductModel.Builder()
+                ProductModel productModel1 = new ProductModel.Builder()
                     .id(resultSet.getInt("products.products_id"))
                     .quantity(productModel.getQuantity())
                     .name(resultSet.getString("newigp_product_extra_info.display_name"))
@@ -243,6 +247,7 @@ public class MarketPlaceOrderUtil {
                     .serviceTypeId(productModel.getServiceTypeId())
                     .serviceType(productModel.getServiceType())
                     .build();
+                logger.debug("product details : "+productModel1);
                 if(productModel1.getId() == null || productModel1.getId() == 0 ||
                     productModel1.getSellingPrice() == null || productModel1.getQuantity() <= 0 ||
                     productModel1.getServiceCharge() == null){
@@ -399,7 +404,7 @@ public class MarketPlaceOrderUtil {
         }
         return orderTempId;
     }
-    public static String parseAndSortProductAttributes(Map<String, String> attributes) {
+    public String parseAndSortProductAttributes(Map<String, String> attributes) {
         String sortedAttributes;
         String[] attributeArray = new String[attributes.size()];
         Integer count = 0;
@@ -418,7 +423,7 @@ public class MarketPlaceOrderUtil {
     }
 
 
-    public static Integer createTempOrderBasket(OrderTempBasketModel orderTempBasketModel) {
+    public Integer createTempOrderBasket(OrderTempBasketModel orderTempBasketModel) {
         Integer tempOrderBasketId = null;
         Connection connection = null;
         String statement;
@@ -460,7 +465,7 @@ public class MarketPlaceOrderUtil {
         return tempOrderBasketId;
     }
 
-    public static Boolean insertIntoOrdersTempBasketExtraInfo(OrderTempBasketModel orderTempBasketModel, Integer orderTempBasketId) {
+    public Boolean insertIntoOrdersTempBasketExtraInfo(OrderTempBasketModel orderTempBasketModel, Integer orderTempBasketId) {
         Boolean response = Boolean.FALSE;
         Connection connection = null;
         String statement;
@@ -517,12 +522,12 @@ public class MarketPlaceOrderUtil {
                 user.setIdHash(resultSet.getString("n.id_hash"));
                 logger.debug("USER DEBUGGING : " + "setUserDOB "+resultSet.getString("c.customers_dob"));
 
-              //  if(resultSet.getString("c.customers_dob").equals("none") || resultSet.getString("c.customers_dob").equals("") || resultSet.getString("c.customers_dob").isEmpty()){
-                    // don't take dob.
-              //  }
-              //  else {
-             //       user.setDob(resultSet.getString("c.customers_dob"));
-             //   }
+                //  if(resultSet.getString("c.customers_dob").equals("none") || resultSet.getString("c.customers_dob").equals("") || resultSet.getString("c.customers_dob").isEmpty()){
+                // don't take dob.
+                //  }
+                //  else {
+                //       user.setDob(resultSet.getString("c.customers_dob"));
+                //   }
             }
         } catch (Exception exception) {
             logger.error("Exception getting user from database : ", exception);
@@ -670,7 +675,7 @@ public class MarketPlaceOrderUtil {
         }
         return orderId;
     }
-    public static String getMobilePrefixByCountryId(String countryId) {
+    public String getMobilePrefixByCountryId(String countryId) {
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -704,18 +709,22 @@ public class MarketPlaceOrderUtil {
             checkCorpOrderModel.setError(false);
             checkCorpOrderModel.setRelId(validationModel.getExtraInfoModel().getRelId());
             checkCorpOrderModel.setOrderId(0);
-            String postData = objectMapper.writeValueAsString(checkCorpOrderModel);
-            String orderExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/corporate/corpordercheck");
-            generalAddressResponseModel = objectMapper.readValue(orderExist, GenerateCheckCorpOrderResponseModel.class);
-            checkCorpOrderModel = generalAddressResponseModel.getData();
-            if(checkCorpOrderModel.getError()==false){
-                if (checkCorpOrderModel.getFlag()==true){
-                    validationModel.setError(true);
-                    validationModel.setMessage("Duplicate Order.");
+            if(!checkCorpOrderModel.getRelId().isEmpty()||!checkCorpOrderModel.getRelId().equals("0")) {
+                String postData = objectMapper.writeValueAsString(checkCorpOrderModel);
+                String orderExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/corporate/corpordercheck");
+                generalAddressResponseModel = objectMapper.readValue(orderExist, GenerateCheckCorpOrderResponseModel.class);
+                checkCorpOrderModel = generalAddressResponseModel.getData();
+                if (checkCorpOrderModel.getError() == false) {
+                    if (checkCorpOrderModel.getFlag() == true) {
+                        validationModel.setError(true);
+                        validationModel.setMessage("Duplicate Order.");
+                    }
+                } else {
+                    throw new Exception("Exception at checking order already exists");
                 }
-            }
-            else {
-                throw new Exception("Exception at checking order already exists");
+            }else {
+                validationModel.setError(true);
+                validationModel.setMessage("PO number can't be empty.");
             }
         }
         catch (Exception e){
@@ -756,7 +765,7 @@ public class MarketPlaceOrderUtil {
             logger.error("Exception Occured while uploading file : ", exception);
             fileUploadModel.setError(true);
         }
-       return fileUploadModel;
+        return fileUploadModel;
     }
 
 }
