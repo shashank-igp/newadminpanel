@@ -40,7 +40,6 @@ public class MarketPlaceOrderUtil {
         validationModel.setError(Boolean.FALSE);
         try {
             if (userModel.getFirstname() == null || Objects.equals(userModel.getFirstname(), "") ||
-                userModel.getLastname() == null || Objects.equals(userModel.getLastname(), "") ||
                 userModel.getEmail() == null || Objects.equals(userModel.getEmail(), "") ||
                 userModel.getPassword() == null || Objects.equals(userModel.getPassword(), "") ||
                 userModel.getMobile() == null || Objects.equals(userModel.getMobile(), "") ||
@@ -244,9 +243,11 @@ public class MarketPlaceOrderUtil {
                     .serviceTypeId(productModel.getServiceTypeId())
                     .serviceType(productModel.getServiceType())
                     .build();
-                if(productModel1.getId() == null || productModel1.getId() == 0){
+                if(productModel1.getId() == null || productModel1.getId() == 0 ||
+                    productModel1.getSellingPrice() == null || productModel1.getQuantity() <= 0 ||
+                    productModel1.getServiceCharge() == null){
                     validationModel.setError(Boolean.TRUE);
-                    validationModel.setMessage("Product is not available.");
+                    validationModel.setMessage("Product is not available Or Details incorrect.");
                 }
                 validationModel.setProductModel(productModel1);
             }
@@ -311,6 +312,12 @@ public class MarketPlaceOrderUtil {
                 preparedStatement.setString(3, "f");
             else
                 preparedStatement.setString(3, "");
+            logger.debug("serive charges : " + productModel.getServiceCharge());
+            logger.debug("gift box : " + productModel.getGiftBox());
+            logger.debug("quantity : " + productModel.getQuantity());
+            logger.debug("sellingPrice : " + productModel.getSellingPrice());
+            logger.debug("discount : "+orderTempModel.getDiscount());
+
 
             BigDecimal serviceCharges = productModel.getServiceCharge().add(new BigDecimal(productModel.getGiftBox() * productModel.getQuantity()));// * Environment.getGiftBoxPrice()));
             BigDecimal cartValue = productModel.getSellingPrice().add(serviceCharges).subtract(orderTempModel.getDiscount());
@@ -503,16 +510,19 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setString(1, user.getEmail());
             resultSet = preparedStatement.executeQuery();
             if (resultSet.first()) {
+                logger.debug("USER DEBUGGING : " + "PreparedStatement "+preparedStatement);
+                logger.debug("USER DEBUGGING : " + "setUser_id "+resultSet.getString("c.customers_id"));
                 user.setId(resultSet.getString("c.customers_id"));
+                logger.debug("USER DEBUGGING : " + "setUserHash "+resultSet.getString("n.id_hash"));
                 user.setIdHash(resultSet.getString("n.id_hash"));
                 logger.debug("USER DEBUGGING : " + "setUserDOB "+resultSet.getString("c.customers_dob"));
 
-                if(resultSet.getString("c.customers_dob").equals("none") || resultSet.getString("c.customers_dob").equals("") || resultSet.getString("c.customers_dob").isEmpty()){
+              //  if(resultSet.getString("c.customers_dob").equals("none") || resultSet.getString("c.customers_dob").equals("") || resultSet.getString("c.customers_dob").isEmpty()){
                     // don't take dob.
-                }
-                else {
-                    user.setDob(resultSet.getString("c.customers_dob"));
-                }
+              //  }
+              //  else {
+             //       user.setDob(resultSet.getString("c.customers_dob"));
+             //   }
             }
         } catch (Exception exception) {
             logger.error("Exception getting user from database : ", exception);
