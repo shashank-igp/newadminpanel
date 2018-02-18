@@ -142,7 +142,7 @@ public class MarketPlaceMapper {
                 // i.e. customer,address,product,extra_info
                 if(user.equals("loyalty")) {
 
-                    String name = column.get("MemberName");
+                    String name = column.get("MemberName").trim();
                     String fname = "";
                     String lname = "";
 
@@ -204,7 +204,7 @@ public class MarketPlaceMapper {
                         sellingPrice = (int) d;
                     }
                     productModel = new ProductModel.Builder()
-                        .productCode(column.get("Item Code"))
+                        .productCode(column.get("Item Code").trim())
                         .quantity(quantity)
                         .sellingPrice(new BigDecimal(sellingPrice))
                         .name(column.get("ProductName"))
@@ -221,8 +221,8 @@ public class MarketPlaceMapper {
 
                     String detail = column.get("PO Number") + "(#)" +
                         column.get("MemberName")  + "(#)" +
-                        column.get("Contact No"  + "(#)" +
-                        column.get("Email"))  + "(#)" +
+                        column.get("Contact No")  + "(#)" +
+                        column.get("Email")  + "(#)" +
                         column.get("AddressLine1") + "(#)" +
                         column.get("AddressLine2") + "(#)" +
                         column.get("State") + "(#)" +
@@ -353,7 +353,7 @@ public class MarketPlaceMapper {
                         // validate customer details.
                         validationModel = marketPlaceOrderUtil.validateCustomerDetails(validationModel);
                         if (validationModel.getError() == Boolean.TRUE) {
-                            validationModel.setMessage("Error is Customer Details.");
+                           // validationModel.setMessage("Error is Customer Details.");
                         } else {
                             // no error in getting customer model.
                             addressModel.setId(validationModel.getUserModel().getIdHash());
@@ -365,7 +365,7 @@ public class MarketPlaceMapper {
 
                             validationModel = marketPlaceOrderUtil.validateSelectedAddress(validationModel);
                             if (validationModel.getError() == Boolean.TRUE) {
-                                validationModel.setMessage("Error is Address Validation.");
+                               // validationModel.setMessage("Error is Address Validation.");
                             } else {
                                 // check product details.
                                 String prodCode = productModel.getProductCode();
@@ -378,11 +378,12 @@ public class MarketPlaceMapper {
                                 } else {
                                     // product details are not empty so bring product details to the model.
                                     validationModel = marketPlaceOrderUtil.validateAndGetProductDetails(validationModel);
-                                    if (validationModel.getError() == Boolean.TRUE) {
-
+                                    productModel = validationModel.getProductModel();
+                                    if (validationModel.getError() == Boolean.TRUE || productModel.getId()==null) {
+                                        validationModel.setError(Boolean.TRUE);
+                                        validationModel.setMessage("Product Can't be found.");
                                     } else {
                                         // finally validate extra info values and add in the model
-
                                         if (extraInfoModel.getGstNo() != null || extraInfoModel.getGstNo() != "" ||
                                             extraInfoModel.getMarketData() != null || extraInfoModel.getMarketData() != "" ||
                                             extraInfoModel.getMarketName() != null || extraInfoModel.getMarketName() != "" ||
@@ -431,7 +432,7 @@ public class MarketPlaceMapper {
 
                 }
                 else {
-                    countModel.setCorrect(correct++);
+                    countModel.setCorrect(++correct);
                     countModel.setFail(fail);
                 }
 

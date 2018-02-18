@@ -46,8 +46,7 @@ public class MarketPlaceOrderUtil {
                 userModel.getCountryId() == null || userModel.getCountryId() == 0) {
 
                 logger.error("Customer Details can't be empty.");
-                validationModel.setError(Boolean.TRUE);
-                validationModel.setMessage("Customer Details can't be empty.");
+                throw new Exception("Customer Details can't be empty.");
             } else {
                 // other checks
 
@@ -75,22 +74,31 @@ public class MarketPlaceOrderUtil {
                     generalUserResponseModel = objectMapper.readValue(custResponse, GeneralUserResponseModel.class);
                     // populate cust id hash in customer and address model.
                     authResponseModel = generalUserResponseModel.getData();
-                    validationModel.setUserModel(authResponseModel.getUser());
+                    UserModel userModel2 = authResponseModel.getUser();
+                    // validationModel.setUserModel(authResponseModel.getUser());
                     validationModel.setError(!authResponseModel.getLogin());
                     if(validationModel.getError()==true){
-                        throw new Exception("Exception at Customer Creation");
+                        throw new Exception("New Customer couldn't be Created.");
                     }
                     else {
                         // since new customer created therefore update rest of the details.
-                        userModel.setId(validationModel.getUserModel().getId());
+                        userModel.setId(userModel2.getId());
                         String postData1 = objectMapper.writeValueAsString(userModel);
                         String custUpdate = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/signup");
                         generalUserResponseModel = objectMapper.readValue(custUpdate, GeneralUserResponseModel.class);
                         authResponseModel =  generalUserResponseModel.getData();
-                        validationModel.setUserModel(authResponseModel.getUser());
+                        // storing idHash and id in proper fields.
+                        userModel2.setIdHash(userModel.getId());
+                        userModel = authResponseModel.getUser();
+                        userModel.setIdHash(userModel2.getIdHash());
+                        //userModel.setId(null);
+                        validationModel.setUserModel(userModel);
                         validationModel.setError(!authResponseModel.getLogin());
                         if(validationModel.getError()==true){
-                            throw new Exception("Exception at Customer Updation");
+                            throw new Exception("Customer details were not updated.");
+                        }
+                        else {
+                            validationModel.setUserModel(isUser(userModel));
                         }
                     }
                 }
@@ -98,7 +106,7 @@ public class MarketPlaceOrderUtil {
         } catch (Exception e) {
             logger.error("Exception at validating Customer Details.", e);
             validationModel.setError(Boolean.TRUE);
-            validationModel.setMessage("Customer Details are wrong.");
+            validationModel.setMessage(e.getMessage());
         }
         logger.debug("Customer Id : " + userModel.getId());
         return validationModel;
@@ -120,9 +128,9 @@ public class MarketPlaceOrderUtil {
                 shippingAddress.getState() == null || Objects.equals(shippingAddress.getState(), "") ||
                 shippingAddress.getCity() == null || Objects.equals(shippingAddress.getCity(), "")) {
 
-                logger.error("Shipping Details can't be empty.");
-                validationModel.setError(Boolean.TRUE);
-                validationModel.setMessage("Shipping Details can't be empty.");
+                logger.error("Delivery Details can't be empty.");
+                throw new Exception("Delivery Details can't be empty.");
+
             } else if (Objects.equals(shippingAddress.getCountryId(), "99")) {
                 Map<String, String> data = getStateAndCityByPin(shippingAddress.getPostcode());
                 if (data.get("error").equals("0")) {
@@ -132,8 +140,7 @@ public class MarketPlaceOrderUtil {
                 } else {
                     //pincode entered was not found in the database.
                     logger.debug("Pincode not found in our database.");
-                    validationModel.setError(Boolean.TRUE);
-                    validationModel.setMessage("Pincode not found in our database.");
+                    throw new Exception("We do not serve this Pincode.");
                 }
             }
             // model didn't return any error and now work on address book.
@@ -148,8 +155,7 @@ public class MarketPlaceOrderUtil {
                 String postData1 = objectMapper.writeValueAsString(shippingAddress);
                 String createAddress = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/user/address");
                 if(createAddress.contains("error")){
-                    validationModel.setError(Boolean.TRUE);
-                    validationModel.setMessage("Problem in Shipping Details. ");
+                    throw new Exception("Problem in Delivery Details.");
 
                 }else {
                     generalCustomerAddressMapResponseModel = objectMapper.readValue(createAddress, GeneralCustomerAddressMapResponseModel.class);
@@ -159,18 +165,16 @@ public class MarketPlaceOrderUtil {
                     logger.debug("Address id is : "+shippingAddress.getAid());
                 }
                 if (shippingAddress.getAid() == "" || shippingAddress.getAid() == null) {
-                    validationModel.setError(Boolean.TRUE);
-                    validationModel.setMessage("Couldn't get proper address from database.");
+                    throw new Exception("Couldn't get this Address from database.");
                 }
             }
+            validationModel.setAddressModel(shippingAddress);
         } catch (Exception e) {
-            logger.error("Exception at validating Shipping Details : ", e);
+            logger.error("Exception at validating Delivery Details : ", e);
             validationModel.setError(Boolean.TRUE);
-            validationModel.setMessage("Shipping Details are wrong. ");
-
+            validationModel.setMessage(e.getMessage());
         }
         logger.debug("Address id is : "+shippingAddress.getAid());
-        validationModel.setAddressModel(shippingAddress);
         return validationModel;
     }
 
@@ -202,7 +206,7 @@ public class MarketPlaceOrderUtil {
         return data;
     }
 
-    public static ValidationModel validateAndGetProductDetails(ValidationModel validationModel) {
+    public ValidationModel validateAndGetProductDetails(ValidationModel validationModel) {
         ProductModel productModel = validationModel.getProductModel();
         Connection connection = null;
         String statement;
@@ -211,18 +215,17 @@ public class MarketPlaceOrderUtil {
         String prodCode = productModel.getProductCode();
         validationModel.setError(Boolean.FALSE);
         try {
-            if (prodCode == "" || prodCode == null) {
+            if (prodCode == "" || prodCode == null || prodCode.length() != 9 ) {
                 logger.debug("product details : "+productModel);
-                throw new Exception("Product Code is Empty");
+                throw new Exception("Product Code is Wrong.");
             }
-                connection = Database.INSTANCE.getReadOnlyConnection();
+            connection = Database.INSTANCE.getReadOnlyConnection();
             statement = "SELECT * FROM products INNER JOIN newigp_product_extra_info WHERE " +
                 "products.products_id = newigp_product_extra_info.products_id AND products.products_code = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, prodCode);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-
                 //- trying to convert the prices from INR to USD.
                 BigDecimal inrPrice = resultSet.getBigDecimal("products.products_mrp");
                 //- INR-USD conversion completed
@@ -248,18 +251,18 @@ public class MarketPlaceOrderUtil {
                     .serviceType(productModel.getServiceType())
                     .build();
                 logger.debug("product details : "+productModel1);
-                if(productModel1.getId() == null || productModel1.getId() == 0 ||
-                    productModel1.getSellingPrice() == null || productModel1.getQuantity() <= 0 ||
-                    productModel1.getServiceCharge() == null){
-                    validationModel.setError(Boolean.TRUE);
-                    validationModel.setMessage("Product is not available Or Details incorrect.");
-                }
+                productModel = productModel1;
                 validationModel.setProductModel(productModel1);
             }
+            if(productModel.getId() == null || productModel.getId() == 0 ||
+                productModel.getSellingPrice() == null || productModel.getQuantity() <= 0 ||
+                productModel.getServiceCharge() == null){
+                throw new Exception("Product is not available Or Details incorrect.");
+            }
         } catch (Exception exception) {
-            logger.error("Exception on sql query for products : ", exception);
+            logger.error("Exception in products : ", exception);
             validationModel.setError(Boolean.TRUE);
-            validationModel.setMessage("Product is not available.");
+            validationModel.setMessage(exception.getMessage());
 
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
@@ -269,7 +272,7 @@ public class MarketPlaceOrderUtil {
         return validationModel;
     }
 
-    public static String encryptPayment(String msg) throws NoSuchAlgorithmException {
+    public String encryptPayment(String msg) throws NoSuchAlgorithmException {
         MessageDigest md;
         String out = "";
         try {
@@ -296,6 +299,7 @@ public class MarketPlaceOrderUtil {
     public Integer createTempOrder(MarketPlaceTempOrderModel orderTempModel, ProductModel productModel) {
         Integer orderTempId = 0;
         Connection connection = null;
+        ResultSet resultSet = null;
         String statement;
         PreparedStatement preparedStatement = null;
         try {
@@ -355,7 +359,7 @@ public class MarketPlaceOrderUtil {
                 logger.error("Failed to create tempOrder");
                 orderTempId = 0;
             } else {
-                ResultSet resultSet = preparedStatement.getGeneratedKeys();
+                resultSet = preparedStatement.getGeneratedKeys();
                 resultSet.first();
                 String shippingType ="";
                 orderTempId = resultSet.getInt(1);
@@ -401,6 +405,7 @@ public class MarketPlaceOrderUtil {
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
         }
         return orderTempId;
     }
@@ -520,7 +525,7 @@ public class MarketPlaceOrderUtil {
                 user.setId(resultSet.getString("c.customers_id"));
                 logger.debug("USER DEBUGGING : " + "setUserHash "+resultSet.getString("n.id_hash"));
                 user.setIdHash(resultSet.getString("n.id_hash"));
-                logger.debug("USER DEBUGGING : " + "setUserDOB "+resultSet.getString("c.customers_dob"));
+              //  logger.debug("USER DEBUGGING : " + "setUserDOB "+resultSet.getString("c.customers_dob"));
 
                 //  if(resultSet.getString("c.customers_dob").equals("none") || resultSet.getString("c.customers_dob").equals("") || resultSet.getString("c.customers_dob").isEmpty()){
                 // don't take dob.
@@ -716,23 +721,20 @@ public class MarketPlaceOrderUtil {
                 checkCorpOrderModel = generalAddressResponseModel.getData();
                 if (checkCorpOrderModel.getError() == false) {
                     if (checkCorpOrderModel.getFlag() == true) {
-                        validationModel.setError(true);
-                        validationModel.setMessage("Duplicate Order.");
+                        throw new Exception("Duplicate Order.");
                     }
                 } else {
                     throw new Exception("Exception at checking order already exists");
                 }
             }else {
-                validationModel.setError(true);
-                validationModel.setMessage("PO number can't be empty.");
+               throw new Exception("PO number can't be Empty.");
             }
         }
         catch (Exception e){
             validationModel.setError(true);
-            validationModel.setMessage("Duplicate Order.");
+            validationModel.setMessage(e.getMessage());
             logger.error("Exception at check order exists : " + e);
         }
-
         return validationModel;
     }
 
