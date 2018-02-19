@@ -138,13 +138,20 @@ public class OrderMapper
 
                 List<OrderComponent> componentList = new ArrayList<>();
 
-                orderProducts.setComponentTotal(orderUtil.getProductComponents(orderProducts.getProductId(),fkassociateId,
-                                                                                orderProducts.getProducts_code(),componentList,
-                                                                                orderProductExtraInfo,true));
+                if(forAdminPanelOrNot==false){
+                    orderProducts.setComponentTotal(orderUtil.getProductComponents(orderProducts.getProductId(),fkassociateId,
+                        orderProducts.getProducts_code(),componentList,
+                        orderProductExtraInfo,true));
+                }else {
+                    orderProducts.setComponentTotal(orderUtil.getComponentListFromComponentInfo(orderProducts.getOrderId(),componentList,
+                        orderProductExtraInfo,true));
+                }
+
+
+
                 orderProducts.setPriceAdjustmentPerProduct(orderProducts.getVendorPrice()-orderProducts.getComponentTotal());
 
-//                statement =" SELECT mc.componentImage componentImage ,opci.component_code,mc.component_name,opci.vendor_to_component_price, "
-                //                + " opci.products_id,opci.quantity,mc.type,mc.mod_time FROM  orders_products_components_info opci join AA_master_components mc ";
+
 
                 // this is when if we have some price changes
                 if(orderProducts.getPriceAdjustmentPerProduct()!=0.0){
