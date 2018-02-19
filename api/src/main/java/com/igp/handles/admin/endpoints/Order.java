@@ -196,14 +196,14 @@ public class Order {
     @POST
     @Path("/v1/admin/handels/cancelOrder")
     public HandleServiceResponse cancelOrder(@QueryParam("orderId") int orderId,@QueryParam("orderProductId")int orderProductId
-                                        ,@QueryParam("comment")String comment){
+                                        ,@QueryParam("comment")String comment,@DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         boolean result=false;
         try{
-            result=orderMapper.cancelOrder(orderId,orderProductId,comment);
+            result=orderMapper.cancelOrder(orderId,orderProductId,comment,handleServiceResponse,orderProductIdList);
             if(result){
-                handleServiceResponse.setResult(result);
+//                handleServiceResponse.setResult(result);
             }else{
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setResult(false);

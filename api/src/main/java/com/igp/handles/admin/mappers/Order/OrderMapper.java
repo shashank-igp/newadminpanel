@@ -219,13 +219,26 @@ public class OrderMapper {
         }
         return orders;
     }
-    public boolean cancelOrder(int orderId,int orderProductId,String comment){
+    public boolean cancelOrder(int orderId,int orderProductId,String comment,HandleServiceResponse handleServiceResponse,String orderProductIdList){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
+        String restOrderProductIdList="";
+        List<Order> orderList=new ArrayList<>();
         try {
+            String[] orderProductIds=orderProductIdList.split(",");
+            for(int i=0;i<orderProductIds.length;i++){
+                if(!orderProductIds[i].equals(String.valueOf(orderProductId))){
+                    restOrderProductIdList+=orderProductIds[i]+",";
+                }
+            }
+            if(!restOrderProductIdList.equals("")){
+                restOrderProductIdList=restOrderProductIdList.substring(0,restOrderProductIdList.length()-1);
+                orderList=getOrder(orderId,restOrderProductIdList);
+            }
+            handleServiceResponse.setResult(orderList);
             result=orderUtil.cancelOrder(orderId,orderProductId,comment);
         }catch (Exception exception){
-            logger.error("error while deliveryDetailChanges",exception);
+            logger.error("error while cancelling ",exception);
         }
         return result;
     }
