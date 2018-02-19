@@ -143,10 +143,7 @@ public class OrderMapper
                         orderProducts.getProducts_code(),componentList,
                         orderProductExtraInfo,true));
                 }else {
-//                    orderProducts.setComponentTotal(orderUtil.getComponentListFromComponentInfo(orderProducts.getOrderId(),componentList,
-//                        orderProductExtraInfo,true));
-                    orderProducts.setComponentTotal(orderUtil.getProductComponents(orderProducts.getProductId(),fkassociateId,
-                        orderProducts.getProducts_code(),componentList,
+                    orderProducts.setComponentTotal(orderUtil.getComponentListFromComponentInfo(orderProducts.getOrderId(),componentList,
                         orderProductExtraInfo,true));
                 }
 
@@ -183,8 +180,7 @@ public class OrderMapper
                         order.getOrderProducts().add(orderProducts);
                     }
 
-                } else if (orderProductExtraInfo.getDeliveryType() == 2
-                    || orderProductExtraInfo.getDeliveryType() == 3) {
+                } else if (orderProductExtraInfo.getDeliveryType() == 2 || orderProductExtraInfo.getDeliveryType() == 3) {
                     Order order = originalOrderMap.get(key);
                     if (order == null) {
                         order = orderUtil.gerOrderOnly( orderProducts.getOrderId(),fkassociateId,forAdminPanelOrNot);
@@ -198,6 +194,9 @@ public class OrderMapper
                     order.setVendorOrderTotal(order.getVendorOrderTotal() + orderProducts.getVendorPrice());
                     order.setOrderNetProductPrice(order.getOrderNetProductPrice()+orderProducts.getVendorPrice());
                     order.setComponentTotal(order.getComponentTotal()+orderProducts.getComponentTotal());
+                    if(order.getOrderId()==1236500){
+                        logger.debug("checking for 1236500 "+order.toString());
+                    }
                 }
 
 
@@ -301,6 +300,11 @@ public class OrderMapper
                 Map<String,List<String>> uploadedFilePath=uploadUtil.getUploadedfilePathFromVpFileUpload(orderId.intValue());
                 order.setUploadedFilePath(uploadedFilePath);
 //                sortedOrderMap.put(Long.valueOf(deliveryTime + "" + orderId), order);  eliveryTime+orderId.longValue()
+
+                if(orderId.intValue()==1236500){
+                    logger.debug("checking for 1236500 with key "+key);
+                    logger.debug("checking for 1236500 "+order.toString());
+                }
 
                 sortedOrderMap.put(Long.valueOf(deliveryTime+orderId.longValue()), order);
 
