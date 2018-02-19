@@ -152,9 +152,9 @@ public class OrderUtil
             String operator = isfuture ? " >= " : " = ";
             if(forAdminPanelOrNot==true ){
                 if(fkAssociateId==72){
-                    fkAssociateIdWhereClause="op.fk_associate_id = 72 and ";
+                    fkAssociateIdWhereClause="op.fk_associate_id = 72  and  ";
                 }else {
-                    fkAssociateIdWhereClause="op.fk_associate_id != 72 and ";
+                    fkAssociateIdWhereClause="op.fk_associate_id != 72 and p.fk_associate_id = 72 and ";
                 }
             }else {
                 fkAssociateIdWhereClause="op.fk_associate_id = "+fkAssociateId+" and ";
