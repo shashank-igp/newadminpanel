@@ -516,9 +516,10 @@ public class OrderUtil
 
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement="SELECT  * from orders_products_components_info opci join AA_master_components mc on opci.component_id"
-                + " = mc.component_id where opci.orders_id = ? ";
+                + " = mc.component_id where opci.orders_id = ? and products_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,orderId);
+            preparedStatement.setInt(2,orderProductExtraInfo.getProductId());
 
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
