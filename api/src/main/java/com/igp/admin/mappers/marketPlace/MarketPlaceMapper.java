@@ -129,7 +129,10 @@ public class MarketPlaceMapper {
                 }
                 String zipCode = column.get("Zip");
                 if(!zipCode.isEmpty()) {
-                    zipCode = zipCode.substring(0, 6);
+                    zipCode = zipCode.trim();
+                    if(zipCode.length()>=6) {
+                        zipCode = zipCode.substring(0, 6);
+                    }
                 }
                 String quant = column.get("QTY");
                 int quantity = 0;
