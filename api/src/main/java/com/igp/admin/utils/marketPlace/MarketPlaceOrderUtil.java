@@ -126,7 +126,8 @@ public class MarketPlaceOrderUtil {
                 shippingAddress.getPostcode() == null || Objects.equals(shippingAddress.getPostcode(), "") ||
                 shippingAddress.getCountryId() == null || Objects.equals(shippingAddress.getCountryId(), "") ||
                 shippingAddress.getState() == null || Objects.equals(shippingAddress.getState(), "") ||
-                shippingAddress.getCity() == null || Objects.equals(shippingAddress.getCity(), "")) {
+                shippingAddress.getCity() == null || Objects.equals(shippingAddress.getCity(), "")
+                ){
 
                 logger.error("Delivery Details can't be empty.");
                 throw new Exception("Delivery Details can't be empty.");
@@ -525,7 +526,7 @@ public class MarketPlaceOrderUtil {
                 user.setId(resultSet.getString("c.customers_id"));
                 logger.debug("USER DEBUGGING : " + "setUserHash "+resultSet.getString("n.id_hash"));
                 user.setIdHash(resultSet.getString("n.id_hash"));
-              //  logger.debug("USER DEBUGGING : " + "setUserDOB "+resultSet.getString("c.customers_dob"));
+                //  logger.debug("USER DEBUGGING : " + "setUserDOB "+resultSet.getString("c.customers_dob"));
 
                 //  if(resultSet.getString("c.customers_dob").equals("none") || resultSet.getString("c.customers_dob").equals("") || resultSet.getString("c.customers_dob").isEmpty()){
                 // don't take dob.
@@ -727,7 +728,7 @@ public class MarketPlaceOrderUtil {
                     throw new Exception("Exception at checking order already exists");
                 }
             }else {
-               throw new Exception("PO number can't be Empty.");
+                throw new Exception("PO number can't be Empty.");
             }
         }
         catch (Exception e){
