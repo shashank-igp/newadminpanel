@@ -143,7 +143,10 @@ public class OrderMapper
                         orderProducts.getProducts_code(),componentList,
                         orderProductExtraInfo,true));
                 }else {
-                    orderProducts.setComponentTotal(orderUtil.getComponentListFromComponentInfo(orderProducts.getOrderId(),componentList,
+//                    orderProducts.setComponentTotal(orderUtil.getComponentListFromComponentInfo(orderProducts.getOrderId(),componentList,
+//                        orderProductExtraInfo,true));
+                    orderProducts.setComponentTotal(orderUtil.getProductComponents(orderProducts.getProductId(),fkassociateId,
+                        orderProducts.getProducts_code(),componentList,
                         orderProductExtraInfo,true));
                 }
 
