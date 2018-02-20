@@ -72,6 +72,7 @@ public class OrderUtil
                     .productQuantity(resultSet.getInt("op.products_quantity"))
                     .productSize(resultSet.getString("op.products_size"))
                     .products_weight(resultSet.getString("op.products_weight"))
+                    .ordersProductStatus(resultSet.getString("op.orders_product_status"))
                     .products_code(resultSet.getString("op.products_code"))
                     .fkAssociateId(resultSet.getString("op.fk_associate_id"))
                     .deliveryStatus(resultSet.getInt("op.delivery_status"))
