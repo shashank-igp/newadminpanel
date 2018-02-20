@@ -81,7 +81,7 @@ public class VendorUtil
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = "SELECT min(festival_date) from igp_festival_date where festival_date >= ?";
+            statement = "SELECT min(festival_date) as festival_date from igp_festival_date where festival_date >= ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1,dateFormat.format(todayDate));
             logger.debug("STATEMENT CHECK: " + preparedStatement);
