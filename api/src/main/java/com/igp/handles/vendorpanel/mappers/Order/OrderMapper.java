@@ -197,9 +197,6 @@ public class OrderMapper
                     order.setVendorOrderTotal(order.getVendorOrderTotal() + orderProducts.getVendorPrice());
                     order.setOrderNetProductPrice(order.getOrderNetProductPrice()+orderProducts.getVendorPrice());
                     order.setComponentTotal(order.getComponentTotal()+orderProducts.getComponentTotal());
-                    if(order.getOrderId()==1236500){
-                        logger.debug("checking for 1236500 "+order.toString());
-                    }
                 }
 
 
@@ -302,11 +299,6 @@ public class OrderMapper
                 Map<String,List<String>> uploadedFilePath=uploadUtil.getUploadedfilePathFromVpFileUpload(orderId.intValue());
                 order.setUploadedFilePath(uploadedFilePath);
 
-                if(orderId.intValue()==1236500){
-                    logger.debug("checking for 1236500 with key "+key);
-                    logger.debug("checking for 1236500 "+order.toString());
-                }
-
                 sortedOrderMap.put(Long.valueOf(deliveryTime+orderId.longValue()), order);
 
                 // doing this only for admin/Handel panel
@@ -325,6 +317,7 @@ public class OrderMapper
 
         SlaCompliant slaCompliant=new SlaCompliant();
         SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd");
+        int slaCode=-12;
 
         int flagForAdminPanel=forAdminPanelOrNot==true ? 1 : 0;
         try{
@@ -339,8 +332,12 @@ public class OrderMapper
                 orderDetailsPerOrderProduct.setOrderProductStatus(ordersProducts.getOrdersProductStatus());
                 orderDetailsPerOrderProduct.setDeliveryTime(ordersProducts.getOrderProductExtraInfo().getDeliveryTime());
 
-                ordersProducts.setSlaFlag(OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,flagForAdminPanel)));
-                ordersProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,flagForAdminPanel)));
+                slaCode = slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,flagForAdminPanel);
+
+                logger.debug("slacode  on layer "+slaCode);
+
+                ordersProducts.setSlaFlag(OrderUtil.isSLASatisfied(slaCode));
+                ordersProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(slaCode));
             }
         }catch (Exception exception){
             logger.error("error occured while calculating sla codes on the go");

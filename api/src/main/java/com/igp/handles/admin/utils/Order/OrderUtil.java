@@ -620,17 +620,24 @@ public class OrderUtil {
         PreparedStatement preparedStatement = null;
         DashboardMapper dashboardMapper=new DashboardMapper();
         Integer status=null;
+        Order order=null;
         try{
-
+            order=getOrderRelatedInfo(orderId,orderProductId);
+            if(deliveryType==3){
+                deliveryTime="23:30 hrs - 23:59 hrs";
+            }else if(deliveryType==1 || deliveryType == 4){
+                deliveryTime="";
+            }
             if(deliveryDate!=null){
                 deliveryDateClause=" delivery_date = '"+deliveryDate+"' , ";
-            }
-            if(deliveryTime != null && deliveryType == 2){
-                deliveryTimeClause=" delivery_time = '"+deliveryTime+"' , ";
             }
             if(deliveryType!=0){
                 deliveryTypeClause=" delivery_type = "+deliveryType+" , ";
             }
+            if(deliveryTime != null){
+                deliveryTimeClause=" delivery_time = '"+deliveryTime+"' , ";
+            }
+
 
             connection = Database.INSTANCE.getReadWriteConnection();
             statement=" UPDATE order_product_extra_info set "+deliveryDateClause+deliveryTimeClause+deliveryTypeClause
