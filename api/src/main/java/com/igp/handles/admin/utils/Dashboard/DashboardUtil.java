@@ -30,7 +30,8 @@ public class DashboardUtil {
         List<OrderDetailsPerOrderProduct> listOfOrderIdAsPerVendor=new ArrayList<>();
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = "select o.*,op.*,opei.*,p.*,vap.assign_time from orders o join orders_products op on o.orders_id = op.orders_id join "
+            statement = "select o.*,op.*,opei.*,p.*,( CASE WHEN vap.assign_time !='0000-00-00 00:00:00' THEN vap.assign_time "
+                + " END ) as  vendor_assign_time  vap.assign_time from orders o join orders_products op on o.orders_id = op.orders_id join "
                 + " order_product_extra_info opei on opei.order_product_id=op.orders_products_id join products p on p.products_id = op.products_id "
                 + " left join vendor_assign_price vap on vap.orders_id = op.orders_id and vap.products_id = op.products_id "
                 + " where opei.delivery_date "+dateComapareSymbol+" ? and p.fk_associate_id = ? ";
@@ -57,7 +58,7 @@ public class DashboardUtil {
                 orderDetailsPerOrderProduct.setSlaCode(resultSet.getInt("op.sla_code"));
                 orderDetailsPerOrderProduct.setOrdersProductsId(resultSet.getLong("op.orders_products_id"));
                 orderDetailsPerOrderProduct.setVendorId(resultSet.getInt("op.fk_associate_id"));
-                orderDetailsPerOrderProduct.setAssignTime(resultSet.getString("vap.assign_time"));
+                orderDetailsPerOrderProduct.setAssignTime(resultSet.getString("vendor_assign_time"));
                 orderDetailsPerOrderProduct.setPurchasedTime(resultSet.getString("o.date_purchased"));
                 listOfOrderIdAsPerVendor.add(orderDetailsPerOrderProduct);
             }
