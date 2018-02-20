@@ -86,6 +86,7 @@ public class MarketPlaceMapper {
             logger.error("Exception at populating Map from file : ", e);
 
         }
+        logger.debug("size : "+data.size());
 
         return data;
 
@@ -103,223 +104,225 @@ public class MarketPlaceMapper {
                 put(4, Constants.getSameDay());
             }
 
-        };
+        };rowNum
 
 
 
         for (Map.Entry<Integer, Map<String, String>> entry : data.entrySet()) {
             // revisiting each map i.e. each row
             Map<String, String> row = entry.getValue();
-            Iterator<Map.Entry<String, String>> rowNum = row.entrySet().iterator();
+            if(row != null || !row.isEmpty()) {
+                Iterator<Map.Entry<String, String>> rowNum = row.entrySet().iterator();
 
-            try {
-                //  while (rowNum.hasNext()) {
-                ValidationModel validationModel = new ValidationModel();
-                UserModel userModel;
-                AddressModel addressModel = new AddressModel();
-                ProductModel productModel = null;
-                ExtraInfoModel extraInfoModel = null;
-                // visiting each column
-                Map<String, String> column = row;
+                try {
+                    //  while (rowNum.hasNext()) {
+                    ValidationModel validationModel = new ValidationModel();
+                    UserModel userModel;
+                    AddressModel addressModel = new AddressModel();
+                    ProductModel productModel = null;
+                    ExtraInfoModel extraInfoModel = null;
+                    // visiting each column
+                    Map<String, String> column = row;
 
-                // fill few generic values.
-                String mprefix = marketPlaceOrderUtil.getMobilePrefixByCountryId("99");
-                validationModel.setFkAssociateId(fk_associate_id);
-                validationModel.setError(Boolean.FALSE);
-                validationModel.setId(0);
-                long millis = System.currentTimeMillis();
-                String phone = column.get("Contact No");
-                if(!phone.isEmpty()) {
-                    phone = new BigDecimal(column.get("Contact No")).toPlainString();
-                }
-                String zipCode = column.get("Zip");
-                if(!zipCode.isEmpty()) {
-                    zipCode = zipCode.trim();
-                    if(zipCode.length()>=6) {
-                        zipCode = zipCode.substring(0, 6);
+                    // fill few generic values.
+                    String mprefix = marketPlaceOrderUtil.getMobilePrefixByCountryId("99");
+                    validationModel.setFkAssociateId(fk_associate_id);
+                    validationModel.setError(Boolean.FALSE);
+                    validationModel.setId(0);
+                    long millis = System.currentTimeMillis();
+                    String phone = column.get("Contact No");
+                    if (!phone.isEmpty()) {
+                        phone = new BigDecimal(column.get("Contact No")).toPlainString();
                     }
-                }
-                String quant = column.get("QTY");
-                int quantity = 0;
-                if(!quant.isEmpty()) {
-                    double d = Double.parseDouble(quant);
-                    quantity = (int) d;
-                }
+                    String zipCode = column.get("Zip");
+                    if (!zipCode.isEmpty()) {
+                        zipCode = zipCode.trim();
+                        if (zipCode.length() >= 6) {
+                            zipCode = zipCode.substring(0, 6);
+                        }
+                    }
+                    String quant = column.get("QTY");
+                    int quantity = 0;
+                    if (!quant.isEmpty()) {
+                        double d = Double.parseDouble(quant);
+                        quantity = (int) d;
+                    }
 
-                // take out all the values and fill the models.
-                // i.e. customer,address,product,extra_info
-                if(user.equals("loyalty") || user.equals("iipsroot")) {
+                    // take out all the values and fill the models.
+                    // i.e. customer,address,product,extra_info
+                    if (user.equals("loyalty") || user.equals("iipsroot")) {
 
-                    String name = column.get("MemberName").trim();
-                    String fname = "";
-                    String lname = "";
+                        String name = column.get("MemberName").trim();
+                        String fname = "";
+                        String lname = "";
 
-                    if (name!=null) {
+                        if (name != null) {
 
-                        if (name.contains(" ")) {
-                            String[] nameArray = name.trim().split(" ");
-                            fname = nameArray[0];
-                            if (nameArray.length > 1) {
-                                lname = name.trim().substring(fname.length() + 1, name.trim().length());
+                            if (name.contains(" ")) {
+                                String[] nameArray = name.trim().split(" ");
+                                fname = nameArray[0];
+                                if (nameArray.length > 1) {
+                                    lname = name.trim().substring(fname.length() + 1, name.trim().length());
 
+                                } else {
+                                    fname = column.get("MemberName");
+                                }
                             } else {
                                 fname = column.get("MemberName");
                             }
-                        } else {
-                            fname = column.get("MemberName");
                         }
+
+
+                        userModel = new UserModel.UserBuilder()
+                            .id(null)
+                            .firstname(fname)
+                            .lastname(lname)
+                            .addressField1(column.get("AddressLine1"))
+                            .addressField2(column.get("AddressLine2"))
+                            .state(column.get("State"))
+                            .city(column.get("City"))
+                            .postcode(zipCode)
+                            .email(column.get("Email"))
+                            .mobile(phone)
+                            .mobilePrefix(mprefix)
+                            .password(millis + "")
+                            .countryId(99)
+                            .associateId(fk_associate_id)
+                            .uniqsrc("Bulk-" + millis)
+                            .build();
+
+
+                        addressModel.setTitle("");
+                        addressModel.setFirstname(userModel.getFirstname());
+                        addressModel.setLastname(userModel.getLastname());
+                        addressModel.setStreetAddress(userModel.getAddressField1());
+                        addressModel.setStreetAddress2(userModel.getAddressField2());
+                        addressModel.setPostcode(userModel.getPostcode());
+                        addressModel.setCity(userModel.getCity());
+                        addressModel.setState(userModel.getState());
+                        addressModel.setCountryId(userModel.getCountryId().toString());
+                        addressModel.setRelation("Self");
+                        addressModel.setEmail(userModel.getEmail());
+                        addressModel.setMobile(userModel.getMobile());
+                        addressModel.setMobilePrefix(mprefix);
+                        addressModel.setAddressType(0); // home
+
+                        String sP = column.get("SellingPrice");
+                        int sellingPrice = 0;
+                        if (!sP.isEmpty()) {
+                            double d = Double.parseDouble(sP);
+                            sellingPrice = (int) d;
+                        }
+                        productModel = new ProductModel.Builder()
+                            .productCode(column.get("Item Code").trim())
+                            .quantity(quantity)
+                            .sellingPrice(new BigDecimal(sellingPrice))
+                            .name(column.get("ProductName"))
+                            .serviceDate("1970-01-01")
+                            .serviceTypeId(1 + "")
+                            .serviceType(serviceType.get(1))
+                            .serviceCharge(new BigDecimal(0))
+                            .displayAttrList(new HashMap<>())
+                            .perProductDiscount(new BigDecimal(0))
+                            .giftBox(0)
+                            .voucher(null)
+                            .build();
+
+
+                        String detail = column.get("PO Number") + "(#)" +
+                            column.get("MemberName") + "(#)" +
+                            userModel.getMobile() + "(#)" +
+                            column.get("Email") + "(#)" +
+                            column.get("AddressLine1") + "(#)" +
+                            column.get("AddressLine2") + "(#)" +
+                            column.get("State") + "(#)" +
+                            column.get("City") + "(#)" +
+                            userModel.getPostcode() + "(#)" +
+                            column.get("Item Code") + "(#)" +
+                            quantity + "(#)" +
+                            sellingPrice + "(#)" +
+                            column.get("ProductName");
+
+                        extraInfoModel = new ExtraInfoModel.Builder()
+                            .gstNo("")
+                            .relId(column.get("PO Number"))
+                            .marketData(detail)
+                            .marketName("RL")
+                            .build();
+
+                    } else {
+
+                        userModel = new UserModel.UserBuilder()
+                            .id(null)
+                            .firstname("suditi")
+                            .lastname("choudhary")
+                            .email("a131@gma.com")
+                            .mobile("8223255954")
+                            .mobilePrefix(mprefix)
+                            .password(millis + "")
+                            .countryId(99)
+                            .associateId(fk_associate_id)
+                            .uniqsrc("Bulk-" + millis)
+                            .build();
+
+
+                        addressModel.setTitle("f");
+                        addressModel.setFirstname("sud");
+                        addressModel.setLastname("chou");
+                        addressModel.setStreetAddress("desd");
+                        addressModel.setPostcode("400072");
+                        addressModel.setCity("mumbai");
+                        addressModel.setState("mha");
+                        addressModel.setCountryId("99");
+                        addressModel.setRelation("self");
+                        addressModel.setEmail("ssx@dfcs");
+                        addressModel.setMobile("9413223688");
+                        addressModel.setMobilePrefix(mprefix);
+                        addressModel.setAddressType(new Integer(7));
+
+
+                        productModel = new ProductModel.Builder()
+                            .productCode("HD1046865")
+                            .quantity(new Integer(2))
+                            .displayPrice(new Integer(100))
+                            .serviceDate("1970-01-01")
+                            .serviceTypeId(1 + "")
+                            .serviceType(serviceType.get(1))
+                            .displayAttrList(new HashMap<>())
+                            .perProductDiscount(new BigDecimal(0))
+                            .giftBox(0)
+                            .voucher(null)
+                            .build();
+
+
+                        extraInfoModel = new ExtraInfoModel.Builder()
+                            .gstNo("gffv")
+                            .relId("xyz")
+                            .marketData("")
+                            .marketName("")
+                            .build();
                     }
-
-
-                    userModel = new UserModel.UserBuilder()
-                        .id(null)
-                        .firstname(fname)
-                        .lastname(lname)
-                        .addressField1(column.get("AddressLine1"))
-                        .addressField2(column.get("AddressLine2"))
-                        .state(column.get("State"))
-                        .city(column.get("City"))
-                        .postcode(zipCode)
-                        .email(column.get("Email"))
-                        .mobile(phone)
-                        .mobilePrefix(mprefix)
-                        .password(millis+"")
-                        .countryId(99)
-                        .associateId(fk_associate_id)
-                        .uniqsrc("Bulk-"+ millis)
-                        .build();
-
-
-                    addressModel.setTitle("");
-                    addressModel.setFirstname(userModel.getFirstname());
-                    addressModel.setLastname(userModel.getLastname());
-                    addressModel.setStreetAddress(userModel.getAddressField1());
-                    addressModel.setStreetAddress2(userModel.getAddressField2());
-                    addressModel.setPostcode(userModel.getPostcode());
-                    addressModel.setCity(userModel.getCity());
-                    addressModel.setState(userModel.getState());
-                    addressModel.setCountryId(userModel.getCountryId().toString());
-                    addressModel.setRelation("Self");
-                    addressModel.setEmail(userModel.getEmail());
-                    addressModel.setMobile(userModel.getMobile());
-                    addressModel.setMobilePrefix(mprefix);
-                    addressModel.setAddressType(0); // home
-
-                    String sP = column.get("SellingPrice");
-                    int sellingPrice = 0;
-                    if(!sP.isEmpty()) {
-                        double d = Double.parseDouble(sP);
-                        sellingPrice = (int) d;
-                    }
-                    productModel = new ProductModel.Builder()
-                        .productCode(column.get("Item Code").trim())
-                        .quantity(quantity)
-                        .sellingPrice(new BigDecimal(sellingPrice))
-                        .name(column.get("ProductName"))
-                        .serviceDate("1970-01-01")
-                        .serviceTypeId(1+"")
-                        .serviceType(serviceType.get(1))
-                        .serviceCharge(new BigDecimal(0))
-                        .displayAttrList(new HashMap<>())
-                        .perProductDiscount(new BigDecimal(0))
-                        .giftBox(0)
-                        .voucher(null)
-                        .build();
-
-
-                    String detail = column.get("PO Number") + "(#)" +
-                        column.get("MemberName")  + "(#)" +
-                        userModel.getMobile()  + "(#)" +
-                        column.get("Email")  + "(#)" +
-                        column.get("AddressLine1") + "(#)" +
-                        column.get("AddressLine2") + "(#)" +
-                        column.get("State") + "(#)" +
-                        column.get("City") + "(#)" +
-                        userModel.getPostcode() + "(#)" +
-                        column.get("Item Code") + "(#)" +
-                        quantity + "(#)" +
-                        sellingPrice + "(#)" +
-                        column.get("ProductName");
-
-                    extraInfoModel = new ExtraInfoModel.Builder()
-                        .gstNo("")
-                        .relId(column.get("PO Number"))
-                        .marketData(detail)
-                        .marketName("RL")
-                        .build();
-
-                }else{
-
-                    userModel = new UserModel.UserBuilder()
-                        .id(null)
-                        .firstname("suditi")
-                        .lastname("choudhary")
-                        .email("a131@gma.com")
-                        .mobile("8223255954")
-                        .mobilePrefix(mprefix)
-                        .password(millis+"")
-                        .countryId(99)
-                        .associateId(fk_associate_id)
-                        .uniqsrc("Bulk-"+ millis)
-                        .build();
-
-
-                    addressModel.setTitle("f");
-                    addressModel.setFirstname("sud");
-                    addressModel.setLastname("chou");
-                    addressModel.setStreetAddress("desd");
-                    addressModel.setPostcode("400072");
-                    addressModel.setCity("mumbai");
-                    addressModel.setState("mha");
-                    addressModel.setCountryId("99");
-                    addressModel.setRelation("self");
-                    addressModel.setEmail("ssx@dfcs");
-                    addressModel.setMobile("9413223688");
-                    addressModel.setMobilePrefix(mprefix);
-                    addressModel.setAddressType(new Integer(7));
-
-
-                    productModel = new ProductModel.Builder()
-                        .productCode("HD1046865")
-                        .quantity(new Integer(2))
-                        .displayPrice(new Integer(100))
-                        .serviceDate("1970-01-01")
-                        .serviceTypeId(1+"")
-                        .serviceType(serviceType.get(1))
-                        .displayAttrList(new HashMap<>())
-                        .perProductDiscount(new BigDecimal(0))
-                        .giftBox(0)
-                        .voucher(null)
-                        .build();
-
-
-                    extraInfoModel = new ExtraInfoModel.Builder()
-                        .gstNo("gffv")
-                        .relId("xyz")
-                        .marketData("")
-                        .marketName("")
-                        .build();
-                }
 
                     /*// populate validation model*/
-                validationModel.setUserModel(userModel);
-                validationModel.setAddressModel(addressModel);
-                validationModel.setProductModel(productModel);
-                validationModel.setExtraInfoModel(extraInfoModel);
-                validationModel.setError(false);
+                    validationModel.setUserModel(userModel);
+                    validationModel.setAddressModel(addressModel);
+                    validationModel.setProductModel(productModel);
+                    validationModel.setExtraInfoModel(extraInfoModel);
+                    validationModel.setError(false);
 
-                logger.debug("validation model : "+rowNum);
-                logger.debug("values : ",validationModel);
+                    logger.debug("validation model : " + rowNum);
+                    logger.debug("values : ", validationModel);
 
-                validationModelList.add(validationModel);
+                    validationModelList.add(validationModel);
 
-            }catch (Exception e){
-                logger.debug("exception at row : "+rowNum);
-                ValidationModel validationModel = new ValidationModel();
-                validationModel.setError(true);
-                validationModel.setMessage("Details Inappropriate.");
-                validationModelList.add(validationModel);
-                logger.error("Exception at filling model after reading excel : ", e);
+                } catch (Exception e) {
+                    logger.debug("exception at row : " + rowNum);
+                    ValidationModel validationModel = new ValidationModel();
+                    validationModel.setError(true);
+                    validationModel.setMessage("Details Inappropriate.");
+                    validationModelList.add(validationModel);
+                    logger.error("Exception at filling model after reading excel : ", e);
+                }
             }
         }
 
@@ -340,6 +343,7 @@ public class MarketPlaceMapper {
         ProductModel productModel = null;
         int i = 0, fail = 0, correct = 0;
         int listSize = validationModelList.size();
+        logger.debug("listSize : "+listSize);
 
         while (listSize!=0) {
 
@@ -349,7 +353,7 @@ public class MarketPlaceMapper {
             try {
                 validationModel = validationModelList1.get(i);
                 i++;
-                logger.debug("row number : "+i);
+                logger.debug("row number : "+0);
                 logger.debug("row values : ",validationModel);
                 AddressModel addressModel = validationModel.getAddressModel();
                 extraInfoModel = validationModel.getExtraInfoModel();
