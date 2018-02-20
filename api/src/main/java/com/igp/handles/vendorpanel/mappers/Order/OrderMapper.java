@@ -1,9 +1,11 @@
 package com.igp.handles.vendorpanel.mappers.Order;
 
+import com.igp.handles.admin.utils.Order.SlaCompliant;
 import com.igp.handles.vendorpanel.models.Order.Order;
 import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
 import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
+import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerOrderProduct;
 import com.igp.handles.vendorpanel.utils.FileUpload.UploadUtil;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
 import org.slf4j.Logger;
@@ -130,6 +132,7 @@ public class OrderMapper
                 deliveryDate=dateFormat.format(orderProductExtraInfo.getDeliveryDate());
                 orderProductDeliveryDateMap.put(orderProducts.getOrderProductId(), deliveryDate);
                 orderProducts.setVendorPrice((int)Double.parseDouble(vendorAssignPriceArray[1]));
+                orderProducts.setAssignTime(vendorAssignPriceArray[3]);
                 Double shippingCharge = orderShippingChargeMap.get(orderProducts.getOrderId());
                 if (shippingCharge == null
                     || (shippingCharge.doubleValue() < Double.parseDouble(vendorAssignPriceArray[0]))) {
@@ -293,13 +296,11 @@ public class OrderMapper
                 long deliveryTime = calendar.getTimeInMillis() ;/// 86400000l;
                 logger.debug("delivery time + orderId  is key for sorted order map "+deliveryTime+" "+orderId.toString()
                 );
-//                order.setPriceAdjustment((order.getVendorOrderTotal()-order.getComponentTotal()));
-//                order.setComponentTotal(order.getComponentTotal()+orderProducts.getComponentTotal());
+                
                 order.setVendorOrderTotal(order.getVendorOrderTotal() + order.getVendorDeliveryCharge());
                 order.setVendorOrderTotal((int)order.getVendorOrderTotal());
                 Map<String,List<String>> uploadedFilePath=uploadUtil.getUploadedfilePathFromVpFileUpload(orderId.intValue());
                 order.setUploadedFilePath(uploadedFilePath);
-//                sortedOrderMap.put(Long.valueOf(deliveryTime + "" + orderId), order);  eliveryTime+orderId.longValue()
 
                 if(orderId.intValue()==1236500){
                     logger.debug("checking for 1236500 with key "+key);
@@ -308,12 +309,43 @@ public class OrderMapper
 
                 sortedOrderMap.put(Long.valueOf(deliveryTime+orderId.longValue()), order);
 
+                // doing this only for admin/Handel panel
+                if(forAdminPanelOrNot){
+                    fillSlaFlagsOnOrderProducts(order,forAdminPanelOrNot);
+                }
             } catch (Exception e) {
                 logger.error("Error in the order :" + entry.getKey(), e);
             }
         }
 
         return originalOrderMap.values().size() != 0 ? new ArrayList<>(sortedOrderMap.values()) : new ArrayList<>();
+    }
+
+    public void fillSlaFlagsOnOrderProducts(Order order,boolean forAdminPanelOrNot ){
+
+        SlaCompliant slaCompliant=new SlaCompliant();
+        SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd");
+
+        int flagForAdminPanel=forAdminPanelOrNot==true ? 1 : 0;
+        try{
+            for(OrdersProducts ordersProducts:order.getOrderProducts()){
+                OrderDetailsPerOrderProduct orderDetailsPerOrderProduct = new OrderDetailsPerOrderProduct();
+
+                orderDetailsPerOrderProduct.setAssignTime(ordersProducts.getAssignTime());
+                orderDetailsPerOrderProduct.setPurchasedTime(formatter.format(order.getDatePurchased()));
+                orderDetailsPerOrderProduct.setDeliveryDate(ordersProducts.getOrderProductExtraInfo().getDeliveryDate());
+                orderDetailsPerOrderProduct.setShippingType(String.valueOf(ordersProducts.getOrderProductExtraInfo().getDeliveryType()));
+                orderDetailsPerOrderProduct.setDeliveryStatus(ordersProducts.getDeliveryStatus()==1 ? true:false);
+                orderDetailsPerOrderProduct.setOrderProductStatus(ordersProducts.getOrdersProductStatus());
+                orderDetailsPerOrderProduct.setDeliveryTime(ordersProducts.getOrderProductExtraInfo().getDeliveryTime());
+
+                ordersProducts.setSlaFlag(OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,flagForAdminPanel)));
+                ordersProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,flagForAdminPanel)));
+            }
+        }catch (Exception exception){
+            logger.error("error occured while calculating sla codes on the go");
+        }
+
     }
 
 }
