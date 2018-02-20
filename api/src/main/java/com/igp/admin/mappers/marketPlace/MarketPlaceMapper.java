@@ -104,7 +104,7 @@ public class MarketPlaceMapper {
                 put(4, Constants.getSameDay());
             }
 
-        };rowNum
+        };
 
 
 
