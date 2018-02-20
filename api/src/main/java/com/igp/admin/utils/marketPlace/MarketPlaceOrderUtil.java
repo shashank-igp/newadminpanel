@@ -70,7 +70,7 @@ public class MarketPlaceOrderUtil {
                     userModel.setId(null);
                     // customer doesn't exist therefore create a new customer.
                     String postData = objectMapper.writeValueAsString(userModel);
-                    String custResponse = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/signup",new ArrayList<>());
+                    String custResponse = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/signup",null);
                     generalUserResponseModel = objectMapper.readValue(custResponse, GeneralUserResponseModel.class);
                     // populate cust id hash in customer and address model.
                     authResponseModel = generalUserResponseModel.getData();
@@ -84,7 +84,7 @@ public class MarketPlaceOrderUtil {
                         // since new customer created therefore update rest of the details.
                         userModel.setId(userModel2.getId());
                         String postData1 = objectMapper.writeValueAsString(userModel);
-                        String custUpdate = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/signup",new ArrayList<>());
+                        String custUpdate = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/signup",null);
                         generalUserResponseModel = objectMapper.readValue(custUpdate, GeneralUserResponseModel.class);
                         authResponseModel =  generalUserResponseModel.getData();
                         // storing idHash and id in proper fields.
@@ -98,7 +98,10 @@ public class MarketPlaceOrderUtil {
                             throw new Exception("Customer details were not updated.");
                         }
                         else {
-                            validationModel.setUserModel(isUser(userModel));
+                            // fill all the details.
+                            userModel = isUser(userModel);
+                            updateDetails(userModel);
+                            validationModel.setUserModel(userModel);
                         }
                     }
                 }
@@ -146,7 +149,7 @@ public class MarketPlaceOrderUtil {
             }
             // model didn't return any error and now work on address book.
             String postData = objectMapper.writeValueAsString(shippingAddress);
-            String addressExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/user/checkaddress",new ArrayList<>());
+            String addressExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/user/checkaddress",null);
             generalShipResponseModel = objectMapper.readValue(addressExist, GeneralShipResponseModel.class);
             shippingAddress = generalShipResponseModel.getData();
 
@@ -154,7 +157,7 @@ public class MarketPlaceOrderUtil {
                 logger.error("Couldn't get proper address.");
                 // create new address entry.
                 String postData1 = objectMapper.writeValueAsString(shippingAddress);
-                String createAddress = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/user/address",new ArrayList<>());
+                String createAddress = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/user/address",null);
                 if(createAddress.contains("error")){
                     throw new Exception("Problem in Delivery Details.");
 
@@ -551,44 +554,47 @@ public class MarketPlaceOrderUtil {
         String statement;
         PreparedStatement preparedStatement = null;
         try {
-            String changeDob = "";
-            String changeMobile = "";
-            String changeMobilePrefix = "";
-            String changeCountryId = "";
-            Integer isChangeDob = 0;
-            Integer isChangeMobile = 0;
-            Integer isChangeMobilePrefix = 0;
-            Integer isChangeCountryId = 0;
 
+            Integer isChangeDob = 0;
+            String columns = "";
             if (userModel.getDob() != null && !userModel.getDob().isEmpty()) {
-                changeDob = ", c.customers_dob = ?";
+                columns = ", c.customers_dob = ?";
                 isChangeDob = 1;
             }
-            if (userModel.getMobile() != null && !userModel.getMobile().isEmpty()) {
-                changeMobile = ", c.customers_mobile = ?";
-                isChangeMobile = 1;
-            }
-            if (userModel.getMobilePrefix() != null && !userModel.getMobilePrefix().isEmpty()) {
-                changeMobilePrefix = ", ce.int_mob_prefix = ?";
-                isChangeMobilePrefix = 1;
-            }
-            if (userModel.getCountryId() != null && userModel.getCountryId() != 0) {
-                changeCountryId = ", c.customers_country_id = ?";
-                isChangeCountryId = 1;
+            if (Objects.equals(userModel.getCountryId(), "99") && !userModel.getPostcode().isEmpty()) {
+                Map<String, String> data = getStateAndCityByPin(userModel.getPostcode());
+                if (data.get("error").equals("0")) {
+                    userModel.setState(data.get("state"));
+                    userModel.setCity(data.get("city"));
+                    userModel.setMobilePrefix("91");
+                } else {
+                    //pincode entered was not found in the database.
+                    logger.debug("Pincode not found in our database.");
+                    throw new Exception("We do not serve this Pincode.");
+                }
             }
 
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "UPDATE customers c INNER JOIN n_user ce ON ce.id = c.customers_id SET c.customers_firstname = ?, c.customers_lastname = ?" + changeDob + changeMobile + changeMobilePrefix + changeCountryId + " WHERE c.customers_id = ?";
+            statement = "UPDATE customers c INNER JOIN n_user ce ON ce.id = c.customers_id SET " +
+                " c.customers_firstname = ?, c.customers_lastname = ?, c.customers_mobile = ? ," +
+                " ce.int_mob_prefix = ? , c.customers_country_id = ? , c.customers_street_address = ? ," +
+                " c.customers_street_address2 = ? , c.customers_postcode = ? , c.customers_city = ? ," +
+                " c.customers_state = ? "+columns + " WHERE c.customers_id = ?";
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, userModel.getFirstname());
             preparedStatement.setString(2, userModel.getLastname());
-            if (isChangeDob == 1) preparedStatement.setString(3, userModel.getDob());
-            if (isChangeMobile == 1) preparedStatement.setString(3 + isChangeDob, userModel.getMobile());
-            if (isChangeMobilePrefix == 1)
-                preparedStatement.setString(3 + isChangeDob + isChangeMobile, userModel.getMobilePrefix());
-            if (isChangeCountryId == 1)
-                preparedStatement.setString(3 + isChangeDob + isChangeMobile + isChangeMobilePrefix, userModel.getCountryId().toString());
-            preparedStatement.setString(3 + isChangeDob + isChangeMobile + isChangeMobilePrefix + isChangeCountryId, userModel.getId());
+            preparedStatement.setString(3, userModel.getMobile());
+            preparedStatement.setString(4, userModel.getMobilePrefix());
+            preparedStatement.setInt(5, userModel.getCountryId());
+            preparedStatement.setString(6, userModel.getAddressField1());
+            preparedStatement.setString(7, userModel.getAddressField2());
+            preparedStatement.setString(8, userModel.getPostcode());
+            preparedStatement.setString(9, userModel.getCity());
+            preparedStatement.setString(10, userModel.getState());
+
+            if (isChangeDob == 1){
+                preparedStatement.setString(11, userModel.getDob());
+            }
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Failed while updating user profile.");
@@ -598,7 +604,7 @@ public class MarketPlaceOrderUtil {
                 logger.debug("USER PROFILE UPDATED SUCCESSFULLY..!!");
             }
         } catch (Exception exception) {
-            logger.error("Exception in connection", exception);
+            logger.error("Exception at Updating Customer : "+exception.getMessage(), exception);
             response = Boolean.FALSE;
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
@@ -722,7 +728,7 @@ public class MarketPlaceOrderUtil {
             checkCorpOrderModel.setOrderId(0);
             if(!checkCorpOrderModel.getRelId().isEmpty()||!checkCorpOrderModel.getRelId().equals("0")) {
                 String postData = objectMapper.writeValueAsString(checkCorpOrderModel);
-                String orderExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/corporate/corpordercheck",new ArrayList<>());
+                String orderExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/corporate/corpordercheck",null);
                 generalAddressResponseModel = objectMapper.readValue(orderExist, GenerateCheckCorpOrderResponseModel.class);
                 checkCorpOrderModel = generalAddressResponseModel.getData();
                 if (checkCorpOrderModel.getError() == false) {
