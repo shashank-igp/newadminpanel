@@ -141,13 +141,20 @@ public class OrderMapper
 
                 List<OrderComponent> componentList = new ArrayList<>();
 
-                orderProducts.setComponentTotal(orderUtil.getProductComponents(orderProducts.getProductId(),fkassociateId,
-                                                                                orderProducts.getProducts_code(),componentList,
-                                                                                orderProductExtraInfo,true));
+                if(forAdminPanelOrNot==false){
+                    orderProducts.setComponentTotal(orderUtil.getProductComponents(orderProducts.getProductId(),fkassociateId,
+                        orderProducts.getProducts_code(),componentList,
+                        orderProductExtraInfo,true));
+                }else {
+                    orderProducts.setComponentTotal(orderUtil.getComponentListFromComponentInfo(orderProducts.getOrderId(),componentList,
+                        orderProductExtraInfo,true));
+                }
+
+
+
                 orderProducts.setPriceAdjustmentPerProduct(orderProducts.getVendorPrice()-orderProducts.getComponentTotal());
 
-//                statement =" SELECT mc.componentImage componentImage ,opci.component_code,mc.component_name,opci.vendor_to_component_price, "
-                //                + " opci.products_id,opci.quantity,mc.type,mc.mod_time FROM  orders_products_components_info opci join AA_master_components mc ";
+
 
                 // this is when if we have some price changes
                 if(orderProducts.getPriceAdjustmentPerProduct()!=0.0){
@@ -176,8 +183,7 @@ public class OrderMapper
                         order.getOrderProducts().add(orderProducts);
                     }
 
-                } else if (orderProductExtraInfo.getDeliveryType() == 2
-                    || orderProductExtraInfo.getDeliveryType() == 3) {
+                } else if (orderProductExtraInfo.getDeliveryType() == 2 || orderProductExtraInfo.getDeliveryType() == 3) {
                     Order order = originalOrderMap.get(key);
                     if (order == null) {
                         order = orderUtil.gerOrderOnly( orderProducts.getOrderId(),fkassociateId,forAdminPanelOrNot);
@@ -191,6 +197,9 @@ public class OrderMapper
                     order.setVendorOrderTotal(order.getVendorOrderTotal() + orderProducts.getVendorPrice());
                     order.setOrderNetProductPrice(order.getOrderNetProductPrice()+orderProducts.getVendorPrice());
                     order.setComponentTotal(order.getComponentTotal()+orderProducts.getComponentTotal());
+                    if(order.getOrderId()==1236500){
+                        logger.debug("checking for 1236500 "+order.toString());
+                    }
                 }
 
 
@@ -292,6 +301,11 @@ public class OrderMapper
                 order.setVendorOrderTotal((int)order.getVendorOrderTotal());
                 Map<String,List<String>> uploadedFilePath=uploadUtil.getUploadedfilePathFromVpFileUpload(orderId.intValue());
                 order.setUploadedFilePath(uploadedFilePath);
+
+                if(orderId.intValue()==1236500){
+                    logger.debug("checking for 1236500 with key "+key);
+                    logger.debug("checking for 1236500 "+order.toString());
+                }
 
                 sortedOrderMap.put(Long.valueOf(deliveryTime+orderId.longValue()), order);
 

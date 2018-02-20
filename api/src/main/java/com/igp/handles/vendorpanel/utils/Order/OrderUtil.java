@@ -139,9 +139,9 @@ public class OrderUtil
             String operator = isfuture ? " >= " : " = ";
             if(forAdminPanelOrNot==true ){
                 if(fkAssociateId==72){
-                    fkAssociateIdWhereClause="op.fk_associate_id = 72 and ";
+                    fkAssociateIdWhereClause="op.fk_associate_id = 72  and  ";
                 }else {
-                    fkAssociateIdWhereClause="op.fk_associate_id != 72 and ";
+                    fkAssociateIdWhereClause="op.fk_associate_id != 72 and p.fk_associate_id = 72 and ";
                 }
             }else {
                 fkAssociateIdWhereClause="op.fk_associate_id = "+fkAssociateId+" and ";
@@ -472,8 +472,7 @@ public class OrderUtil
     }
 
     public double getComponentListFromComponentInfo(int orderId,List<OrderComponent> componentList , OrderProductExtraInfo orderProductExtraInfo
-    ){
-
+        ,boolean clubEgglessComponentFalg){
         Connection connection = null;
         ResultSet resultSet = null;
         String statement;
@@ -493,9 +492,10 @@ public class OrderUtil
 
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement="SELECT  * from orders_products_components_info opci join AA_master_components mc on opci.component_id"
-                + " = mc.component_id where opci.orders_id = ? ";
+                + " = mc.component_id where opci.orders_id = ? and products_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,orderId);
+            preparedStatement.setInt(2,orderProductExtraInfo.getProductId());
 
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
@@ -515,7 +515,7 @@ public class OrderUtil
                     .build();
 
 
-                if (orderComponent.getComponentName().equalsIgnoreCase("Eggless"))
+                if (orderComponent.getComponentName().equalsIgnoreCase("Eggless") && clubEgglessComponentFalg==true)
                 {
                     egglessProductMap.put(orderComponent.getProductId(), orderComponent);
                 }

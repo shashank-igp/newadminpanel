@@ -109,7 +109,7 @@ public class Order {
 
     @POST
     @Path("/v1/admin/handels/orderPriceChanges")
-    public HandleServiceResponse orderPriceChanges(@QueryParam("orderId")int orderId,@QueryParam("orderproductId")
+    public HandleServiceResponse orderPriceChanges(@QueryParam("orderId")int orderId,@QueryParam("orderProductId")
         int orderProductId,@QueryParam("componentId") int componentId,@QueryParam("componentPrice") Double componentPrice,
         @QueryParam("shippingCharge") Double shippingCharge,
         @DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){

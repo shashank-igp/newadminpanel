@@ -51,8 +51,9 @@ public class MarketPlaceMapper {
                 while (rowIterator.hasNext()) {
                     Map<String, String> a = new HashMap<>();
                     row++;
-// check if we get second row since first has column headers
+                // check if we get second row since first has column headers
                     Row currentRow = rowIterator.next();
+                    int count = 0;
                     for (int currCol = 0; currCol < NUM_COLUMNS; currCol++) {
                         Cell currentCell = currentRow.getCell(currCol);
 
@@ -64,10 +65,14 @@ public class MarketPlaceMapper {
                             a.put(list.get(currCol), currentCell.getBooleanCellValue() + "");
                         } else if (currentCell.getCellType() == Cell.CELL_TYPE_BLANK) {
                             a.put(list.get(currCol), "");
+                            count++;
                         }
-
                     }
-                    data.put(row, a);
+                    if(count>=15){
+                        // row is empty.
+                    }
+                    else {
+                        data.put(row, a);}
                     logger.debug("row : "+row);
                     logger.debug("values : "+data.get(row));
                 }
@@ -129,7 +134,10 @@ public class MarketPlaceMapper {
                 }
                 String zipCode = column.get("Zip");
                 if(!zipCode.isEmpty()) {
-                    zipCode = zipCode.substring(0, 6);
+                    zipCode = zipCode.trim();
+                    if(zipCode.length()>=6) {
+                        zipCode = zipCode.substring(0, 6);
+                    }
                 }
                 String quant = column.get("QTY");
                 int quantity = 0;
@@ -140,7 +148,7 @@ public class MarketPlaceMapper {
 
                 // take out all the values and fill the models.
                 // i.e. customer,address,product,extra_info
-                if(user.equals("loyalty")) {
+                if(user.equals("loyalty") || user.equals("iipsroot")) {
 
                     String name = column.get("MemberName").trim();
                     String fname = "";
@@ -300,6 +308,8 @@ public class MarketPlaceMapper {
                 validationModel.setExtraInfoModel(extraInfoModel);
                 validationModel.setError(false);
 
+                logger.debug("validation model : "+rowNum);
+                logger.debug("values : ",validationModel);
 
                 validationModelList.add(validationModel);
 
@@ -353,7 +363,7 @@ public class MarketPlaceMapper {
                         // validate customer details.
                         validationModel = marketPlaceOrderUtil.validateCustomerDetails(validationModel);
                         if (validationModel.getError() == Boolean.TRUE) {
-                           // validationModel.setMessage("Error is Customer Details.");
+                            // validationModel.setMessage("Error is Customer Details.");
                         } else {
                             // no error in getting customer model.
                             addressModel.setId(validationModel.getUserModel().getIdHash());
@@ -365,7 +375,7 @@ public class MarketPlaceMapper {
 
                             validationModel = marketPlaceOrderUtil.validateSelectedAddress(validationModel);
                             if (validationModel.getError() == Boolean.TRUE) {
-                               // validationModel.setMessage("Error is Address Validation.");
+                                // validationModel.setMessage("Error is Address Validation.");
                             } else {
                                 // check product details.
                                 String prodCode = productModel.getProductCode();
