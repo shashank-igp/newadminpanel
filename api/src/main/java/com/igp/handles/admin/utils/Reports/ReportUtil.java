@@ -117,7 +117,12 @@ public class ReportUtil {
                 orderReportObjectModel.setPrice(resultSet.getDouble("Amount"));
                 orderReportObjectModel.setPhoneNumber(resultSet.getString("Phone"));
                 orderReportObjectModel.setStatus(resultSet.getInt("status"));
-                orderReportObjectModel.setVendorName(resultSet.getString("vendorName"));
+                String vendorName = resultSet.getString("vendorName");
+                if(vendorName==null || vendorName.equals("")){
+                    orderReportObjectModel.setVendorName("");
+                }else {
+                    orderReportObjectModel.setVendorName(resultSet.getString("vendorName"));
+                }
 
                 if (resultSet.getString("opStatus").equals("Shipped") && resultSet.getInt("status" )==1){
 
