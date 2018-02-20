@@ -229,16 +229,16 @@ public class MarketPlaceMapper {
 
                     String detail = column.get("PO Number") + "(#)" +
                         column.get("MemberName")  + "(#)" +
-                        column.get("Contact No")  + "(#)" +
+                        userModel.getMobile()  + "(#)" +
                         column.get("Email")  + "(#)" +
                         column.get("AddressLine1") + "(#)" +
                         column.get("AddressLine2") + "(#)" +
                         column.get("State") + "(#)" +
                         column.get("City") + "(#)" +
-                        column.get("Zip") + "(#)" +
+                        userModel.getPostcode() + "(#)" +
                         column.get("Item Code") + "(#)" +
-                        column.get("QTY") + "(#)" +
-                        column.get("SellingPrice") + "(#)" +
+                        quantity + "(#)" +
+                        sellingPrice + "(#)" +
                         column.get("ProductName");
 
                     extraInfoModel = new ExtraInfoModel.Builder()
