@@ -282,10 +282,12 @@ public class DashboardMapper {
                     int vendorId=orderDetailsPerOrderProduct.getVendorId();
                     boolean deliverystatus = (boolean) orderDetailsPerOrderProduct.getDeliveryStatus();
                     boolean flagForUniqueness=false;
-                    int slaCode= orderDetailsPerOrderProduct.getSlaCode();
+                    int slaCode= slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1);
                     String key=orderId + "," + deliveryDate + "," + shippingType;
                     flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId);
 
+                    logger.debug("slacode  on layer "+slaCode+" with orderProductId "+orderDetailsPerOrderProduct.getOrdersProductsId());
+                    
                     if (flagForUniqueness){
 
                         if(status.equals("Processed") && vendorId==72){ // unassigned -> not alloted
@@ -296,7 +298,7 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("notAlloted").get("count"));
                                 count++;
                                 statusCountMap0.get("unAssigned").get("notAlloted").put("count", count + "");
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap4.get("unAssigned").get("notAlloted").get("count"));
                                     noBreachCount++;
@@ -304,7 +306,7 @@ public class DashboardMapper {
                                     statusCountMap4.get("unAssigned").get("notAlloted").put("sla", true + "");
                                     statusCountMap0.get("unAssigned").get("notAlloted").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap8.get("unAssigned").get("notAlloted").get("count"));
                                     alertCount++;
@@ -318,7 +320,7 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(statusCountMap1.get("unAssigned").get("notAlloted").get("count"));
                                 count++;
                                 statusCountMap1.get("unAssigned").get("notAlloted").put("count", count + "");
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap5.get("unAssigned").get("notAlloted").get("count"));
                                     noBreachCount++;
@@ -326,7 +328,7 @@ public class DashboardMapper {
                                     statusCountMap5.get("unAssigned").get("notAlloted").put("sla", true + "");
                                     statusCountMap1.get("unAssigned").get("notAlloted").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap9.get("unAssigned").get("notAlloted").get("count"));
                                     alertCount++;
@@ -340,7 +342,7 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(statusCountMap2.get("unAssigned").get("notAlloted").get("count"));
                                 count++;
                                 statusCountMap2.get("unAssigned").get("notAlloted").put("count", count + "");
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap6.get("unAssigned").get("notAlloted").get("count"));
                                     noBreachCount++;
@@ -348,7 +350,7 @@ public class DashboardMapper {
                                     statusCountMap6.get("unAssigned").get("notAlloted").put("sla", true + "");
                                     statusCountMap2.get("unAssigned").get("notAlloted").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap10.get("unAssigned").get("notAlloted").get("count"));
                                     alertCount++;
@@ -362,7 +364,7 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(statusCountMap3.get("unAssigned").get("notAlloted").get("count"));
                                 count++;
                                 statusCountMap3.get("unAssigned").get("notAlloted").put("count", count + "");
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap7.get("unAssigned").get("notAlloted").get("count"));
                                     noBreachCount++;
@@ -370,7 +372,7 @@ public class DashboardMapper {
                                     statusCountMap7.get("unAssigned").get("notAlloted").put("sla", true + "");
                                     statusCountMap3.get("unAssigned").get("notAlloted").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap11.get("unAssigned").get("notAlloted").get("count"));
                                     alertCount++;
@@ -390,7 +392,7 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap0.get("unAssigned").get("processing").put("count", count + "");
 
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap4.get("unAssigned").get("processing").get("count"));
                                     noBreachCount++;
@@ -398,7 +400,7 @@ public class DashboardMapper {
                                     statusCountMap4.get("unAssigned").get("processing").put("sla", true + "");
                                     statusCountMap0.get("unAssigned").get("processing").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap8.get("unAssigned").get("processing").get("count"));
                                     alertCount++;
@@ -412,7 +414,7 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(statusCountMap1.get("unAssigned").get("processing").get("count"));
                                 count++;
                                 statusCountMap1.get("unAssigned").get("processing").put("count", count + "");
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap5.get("unAssigned").get("processing").get("count"));
                                     noBreachCount++;
@@ -420,7 +422,7 @@ public class DashboardMapper {
                                     statusCountMap5.get("unAssigned").get("processing").put("sla", true + "");
                                     statusCountMap1.get("unAssigned").get("processing").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap9.get("unAssigned").get("processing").get("count"));
                                     alertCount++;
@@ -437,7 +439,7 @@ public class DashboardMapper {
 
 
 
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap6.get("unAssigned").get("processing").get("count"));
                                     noBreachCount++;
@@ -445,7 +447,7 @@ public class DashboardMapper {
                                     statusCountMap6.get("unAssigned").get("processing").put("sla", true + "");
                                     statusCountMap2.get("unAssigned").get("processing").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap10.get("unAssigned").get("processing").get("count"));
                                     alertCount++;
@@ -460,7 +462,7 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap3.get("unAssigned").get("processing").put("count", count + "");
 
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap7.get("unAssigned").get("processing").get("count"));
                                     noBreachCount++;
@@ -468,7 +470,7 @@ public class DashboardMapper {
                                     statusCountMap7.get("unAssigned").get("processing").put("sla", true + "");
                                     statusCountMap3.get("unAssigned").get("processing").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap11.get("unAssigned").get("processing").get("count"));
                                     alertCount++;
@@ -490,7 +492,7 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap0.get("notConfirmed").get("total").put("count", count + "");
 
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap4.get("notConfirmed").get("total").get("count"));
                                     noBreachCount++;
@@ -498,7 +500,7 @@ public class DashboardMapper {
                                     statusCountMap4.get("notConfirmed").get("total").put("sla", true + "");
                                     statusCountMap0.get("notConfirmed").get("total").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap8.get("notConfirmed").get("pending").get("count"));
                                     alertCount++;
@@ -512,7 +514,7 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(statusCountMap1.get("notConfirmed").get("total").get("count"));
                                 count++;
                                 statusCountMap1.get("notConfirmed").get("total").put("count", count + "");
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap5.get("notConfirmed").get("total").get("count"));
                                     noBreachCount++;
@@ -520,7 +522,7 @@ public class DashboardMapper {
                                     statusCountMap5.get("notConfirmed").get("total").put("sla", true + "");
                                     statusCountMap1.get("notConfirmed").get("total").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap9.get("notConfirmed").get("pending").get("count"));
                                     alertCount++;
@@ -534,7 +536,7 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(statusCountMap2.get("notConfirmed").get("total").get("count"));
                                 count++;
                                 statusCountMap2.get("notConfirmed").get("total").put("count", count + "");
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap6.get("notConfirmed").get("total").get("count"));
                                     noBreachCount++;
@@ -542,7 +544,7 @@ public class DashboardMapper {
                                     statusCountMap6.get("notConfirmed").get("total").put("sla", true + "");
                                     statusCountMap2.get("notConfirmed").get("total").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap10.get("notConfirmed").get("pending").get("count"));
                                     alertCount++;
@@ -556,7 +558,7 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(statusCountMap3.get("notConfirmed").get("total").get("count"));
                                 count++;
                                 statusCountMap3.get("notConfirmed").get("total").put("count", count + "");
-                                if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if (OrderUtil.isSLASatisfied(slaCode)){
 
                                     int noBreachCount=Integer.parseInt(statusCountMap7.get("notConfirmed").get("total").get("count"));
                                     noBreachCount++;
@@ -564,7 +566,7 @@ public class DashboardMapper {
                                     statusCountMap7.get("notConfirmed").get("total").put("sla", true + "");
                                     statusCountMap3.get("notConfirmed").get("total").put("sla",true+"");
 
-                                }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                                }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap11.get("notConfirmed").get("pending").get("count"));
                                     alertCount++;
@@ -587,7 +589,7 @@ public class DashboardMapper {
                                 count++;
                                 notShippedTotalOrderCount.put("count",count+"");
                                 notShippedTotalOrderCount.put("sla",true+"");
-                                if(OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if(OrderUtil.isHighAlertActionRequired(slaCode)){
                                     orderTotalWhole++;
                                     int alertCount=Integer.parseInt(notShippedPendingOrderCount.get("count"));
                                     alertCount++;
@@ -607,7 +609,7 @@ public class DashboardMapper {
                                 count++;
                                 notDeliveredTotalOrderCount.put("count",count+"");
                                 notDeliveredTotalOrderCount.put("sla",true+"");
-                                if(OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                                if(OrderUtil.isHighAlertActionRequired(slaCode)){
                                     orderTotalWhole++;
                                     int alertCount=Integer.parseInt(notDeliveredPendingOrderCount.get("count"));
                                     alertCount++;
@@ -726,7 +728,7 @@ public class DashboardMapper {
                             count++;
                             statusCountMap0.get("unAssigned").get("notAlloted").put("count", count + "");
 
-                            if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                            if (OrderUtil.isSLASatisfied(slaCode)){
 
                                 int noBreachCount=Integer.parseInt(statusCountMap4.get("unAssigned").get("notAlloted").get("count"));
                                 noBreachCount++;
@@ -734,7 +736,7 @@ public class DashboardMapper {
                                 statusCountMap4.get("unAssigned").get("notAlloted").put("sla", true + "");
                                 statusCountMap0.get("unAssigned").get("notAlloted").put("sla",true+"");
 
-                            }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                            }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                 int alertCount = Integer.parseInt(statusCountMap8.get("unAssigned").get("notAlloted").get("count"));
                                 alertCount++;
@@ -749,7 +751,7 @@ public class DashboardMapper {
                             count++;
                             statusCountMap0.get("unAssigned").get("processing").put("count", count + "");
 
-                            if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                            if (OrderUtil.isSLASatisfied(slaCode)){
 
                                 int noBreachCount=Integer.parseInt(statusCountMap4.get("unAssigned").get("processing").get("count"));
                                 noBreachCount++;
@@ -757,7 +759,7 @@ public class DashboardMapper {
                                 statusCountMap4.get("unAssigned").get("processing").put("sla", true + "");
                                 statusCountMap0.get("unAssigned").get("processing").put("sla",true+"");
 
-                            }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                            }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                 int alertCount = Integer.parseInt(statusCountMap8.get("unAssigned").get("notAlloted").get("count"));
                                 alertCount++;
@@ -775,7 +777,7 @@ public class DashboardMapper {
                             count++;
                             statusCountMap0.get("notConfirmed").get("total").put("count", count + "");
 
-                            if (OrderUtil.isSLASatisfied(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))){
+                            if (OrderUtil.isSLASatisfied(slaCode)){
 
                                 int noBreachCount=Integer.parseInt(statusCountMap4.get("notConfirmed").get("total").get("count"));
                                 noBreachCount++;
@@ -783,7 +785,7 @@ public class DashboardMapper {
                                 statusCountMap4.get("notConfirmed").get("total").put("sla", true + "");
                                 statusCountMap0.get("notConfirmed").get("total").put("sla",true+"");
 
-                            }else if (OrderUtil.isHighAlertActionRequired(slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1))) {
+                            }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                 int alertCount = Integer.parseInt(statusCountMap8.get("notConfirmed").get("pending").get("count"));
                                 alertCount++;

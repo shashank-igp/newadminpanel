@@ -60,10 +60,10 @@ public class SlaCompliant {
             if(status.equalsIgnoreCase("Processing") && flag == 1){
                 SimpleDateFormat formatter2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
                 Date datePurchased = formatter2.parse(purchasedTime);
-                Calendar timePurchased = Calendar.getInstance();
-                timePurchased.setTime(datePurchased);
-                timePurchased.add(Calendar.MINUTE,15);
-                if (cal.compareTo(timePurchased) <= 0){
+                cal.setTime(datePurchased);
+                cal.add(Calendar.MINUTE,15);
+                datePurchased=cal.getTime();
+                if (today.compareTo(datePurchased) <= 0){
                     slaCodeAdmin = 6;
                 }
                 else {
