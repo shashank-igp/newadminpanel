@@ -63,7 +63,7 @@ public class SlaCompliant {
                 cal.setTime(datePurchased);
                 cal.add(Calendar.MINUTE,15);
                 datePurchased=cal.getTime();
-                if (today.compareTo(datePurchased) <= 0){
+                if (currentDateWithTimeStamp.compareTo(datePurchased) <= 0){
                     slaCodeAdmin = 6;
                 }
                 else {

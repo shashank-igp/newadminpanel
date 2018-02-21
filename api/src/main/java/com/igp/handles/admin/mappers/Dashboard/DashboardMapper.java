@@ -287,7 +287,7 @@ public class DashboardMapper {
                     flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId);
 
                     logger.debug("slacode  on layer "+slaCode+" with orderProductId "+orderDetailsPerOrderProduct.getOrdersProductsId());
-                    
+
                     if (flagForUniqueness){
 
                         if(status.equals("Processed") && vendorId==72){ // unassigned -> not alloted

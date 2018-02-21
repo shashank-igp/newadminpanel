@@ -765,7 +765,7 @@ public class OrderUtil {
             if (status == 0) {
                 logger.error("Failed to update orders_products while marking that orderProduct as cancelled ");
             } else {
-                if(insertIntoOrderHistory(order,0,comment)){
+                if(insertIntoOrderHistory(order,0,"order is cancelled , reason is "+comment)){
                     result=true;
                 }
             }
