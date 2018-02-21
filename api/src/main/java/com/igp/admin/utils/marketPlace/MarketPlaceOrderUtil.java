@@ -75,23 +75,19 @@ public class MarketPlaceOrderUtil {
                     // populate cust id hash in customer and address model.
                     authResponseModel = generalUserResponseModel.getData();
                     UserModel userModel2 = authResponseModel.getUser();
-                    // validationModel.setUserModel(authResponseModel.getUser());
                     validationModel.setError(!authResponseModel.getLogin());
                     if(validationModel.getError()==true){
                         throw new Exception("New Customer couldn't be Created.");
                     }
                     else {
                         // since new customer created therefore update rest of the details.
-                        userModel.setId(userModel2.getId());
-                        String postData1 = objectMapper.writeValueAsString(userModel);
+                        String postData1 = objectMapper.writeValueAsString(userModel2);
                         String custUpdate = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/signup",new ArrayList<>());
                         generalUserResponseModel = objectMapper.readValue(custUpdate, GeneralUserResponseModel.class);
                         authResponseModel =  generalUserResponseModel.getData();
                         // storing idHash and id in proper fields.
-                        userModel2.setIdHash(userModel.getId());
-                        userModel = authResponseModel.getUser();
-                        userModel.setIdHash(userModel2.getIdHash());
-                        //userModel.setId(null);
+                        userModel2 = authResponseModel.getUser();
+                        userModel.setIdHash(userModel2.getId());
                         validationModel.setUserModel(userModel);
                         validationModel.setError(!authResponseModel.getLogin());
                         if(validationModel.getError()==true){
@@ -553,6 +549,7 @@ public class MarketPlaceOrderUtil {
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
+        int custId = new Integer(userModel.getId());
         try {
 
             Integer isChangeDob = 0;
@@ -561,7 +558,7 @@ public class MarketPlaceOrderUtil {
                 columns = ", c.customers_dob = ?";
                 isChangeDob = 1;
             }
-            if (Objects.equals(userModel.getCountryId(), "99") && !userModel.getPostcode().isEmpty()) {
+            if (Objects.equals(userModel.getCountryId(), "99") && !userModel.getPostcode().isEmpty() && userModel.getPostcode()!=null) {
                 Map<String, String> data = getStateAndCityByPin(userModel.getPostcode());
                 if (data.get("error").equals("0")) {
                     userModel.setState(data.get("state"));
@@ -581,19 +578,24 @@ public class MarketPlaceOrderUtil {
                 " c.customers_street_address2 = ? , c.customers_postcode = ? , c.customers_city = ? ," +
                 " c.customers_state = ? "+columns + " WHERE c.customers_id = ?";
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
+
             preparedStatement.setString(1, userModel.getFirstname());
             preparedStatement.setString(2, userModel.getLastname());
             preparedStatement.setString(3, userModel.getMobile());
             preparedStatement.setString(4, userModel.getMobilePrefix());
             preparedStatement.setInt(5, userModel.getCountryId());
-            preparedStatement.setString(6, userModel.getAddressField1());
-            preparedStatement.setString(7, userModel.getAddressField2());
-            preparedStatement.setString(8, userModel.getPostcode());
-            preparedStatement.setString(9, userModel.getCity());
-            preparedStatement.setString(10, userModel.getState());
+            preparedStatement.setString(6, userModel.getAddressField1()==null?"":userModel.getAddressField1());
+            preparedStatement.setString(7, userModel.getAddressField2()==null?"":userModel.getAddressField2());
+            preparedStatement.setString(8, userModel.getPostcode()==null?"":userModel.getPostcode());
+            preparedStatement.setString(9, userModel.getCity()==null?"":userModel.getCity());
+            preparedStatement.setString(10, userModel.getState()==null?"":userModel.getState());
 
             if (isChangeDob == 1){
                 preparedStatement.setString(11, userModel.getDob());
+                preparedStatement.setInt(12, custId);
+            }
+            else {
+                preparedStatement.setInt(11, custId);
             }
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
