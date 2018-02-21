@@ -316,7 +316,7 @@ public class OrderMapper
     public void fillSlaFlagsOnOrderProducts(Order order,boolean forAdminPanelOrNot ){
 
         SlaCompliant slaCompliant=new SlaCompliant();
-        SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd");
+        SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         int slaCode=-12;
 
         int flagForAdminPanel=forAdminPanelOrNot==true ? 1 : 0;
@@ -331,6 +331,8 @@ public class OrderMapper
                 orderDetailsPerOrderProduct.setDeliveryStatus(ordersProducts.getDeliveryStatus()==1 ? true:false);
                 orderDetailsPerOrderProduct.setOrderProductStatus(ordersProducts.getOrdersProductStatus());
                 orderDetailsPerOrderProduct.setDeliveryTime(ordersProducts.getOrderProductExtraInfo().getDeliveryTime());
+                orderDetailsPerOrderProduct.setOrdersId(new Long(order.getOrderId()));
+                orderDetailsPerOrderProduct.setOrdersProductsId(new Long(ordersProducts.getOrderProductId()));
 
                 slaCode = slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,flagForAdminPanel);
 
