@@ -94,4 +94,18 @@ public class ValidationModel {
     public void setId(Integer id) {
         this.id = id;
     }
+
+    @Override
+    public String toString() {
+        return "ValidationModel{" +
+            "error=" + error +
+            ", userModel=" + userModel +
+            ", addressModel=" + addressModel +
+            ", productModel=" + productModel +
+            ", extraInfoModel=" + extraInfoModel +
+            ", id=" + id +
+            ", fkAssociateId=" + fkAssociateId +
+            ", message='" + message + '\'' +
+            '}';
+    }
 }
