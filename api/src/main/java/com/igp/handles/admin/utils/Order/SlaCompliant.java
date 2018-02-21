@@ -15,7 +15,7 @@ public class SlaCompliant {
 
     private static final Logger logger = LoggerFactory.getLogger(SlaCompliant.class);
     public int generateSlacodeForAll(OrderDetailsPerOrderProduct orderDetailsPerOrderProduct,int flag)
-        // flag 0 for vendors and 1 for admin
+    // flag 0 for vendors and 1 for admin
     {
         String status,assignTime,shippingType,deliveryDate,deliveryTime,purchasedTime;
         int deliveryStatus;
@@ -103,7 +103,7 @@ public class SlaCompliant {
                     if (timeAssigned.compareTo(yesterdayDateTimeStampwith20Pm) < 0) {
                         slaCode = 101;
                         slaCodeAdmin = 101;
-                    } else if (timeAssigned.compareTo(yesterdayDateTimeStampwith20Pm) >= 0 && timeAssigned.compareTo(todayDate08Pm) < 0) {
+                    } else if (timeAssigned.compareTo(yesterdayDateTimeStampwith20Pm) >= 0 && timeAssigned.compareTo(todayDate0815Am) < 0) {
 
                         if(flag == 0) {
                             if (cal3.get(Calendar.HOUR_OF_DAY) <= 9) {
@@ -117,22 +117,20 @@ public class SlaCompliant {
                             }
                         }
                         else {
-                            if (cal3.get(Calendar.HOUR_OF_DAY) <= 8 && cal3.get(Calendar.MINUTE) < 45) {
-                                slaCodeAdmin = 2;
-
-                            } else if (cal3.get(Calendar.HOUR_OF_DAY) >= 8 && cal3.get(Calendar.MINUTE) >= 45) {
+                            if (cal3.get(Calendar.HOUR_OF_DAY) <= 8) {
+                                if(cal3.get(Calendar.HOUR_OF_DAY) == 8 && cal3.get(Calendar.MINUTE) > 45) {
+                                    slaCodeAdmin = 102;
+                                }
+                                else {
+                                    slaCodeAdmin = 2;
+                                }
+                            } else {
                                 slaCodeAdmin = 102;
                             }
                         }
                     }
                     else if (timeAssigned.compareTo(todayDate0815Am) >= 0 && timeAssigned.compareTo(todayDate08Pm) < 0) {
-                        if(flag == 0) {{
-                            if (assign45Min.compareTo(cal3.getTime()) <= 0) {
-                                slaCode = 101;
-                            } else if (assign45Min.compareTo(cal3.getTime()) > 0) {
-                                slaCode = 1;
-                            }
-                        }
+                        if(flag == 0){
                             if (assign45Min.compareTo(cal3.getTime()) <= 0) {
                                 slaCode = 101;
                             } else if (assign45Min.compareTo(cal3.getTime()) > 0) {
