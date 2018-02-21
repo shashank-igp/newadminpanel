@@ -40,7 +40,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setPurchasedTime(String purchasedTime)
     {
-        this.purchasedTime = purchasedTime;
+        this.purchasedTime  =  purchasedTime;
     }
 
     public String getAssignTime()
@@ -50,7 +50,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setAssignTime(String assignTime)
     {
-        this.assignTime = assignTime;
+        this.assignTime  =  assignTime;
     }
 
     public int getVendorId()
@@ -60,7 +60,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setVendorId(int vendorId)
     {
-        this.vendorId = vendorId;
+        this.vendorId  =  vendorId;
     }
 
     public Long getOrdersProductsId()
@@ -70,7 +70,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setOrdersProductsId(Long ordersProductsId)
     {
-        this.ordersProductsId = ordersProductsId;
+        this.ordersProductsId  =  ordersProductsId;
     }
 
     public Long getOrdersId()
@@ -80,7 +80,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setOrdersId(Long ordersId)
     {
-        this.ordersId = ordersId;
+        this.ordersId  =  ordersId;
     }
 
     public Date getDeliveredDate()
@@ -90,7 +90,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setDeliveredDate(Date deliveredDate)
     {
-        this.deliveredDate = deliveredDate;
+        this.deliveredDate  =  deliveredDate;
     }
 
     public Date getDeliveryDate()
@@ -100,7 +100,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setDeliveryDate(Date deliveryDate)
     {
-        this.deliveryDate = deliveryDate;
+        this.deliveryDate  =  deliveryDate;
     }
 
     public Date getOutForDeliveryDate()
@@ -110,7 +110,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setOutForDeliveryDate(Date outForDeliveryDate)
     {
-        this.outForDeliveryDate = outForDeliveryDate;
+        this.outForDeliveryDate  =  outForDeliveryDate;
     }
 
     public String getOrderProductStatus()
@@ -120,7 +120,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setOrderProductStatus(String orderProductStatus)
     {
-        this.orderProductStatus = orderProductStatus;
+        this.orderProductStatus  =  orderProductStatus;
     }
 
     public boolean getDeliveryStatus()
@@ -130,7 +130,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setDeliveryStatus(boolean deliveryStatus)
     {
-        this.deliveryStatus = deliveryStatus;
+        this.deliveryStatus  =  deliveryStatus;
     }
 
     public String getDeliveryTime()
@@ -140,7 +140,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setDeliveryTime(String deliveryTime)
     {
-        this.deliveryTime = deliveryTime;
+        this.deliveryTime  =  deliveryTime;
     }
 
     public String getShippingType()
@@ -150,7 +150,7 @@ public class OrderDetailsPerOrderProduct
 
     public void setShippingType(String shippingType)
     {
-        this.shippingType = shippingType;
+        this.shippingType  =  shippingType;
     }
 
     public int getSlaCode()
@@ -160,6 +160,16 @@ public class OrderDetailsPerOrderProduct
 
     public void setSlaCode(int slaCode)
     {
-        this.slaCode = slaCode;
+        this.slaCode  =  slaCode;
+    }
+
+    @Override public String toString()
+    {
+        return "OrderDetailsPerOrderProduct{" + "ordersId = " + ordersId + ", deliveredDate = " + deliveredDate
+            + ", deliveryDate = " + deliveryDate + ", outForDeliveryDate = " + outForDeliveryDate + ", orderProductStatus = '"
+            + orderProductStatus + '\'' + ", deliveryStatus = " + deliveryStatus + ", deliveryTime = '" + deliveryTime
+            + '\'' + ", shippingType = '" + shippingType + '\'' + ", slaCode = " + slaCode + ", ordersProductsId = "
+            + ordersProductsId + ", vendorId = " + vendorId + ", assignTime = '" + assignTime + '\'' + ", purchasedTime = '"
+            + purchasedTime + '\'' + '}';
     }
 }
