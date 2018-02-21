@@ -28,5 +28,17 @@ public class Constants {
         return SAME_DAY;
     }
 
+    public static  String getDeliveryType(String deliveryTypeIntValue){
+        String deliveryType="";
+        Map<String,String> deliveryTypeMap=new HashMap<>();
+        deliveryTypeMap.put("1","Any time");
+        deliveryTypeMap.put("2","Fix Time");
+        deliveryTypeMap.put("3","Midnight");
+        deliveryTypeMap.put("4","Same Day");
+
+        deliveryType=deliveryTypeMap.get(deliveryTypeIntValue);
+
+        return deliveryType;
+    }
 
 }

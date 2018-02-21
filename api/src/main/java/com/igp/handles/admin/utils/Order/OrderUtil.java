@@ -1,5 +1,6 @@
 package com.igp.handles.admin.utils.Order;
 
+import com.igp.admin.mappers.marketPlace.Constants;
 import com.igp.config.instance.Database;
 import com.igp.handles.admin.mappers.Dashboard.DashboardMapper;
 import com.igp.handles.admin.models.Vendor.VendorAssignModel;
@@ -283,7 +284,7 @@ public class OrderUtil {
             vendorAssignModel.setMailRemainderFlag(0);
             vendorAssignModel.setAssignThrough(3);
             vendorAssignModel.setAssignByUser("NewHandelsPanel");
-            vendorAssignModel.setShipppingType(dashboardMapper.getDeliveryType(orderProductExtraInfo.getDeliveryType()+""));
+            vendorAssignModel.setShipppingType(Constants.getDeliveryType(orderProductExtraInfo.getDeliveryType()+""));
             vendorAssignModel.setDeliveryDate(orderProductExtraInfo.getDeliveryDate().toString());
             vendorAssignModel.setDeliveryTime(orderProductExtraInfo.getDeliveryTime());
             vendorAssignModel.setFlagEggless(0); //
@@ -398,17 +399,24 @@ public class OrderUtil {
         return result;
     }
     public boolean updateVendorAssignPrice(int orderId,int productId,
-                                                            Double vendorPrice,Double shippingCharge){
+                                                            Double vendorPrice,Double shippingCharge,int orderProductId){
         boolean result=true;
         Connection connection = null;
         String statement,shippingChargeClause="",vendorPriceClause="";
         PreparedStatement preparedStatement = null;
+        Order order=null;
+        OrdersProducts ordersProducts=null;
+        String orderHistoryComment=null,comment1="",comment2="";
         try{
+            order=getOrderRelatedInfo(orderId,orderProductId);
+            ordersProducts=order.getOrderProducts().get(0);
             if(shippingCharge!=null){
                 shippingChargeClause+=" shipping = "+shippingCharge+" , ";
+                comment1=" shipping price = "+shippingCharge;
             }
             if(vendorPrice!=null){
                 vendorPriceClause+=" vendor_price = vendor_price + "+vendorPrice+" , ";
+                comment2=" , vendor Price = "+vendorPrice;
             }
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="update vendor_assign_price set "+vendorPriceClause+shippingChargeClause
@@ -423,6 +431,8 @@ public class OrderUtil {
                 logger.error("Failed to update vendor_price in vendor_assign_price ");
             } else {
                 result=true;
+                orderHistoryComment="Price changes happened for product "+ordersProducts.getProductName()+" to "+comment1+comment2;
+                insertIntoOrderHistory(order,Integer.parseInt(ordersProducts.getFkAssociateId()),orderHistoryComment);
             }
 
         }catch (Exception exception){
@@ -618,11 +628,15 @@ public class OrderUtil {
         Connection connection = null;
         String statement,deliveryDateClause="",deliveryTimeClause="",deliveryTypeClause="";
         PreparedStatement preparedStatement = null;
-        DashboardMapper dashboardMapper=new DashboardMapper();
         Integer status=null;
         Order order=null;
+        OrdersProducts ordersProducts=null;
+        OrderProductExtraInfo orderProductExtraInfo=null;
+        String orderHistoryComment=null;
         try{
             order=getOrderRelatedInfo(orderId,orderProductId);
+            ordersProducts=order.getOrderProducts().get(0);
+            orderProductExtraInfo=ordersProducts.getOrderProductExtraInfo();
             if(deliveryType==3){
                 deliveryTime="23:30 hrs - 23:59 hrs";
             }else if(deliveryType==1 || deliveryType == 4){
@@ -658,7 +672,7 @@ public class OrderUtil {
                     deliveryTimeClause=" delivery_time = '"+deliveryTime.split(" - ")[0]+"' , ";
                 }
                 if(deliveryType!=0){
-                    deliveryTypeClause=" shipping_type = '"+dashboardMapper.getDeliveryType(deliveryType+"")+"' , ";
+                    deliveryTypeClause=" shipping_type = '"+Constants.getDeliveryType(deliveryType+"")+"' , ";
                 }
 
 
@@ -689,6 +703,11 @@ public class OrderUtil {
                             logger.error("Failed to update trackorders while updateDeliveryDetails ");
                         } else{
                             result=true;
+                            orderHistoryComment="Delivery Detail changes for product "+ordersProducts.getProductName()+" from "
+                                +orderProductExtraInfo.getDeliveryDate()+" "+orderProductExtraInfo.getDeliveryTime()+" "
+                                +Constants.getDeliveryType(String.valueOf(orderProductExtraInfo.getDeliveryType()))+" to "
+                            +deliveryDateClause+"  "+deliveryTimeClause+"  "+deliveryTypeClause;
+                            insertIntoOrderHistory(order,Integer.parseInt(ordersProducts.getFkAssociateId()),orderHistoryComment);
                         }
                     }
                 }
