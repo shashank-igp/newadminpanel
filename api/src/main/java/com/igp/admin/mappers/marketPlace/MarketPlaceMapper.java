@@ -72,7 +72,8 @@ public class MarketPlaceMapper {
                         // row is empty.
                     }
                     else {
-                        data.put(row, a);}
+                        data.put(row, a);
+                    }
                     logger.debug("row : "+row);
                     logger.debug("values : "+data.get(row));
                 }
@@ -353,8 +354,9 @@ public class MarketPlaceMapper {
             try {
                 validationModel = validationModelList1.get(i);
                 i++;
-                logger.debug("row number : "+0);
-                logger.debug("row values : ",validationModel);
+                logger.debug("row number : "+ i);
+                logger.debug("row values : "+ validationModel.toString());
+
                 AddressModel addressModel = validationModel.getAddressModel();
                 extraInfoModel = validationModel.getExtraInfoModel();
                 productModel = validationModel.getProductModel();
