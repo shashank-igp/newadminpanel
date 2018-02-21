@@ -38,10 +38,18 @@ public class SlaCompliant {
         Date timeAssigned=null;
         Date assignTimeNoTimeStamp=null;
         Date deliveryDateFormat=null;
+        Date assign30Min=null;
+        Date assign45Min=null;
+        Calendar cal = Calendar.getInstance();
         try{
             if(assignTime!=null){
                 timeAssigned=formatter.parse(assignTime);
                 assignTimeNoTimeStamp=formatter1.parse(assignTime);
+                cal.setTime(timeAssigned);
+                cal.add(Calendar.MINUTE,30);
+                assign30Min = cal.getTime();
+                cal.add(Calendar.MINUTE,15);
+                assign45Min = cal.getTime();
             }
             Date currentDateNoTimeStamp=new Date();
             Date currentDateWithTimeStamp=new Date();
@@ -51,19 +59,8 @@ public class SlaCompliant {
             }
             currentDateNoTimeStamp=formatter1.parse(formatter1.format(currentDateNoTimeStamp));
             currentDateWithTimeStamp=formatter.parse(formatter.format(currentDateWithTimeStamp));
-            Calendar cal = Calendar.getInstance();
-            cal.setTime(timeAssigned);
-            int hourDatePurchase = cal.get(Calendar.HOUR_OF_DAY);
-            int minDatePurchase=cal.get(Calendar.MINUTE);
-            cal.add(Calendar.MINUTE,30);
-            Date assign30Min = cal.getTime();
-            cal.add(Calendar.MINUTE,15);
-            Date assign45Min = cal.getTime();
             Date today=new Date();
             cal.setTime(today);
-            int hourToday = cal.get(Calendar.HOUR_OF_DAY);
-            int minToday=cal.get(Calendar.MINUTE);
-            Date todayPlus=cal.getTime();
 
             if(status.equalsIgnoreCase("Processing") && flag == 1){
                 Date datePurchased = formatter.parse(purchasedTime);
