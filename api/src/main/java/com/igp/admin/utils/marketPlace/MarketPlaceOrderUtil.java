@@ -774,6 +774,8 @@ public class MarketPlaceOrderUtil {
                     fileUploadModel.setError(false);
                     fileUploadModel.setFile(newFile);
                     fileUploadModel.setUploadedFilePath(filePath);
+                    fileUploadModel.setFileName(splittedFileName[0]);
+                    fileUploadModel.setFileExtension(fileExtention);
                 }
             }
         }catch (Exception exception){
