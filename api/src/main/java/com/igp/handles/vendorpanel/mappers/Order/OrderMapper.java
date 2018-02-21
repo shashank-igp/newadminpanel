@@ -336,7 +336,7 @@ public class OrderMapper
 
                 slaCode = slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,flagForAdminPanel);
 
-                logger.debug("slacode  on layer "+slaCode+" with orderProductId "+ordersProducts.getOrderProductId());
+//                logger.debug("slacode  on layer "+slaCode+" with orderProductId "+ordersProducts.getOrderProductId());
 
                 ordersProducts.setSlaFlag(OrderUtil.isSLASatisfied(slaCode));
                 ordersProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(slaCode));
