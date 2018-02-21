@@ -29,7 +29,7 @@ public class SlaCompliant {
         purchasedTime=orderDetailsPerOrderProduct.getPurchasedTime();
         deliveryStatus=orderDetailsPerOrderProduct.getDeliveryStatus()==true ? 1 : 0;
 
-        logger.debug(" orderDetailsPerOrderProduct with "+orderDetailsPerOrderProduct.toString());
+//        logger.debug(" orderDetailsPerOrderProduct with "+orderDetailsPerOrderProduct.toString());
 
 
         int slaCode=-2;

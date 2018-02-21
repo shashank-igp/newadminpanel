@@ -286,7 +286,7 @@ public class DashboardMapper {
                     String key=orderId + "," + deliveryDate + "," + shippingType;
                     flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId);
 
-                    logger.debug("slacode  on layer "+slaCode+" with orderId "+orderDetailsPerOrderProduct.getOrdersId());
+//                    logger.debug("slacode  on layer "+slaCode+" with orderId "+orderDetailsPerOrderProduct.getOrdersId());
 
                     if (flagForUniqueness){
 
@@ -297,88 +297,53 @@ public class DashboardMapper {
                             if (deliveryDate.getTime() < todayDate.getTime()){
                                 int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("notAlloted").get("count"));
                                 count++;
-                                statusCountMap0.get("unAssigned").get("notAlloted").put("count", count + "");
+                                statusCountMap0.get("unAssigned").get("notAlloted").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
 
-                                    int noBreachCount=Integer.parseInt(statusCountMap4.get("unAssigned").get("notAlloted").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap4.get("unAssigned").get("notAlloted").put("count", noBreachCount + "");
-                                    statusCountMap4.get("unAssigned").get("notAlloted").put("sla", true + "");
-                                    statusCountMap0.get("unAssigned").get("notAlloted").put("sla",true+"");
+                                    statusCountMap0.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
-                                    int alertCount = Integer.parseInt(statusCountMap8.get("unAssigned").get("notAlloted").get("count"));
-                                    alertCount++;
-                                    statusCountMap8.get("unAssigned").get("notAlloted").put("count", alertCount + "");
-                                    statusCountMap8.get("unAssigned").get("notAlloted").put("sla", true + "");
-                                    statusCountMap0.get("unAssigned").get("notAlloted").put("sla",true+"");
+                                    statusCountMap0.get("unAssigned").get("notAlloted").put("alert",String.valueOf(true));
 
                                 }
                             }
                             else if (deliveryDate.getTime() == todayDate.getTime()){ // today
                                 int count=Integer.parseInt(statusCountMap1.get("unAssigned").get("notAlloted").get("count"));
                                 count++;
-                                statusCountMap1.get("unAssigned").get("notAlloted").put("count", count + "");
+                                statusCountMap1.get("unAssigned").get("notAlloted").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
 
-                                    int noBreachCount=Integer.parseInt(statusCountMap5.get("unAssigned").get("notAlloted").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap5.get("unAssigned").get("notAlloted").put("count", noBreachCount + "");
-                                    statusCountMap5.get("unAssigned").get("notAlloted").put("sla", true + "");
-                                    statusCountMap1.get("unAssigned").get("notAlloted").put("sla",true+"");
+                                    statusCountMap1.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-
-                                    int alertCount = Integer.parseInt(statusCountMap9.get("unAssigned").get("notAlloted").get("count"));
-                                    alertCount++;
-                                    statusCountMap9.get("unAssigned").get("notAlloted").put("count", alertCount + "");
-                                    statusCountMap9.get("unAssigned").get("notAlloted").put("sla", true + "");
-                                    statusCountMap1.get("unAssigned").get("notAlloted").put("sla",true+"");
-
+                                    
+                                    statusCountMap1.get("unAssigned").get("notAlloted").put("alert",String.valueOf(true));
                                 }
                             }
                             else if(deliveryDate.getTime() == tomorrowDate.getTime()){ // tommorow
                                 int count=Integer.parseInt(statusCountMap2.get("unAssigned").get("notAlloted").get("count"));
                                 count++;
-                                statusCountMap2.get("unAssigned").get("notAlloted").put("count", count + "");
+                                statusCountMap2.get("unAssigned").get("notAlloted").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                    int noBreachCount=Integer.parseInt(statusCountMap6.get("unAssigned").get("notAlloted").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap6.get("unAssigned").get("notAlloted").put("count", noBreachCount + "");
-                                    statusCountMap6.get("unAssigned").get("notAlloted").put("sla", true + "");
-                                    statusCountMap2.get("unAssigned").get("notAlloted").put("sla",true+"");
+                                    
+                                    statusCountMap2.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-
-                                    int alertCount = Integer.parseInt(statusCountMap10.get("unAssigned").get("notAlloted").get("count"));
-                                    alertCount++;
-                                    statusCountMap10.get("unAssigned").get("notAlloted").put("count", alertCount + "");
-                                    statusCountMap10.get("unAssigned").get("notAlloted").put("sla", true + "");
-                                    statusCountMap2.get("unAssigned").get("notAlloted").put("sla",true+"");
-
+                                    
+                                    statusCountMap2.get("unAssigned").get("notAlloted").put("alert",String.valueOf(true));
                                 }
                             }
                             else if (deliveryDate.getTime() >= futureDate.getTime()){ // future
                                 int count=Integer.parseInt(statusCountMap3.get("unAssigned").get("notAlloted").get("count"));
                                 count++;
-                                statusCountMap3.get("unAssigned").get("notAlloted").put("count", count + "");
+                                statusCountMap3.get("unAssigned").get("notAlloted").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                    int noBreachCount=Integer.parseInt(statusCountMap7.get("unAssigned").get("notAlloted").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap7.get("unAssigned").get("notAlloted").put("count", noBreachCount + "");
-                                    statusCountMap7.get("unAssigned").get("notAlloted").put("sla", true + "");
-                                    statusCountMap3.get("unAssigned").get("notAlloted").put("sla",true+"");
+                                    
+                                    statusCountMap3.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-
-                                    int alertCount = Integer.parseInt(statusCountMap11.get("unAssigned").get("notAlloted").get("count"));
-                                    alertCount++;
-                                    statusCountMap11.get("unAssigned").get("notAlloted").put("count", alertCount + "");
-                                    statusCountMap11.get("unAssigned").get("notAlloted").put("sla", true + "");
-                                    statusCountMap3.get("unAssigned").get("notAlloted").put("sla",true+"");
+                                    statusCountMap3.get("unAssigned").get("notAlloted").put("alert",String.valueOf(true));
 
                                 }
                             }
@@ -390,93 +355,53 @@ public class DashboardMapper {
                             if (deliveryDate.getTime() < todayDate.getTime()){
                                 int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("processing").get("count"));
                                 count++;
-                                statusCountMap0.get("unAssigned").get("processing").put("count", count + "");
+                                statusCountMap0.get("unAssigned").get("processing").put("count", String.valueOf(count));
 
                                 if (OrderUtil.isSLASatisfied(slaCode)){
 
-                                    int noBreachCount=Integer.parseInt(statusCountMap4.get("unAssigned").get("processing").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap4.get("unAssigned").get("processing").put("count", noBreachCount + "");
-                                    statusCountMap4.get("unAssigned").get("processing").put("sla", true + "");
-                                    statusCountMap0.get("unAssigned").get("processing").put("sla",true+"");
-
+                                    statusCountMap0.get("unAssigned").get("processing").put("sla",String.valueOf(true));
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-
-                                    int alertCount = Integer.parseInt(statusCountMap8.get("unAssigned").get("processing").get("count"));
-                                    alertCount++;
-                                    statusCountMap8.get("unAssigned").get("processing").put("count", alertCount + "");
-                                    statusCountMap8.get("unAssigned").get("processing").put("sla", true + "");
-                                    statusCountMap0.get("unAssigned").get("processing").put("sla",true+"");
+                                    
+                                    statusCountMap0.get("unAssigned").get("processing").put("alert",String.valueOf(true));
 
                                 }
                             }
                             else if (deliveryDate.getTime() == todayDate.getTime()){ // today
                                 int count=Integer.parseInt(statusCountMap1.get("unAssigned").get("processing").get("count"));
                                 count++;
-                                statusCountMap1.get("unAssigned").get("processing").put("count", count + "");
+                                statusCountMap1.get("unAssigned").get("processing").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                    int noBreachCount=Integer.parseInt(statusCountMap5.get("unAssigned").get("processing").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap5.get("unAssigned").get("processing").put("count", noBreachCount + "");
-                                    statusCountMap5.get("unAssigned").get("processing").put("sla", true + "");
-                                    statusCountMap1.get("unAssigned").get("processing").put("sla",true+"");
+                                    statusCountMap1.get("unAssigned").get("processing").put("sla",String.valueOf(true));
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-
-                                    int alertCount = Integer.parseInt(statusCountMap9.get("unAssigned").get("processing").get("count"));
-                                    alertCount++;
-                                    statusCountMap9.get("unAssigned").get("processing").put("count", alertCount + "");
-                                    statusCountMap9.get("unAssigned").get("processing").put("sla", true + "");
-                                    statusCountMap1.get("unAssigned").get("processing").put("sla",true+"");
+                                    
+                                    statusCountMap1.get("unAssigned").get("processing").put("alert",String.valueOf(true));
 
                                 }
                             }
                             else if(deliveryDate.getTime() == tomorrowDate.getTime()){ // tommorow
                                 int count=Integer.parseInt(statusCountMap2.get("unAssigned").get("processing").get("count"));
                                 count++;
-                                statusCountMap2.get("unAssigned").get("processing").put("count", count + "");
-
-
-
+                                statusCountMap2.get("unAssigned").get("processing").put("count", String.valueOf(count));
+                                
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                    int noBreachCount=Integer.parseInt(statusCountMap6.get("unAssigned").get("processing").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap6.get("unAssigned").get("processing").put("count", noBreachCount + "");
-                                    statusCountMap6.get("unAssigned").get("processing").put("sla", true + "");
-                                    statusCountMap2.get("unAssigned").get("processing").put("sla",true+"");
+                                    statusCountMap2.get("unAssigned").get("processing").put("sla",String.valueOf(true));
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-
-                                    int alertCount = Integer.parseInt(statusCountMap10.get("unAssigned").get("processing").get("count"));
-                                    alertCount++;
-                                    statusCountMap10.get("unAssigned").get("processing").put("count", alertCount + "");
-                                    statusCountMap10.get("unAssigned").get("processing").put("sla", true + "");
-                                    statusCountMap2.get("unAssigned").get("processing").put("sla",true+"");
+                                    statusCountMap2.get("unAssigned").get("processing").put("alert",String.valueOf(true));
 
                                 }
                             }
                             else if (deliveryDate.getTime() >= futureDate.getTime()){ // future
                                 int count=Integer.parseInt(statusCountMap3.get("unAssigned").get("processing").get("count"));
                                 count++;
-                                statusCountMap3.get("unAssigned").get("processing").put("count", count + "");
+                                statusCountMap3.get("unAssigned").get("processing").put("count", String.valueOf(count));
 
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                    int noBreachCount=Integer.parseInt(statusCountMap7.get("unAssigned").get("processing").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap7.get("unAssigned").get("processing").put("count", noBreachCount + "");
-                                    statusCountMap7.get("unAssigned").get("processing").put("sla", true + "");
-                                    statusCountMap3.get("unAssigned").get("processing").put("sla",true+"");
+                                    statusCountMap3.get("unAssigned").get("processing").put("sla",String.valueOf(true));
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-
-                                    int alertCount = Integer.parseInt(statusCountMap11.get("unAssigned").get("processing").get("count"));
-                                    alertCount++;
-                                    statusCountMap11.get("unAssigned").get("processing").put("count", alertCount + "");
-                                    statusCountMap11.get("unAssigned").get("processing").put("sla", true + "");
-                                    statusCountMap3.get("unAssigned").get("processing").put("sla",true+"");
+                                    statusCountMap3.get("unAssigned").get("processing").put("alert",String.valueOf(true));
 
                                 }
                             }
@@ -490,89 +415,67 @@ public class DashboardMapper {
                             if (deliveryDate.getTime() < todayDate.getTime()){
                                 int count=Integer.parseInt(statusCountMap0.get("notConfirmed").get("total").get("count"));
                                 count++;
-                                statusCountMap0.get("notConfirmed").get("total").put("count", count + "");
+                                statusCountMap0.get("notConfirmed").get("total").put("count", String.valueOf(count));
 
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                    int noBreachCount=Integer.parseInt(statusCountMap4.get("notConfirmed").get("total").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap4.get("notConfirmed").get("total").put("count", noBreachCount + "");
-                                    statusCountMap4.get("notConfirmed").get("total").put("sla", true + "");
-                                    statusCountMap0.get("notConfirmed").get("total").put("sla",true+"");
+                                    statusCountMap0.get("notConfirmed").get("total").put("sla",String.valueOf(true));
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
-                                    int alertCount = Integer.parseInt(statusCountMap8.get("notConfirmed").get("pending").get("count"));
+                                    int alertCount = Integer.parseInt(statusCountMap0.get("notConfirmed").get("pending").get("count"));
                                     alertCount++;
-                                    statusCountMap8.get("notConfirmed").get("pending").put("count", alertCount + "");
-                                    statusCountMap8.get("notConfirmed").get("pending").put("sla", true + "");
-                                    statusCountMap0.get("notConfirmed").get("pending").put("sla",true+"");
+                                    statusCountMap0.get("notConfirmed").get("pending").put("count", String.valueOf(alertCount));
+                                    statusCountMap0.get("notConfirmed").get("pending").put("alert",String.valueOf(true));
 
                                 }
                             }
                             else if (deliveryDate.getTime() == todayDate.getTime()){ // today
                                 int count=Integer.parseInt(statusCountMap1.get("notConfirmed").get("total").get("count"));
                                 count++;
-                                statusCountMap1.get("notConfirmed").get("total").put("count", count + "");
+                                statusCountMap1.get("notConfirmed").get("total").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                    int noBreachCount=Integer.parseInt(statusCountMap5.get("notConfirmed").get("total").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap5.get("notConfirmed").get("total").put("count", noBreachCount + "");
-                                    statusCountMap5.get("notConfirmed").get("total").put("sla", true + "");
-                                    statusCountMap1.get("notConfirmed").get("total").put("sla",true+"");
+                                    statusCountMap1.get("notConfirmed").get("total").put("sla",String.valueOf(true));
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
-                                    int alertCount = Integer.parseInt(statusCountMap9.get("notConfirmed").get("pending").get("count"));
+                                    int alertCount = Integer.parseInt(statusCountMap1.get("notConfirmed").get("pending").get("count"));
                                     alertCount++;
-                                    statusCountMap9.get("notConfirmed").get("pending").put("count", alertCount + "");
-                                    statusCountMap9.get("notConfirmed").get("pending").put("sla", true + "");
-                                    statusCountMap1.get("notConfirmed").get("pending").put("sla",true+"");
+                                    statusCountMap1.get("notConfirmed").get("pending").put("count", String.valueOf(alertCount));
+                                    statusCountMap1.get("notConfirmed").get("pending").put("alert",String.valueOf(true));
 
                                 }
                             }
                             else if(deliveryDate.getTime() == tomorrowDate.getTime()){ // tommorow
                                 int count=Integer.parseInt(statusCountMap2.get("notConfirmed").get("total").get("count"));
                                 count++;
-                                statusCountMap2.get("notConfirmed").get("total").put("count", count + "");
+                                statusCountMap2.get("notConfirmed").get("total").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                    int noBreachCount=Integer.parseInt(statusCountMap6.get("notConfirmed").get("total").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap6.get("notConfirmed").get("total").put("count", noBreachCount + "");
-                                    statusCountMap6.get("notConfirmed").get("total").put("sla", true + "");
-                                    statusCountMap2.get("notConfirmed").get("total").put("sla",true+"");
+                                    
+                                    statusCountMap2.get("notConfirmed").get("total").put("sla",String.valueOf(true));
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
-                                    int alertCount = Integer.parseInt(statusCountMap10.get("notConfirmed").get("pending").get("count"));
+                                    int alertCount = Integer.parseInt(statusCountMap2.get("notConfirmed").get("pending").get("count"));
                                     alertCount++;
-                                    statusCountMap10.get("notConfirmed").get("pending").put("count", alertCount + "");
-                                    statusCountMap10.get("notConfirmed").get("pending").put("sla", true + "");
-                                    statusCountMap2.get("notConfirmed").get("pending").put("sla",true+"");
+                                    statusCountMap2.get("notConfirmed").get("pending").put("count", String.valueOf(alertCount));
+                                    statusCountMap2.get("notConfirmed").get("pending").put("alert",String.valueOf(true));
 
                                 }
                             }
                             else if (deliveryDate.getTime() >= futureDate.getTime()){ // future
                                 int count=Integer.parseInt(statusCountMap3.get("notConfirmed").get("total").get("count"));
                                 count++;
-                                statusCountMap3.get("notConfirmed").get("total").put("count", count + "");
+                                statusCountMap3.get("notConfirmed").get("total").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                    int noBreachCount=Integer.parseInt(statusCountMap7.get("notConfirmed").get("total").get("count"));
-                                    noBreachCount++;
-                                    statusCountMap7.get("notConfirmed").get("total").put("count", noBreachCount + "");
-                                    statusCountMap7.get("notConfirmed").get("total").put("sla", true + "");
-                                    statusCountMap3.get("notConfirmed").get("total").put("sla",true+"");
+                                    
+                                    statusCountMap3.get("notConfirmed").get("total").put("sla",String.valueOf(true));
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
-                                    int alertCount = Integer.parseInt(statusCountMap11.get("notConfirmed").get("pending").get("count"));
+                                    int alertCount = Integer.parseInt(statusCountMap3.get("notConfirmed").get("pending").get("count"));
                                     alertCount++;
-                                    statusCountMap11.get("notConfirmed").get("pending").put("count", alertCount + "");
-                                    statusCountMap11.get("notConfirmed").get("pending").put("sla", true + "");
-                                    statusCountMap3.get("notConfirmed").get("pending").put("sla",true+"");
+                                    statusCountMap3.get("notConfirmed").get("pending").put("count", String.valueOf(alertCount));
+                                    statusCountMap3.get("notConfirmed").get("pending").put("alert",String.valueOf(true));
 
                                 }
                             }
@@ -588,13 +491,13 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(notShippedTotalOrderCount.get("count"));
                                 count++;
                                 notShippedTotalOrderCount.put("count",count+"");
-                                notShippedTotalOrderCount.put("sla",true+"");
+                                notShippedTotalOrderCount.put("sla",String.valueOf(true));
                                 if(OrderUtil.isHighAlertActionRequired(slaCode)){
                                     orderTotalWhole++;
                                     int alertCount=Integer.parseInt(notShippedPendingOrderCount.get("count"));
                                     alertCount++;
                                     notShippedPendingOrderCount.put("count",alertCount+"");
-                                    notShippedPendingOrderCount.put("alert", true + "");
+                                    notShippedPendingOrderCount.put("alert", String.valueOf(true));
                                 }
                             }
 
@@ -608,13 +511,13 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(notDeliveredTotalOrderCount.get("count"));
                                 count++;
                                 notDeliveredTotalOrderCount.put("count",count+"");
-                                notDeliveredTotalOrderCount.put("sla",true+"");
+                                notDeliveredTotalOrderCount.put("sla",String.valueOf(true));
                                 if(OrderUtil.isHighAlertActionRequired(slaCode)){
                                     orderTotalWhole++;
                                     int alertCount=Integer.parseInt(notDeliveredPendingOrderCount.get("count"));
                                     alertCount++;
                                     notDeliveredPendingOrderCount.put("count",alertCount+"");
-                                    notDeliveredPendingOrderCount.put("alert", true + "");
+                                    notDeliveredPendingOrderCount.put("alert", String.valueOf(true));
                                 }
                             }
 
@@ -726,46 +629,27 @@ public class DashboardMapper {
                         if(status.equals("Processed") && vendorId==72){ // unassigned -> not alloted
                             int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("notAlloted").get("count"));
                             count++;
-                            statusCountMap0.get("unAssigned").get("notAlloted").put("count", count + "");
+                            statusCountMap0.get("unAssigned").get("notAlloted").put("count", String.valueOf(count));
 
                             if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                int noBreachCount=Integer.parseInt(statusCountMap4.get("unAssigned").get("notAlloted").get("count"));
-                                noBreachCount++;
-                                statusCountMap4.get("unAssigned").get("notAlloted").put("count", noBreachCount + "");
-                                statusCountMap4.get("unAssigned").get("notAlloted").put("sla", true + "");
-                                statusCountMap0.get("unAssigned").get("notAlloted").put("sla",true+"");
+                                statusCountMap0.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
 
                             }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-
-                                int alertCount = Integer.parseInt(statusCountMap8.get("unAssigned").get("notAlloted").get("count"));
-                                alertCount++;
-                                statusCountMap8.get("unAssigned").get("notAlloted").put("count", alertCount + "");
-                                statusCountMap8.get("unAssigned").get("notAlloted").put("sla", true + "");
-                                statusCountMap0.get("unAssigned").get("notAlloted").put("sla",true+"");
+                                
+                                statusCountMap0.get("unAssigned").get("notAlloted").put("alert",String.valueOf(true));
 
                             }
                         }
                         else if(status.equals("Processing") && vendorId==72){ // unassigned -> Processing
                             int count=Integer.parseInt(statusCountMap0.get("unAssigned").get("processing").get("count"));
                             count++;
-                            statusCountMap0.get("unAssigned").get("processing").put("count", count + "");
+                            statusCountMap0.get("unAssigned").get("processing").put("count", String.valueOf(count));
 
                             if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                int noBreachCount=Integer.parseInt(statusCountMap4.get("unAssigned").get("processing").get("count"));
-                                noBreachCount++;
-                                statusCountMap4.get("unAssigned").get("processing").put("count", noBreachCount + "");
-                                statusCountMap4.get("unAssigned").get("processing").put("sla", true + "");
-                                statusCountMap0.get("unAssigned").get("processing").put("sla",true+"");
+                                statusCountMap0.get("unAssigned").get("processing").put("sla",String.valueOf(true));
 
                             }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-
-                                int alertCount = Integer.parseInt(statusCountMap8.get("unAssigned").get("notAlloted").get("count"));
-                                alertCount++;
-                                statusCountMap8.get("unAssigned").get("processing").put("count", alertCount + "");
-                                statusCountMap8.get("unAssigned").get("processing").put("sla", true + "");
-                                statusCountMap0.get("unAssigned").get("processing").put("sla",true+"");
+                                statusCountMap0.get("unAssigned").get("processing").put("alert",String.valueOf(true));
 
                             }
                         }
@@ -775,23 +659,17 @@ public class DashboardMapper {
 
                             int count=Integer.parseInt(statusCountMap0.get("notConfirmed").get("total").get("count"));
                             count++;
-                            statusCountMap0.get("notConfirmed").get("total").put("count", count + "");
+                            statusCountMap0.get("notConfirmed").get("total").put("count", String.valueOf(count));
 
                             if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                int noBreachCount=Integer.parseInt(statusCountMap4.get("notConfirmed").get("total").get("count"));
-                                noBreachCount++;
-                                statusCountMap4.get("notConfirmed").get("total").put("count", noBreachCount + "");
-                                statusCountMap4.get("notConfirmed").get("total").put("sla", true + "");
-                                statusCountMap0.get("notConfirmed").get("total").put("sla",true+"");
+                                statusCountMap0.get("notConfirmed").get("total").put("sla",String.valueOf(true));
 
                             }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
-                                int alertCount = Integer.parseInt(statusCountMap8.get("notConfirmed").get("pending").get("count"));
+                                int alertCount = Integer.parseInt(statusCountMap0.get("notConfirmed").get("pending").get("count"));
                                 alertCount++;
-                                statusCountMap8.get("notConfirmed").get("pending").put("count", alertCount + "");
-                                statusCountMap8.get("notConfirmed").get("pending").put("sla", true + "");
-                                statusCountMap0.get("notConfirmed").get("pending").put("sla",true+"");
+                                statusCountMap0.get("notConfirmed").get("pending").put("count", String.valueOf(alertCount));
+                                statusCountMap0.get("notConfirmed").get("pending").put("alert",String.valueOf(true));
 
                             }
 
