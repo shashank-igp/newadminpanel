@@ -668,8 +668,12 @@ public class OrderUtil {
                 logger.error("Failed to update order_product_extra_info while updateDeliveryDetails ");
             } else {
 
-                if(deliveryTime != null && deliveryType == 2){
-                    deliveryTimeClause=" delivery_time = '"+deliveryTime.split(" - ")[0]+"' , ";
+                if(deliveryTime != null ){
+                    if(deliveryType == 2){
+                        deliveryTimeClause=" delivery_time = '"+deliveryTime.split(" - ")[0]+"' , ";
+                    }else {
+                        deliveryTimeClause=" delivery_time = '' ,";
+                    }
                 }
                 if(deliveryType!=0){
                     deliveryTypeClause=" shipping_type = '"+Constants.getDeliveryType(deliveryType+"")+"' , ";
