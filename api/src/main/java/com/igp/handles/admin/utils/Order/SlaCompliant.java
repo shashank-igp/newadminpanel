@@ -29,6 +29,8 @@ public class SlaCompliant {
         purchasedTime=orderDetailsPerOrderProduct.getPurchasedTime();
         deliveryStatus=orderDetailsPerOrderProduct.getDeliveryStatus()==true ? 1 : 0;
 
+        logger.debug(" orderDetailsPerOrderProduct with "+orderDetailsPerOrderProduct.toString());
+
 
         int slaCode=-2;
         int slaCodeAdmin = -2;
@@ -58,8 +60,7 @@ public class SlaCompliant {
             Date todayPlus=cal.getTime();
 
             if(status.equalsIgnoreCase("Processing") && flag == 1){
-                SimpleDateFormat formatter2=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                Date datePurchased = formatter2.parse(purchasedTime);
+                Date datePurchased = formatter.parse(purchasedTime);
                 cal.setTime(datePurchased);
                 cal.add(Calendar.MINUTE,15);
                 datePurchased=cal.getTime();
