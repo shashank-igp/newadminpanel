@@ -1,5 +1,6 @@
 package com.igp.handles.admin.mappers.Dashboard;
 
+import com.igp.admin.mappers.marketPlace.Constants;
 import com.igp.handles.admin.models.Dashboard.DashboardDetail;
 import com.igp.handles.admin.utils.Dashboard.DashboardUtil;
 import com.igp.handles.admin.utils.Order.SlaCompliant;
@@ -277,7 +278,7 @@ public class DashboardMapper {
 
                     String status = orderDetailsPerOrderProduct.getOrderProductStatus();
                     String deliveryTime = orderDetailsPerOrderProduct.getDeliveryTime();
-                    String shippingType = getDeliveryType(orderDetailsPerOrderProduct.getShippingType());
+                    String shippingType = Constants.getDeliveryType(orderDetailsPerOrderProduct.getShippingType());
                     int vendorId=orderDetailsPerOrderProduct.getVendorId();
                     boolean deliverystatus = (boolean) orderDetailsPerOrderProduct.getDeliveryStatus();
                     boolean flagForUniqueness=false;
@@ -710,7 +711,7 @@ public class DashboardMapper {
 
                     String status = orderDetailsPerOrderProduct.getOrderProductStatus();
                     String deliveryTime = orderDetailsPerOrderProduct.getDeliveryTime();
-                    String shippingType = getDeliveryType(orderDetailsPerOrderProduct.getShippingType());
+                    String shippingType = Constants.getDeliveryType(orderDetailsPerOrderProduct.getShippingType());
                     int vendorId=orderDetailsPerOrderProduct.getVendorId();
                     boolean deliverystatus = (boolean) orderDetailsPerOrderProduct.getDeliveryStatus();
                     boolean flagForUniqueness=false;
@@ -806,18 +807,5 @@ public class DashboardMapper {
             logger.error("Error in preparing order for specific date in handel panel dashboard",exception);
         }
 
-    }
-
-    public String getDeliveryType(String deliveryTypeIntValue){
-        String deliveryType="";
-        Map<String,String> deliveryTypeMap=new HashMap<>();
-        deliveryTypeMap.put("1","Any time");
-        deliveryTypeMap.put("2","Fix Time");
-        deliveryTypeMap.put("3","Midnight");
-        deliveryTypeMap.put("4","Same Day");
-
-        deliveryType=deliveryTypeMap.get(deliveryTypeIntValue);
-
-        return deliveryType;
     }
 }

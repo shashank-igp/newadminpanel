@@ -144,13 +144,11 @@ public class OrderMapper {
                     - Double.valueOf(orderComponent.getQuantity())*componentPrice ) ;
             }
 
-            result=orderUtil.updateVendorAssignPrice(orderId,productId,vendorPrice,shippingCharge);
+            result=orderUtil.updateVendorAssignPrice(orderId,productId,vendorPrice,shippingCharge,orderProductId);
 
         }catch (Exception exception){
             logger.error("error while orderComponentPriceChange",exception);
         }
-
-
         return result;
     }
     public boolean deliveryDetailChanges(int orderId,int orderProductId,String deliveryDate,String deliveryTime,int deliveryType,
