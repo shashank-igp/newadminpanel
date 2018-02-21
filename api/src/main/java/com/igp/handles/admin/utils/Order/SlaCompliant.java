@@ -41,6 +41,7 @@ public class SlaCompliant {
         Date assign30Min=null;
         Date assign45Min=null;
         Calendar cal = Calendar.getInstance();
+        Calendar calForDatePurchased = Calendar.getInstance();
         try{
             if(assignTime!=null){
                 timeAssigned=formatter.parse(assignTime);
@@ -61,13 +62,14 @@ public class SlaCompliant {
             currentDateWithTimeStamp=formatter.parse(formatter.format(currentDateWithTimeStamp));
             Date today=new Date();
             cal.setTime(today);
+            Date datePurchased15 = formatter.parse(purchasedTime);
+            calForDatePurchased.setTime(datePurchased15);
+            calForDatePurchased.add(Calendar.MINUTE,15);
+            datePurchased15=calForDatePurchased.getTime();
 
             if(status.equalsIgnoreCase("Processing") && flag == 1){
-                Date datePurchased = formatter.parse(purchasedTime);
-                cal.setTime(datePurchased);
-                cal.add(Calendar.MINUTE,15);
-                datePurchased=cal.getTime();
-                if (currentDateWithTimeStamp.compareTo(datePurchased) <= 0){
+
+                if (currentDateWithTimeStamp.compareTo(datePurchased15) <= 0){
                     slaCodeAdmin = 6;
                 }
                 else {
@@ -76,74 +78,84 @@ public class SlaCompliant {
                 }
             }
             else if(status.equalsIgnoreCase("Processed")){
-                Calendar cal3 = Calendar.getInstance();
-                cal3.setTime(currentDateNoTimeStamp);
-                cal3.add(Calendar.DATE,-1);
-                cal3.add(Calendar.HOUR_OF_DAY,20);
-                Date yesterdayDateTimeStampwith20Pm=cal3.getTime();
-                cal3.setTime(currentDateNoTimeStamp);
-                cal3.add(Calendar.HOUR_OF_DAY,8);
-                cal3.add(Calendar.MINUTE,15);
-                Date todayDate0815Am=cal3.getTime();
-                cal3.setTime(currentDateNoTimeStamp);
-                cal3.add(Calendar.HOUR_OF_DAY,20);
-                Date todayDate08Pm=cal3.getTime();
-                cal3.setTime(currentDateWithTimeStamp);
-                if (timeAssigned.compareTo(yesterdayDateTimeStampwith20Pm) < 0) {
-                    slaCode = 101;
-                    slaCodeAdmin = 101;
-                } else if (timeAssigned.compareTo(yesterdayDateTimeStampwith20Pm) >= 0 && timeAssigned.compareTo(todayDate08Pm) < 0) {
-
-                    if(flag == 0) {
-                        if (cal3.get(Calendar.HOUR_OF_DAY) <= 9) {
-                            if (cal3.get(Calendar.HOUR_OF_DAY) == 9 && cal3.get(Calendar.MINUTE) > 0) {
-                                slaCode = 102;
-                            } else {
-                                slaCode = 2;
-                            }
-                        } else if (cal3.get(Calendar.HOUR_OF_DAY) > 9) {
-                            slaCode = 102;
-                        }
+                if(orderDetailsPerOrderProduct.getVendorId()==72){
+                    if (currentDateWithTimeStamp.compareTo(datePurchased15) <= 0){
+                        slaCodeAdmin = 1;
                     }
                     else {
-                        if (cal3.get(Calendar.HOUR_OF_DAY) <= 8 && cal3.get(Calendar.MINUTE) < 45) {
-                            slaCodeAdmin = 2;
+                        slaCodeAdmin = 101;
+                        // the order is not yet alloted.
+                    }
+                }else if (orderDetailsPerOrderProduct.getVendorId()!=72 && assignTime!=null) {
+                    Calendar cal3 = Calendar.getInstance();
+                    cal3.setTime(currentDateNoTimeStamp);
+                    cal3.add(Calendar.DATE,-1);
+                    cal3.add(Calendar.HOUR_OF_DAY,20);
+                    Date yesterdayDateTimeStampwith20Pm=cal3.getTime();
+                    cal3.setTime(currentDateNoTimeStamp);
+                    cal3.add(Calendar.HOUR_OF_DAY,8);
+                    cal3.add(Calendar.MINUTE,15);
+                    Date todayDate0815Am=cal3.getTime();
+                    cal3.setTime(currentDateNoTimeStamp);
+                    cal3.add(Calendar.HOUR_OF_DAY,20);
+                    Date todayDate08Pm=cal3.getTime();
+                    cal3.setTime(currentDateWithTimeStamp);
+                    if (timeAssigned.compareTo(yesterdayDateTimeStampwith20Pm) < 0) {
+                        slaCode = 101;
+                        slaCodeAdmin = 101;
+                    } else if (timeAssigned.compareTo(yesterdayDateTimeStampwith20Pm) >= 0 && timeAssigned.compareTo(todayDate08Pm) < 0) {
 
-                        } else if (cal3.get(Calendar.HOUR_OF_DAY) >= 8 && cal3.get(Calendar.MINUTE) >= 45) {
-                            slaCodeAdmin = 102;
+                        if(flag == 0) {
+                            if (cal3.get(Calendar.HOUR_OF_DAY) <= 9) {
+                                if (cal3.get(Calendar.HOUR_OF_DAY) == 9 && cal3.get(Calendar.MINUTE) > 0) {
+                                    slaCode = 102;
+                                } else {
+                                    slaCode = 2;
+                                }
+                            } else if (cal3.get(Calendar.HOUR_OF_DAY) > 9) {
+                                slaCode = 102;
+                            }
+                        }
+                        else {
+                            if (cal3.get(Calendar.HOUR_OF_DAY) <= 8 && cal3.get(Calendar.MINUTE) < 45) {
+                                slaCodeAdmin = 2;
+
+                            } else if (cal3.get(Calendar.HOUR_OF_DAY) >= 8 && cal3.get(Calendar.MINUTE) >= 45) {
+                                slaCodeAdmin = 102;
+                            }
                         }
                     }
-                }
-                else if (timeAssigned.compareTo(todayDate0815Am) >= 0 && timeAssigned.compareTo(todayDate08Pm) < 0) {
-                    if(flag == 0) {{
-                        if (assign45Min.compareTo(cal3.getTime()) <= 0) {
-                            slaCode = 101;
-                        } else if (assign45Min.compareTo(cal3.getTime()) > 0) {
-                            slaCode = 1;
+                    else if (timeAssigned.compareTo(todayDate0815Am) >= 0 && timeAssigned.compareTo(todayDate08Pm) < 0) {
+                        if(flag == 0) {{
+                            if (assign45Min.compareTo(cal3.getTime()) <= 0) {
+                                slaCode = 101;
+                            } else if (assign45Min.compareTo(cal3.getTime()) > 0) {
+                                slaCode = 1;
+                            }
                         }
+                            if (assign45Min.compareTo(cal3.getTime()) <= 0) {
+                                slaCode = 101;
+                            } else if (assign45Min.compareTo(cal3.getTime()) > 0) {
+                                slaCode = 1;
+                            }
+                        }else {
+                            if (assign30Min.compareTo(cal3.getTime()) <= 0) {
+                                slaCodeAdmin = 101;
+                            } else if (assign30Min.compareTo(cal3.getTime()) > 0) {
+                                slaCodeAdmin = 1;
+                            }
+                        }
+                    } else if (timeAssigned.compareTo(todayDate08Pm) >= 0) {
+                        slaCode = 1;
+                        slaCodeAdmin = 1;
+                    } else {
+                        slaCode = 100;
+                        slaCodeAdmin = 100;
                     }
-                        if (assign45Min.compareTo(cal3.getTime()) <= 0) {
-                            slaCode = 101;
-                        } else if (assign45Min.compareTo(cal3.getTime()) > 0) {
-                            slaCode = 1;
-                        }
-                    }else {
-                        if (assign30Min.compareTo(cal3.getTime()) <= 0) {
-                            slaCodeAdmin = 101;
-                        } else if (assign30Min.compareTo(cal3.getTime()) > 0) {
-                            slaCodeAdmin = 1;
-                        }
+                    if(timeAssigned.compareTo(today)>0){
+                        slaCode=1;
+                        slaCodeAdmin = 1;
                     }
-                } else if (timeAssigned.compareTo(todayDate08Pm) >= 0) {
-                    slaCode = 1;
-                    slaCodeAdmin = 1;
-                } else {
-                    slaCode = 100;
-                    slaCodeAdmin = 100;
-                }
-                if(timeAssigned.compareTo(today)>0){
-                    slaCode=1;
-                    slaCodeAdmin = 1;
                 }
             } else if(status.equalsIgnoreCase("Confirmed")){
                 if(shippingType.equalsIgnoreCase("4")){ // Fixed Date
