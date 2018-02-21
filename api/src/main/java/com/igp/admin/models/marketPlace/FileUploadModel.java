@@ -12,7 +12,8 @@ public class FileUploadModel {
     private String uploadedFilePath;
 
     private File file;
-
+    private String fileName;
+    private String fileExtension;
     private Boolean error;
 
     public String getUploadedFilePath() {
@@ -29,6 +30,22 @@ public class FileUploadModel {
 
     public void setFile(File file) {
         this.file = file;
+    }
+
+    public String getFileName() {
+        return fileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    public String getFileExtension() {
+        return fileExtension;
+    }
+
+    public void setFileExtension(String fileExtension) {
+        this.fileExtension = fileExtension;
     }
 
     public Boolean getError() {

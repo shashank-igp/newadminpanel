@@ -2,9 +2,12 @@ package com.igp.admin.mappers.marketPlace;
 
 import com.igp.admin.models.marketPlace.*;
 import com.igp.admin.utils.marketPlace.MarketPlaceOrderUtil;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +31,14 @@ public class MarketPlaceMapper {
 
         try {
             FileUploadModel fileUploadModel = marketPlaceOrderUtil.uploadTheFile(multiPart, filePrefix);
-            // create new file and parse it
+            boolean chkExtension = fileUploadModel.getFileExtension().equalsIgnoreCase("xls") || fileUploadModel.getFileExtension().equalsIgnoreCase("xlsx");
+                //check that file is in excel format.
+            if (fileUploadModel.getError() == false && chkExtension) {
+                // create new file and parse it
 
-            if (fileUploadModel.getError() == false) {
                 File file = fileUploadModel.getFile();
-                POIFSFileSystem excelFile = new POIFSFileSystem(file);
-                Workbook workbook = new HSSFWorkbook(excelFile);
+
+                Workbook workbook = WorkbookFactory.create(file);
                 Sheet datatypeSheet = workbook.getSheetAt(0);
                 Iterator<Row> rowIterator = datatypeSheet.iterator();
                 int row = 0;
@@ -51,7 +56,7 @@ public class MarketPlaceMapper {
                 while (rowIterator.hasNext()) {
                     Map<String, String> a = new HashMap<>();
                     row++;
-                // check if we get second row since first has column headers
+                    // check if we get second row since first has column headers
                     Row currentRow = rowIterator.next();
                     int count = 0;
                     for (int currCol = 0; currCol < NUM_COLUMNS; currCol++) {
@@ -68,23 +73,18 @@ public class MarketPlaceMapper {
                             count++;
                         }
                     }
-                    if(count>=15){
+                    if (count >= 15) {
                         // row is empty.
-                    }
-                    else {
+                    } else {
                         data.put(row, a);
                     }
-                    logger.debug("row : "+row);
-                    logger.debug("values : "+data.get(row));
+                    logger.debug("row : " + row);
+                    logger.debug("values : " + data.get(row));
                 }
             }
-        } catch(FileNotFoundException e){
+        } catch(Exception e){
             logger.error("Exception at populating Map from file : ", e);
             e.printStackTrace();
-
-        } catch(IOException e){
-            e.printStackTrace();
-            logger.error("Exception at populating Map from file : ", e);
 
         }
         logger.debug("size : "+data.size());
