@@ -35,14 +35,20 @@ public class SlaCompliant {
         int slaCode=-2;
         int slaCodeAdmin = -2;
         SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-
+        Date timeAssigned=null;
+        Date assignTimeNoTimeStamp=null;
+        Date deliveryDateFormat=null;
         try{
-            Date timeAssigned=formatter.parse(assignTime);
+            if(assignTime!=null){
+                timeAssigned=formatter.parse(assignTime);
+                assignTimeNoTimeStamp=formatter1.parse(assignTime);
+            }
             Date currentDateNoTimeStamp=new Date();
             Date currentDateWithTimeStamp=new Date();
 
-            Date assignTimeNoTimeStamp=formatter1.parse(assignTime);
-            Date deliveryDateFormat=formatter1.parse(deliveryDate);
+            if(deliveryDate!=null){
+                deliveryDateFormat=formatter1.parse(deliveryDate);
+            }
             currentDateNoTimeStamp=formatter1.parse(formatter1.format(currentDateNoTimeStamp));
             currentDateWithTimeStamp=formatter.parse(formatter.format(currentDateWithTimeStamp));
             Calendar cal = Calendar.getInstance();
@@ -393,7 +399,7 @@ public class SlaCompliant {
                 return slaCodeAdmin;
             }
         }catch (Exception exception){
-
+            logger.error("Exception happednd while calculating sla code ",exception);
         }
         // just fall back i.e to just remove compile time error so no use
         return slaCode;
