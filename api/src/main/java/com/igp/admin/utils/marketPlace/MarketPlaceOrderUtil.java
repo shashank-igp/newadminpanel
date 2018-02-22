@@ -30,6 +30,34 @@ import java.util.*;
 public class MarketPlaceOrderUtil {
     private static final Logger logger = LoggerFactory.getLogger(MarketPlaceOrderUtil.class);
 
+    public boolean checkIfAffliate(int fkAssociateId) {
+        Map<String, String> data = new HashMap<>();
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        boolean result = false;
+        try {
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            String statement = "SELECT aa.associate_type_id FROM associate_type aa JOIN associate a on  a.fk_associate_type_id=aa.associate_type_id WHERE a.associate_id = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1, fkAssociateId);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.first()) {
+               int type = resultSet.getInt("aa.associate_type_id");
+               if(type==1){
+                   result=true;
+               }
+            }
+        } catch (Exception exception) {
+            logger.error("Error at finding associate type :", exception);
+        } finally {
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
+    }
+
     public ValidationModel validateCustomerDetails(ValidationModel validationModel) {
 
         UserModel userModel = validationModel.getUserModel();

@@ -24,6 +24,47 @@ import java.util.*;
 public class MarketPlaceMapper {
     private static final Logger logger = LoggerFactory.getLogger(MarketPlaceMapper.class);
 
+    public int findVendor(String value){
+        int fkAssociateId = 0;
+        MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
+        Map<String,Integer> marketPlaceVendorMap = new HashMap<String,Integer>() {
+
+            {
+                //Map(value,fkAssociateId)  user
+
+                put("RL",433);     //Rewardz
+                put("Rediff",457);      //Rediff
+                put("TL",434);          //Talash
+                put("SC",510);          //ShopClues
+                put("SD",437);          //SnapDeal
+                put("AD",580);          //Amazon
+                put("GLA",504);         //Gift A Love
+                put("AWS",511);         //Awesomeji
+                put("KAV",541);         //Kavya(Aus)
+                put("UKG",546);         //UKGiftsPortal
+                put("oyo",547);         //Oyo
+                put("corp",556);        //Corporate orders
+                put("artisanG",561);      //Artisan Gilt
+                put("Inductus",562);    //Inductus
+                put("FNP",741);         //Fnp International
+                put("JnJ",769);           //Johnsons and Johnsons
+                put("INFUK",841);       //Interflora International
+
+            }
+
+        };
+
+        fkAssociateId = marketPlaceVendorMap.get(value)==null?0:marketPlaceVendorMap.get(value);
+        if(fkAssociateId!=0){
+            boolean affiliate =  marketPlaceOrderUtil.checkIfAffliate(fkAssociateId);
+            if(affiliate==false){
+                // not an affliate vendor
+                fkAssociateId=0;
+            }
+        }
+        return fkAssociateId;
+    }
+
     public  Map<Integer, Map<String, String>> parseExcelForMarketPlace(FormDataMultiPart multiPart, String filePrefix) {
         Map<Integer, Map<String, String>> data= new HashMap<>();
         int NUM_COLUMNS = 20;
@@ -32,7 +73,7 @@ public class MarketPlaceMapper {
         try {
             FileUploadModel fileUploadModel = marketPlaceOrderUtil.uploadTheFile(multiPart, filePrefix);
             boolean chkExtension = fileUploadModel.getFileExtension().equalsIgnoreCase("xls") || fileUploadModel.getFileExtension().equalsIgnoreCase("xlsx");
-                //check that file is in excel format.
+            //check that file is in excel format.
             if (fileUploadModel.getError() == false && chkExtension) {
                 // create new file and parse it
 
@@ -93,7 +134,7 @@ public class MarketPlaceMapper {
 
     }
 
-    public List<ValidationModel> refineDataAndPopulateModels( Map<Integer, Map<String, String>> data,String user, Integer fk_associate_id) {
+    public List<ValidationModel> refineDataAndPopulateModels( Map<Integer, Map<String, String>> data,String userValue, Integer fk_associate_id) {
         List<ValidationModel> validationModelList = new ArrayList<>();
         MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
         Map<Integer, String> serviceType = new HashMap<Integer, String>() {
@@ -151,7 +192,8 @@ public class MarketPlaceMapper {
 
                     // take out all the values and fill the models.
                     // i.e. customer,address,product,extra_info
-                    if (user.equals("loyalty") || user.equals("iipsroot")) {
+                    if (fk_associate_id == 433) {
+                        // loyaty rewardz (RL)
 
                         String name = column.get("MemberName").trim();
                         String fname = "";
