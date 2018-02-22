@@ -176,8 +176,12 @@ public class SlaCompliant {
                                 slaCode=201;
                             }
                         }else {
-                            if(cal2.get(Calendar.HOUR_OF_DAY)<=13 && cal2.get(Calendar.MINUTE)<=45){
-                                slaCodeAdmin = 21;
+                            if(cal2.get(Calendar.HOUR_OF_DAY)<=13 ){
+                                if(cal2.get(Calendar.HOUR_OF_DAY)==13 && cal2.get(Calendar.MINUTE) > 45){
+                                    slaCodeAdmin =  201;
+                                }else {
+                                    slaCodeAdmin = 21;
+                                }
                             }else {
                                 slaCodeAdmin =  201;
                             }
@@ -196,7 +200,11 @@ public class SlaCompliant {
                             }
                         }else {
                             if(cal2.get(Calendar.HOUR_OF_DAY)<=18 && cal2.get(Calendar.MINUTE)<=45){
-                                slaCodeAdmin = 22;
+                                if(cal2.get(Calendar.HOUR_OF_DAY)==18 && cal2.get(Calendar.MINUTE)>45){
+                                    slaCodeAdmin =  202;
+                                }else {
+                                    slaCodeAdmin = 22;
+                                }
                             }else {
                                 slaCodeAdmin =  202;
                             }
@@ -294,30 +302,46 @@ public class SlaCompliant {
                     cal3.setTime(currentDateWithTimeStamp);
                     if( deliveryDateFormat.compareTo(currentDateNoTimeStamp)==0 && timeAssigned.compareTo(yesterdayDateTimeStampwith20Pm)<=0 ){
                         if(flag == 0) {
-                            if (cal3.get(Calendar.HOUR_OF_DAY) <= 14 && cal3.get(Calendar.MINUTE) <= 45) {
-                                slaCode = 41;
+                            if (cal3.get(Calendar.HOUR_OF_DAY) <= 14) {
+                                if(cal3.get(Calendar.HOUR_OF_DAY) == 14 && cal3.get(Calendar.MINUTE) > 45){
+                                    slaCode = 401;
+                                }else {
+                                    slaCode = 41;
+                                }
                             } else {
                                 slaCode = 401;
                             }
                         }else{
-                            if (cal3.get(Calendar.HOUR_OF_DAY) <= 14 && cal3.get(Calendar.MINUTE) <= 30) {
-                                slaCodeAdmin = 41;
+                            if (cal3.get(Calendar.HOUR_OF_DAY) <= 14) {
+                                if(cal3.get(Calendar.HOUR_OF_DAY) == 14 && cal3.get(Calendar.MINUTE) > 30){
+                                    slaCode = 401;
+                                }else {
+                                    slaCode = 41;
+                                }
                             } else {
-                                slaCodeAdmin = 401;
+                                slaCode = 401;
                             }
                         }
                     }else if(deliveryDateFormat.compareTo(currentDateNoTimeStamp)==0 && timeAssigned.compareTo(yesterdayDateTimeStampwith20Pm)>0) {
                         if(flag == 0){
-                            if(cal3.get(Calendar.HOUR_OF_DAY)<=19 && cal3.get(Calendar.MINUTE)<=45 ) {
-                                slaCode=42;
+                            if(cal3.get(Calendar.HOUR_OF_DAY)<=19 ) {
+                                if(cal3.get(Calendar.HOUR_OF_DAY)==19 && cal3.get(Calendar.MINUTE) > 45){
+                                    slaCode=402;
+                                }else {
+                                    slaCode=42;
+                                }
                             } else {
                                 slaCode=402;
                             }
                         }else{
-                            if (cal3.get(Calendar.HOUR_OF_DAY) <= 19 && cal3.get(Calendar.MINUTE) <= 15) {
-                                slaCodeAdmin = 42;
+                            if(cal3.get(Calendar.HOUR_OF_DAY)<=19 ) {
+                                if(cal3.get(Calendar.HOUR_OF_DAY)==19 && cal3.get(Calendar.MINUTE) > 15){
+                                    slaCode=402;
+                                }else {
+                                    slaCode=42;
+                                }
                             } else {
-                                slaCodeAdmin = 402;
+                                slaCode=402;
                             }
                         }
                     }else if(deliveryDateFormat.compareTo(currentDateNoTimeStamp)>0){

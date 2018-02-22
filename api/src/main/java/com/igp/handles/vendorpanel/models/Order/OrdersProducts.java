@@ -133,6 +133,10 @@ public class OrdersProducts implements Serializable{
 
     private String assignTime=null;
 
+    private String orderProductCategory=null;
+
+    private String getOrderProductSubCategory=null;
+
     public String getAssignTime()
     {
         return assignTime;
@@ -156,6 +160,26 @@ public class OrdersProducts implements Serializable{
     public void setPriceAdjustmentPerProduct(double priceAdjustmentPerProduct)
     {
         this.priceAdjustmentPerProduct = priceAdjustmentPerProduct;
+    }
+
+    public String getOrderProductCategory()
+    {
+        return orderProductCategory;
+    }
+
+    public void setOrderProductCategory(String orderProductCategory)
+    {
+        this.orderProductCategory = orderProductCategory;
+    }
+
+    public String getGetOrderProductSubCategory()
+    {
+        return getOrderProductSubCategory;
+    }
+
+    public void setGetOrderProductSubCategory(String getOrderProductSubCategory)
+    {
+        this.getOrderProductSubCategory = getOrderProductSubCategory;
     }
 
     public double getComponentTotal()
