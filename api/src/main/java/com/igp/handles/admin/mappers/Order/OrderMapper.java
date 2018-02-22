@@ -71,56 +71,78 @@ public class OrderMapper {
 
         return orders;
     }
-    public int assignReassignOrder(String action,int orderId,int orderProductId,int vendorId,String allOrderProductIdList,
+    public int assignReassignOrder(String action,int orderId,String orderProductIdString,int vendorId,String allOrderProductIdList,
         List<Order> orderList,HandleServiceResponse handleServiceResponse){
         int result=0;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
 
         String restOrderProductIdList="";
+        boolean orderIsProcessedOrNot=false;
         try{
-            String[] orderProductIds=allOrderProductIdList.split(",");
-            for(int i=0;i<orderProductIds.length;i++){
-                if(!orderProductIds[i].equals(String.valueOf(orderProductId))){
-                        restOrderProductIdList+=orderProductIds[i]+",";
+            String[] orderProductId=orderProductIdString.split(",");
+            restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(orderProductIdString,allOrderProductIdList);
+
+            for(int i=0;i<orderProductId.length;i++){
+                Order order=orderUtil.getOrderRelatedInfo(orderId,Integer.parseInt(orderProductId[i]));
+                OrdersProducts ordersProducts=order.getOrderProducts().get(0);
+
+                logger.debug("step-2 assignReassignOrder with orderProductId "+orderProductId+" and restOrderProductIdList "+restOrderProductIdList);
+
+                if(action.equalsIgnoreCase("assign")){
+                    result=orderUtil.assignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order);
+                    if(result!=1){
+                        if(restOrderProductIdList.equals("")){
+                            restOrderProductIdList+=orderProductId[i]+",";
+                        }else {
+                            restOrderProductIdList+=","+orderProductId[i]+",";
+                        }
+                    }else if(result==2||result==3){
+                        return result;
+                    }
+                }else if(action.equalsIgnoreCase("reassign")) {
+                    result=orderUtil.reassignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order);
+
+                    if(ordersProducts.getOrdersProductStatus().equals("Processed")
+                        &&!ordersProducts.getFkAssociateId().equals("72")){
+                        orderIsProcessedOrNot=true;
+                    }
+                    if(result!=1){
+                        if(restOrderProductIdList.equals("")){
+                            restOrderProductIdList+=orderProductId[i]+",";
+                        }else {
+                            restOrderProductIdList+=","+orderProductId[i]+",";
+                        }
+                    }else if(result==2||result==3){
+                        return result;
+                    }
                 }
             }
-            if(!restOrderProductIdList.equals("")){
+            if(!restOrderProductIdList.equals("") && restOrderProductIdList.charAt(restOrderProductIdList.length()-1)==','){
                 restOrderProductIdList=restOrderProductIdList.substring(0,restOrderProductIdList.length()-1);
             }
-
-            Order order=orderUtil.getOrderRelatedInfo(orderId,orderProductId);
-            OrdersProducts ordersProducts=order.getOrderProducts().get(0);
-
-            logger.debug("step-2 assignReassignOrder with orderProductId "+orderProductId+" and restOrderProductIdList "+restOrderProductIdList);
+            String orderProductIdsWhichAreActuallyAssigned=findIntersectionOfTwoCommaSeparatedStrings(restOrderProductIdList,orderProductIdString);
 
             if(action.equalsIgnoreCase("assign")){
-                result=orderUtil.assignOrderToVendor(orderId,orderProductId,vendorId,order);
-                if(result==1){
+                if(!restOrderProductIdList.equals("")){
+                    orderList=getOrder(orderId,restOrderProductIdList);
+                }
+            }else if(action.equalsIgnoreCase("reassign")) {
+                if(orderIsProcessedOrNot){
+                    if(!restOrderProductIdList.equals("")){
+
+                        //this is because if something happend while assigning and reassigning orderProduct then it will be in the other list
+                         orderList=getOrder(orderId,orderProductIdsWhichAreActuallyAssigned);
+                        orderList = mergeOrderList(orderList, getOrder(orderId,restOrderProductIdList));
+                    }else {
+                        orderList=getOrder(orderId,orderProductIdString);
+                    }
+                }else {
                     if(!restOrderProductIdList.equals("")){
                         orderList=getOrder(orderId,restOrderProductIdList);
                     }
                 }
-            }else if(action.equalsIgnoreCase("reassign")) {
-
-
-                result=orderUtil.reassignOrderToVendor(orderId,orderProductId,vendorId,order);
-                if(result==1){
-                    if(ordersProducts.getOrdersProductStatus().equals("Processed")
-                        &&!ordersProducts.getFkAssociateId().equals("72")){
-
-                        if(!restOrderProductIdList.equals("")){
-                            orderList=getOrder(orderId,String.valueOf(orderProductId));
-                            orderList = mergeOrderList(orderList, getOrder(orderId,restOrderProductIdList));
-                        }else {
-                            orderList=getOrder(orderId,String.valueOf(orderProductId));
-                        }
-                    }else {
-                        if(!restOrderProductIdList.equals("")){
-                            orderList=getOrder(orderId,restOrderProductIdList);
-                        }
-                    }
-                }
             }
+            //mailService will be integrated here with orderProductIdsWhichAreActuallyAssigned
             handleServiceResponse.setResult(orderList);
 
         }catch (Exception exception){
@@ -159,15 +181,7 @@ public class OrderMapper {
         List<Order> orderList=new ArrayList<>();
         String restOrderProductIdList="";
         try{
-            String[] orderProductIds=orderProductIdList.split(",");
-            for(int i=0;i<orderProductIds.length;i++){
-                if(!orderProductIds[i].equals(String.valueOf(orderProductId))){
-                    restOrderProductIdList+=orderProductIds[i]+",";
-                }
-            }
-            if(!restOrderProductIdList.equals("")){
-                restOrderProductIdList=restOrderProductIdList.substring(0,restOrderProductIdList.length()-1);
-            }
+            restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(String.valueOf(orderProductId),orderProductIdList);
             productId=orderUtil.getProductId(orderProductId);
             result=orderUtil.updateDeliveryDetails(orderId,orderProductId,productId,deliveryDate,deliveryTime,deliveryType);
             if(result){
@@ -223,14 +237,8 @@ public class OrderMapper {
         String restOrderProductIdList="";
         List<Order> orderList=new ArrayList<>();
         try {
-            String[] orderProductIds=orderProductIdList.split(",");
-            for(int i=0;i<orderProductIds.length;i++){
-                if(!orderProductIds[i].equals(String.valueOf(orderProductId))){
-                    restOrderProductIdList+=orderProductIds[i]+",";
-                }
-            }
+            restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(String.valueOf(orderProductId),orderProductIdList);
             if(!restOrderProductIdList.equals("")){
-                restOrderProductIdList=restOrderProductIdList.substring(0,restOrderProductIdList.length()-1);
                 orderList=getOrder(orderId,restOrderProductIdList);
             }
             handleServiceResponse.setResult(orderList);
@@ -242,5 +250,19 @@ public class OrderMapper {
     }
     public List<Order> mergeOrderList(List<Order> orderList,List<Order> orderList1){
         return ListUtils.union(orderList,orderList1);
+    }
+    public String findIntersectionOfTwoCommaSeparatedStrings(String one,String two){
+        // ( A U B ) == B   , ( A ∩ B ) == A  , !( A ∩ B )  part of B which is not in A .....   consider B as a big circle and A is reside withIn B
+        String interSection="";
+        String[] allElements=two.split(",");
+        for(int i=0;i<allElements.length;i++){
+            if(!one.contains(allElements[i])){
+                interSection+=allElements[i]+",";
+            }
+        }
+        if(!interSection.equals("")){
+            interSection=interSection.substring(0,interSection.length()-1);
+        }
+        return interSection;
     }
 }

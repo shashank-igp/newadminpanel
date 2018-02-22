@@ -72,7 +72,7 @@ public class Order {
     @POST
     @Path("/v1/admin/handels/assignReassignOrder")
     public HandleServiceResponse assignReassignOrder(@QueryParam("action")String action , @QueryParam("orderId") int orderId,
-        @QueryParam("fkAssociateId") int vendorId,@QueryParam("orderProductId") int orderProductId
+        @QueryParam("fkAssociateId") int vendorId,@QueryParam("orderProductId") String orderProductIdString
                                                 ,@DefaultValue("0")@QueryParam("orderProductIds") String allOrderProductIdList){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
@@ -80,10 +80,10 @@ public class Order {
         List<com.igp.handles.vendorpanel.models.Order.Order> orderList=new ArrayList<>();
 
         try{
-
+            //orderProductIdString == comma separated orderProductIds which we have to assign to a vendor
             logger.debug("step-1 assignReassignOrder with "+action);
 
-             result=orderMapper.assignReassignOrder(action,orderId,orderProductId,vendorId,allOrderProductIdList,orderList,handleServiceResponse);
+             result=orderMapper.assignReassignOrder(action,orderId,orderProductIdString,vendorId,allOrderProductIdList,orderList,handleServiceResponse);
             if(result==1){
 //                handleServiceResponse.setResult(orderList);
             }else if(result==2){
