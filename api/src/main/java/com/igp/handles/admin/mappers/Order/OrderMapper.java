@@ -265,4 +265,50 @@ public class OrderMapper {
         }
         return interSection;
     }
+    public String[] findCategoryAndSubCategory(String orderProductStatus,int fkAssociateId,int deliveryStatus,int slacode){
+        String[] catSubCatArray=new String[2];
+        catSubCatArray[0]="";
+        catSubCatArray[1]="";
+        switch (orderProductStatus){
+            case "Processing":
+                catSubCatArray[0]="unAssigned";
+                catSubCatArray[1]="processing";
+                break;
+            case "Processed":
+                if(fkAssociateId==72){
+                    catSubCatArray[0]="unAssigned";
+                    catSubCatArray[1]="notAlloted";
+                }else {
+                    if(OrderUtil.isHighAlertActionRequired(slacode)){
+                        catSubCatArray[0]="notConfirmed";
+                        catSubCatArray[1]="pending";
+                    }else {
+                        catSubCatArray[0]="notConfirmed";
+                        catSubCatArray[1]="total";
+                    }
+                }
+                break;
+            case "Confirmed":
+                if(OrderUtil.isHighAlertActionRequired(slacode)){
+                    catSubCatArray[0]="notShipped";
+                    catSubCatArray[1]="pending";
+                }else {
+                    catSubCatArray[0]="notShipped";
+                    catSubCatArray[1]="total";
+                }
+                break;
+            case "Shipped":
+                if(deliveryStatus==0){
+                    if(OrderUtil.isHighAlertActionRequired(slacode)){
+                        catSubCatArray[0]="notDelivered";
+                        catSubCatArray[1]="pending";
+                    }else {
+                        catSubCatArray[0]="notDelivered";
+                        catSubCatArray[1]="total";
+                    }
+                }
+                break;
+        }
+        return catSubCatArray;
+    }
 }

@@ -320,6 +320,8 @@ public class OrderMapper
         int slaCode=-12;
 
         int flagForAdminPanel=forAdminPanelOrNot==true ? 1 : 0;
+
+        com.igp.handles.admin.mappers.Order.OrderMapper orderMapper=new com.igp.handles.admin.mappers.Order.OrderMapper();
         try{
             for(OrdersProducts ordersProducts:order.getOrderProducts()){
                 OrderDetailsPerOrderProduct orderDetailsPerOrderProduct = new OrderDetailsPerOrderProduct();
@@ -340,6 +342,9 @@ public class OrderMapper
 
                 ordersProducts.setSlaFlag(OrderUtil.isSLASatisfied(slaCode));
                 ordersProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(slaCode));
+                String[] catSubCatArray=orderMapper.findCategoryAndSubCategory(ordersProducts.getOrdersProductStatus(),Integer.parseInt(ordersProducts.getFkAssociateId()),ordersProducts.getDeliveryStatus(),slaCode);
+                ordersProducts.setOrderProductCategory(catSubCatArray[0]);
+                ordersProducts.setGetOrderProductSubCategory(catSubCatArray[1]);
             }
         }catch (Exception exception){
             logger.error("error occured while calculating sla codes on the go");
