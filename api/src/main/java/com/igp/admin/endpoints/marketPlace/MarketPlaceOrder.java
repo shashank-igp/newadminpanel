@@ -29,7 +29,7 @@ public class MarketPlaceOrder {
     @Path("/v1/admin/marketplaceorder")
     public Response performCheckOnCorporateOrder(@QueryParam("user") String user,
                                                  @QueryParam("value") String userValue,
-                                                 @QueryParam("fkAssociateId") @DefaultValue("0") int loginId,
+                                                 @QueryParam("fkasid") @DefaultValue("0") int loginId,
                                                  final FormDataMultiPart multiPart) throws ParseException {
         MarketPlaceFinalOrderResponseModel marketPlaceFinalOrderResponseModel = new MarketPlaceFinalOrderResponseModel();
         Response response = null;
