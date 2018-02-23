@@ -293,7 +293,7 @@ public class MarketPlaceMapper {
                             .marketName("RL")
                             .build();
 
-                    } else {
+                    } else if(fk_associate_id==111){
 
                         userModel = new UserModel.UserBuilder()
                             .id(null)
@@ -345,13 +345,18 @@ public class MarketPlaceMapper {
                             .marketName("")
                             .build();
                     }
+                    else {
+                        validationModel.setError(Boolean.TRUE);
+                        validationModel.setMessage("Vendor Doesn't Match.");
+                        userModel = new UserModel.UserBuilder()
+                            .build();
+                    }
 
                     /*// populate validation model*/
                     validationModel.setUserModel(userModel);
                     validationModel.setAddressModel(addressModel);
                     validationModel.setProductModel(productModel);
                     validationModel.setExtraInfoModel(extraInfoModel);
-                    validationModel.setError(false);
 
                     logger.debug("validation model : " + rowNum);
                     logger.debug("values : ", validationModel);
@@ -399,11 +404,11 @@ public class MarketPlaceMapper {
                 logger.debug("row number : "+ i);
                 logger.debug("row values : "+ validationModel.toString());
 
-                AddressModel addressModel = validationModel.getAddressModel();
-                extraInfoModel = validationModel.getExtraInfoModel();
-                productModel = validationModel.getProductModel();
-                // check if order already exists.
-                if(validationModel.getError() == false) {
+                if(validationModel.getError() == false && validationModel!=null) {
+                    AddressModel addressModel = validationModel.getAddressModel();
+                    extraInfoModel = validationModel.getExtraInfoModel();
+                    productModel = validationModel.getProductModel();
+                    // check if order already exists.
                     validationModel = marketPlaceOrderUtil.checkCorpOrderExists(validationModel);
                     if (validationModel.getError() == false) {
                         // order doesn't exist, so create a new order.
@@ -480,7 +485,6 @@ public class MarketPlaceMapper {
                         }
                     }
                 }
-
                 if (validationModel.getError()==true) {
                     errorModel.setRow(i);
                     errorModel.setMsg(validationModel.getMessage());

@@ -39,13 +39,19 @@ public class MarketPlaceOrder {
         List<ErrorModel> errorModelList = new ArrayList<>();
         try{
             int fkAssociateId = marketPlaceMapper.findVendor(userValue);
-            if(fkAssociateId!=0 && loginId == 1) {
+            if(fkAssociateId!=0 && loginId == 1 ) {
                 // parse the excel file.
                 data = marketPlaceMapper.parseExcelForMarketPlace(multiPart, user + fkAssociateId);
-                // fill the models.
-                List<ValidationModel> validationModelList = marketPlaceMapper.refineDataAndPopulateModels(data, userValue, fkAssociateId);
-                // validate all the models and create order.
-                marketPlaceFinalOrderResponseModel = marketPlaceMapper.validateDataForMarketPlace(validationModelList);
+                if(!data.isEmpty()) {
+                    // fill the models.
+                    List<ValidationModel> validationModelList = marketPlaceMapper.refineDataAndPopulateModels(data, userValue, fkAssociateId);
+                    // validate all the models and create order.
+                    marketPlaceFinalOrderResponseModel = marketPlaceMapper.validateDataForMarketPlace(validationModelList);
+                }else {
+                    errorModel.setMsg("File is Empty/Invalid.");
+                    errorModelList.add(errorModel);
+                    marketPlaceFinalOrderResponseModel.setError(errorModelList);
+                }
             }
             else {
                 errorModel.setMsg("Wrong Vendor Details.");
