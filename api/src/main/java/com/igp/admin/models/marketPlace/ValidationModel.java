@@ -31,6 +31,9 @@ public class ValidationModel {
     @JsonProperty("msg")
     private String message;
 
+    @JsonProperty("row")
+    private int rowNum;
+
     public Boolean getError() {
         return error;
     }
@@ -71,6 +74,14 @@ public class ValidationModel {
         this.extraInfoModel = extraInfoModel;
     }
 
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
     public Integer getFkAssociateId() {
         return fkAssociateId;
     }
@@ -87,12 +98,12 @@ public class ValidationModel {
         this.message = message;
     }
 
-    public Integer getId() {
-        return id;
+    public int getRowNum() {
+        return rowNum;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
+    public void setRowNum(int rowNum) {
+        this.rowNum = rowNum;
     }
 
     @Override
@@ -106,6 +117,7 @@ public class ValidationModel {
             ", id=" + id +
             ", fkAssociateId=" + fkAssociateId +
             ", message='" + message + '\'' +
+            ", rowNum=" + rowNum +
             '}';
     }
 }
