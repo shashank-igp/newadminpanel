@@ -116,11 +116,13 @@ public class MarketPlaceMapper {
                     }
                     if (count >= 15) {
                         // row is empty.
+                        logger.debug("row : " + row);
+                        logger.debug("Empty Row.");
                     } else {
                         data.put(row, a);
+                        logger.debug("row : " + row);
+                        logger.debug("values : " + data.get(row));
                     }
-                    logger.debug("row : " + row);
-                    logger.debug("values : " + data.get(row));
                 }
             }
         } catch(Exception e){
@@ -152,6 +154,7 @@ public class MarketPlaceMapper {
 
         for (Map.Entry<Integer, Map<String, String>> entry : data.entrySet()) {
             // revisiting each map i.e. each row
+            int rowNumValue = entry.getKey();
             Map<String, String> row = entry.getValue();
             if(row != null || !row.isEmpty()) {
                 Iterator<Map.Entry<String, String>> rowNum = row.entrySet().iterator();
@@ -171,6 +174,7 @@ public class MarketPlaceMapper {
                     validationModel.setFkAssociateId(fk_associate_id);
                     validationModel.setError(Boolean.FALSE);
                     validationModel.setId(0);
+                    validationModel.setRowNum(rowNumValue);
                     long millis = System.currentTimeMillis();
                     String phone = column.get("Contact No");
                     if (!phone.isEmpty()) {
@@ -401,7 +405,7 @@ public class MarketPlaceMapper {
             try {
                 validationModel = validationModelList1.get(i);
                 i++;
-                logger.debug("row number : "+ i);
+                logger.debug("row number : "+ validationModel.getRowNum());
                 logger.debug("row values : "+ validationModel.toString());
 
                 if(validationModel.getError() == false && validationModel!=null) {
@@ -486,7 +490,7 @@ public class MarketPlaceMapper {
                     }
                 }
                 if (validationModel.getError()==true) {
-                    errorModel.setRow(i);
+                    errorModel.setRow(validationModel.getRowNum());
                     errorModel.setMsg(validationModel.getMessage());
                     countModel.setFail(++fail);
                     countModel.setCorrect(correct);
@@ -502,7 +506,7 @@ public class MarketPlaceMapper {
             }
             catch(Exception e){
                 logger.error("Exception Caught at validation : ", e);
-                errorModel.setRow(i);
+                errorModel.setRow(validationModel.getRowNum());
                 errorModel.setMsg(validationModel.getMessage());
                 countModel.setFail(++fail);
                 errorModelList.add(errorModel);
