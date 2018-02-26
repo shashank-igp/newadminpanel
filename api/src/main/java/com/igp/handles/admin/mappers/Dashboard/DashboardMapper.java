@@ -299,13 +299,13 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap0.get("unAssigned").get("notAlloted").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                    statusCountMap0.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
-
+                                    if(!statusCountMap0.get("unAssigned").get("notAlloted").get("alert").equals("true")){
+                                        statusCountMap0.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
+                                    }
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     statusCountMap0.get("unAssigned").get("notAlloted").put("alert",String.valueOf(true));
-
+                                    statusCountMap0.get("unAssigned").get("notAlloted").put("sla",String.valueOf(false));
                                 }
                             }
                             else if (deliveryDate.getTime() == todayDate.getTime()){ // today
@@ -313,12 +313,13 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap1.get("unAssigned").get("notAlloted").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-
-                                    statusCountMap1.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
-
+                                    if(!statusCountMap1.get("unAssigned").get("notAlloted").get("alert").equals("true")){
+                                        statusCountMap1.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
+                                    }
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-                                    
+
                                     statusCountMap1.get("unAssigned").get("notAlloted").put("alert",String.valueOf(true));
+                                    statusCountMap1.get("unAssigned").get("notAlloted").put("sla",String.valueOf(false));
                                 }
                             }
                             else if(deliveryDate.getTime() == tomorrowDate.getTime()){ // tommorow
@@ -326,12 +327,15 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap2.get("unAssigned").get("notAlloted").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-                                    
-                                    statusCountMap2.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
+
+                                    if(!statusCountMap2.get("unAssigned").get("notAlloted").get("alert").equals("true")){
+                                        statusCountMap2.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
+                                    }
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-                                    
+
                                     statusCountMap2.get("unAssigned").get("notAlloted").put("alert",String.valueOf(true));
+                                    statusCountMap2.get("unAssigned").get("notAlloted").put("sla",String.valueOf(false));
                                 }
                             }
                             else if (deliveryDate.getTime() >= futureDate.getTime()){ // future
@@ -339,11 +343,14 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap3.get("unAssigned").get("notAlloted").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-                                    
-                                    statusCountMap3.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
+
+                                    if(!statusCountMap3.get("unAssigned").get("notAlloted").get("alert").equals("true")){
+                                        statusCountMap3.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
+                                    }
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
                                     statusCountMap3.get("unAssigned").get("notAlloted").put("alert",String.valueOf(true));
+                                    statusCountMap3.get("unAssigned").get("notAlloted").put("sla",String.valueOf(false));
 
                                 }
                             }
@@ -359,11 +366,13 @@ public class DashboardMapper {
 
                                 if (OrderUtil.isSLASatisfied(slaCode)){
 
-                                    statusCountMap0.get("unAssigned").get("processing").put("sla",String.valueOf(true));
+                                    if(!statusCountMap0.get("unAssigned").get("processing").get("alert").equals("true")){
+                                        statusCountMap0.get("unAssigned").get("processing").put("sla",String.valueOf(true));
+                                    }
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-                                    
-                                    statusCountMap0.get("unAssigned").get("processing").put("alert",String.valueOf(true));
 
+                                    statusCountMap0.get("unAssigned").get("processing").put("alert",String.valueOf(true));
+                                    statusCountMap0.get("unAssigned").get("processing").put("sla",String.valueOf(false));
                                 }
                             }
                             else if (deliveryDate.getTime() == todayDate.getTime()){ // today
@@ -371,11 +380,14 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap1.get("unAssigned").get("processing").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-                                    statusCountMap1.get("unAssigned").get("processing").put("sla",String.valueOf(true));
+                                    if(!statusCountMap1.get("unAssigned").get("processing").get("alert").equals("true")){
+                                        statusCountMap1.get("unAssigned").get("processing").put("sla",String.valueOf(true));
+                                    }
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-                                    
+
                                     statusCountMap1.get("unAssigned").get("processing").put("alert",String.valueOf(true));
+                                    statusCountMap1.get("unAssigned").get("processing").put("sla",String.valueOf(false));
 
                                 }
                             }
@@ -385,10 +397,13 @@ public class DashboardMapper {
                                 statusCountMap2.get("unAssigned").get("processing").put("count", String.valueOf(count));
                                 
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-                                    statusCountMap2.get("unAssigned").get("processing").put("sla",String.valueOf(true));
+                                    if(!statusCountMap2.get("unAssigned").get("processing").get("alert").equals("true")){
+                                        statusCountMap2.get("unAssigned").get("processing").put("sla",String.valueOf(true));
+                                    }
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
                                     statusCountMap2.get("unAssigned").get("processing").put("alert",String.valueOf(true));
+                                    statusCountMap2.get("unAssigned").get("processing").put("sla",String.valueOf(false));
 
                                 }
                             }
@@ -398,10 +413,13 @@ public class DashboardMapper {
                                 statusCountMap3.get("unAssigned").get("processing").put("count", String.valueOf(count));
 
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-                                    statusCountMap3.get("unAssigned").get("processing").put("sla",String.valueOf(true));
+                                    if(!statusCountMap3.get("unAssigned").get("processing").get("alert").equals("true")){
+                                        statusCountMap3.get("unAssigned").get("processing").put("sla",String.valueOf(true));
+                                    }
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
                                     statusCountMap3.get("unAssigned").get("processing").put("alert",String.valueOf(true));
+                                    statusCountMap3.get("unAssigned").get("processing").put("sla",String.valueOf(false));
 
                                 }
                             }
@@ -418,8 +436,11 @@ public class DashboardMapper {
                                 statusCountMap0.get("notConfirmed").get("total").put("count", String.valueOf(count));
 
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-                                    statusCountMap0.get("notConfirmed").get("total").put("sla",String.valueOf(true));
-
+                                    if(statusCountMap0.get("notConfirmed").get("pending").get("alert").equals("true")){
+                                        statusCountMap0.get("notConfirmed").get("total").put("alert",String.valueOf(true));
+                                    }else {
+                                        statusCountMap0.get("notConfirmed").get("total").put("sla",String.valueOf(true));
+                                    }
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap0.get("notConfirmed").get("pending").get("count"));
@@ -434,8 +455,11 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap1.get("notConfirmed").get("total").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-                                    statusCountMap1.get("notConfirmed").get("total").put("sla",String.valueOf(true));
-
+                                    if(statusCountMap1.get("notConfirmed").get("pending").get("alert").equals("true")){
+                                        statusCountMap1.get("notConfirmed").get("total").put("alert",String.valueOf(true));
+                                    }else {
+                                        statusCountMap1.get("notConfirmed").get("total").put("sla",String.valueOf(true));
+                                    }
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
                                     int alertCount = Integer.parseInt(statusCountMap1.get("notConfirmed").get("pending").get("count"));
@@ -450,8 +474,12 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap2.get("notConfirmed").get("total").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-                                    
-                                    statusCountMap2.get("notConfirmed").get("total").put("sla",String.valueOf(true));
+
+                                    if(statusCountMap2.get("notConfirmed").get("pending").get("alert").equals("true")){
+                                        statusCountMap2.get("notConfirmed").get("total").put("alert",String.valueOf(true));
+                                    }else {
+                                        statusCountMap2.get("notConfirmed").get("total").put("sla",String.valueOf(true));
+                                    }
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
@@ -467,8 +495,12 @@ public class DashboardMapper {
                                 count++;
                                 statusCountMap3.get("notConfirmed").get("total").put("count", String.valueOf(count));
                                 if (OrderUtil.isSLASatisfied(slaCode)){
-                                    
-                                    statusCountMap3.get("notConfirmed").get("total").put("sla",String.valueOf(true));
+
+                                    if(statusCountMap3.get("notConfirmed").get("pending").get("alert").equals("true")){
+                                        statusCountMap3.get("notConfirmed").get("total").put("alert",String.valueOf(true));
+                                    }else {
+                                        statusCountMap3.get("notConfirmed").get("total").put("sla",String.valueOf(true));
+                                    }
 
                                 }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
 
