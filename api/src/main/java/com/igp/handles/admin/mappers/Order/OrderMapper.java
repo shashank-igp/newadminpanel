@@ -13,8 +13,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
-import static java.lang.Math.abs;
-
 /**
  * Created by shanky on 22/1/18.
  */
@@ -160,7 +158,7 @@ public class OrderMapper {
     public boolean orderPriceChanges(int orderId,int orderProductId,int componentId,Double componentPrice,Double shippingCharge){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
-        Double vendorPrice=null;
+        Double vendorPrice=0.0;
         int productId=0;
         String mailerAction;
         MailUtil mailUtil=new MailUtil();
@@ -171,16 +169,16 @@ public class OrderMapper {
 
             if(componentPrice!=null && orderComponent != null){
                 orderUtil.updateComponentPriceOrderLevel(orderId,productId,componentId,componentPrice);
-                vendorPrice = abs(Double.valueOf(orderComponent.getQuantity())*Double.valueOf(orderComponent.getComponentPrice())
-                    - Double.valueOf(orderComponent.getQuantity())*componentPrice ) ;
+                vendorPrice = Double.valueOf(orderComponent.getQuantity())*componentPrice ;
             }
-
-            mailerAction="orderpricechange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
-            if(mailUtil.sendGenericMail(mailerAction,"","","")){
-                logger.debug("Mail successfully sent for Price changes of orderId "+orderId+" with orderProductId "+orderProductId);
-            }
-
             result=orderUtil.updateVendorAssignPrice(orderId,productId,vendorPrice,shippingCharge,orderProductId);
+
+            if(result){
+                mailerAction="orderpricechange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
+                if(mailUtil.sendGenericMail(mailerAction,"","","")){
+                    logger.debug("Mail successfully sent for Price changes of orderId "+orderId+" with orderProductId "+orderProductId);
+                }
+            }
 
         }catch (Exception exception){
             logger.error("error while orderComponentPriceChange",exception);
@@ -206,12 +204,12 @@ public class OrderMapper {
                     if(!restOrderProductIdList.equals("")){
                         orderList=getOrder(orderId,restOrderProductIdList);
                     }
-                }else{
-                    orderList=getOrder(orderId,orderProductIdList);
                     mailerAction="orderdeliverychange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
                     if(mailUtil.sendGenericMail(mailerAction,"","","")){
                         logger.debug("Mail successfully sent for Delivery Detail changes of  orderId "+orderId+" with orderProductId "+orderProductId);
                     }
+                }else{
+                    orderList=getOrder(orderId,orderProductIdList);
 //                    if(!restOrderProductIdList.equals("")){
 //                        orderList=getOrder(orderId,String.valueOf(orderProductId));
 //                        orderList=mergeOrderList(orderList,getOrder(orderId,restOrderProductIdList));
