@@ -32,6 +32,7 @@ public class HttpRequestUtil {
         if(!headerKeyValueModelList.isEmpty() || headerKeyValueModelList!=null){
             for(HeaderKeyValueModel header : headerKeyValueModelList) {
                 con.setRequestProperty(header.getKey(), header.getValue());
+                logger.debug("Header added is Key : " + header.getKey() +" Value : " +header.getValue());
             }
         }
         con.setDoOutput(true);

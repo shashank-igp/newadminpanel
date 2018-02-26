@@ -603,8 +603,7 @@ public class MarketPlaceOrderUtil {
             statement = "UPDATE customers c INNER JOIN n_user ce ON ce.id = c.customers_id SET " +
                 " c.customers_firstname = ?, c.customers_lastname = ?, c.customers_mobile = ? ," +
                 " ce.int_mob_prefix = ? , c.customers_country_id = ? , c.customers_street_address = ? ," +
-                " c.customers_street_address2 = ? , c.customers_postcode = ? , c.customers_city = ? ," +
-                " c.customers_state = ? "+columns + " WHERE c.customers_id = ?";
+                " c.customers_postcode = ? , c.customers_city = ? , c.customers_state = ? "+columns + " WHERE c.customers_id = ?";
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setString(1, userModel.getFirstname());
@@ -613,17 +612,16 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setString(4, userModel.getMobilePrefix());
             preparedStatement.setInt(5, userModel.getCountryId());
             preparedStatement.setString(6, userModel.getAddressField1()==null?"":userModel.getAddressField1());
-            preparedStatement.setString(7, userModel.getAddressField2()==null?"":userModel.getAddressField2());
-            preparedStatement.setString(8, userModel.getPostcode()==null?"":userModel.getPostcode());
-            preparedStatement.setString(9, userModel.getCity()==null?"":userModel.getCity());
-            preparedStatement.setString(10, userModel.getState()==null?"":userModel.getState());
+            preparedStatement.setString(7, userModel.getPostcode()==null?"":userModel.getPostcode());
+            preparedStatement.setString(8, userModel.getCity()==null?"":userModel.getCity());
+            preparedStatement.setString(9, userModel.getState()==null?"":userModel.getState());
 
             if (isChangeDob == 1){
-                preparedStatement.setString(11, userModel.getDob());
-                preparedStatement.setInt(12, custId);
+                preparedStatement.setString(10, userModel.getDob());
+                preparedStatement.setInt(11, custId);
             }
             else {
-                preparedStatement.setInt(11, custId);
+                preparedStatement.setInt(10, custId);
             }
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {

@@ -82,7 +82,7 @@ public class MarketPlaceMapper {
                 Workbook workbook = WorkbookFactory.create(file);
                 Sheet datatypeSheet = workbook.getSheetAt(0);
                 Iterator<Row> rowIterator = datatypeSheet.iterator();
-                int row = 0;
+                int row = 1;
                 // Assuming "column headers" are in the first row
                 Row header_row = datatypeSheet.getRow(0);
                 // Assuming 4 columns
@@ -224,8 +224,8 @@ public class MarketPlaceMapper {
                             .id(null)
                             .firstname(fname)
                             .lastname(lname)
-                            .addressField1(column.get("AddressLine1"))
-                            .addressField2(column.get("AddressLine2"))
+                            .addressField1(column.get("AddressLine1")+","+column.get("AddressLine2")+" " + column.get("State")+"," + column.get("City"))
+                       //     .addressField2(column.get("AddressLine2") + column.get("State") + column.get("City"))
                             .state(column.get("State"))
                             .city(column.get("City"))
                             .postcode(zipCode)
@@ -243,7 +243,7 @@ public class MarketPlaceMapper {
                         addressModel.setFirstname(userModel.getFirstname());
                         addressModel.setLastname(userModel.getLastname());
                         addressModel.setStreetAddress(userModel.getAddressField1());
-                        addressModel.setStreetAddress2(userModel.getAddressField2());
+                //        addressModel.setStreetAddress2(userModel.getAddressField2());
                         addressModel.setPostcode(userModel.getPostcode());
                         addressModel.setCity(userModel.getCity());
                         addressModel.setState(userModel.getState());
