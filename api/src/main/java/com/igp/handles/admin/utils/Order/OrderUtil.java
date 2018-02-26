@@ -595,12 +595,13 @@ public class OrderUtil {
 
         return orderComponent;
     }
-    public int getProductId(int orderProductId){
+    public OrdersProducts getProductId(int orderProductId){
         int productId=0;
         Connection connection = null;
         ResultSet resultSet = null;
         String statement;
         PreparedStatement preparedStatement = null;
+        OrdersProducts ordersProducts=null;
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement="SELECT  * from orders_products where orders_products_id = ? ";
@@ -610,7 +611,17 @@ public class OrderUtil {
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             if(resultSet.next()){
-                productId=resultSet.getInt("products_id");
+                ordersProducts = new OrdersProducts.Builder()
+                    .orderProductId(resultSet.getInt("op.orders_Products_Id"))
+                    .orderId(resultSet.getInt("op.orders_id"))
+                    .productId(resultSet.getInt("op.products_id"))
+                    .productName(resultSet.getString("op.products_name"))
+                    .productQuantity(resultSet.getInt("op.products_quantity"))
+                    .products_code(resultSet.getString("op.products_code"))
+                    .fkAssociateId(resultSet.getString("op.fk_associate_id"))
+                    .ordersProductStatus(resultSet.getString("op.orders_product_status"))
+                    .deliveryStatus(resultSet.getInt("op.delivery_status"))
+                    .build();
             }
         }catch (Exception exception){
             logger.error("Exception in connection", exception);
@@ -620,7 +631,7 @@ public class OrderUtil {
             Database.INSTANCE.closeConnection(connection);
         }
 
-        return productId;
+        return ordersProducts;
     }
     public boolean updateDeliveryDetails(int orderId,int orderProductId,int productId,String deliveryDate,String deliveryTime,
                                         int deliveryType){

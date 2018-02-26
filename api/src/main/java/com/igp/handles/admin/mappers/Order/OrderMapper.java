@@ -1,5 +1,6 @@
 package com.igp.handles.admin.mappers.Order;
 
+import com.igp.handles.admin.utils.MailUtil.MailUtil;
 import com.igp.handles.vendorpanel.models.Order.Order;
 import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
@@ -76,8 +77,9 @@ public class OrderMapper {
         int result=0;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
 
-        String restOrderProductIdList="";
+        String restOrderProductIdList="",mailerAction;
         boolean orderIsProcessedOrNot=false;
+        MailUtil mailUtil=new MailUtil();
         try{
             String[] orderProductId=orderProductIdString.split(",");
             restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(orderProductIdString,allOrderProductIdList);
@@ -143,6 +145,8 @@ public class OrderMapper {
                 }
             }
             //mailService will be integrated here with orderProductIdsWhichAreActuallyAssigned
+            mailerAction="action=assignorder&orderid="+orderId+"&orderproductids="+orderProductIdsWhichAreActuallyAssigned+"&associd="+vendorId;
+            mailUtil.sendGenericMail(mailerAction,"","","");
             handleServiceResponse.setResult(orderList);
 
         }catch (Exception exception){
@@ -156,8 +160,11 @@ public class OrderMapper {
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         Double vendorPrice=null;
         int productId=0;
+        String mailerAction;
+        MailUtil mailUtil=new MailUtil();
         try {
-            productId=orderUtil.getProductId(orderProductId);
+            OrdersProducts ordersProducts=orderUtil.getProductId(orderProductId);
+            productId=ordersProducts.getProductId();
             OrderComponent orderComponent=orderUtil.getOrderComponent(orderId,productId,componentId);
 
             if(componentPrice!=null && orderComponent != null){
@@ -165,6 +172,9 @@ public class OrderMapper {
                 vendorPrice = abs(Double.valueOf(orderComponent.getQuantity())*Double.valueOf(orderComponent.getComponentPrice())
                     - Double.valueOf(orderComponent.getQuantity())*componentPrice ) ;
             }
+
+            mailerAction="action=orderpricechange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
+            mailUtil.sendGenericMail(mailerAction,"","","");
 
             result=orderUtil.updateVendorAssignPrice(orderId,productId,vendorPrice,shippingCharge,orderProductId);
 
@@ -180,9 +190,12 @@ public class OrderMapper {
         int productId=0;
         List<Order> orderList=new ArrayList<>();
         String restOrderProductIdList="";
+        String mailerAction;
+        MailUtil mailUtil=new MailUtil();
         try{
             restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(String.valueOf(orderProductId),orderProductIdList);
-            productId=orderUtil.getProductId(orderProductId);
+            OrdersProducts ordersProducts=orderUtil.getProductId(orderProductId);
+            productId=ordersProducts.getProductId();
             result=orderUtil.updateDeliveryDetails(orderId,orderProductId,productId,deliveryDate,deliveryTime,deliveryType);
             if(result){
                 if(deliveryDate!=null){
@@ -190,12 +203,15 @@ public class OrderMapper {
                         orderList=getOrder(orderId,restOrderProductIdList);
                     }
                 }else{
-                    if(!restOrderProductIdList.equals("")){
-                        orderList=getOrder(orderId,String.valueOf(orderProductId));
-                        orderList=mergeOrderList(orderList,getOrder(orderId,restOrderProductIdList));
-                    }else {
-                        orderList=getOrder(orderId,String.valueOf(orderProductId));
-                    }
+                    orderList=getOrder(orderId,orderProductIdList);
+                    mailerAction="action=orderdeliverychange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
+                    mailUtil.sendGenericMail(mailerAction,"","","");
+//                    if(!restOrderProductIdList.equals("")){
+//                        orderList=getOrder(orderId,String.valueOf(orderProductId));
+//                        orderList=mergeOrderList(orderList,getOrder(orderId,restOrderProductIdList));
+//                    }else {
+//
+//                    }
                 }
                 handleServiceResponse.setResult(orderList);
             }
@@ -236,13 +252,20 @@ public class OrderMapper {
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         String restOrderProductIdList="";
         List<Order> orderList=new ArrayList<>();
+        String mailerAction;
+        MailUtil mailUtil=new MailUtil();
         try {
+            OrdersProducts ordersProducts=orderUtil.getProductId(orderProductId);
             restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(String.valueOf(orderProductId),orderProductIdList);
             if(!restOrderProductIdList.equals("")){
                 orderList=getOrder(orderId,restOrderProductIdList);
             }
-            handleServiceResponse.setResult(orderList);
             result=orderUtil.cancelOrder(orderId,orderProductId,comment);
+            if(result){
+                mailerAction="action=cancelorder&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
+                mailUtil.sendGenericMail(mailerAction,"","","");
+                handleServiceResponse.setResult(orderList);
+            }
         }catch (Exception exception){
             logger.error("error while cancelling ",exception);
         }
