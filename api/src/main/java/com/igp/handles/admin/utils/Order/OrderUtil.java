@@ -415,7 +415,7 @@ public class OrderUtil {
                 comment1=" shipping price = "+shippingCharge;
             }
             if(vendorPrice!=null){
-                vendorPriceClause+=" vendor_price = vendor_price + "+vendorPrice+" , ";
+                vendorPriceClause+=" vendor_price =  "+vendorPrice+" , ";
                 comment2=" , vendor Price = "+vendorPrice;
             }
             connection = Database.INSTANCE.getReadWriteConnection();
