@@ -224,7 +224,7 @@ public class MarketPlaceMapper {
                             .id(null)
                             .firstname(fname)
                             .lastname(lname)
-                            .addressField1(column.get("AddressLine1")+","+column.get("AddressLine2")+" " + column.get("State")+"," + column.get("City"))
+                            .addressField1(column.get("AddressLine1")+","+column.get("AddressLine2")+" " +column.get("City")+ "," + column.get("State"))
                        //     .addressField2(column.get("AddressLine2") + column.get("State") + column.get("City"))
                             .state(column.get("State"))
                             .city(column.get("City"))
