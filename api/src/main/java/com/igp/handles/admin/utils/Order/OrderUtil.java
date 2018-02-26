@@ -604,7 +604,7 @@ public class OrderUtil {
         OrdersProducts ordersProducts=null;
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement="SELECT  * from orders_products where orders_products_id = ? ";
+            statement="SELECT  * from orders_products as  op where op.orders_products_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,orderProductId);
 
