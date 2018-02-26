@@ -43,6 +43,7 @@ public class MailUtil {
             if(code==200){
                 result=true;
             }
+            logger.debug("Post data for sentMail "+postData);
         }
         catch (Exception exception)
         {
