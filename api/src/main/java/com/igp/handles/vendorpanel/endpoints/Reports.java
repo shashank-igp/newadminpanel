@@ -33,7 +33,12 @@ public class Reports {
 
     @GET
     @Path("/v1/handels/getOrderReport")
-    public ReportResponse getOrderReport(@QueryParam("fkAssociateId") String fkAssociateId, @QueryParam("orderDateFrom") String startDate, @QueryParam("orderDateTo")String endDate , @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit , @QueryParam("orderNumber") Integer orderNo,@QueryParam("delhiveryDate") String delhiveryDate,@QueryParam("status")  String status,@QueryParam("deliveryDateFrom") String deliveryDateFrom,@QueryParam("deliveryDateTo") String deliveryDateTo){
+    public ReportResponse getOrderReport(@QueryParam("fkAssociateId") String fkAssociateId,
+        @QueryParam("orderDateFrom") String startDate, @QueryParam("orderDateTo")String endDate ,
+        @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ,
+        @QueryParam("orderNumber") Integer orderNo,@QueryParam("delhiveryDate") String delhiveryDate,
+        @QueryParam("status")  String status,@QueryParam("deliveryDateFrom") String deliveryDateFrom,
+        @QueryParam("deliveryDateTo") String deliveryDateTo){
 
         ReportResponse reportResponse=new ReportResponse();
         startDate=getTimestampString(startDate,0);

@@ -573,12 +573,14 @@ public class OrderUtil
             connection = Database.INSTANCE.getReadOnlyConnection();
             if(forAdminPanelOrNot==true){
                 statement="select o.*,( case when  ab.address_type is not null then ab.address_type else 0 end )  as "
-                    + " address_type  from orders as o join orders_temp ot on o.orders_temp_id=ot.orders_temp_id "
+                    + " address_type  from orders as o left join orders_temp ot on o.orders_temp_id=ot.orders_temp_id "
                     + " left join address_book ab on  ab.address_book_id=ot.address_book_id where o.orders_id = ? limit 1";
                 preparedStatement = connection.prepareStatement(statement);
                 preparedStatement.setInt(1,orderId);
             }else {
-                statement="select o.*,group_concat(vi.instruction_msg SEPARATOR ' \n ') as instruction_msg,( case when  ab.address_type is not null then ab.address_type else 0 end )  as address_type  from orders as o join orders_temp ot on o.orders_temp_id=ot.orders_temp_id "
+                statement="select o.*,group_concat(vi.instruction_msg SEPARATOR ' \n ') as instruction_msg, "
+                    + " ( case when  ab.address_type is not null then ab.address_type else 0 end )  as address_type "
+                    + " from orders as o left join orders_temp ot on o.orders_temp_id=ot.orders_temp_id "
                     + " left join address_book ab on  ab.address_book_id=ot.address_book_id left join vendor_instructions as vi ON "
                     + " o.orders_id=vi.orders_id where o.orders_id = ?  and  vi.associate_id = ? limit 1";
                 preparedStatement = connection.prepareStatement(statement);
