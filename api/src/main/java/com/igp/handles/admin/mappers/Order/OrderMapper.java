@@ -146,7 +146,9 @@ public class OrderMapper {
             }
             //mailService will be integrated here with orderProductIdsWhichAreActuallyAssigned
             mailerAction="action=assignorder&orderid="+orderId+"&orderproductids="+orderProductIdsWhichAreActuallyAssigned+"&associd="+vendorId;
-            mailUtil.sendGenericMail(mailerAction,"","","");
+            if(mailUtil.sendGenericMail(mailerAction,"","","")){
+                logger.debug("Mail successfully sent for assign/reassign of orderId "+orderId+" with orderProductId "+orderProductIdsWhichAreActuallyAssigned);
+            }
             handleServiceResponse.setResult(orderList);
 
         }catch (Exception exception){
@@ -174,7 +176,9 @@ public class OrderMapper {
             }
 
             mailerAction="action=orderpricechange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
-            mailUtil.sendGenericMail(mailerAction,"","","");
+            if(mailUtil.sendGenericMail(mailerAction,"","","")){
+                logger.debug("Mail successfully sent for Price changes of orderId "+orderId+" with orderProductId "+orderProductId);
+            }
 
             result=orderUtil.updateVendorAssignPrice(orderId,productId,vendorPrice,shippingCharge,orderProductId);
 
@@ -205,7 +209,9 @@ public class OrderMapper {
                 }else{
                     orderList=getOrder(orderId,orderProductIdList);
                     mailerAction="action=orderdeliverychange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
-                    mailUtil.sendGenericMail(mailerAction,"","","");
+                    if(mailUtil.sendGenericMail(mailerAction,"","","")){
+                        logger.debug("Mail successfully sent for Delivery Detail changes of  orderId "+orderId+" with orderProductId "+orderProductId);
+                    }
 //                    if(!restOrderProductIdList.equals("")){
 //                        orderList=getOrder(orderId,String.valueOf(orderProductId));
 //                        orderList=mergeOrderList(orderList,getOrder(orderId,restOrderProductIdList));
@@ -263,7 +269,10 @@ public class OrderMapper {
             result=orderUtil.cancelOrder(orderId,orderProductId,comment);
             if(result){
                 mailerAction="action=cancelorder&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
-                mailUtil.sendGenericMail(mailerAction,"","","");
+
+                if(mailUtil.sendGenericMail(mailerAction,"","","")){
+                    logger.debug("Mail successfully sent for cancelling orderId "+orderId+" with orderProductId "+orderProductId);
+                }
                 handleServiceResponse.setResult(orderList);
             }
         }catch (Exception exception){
