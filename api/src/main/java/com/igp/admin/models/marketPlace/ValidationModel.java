@@ -22,6 +22,9 @@ public class ValidationModel {
     @JsonProperty("extrainfo")
     private ExtraInfoModel extraInfoModel;
 
+    @JsonProperty("delmsg")
+    private DeliveryMessageModel deliveryMessageModel;
+
     @JsonProperty("id")
     private Integer id;
 
@@ -74,6 +77,14 @@ public class ValidationModel {
         this.extraInfoModel = extraInfoModel;
     }
 
+    public DeliveryMessageModel getDeliveryMessageModel() {
+        return deliveryMessageModel;
+    }
+
+    public void setDeliveryMessageModel(DeliveryMessageModel deliveryMessageModel) {
+        this.deliveryMessageModel = deliveryMessageModel;
+    }
+
     public Integer getId() {
         return id;
     }
@@ -114,6 +125,7 @@ public class ValidationModel {
             ", addressModel=" + addressModel +
             ", productModel=" + productModel +
             ", extraInfoModel=" + extraInfoModel +
+            ", deliveryMessageModel=" + deliveryMessageModel +
             ", id=" + id +
             ", fkAssociateId=" + fkAssociateId +
             ", message='" + message + '\'' +
