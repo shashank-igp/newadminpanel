@@ -413,5 +413,44 @@ public class Reports {
         return handleServiceResponse;
     }
 
+    @GET
+    @Path("/v1/admin/handels/getOrderFileUploadReport")
+    public ReportResponse getOrderFileUploadReport(@QueryParam("fkAssociateId") String fkAssociateId,
+        @QueryParam("orderDateFrom") String startDate,
+        @QueryParam("orderDateTo")String endDate ,
+        @DefaultValue("0") @QueryParam("startLimit") String startLimit,
+        @DefaultValue("10") @QueryParam("endLimit") String endLimit ,
+        @QueryParam("orderNumber") Integer orderNo,
+        @QueryParam("deliveryDateFrom") String deliveryDateFrom,
+        @QueryParam("deliveryDateTo") String deliveryDateTo){
+
+        ReportResponse reportResponse = new ReportResponse();
+        ReportMapper reportMapper = new ReportMapper();
+        startDate=getTimestampString(startDate,0);
+        endDate=getTimestampString(endDate,0);
+        if(deliveryDateFrom==null&&deliveryDateTo==null&&orderNo==null&&endDate==null&&startDate==null){
+            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            LocalDate localDate = LocalDate.now();
+            deliveryDateFrom=dtf.format(localDate);
+            //set today's date by default
+        }
+        deliveryDateTo=getTimestampString(deliveryDateTo,0);
+        deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
+
+        if(deliveryDateFrom!=null&&deliveryDateTo!=null){
+            deliveryDateTo=getTimestampString(deliveryDateTo,1);
+        }
+        if(startDate!=null&&endDate!=null){
+            endDate=getTimestampString(endDate,1);
+        }
+
+        reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Date","Delivery_Date"
+            ,"Product_Photo","Out_Of_Delivery","Proof_Of_Delivery"});
+        OrderProductUploadFileReportWithSummary orderProductUploadFileReportWithSummary = reportMapper.getOrderFileUploadReport(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo);
+        reportResponse.setSummary(orderProductUploadFileReportWithSummary.getSummaryModelList());
+        List<Object> objectList = new ArrayList<Object>(orderProductUploadFileReportWithSummary.getOrderProductUploadFileModelList());
+        reportResponse.setTableData( objectList);
+        return reportResponse;
+    }
 
 }

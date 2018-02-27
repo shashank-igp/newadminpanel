@@ -98,10 +98,12 @@ public class OrderUtil
                     .deliveryTime(resultSet.getString("opei.delivery_time"))
                     .productCostPrice(resultSet.getInt("opei.product_cost_price"))
                     .build();
-                if(!ordersProducts.getTimeSlaVoilates().equalsIgnoreCase("")&&orderProductExtraInfo.getDeliveryTime().equalsIgnoreCase("")){
-                    orderProductExtraInfo.setDeliveryTime(ordersProducts.getTimeSlaVoilates());
-                }
+
                 if(forAdminPanelOrNot==false){
+//                    if(!ordersProducts.getTimeSlaVoilates().equalsIgnoreCase("")&&orderProductExtraInfo.getDeliveryTime().equalsIgnoreCase("")){
+//                        orderProductExtraInfo.setDeliveryTime(ordersProducts.getTimeSlaVoilates());
+//                    }
+
                     if(orderProductExtraInfo.getDeliveryType()==2){
                         String[] timeSlotArray=orderProductExtraInfo.getDeliveryTime().split(" hrs - ");
                         int secondTimeSlot=Integer.parseInt(timeSlotArray[1].substring(0,2))-1;

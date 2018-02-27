@@ -181,6 +181,20 @@ public class ReportMapper {
         BarcodeReportResponseModel barcodeReportResponseModel = reportUtil.getListOfBarcodesUtil(startLimit,endLimit);
         return barcodeReportResponseModel;
     }
+
+    public OrderProductUploadFileReportWithSummary getOrderFileUploadReport(String fkAssociateId, String startDate,
+        String endDate, String startLimit, String endLimit, Integer orderNo, String deliveryDateFrom,
+        String deliveryDateTo){
+        ReportUtil reportUtil=new ReportUtil();
+        OrderProductUploadFileReportWithSummary orderProductUploadFileReportWithSummary=null;
+        try {
+            orderProductUploadFileReportWithSummary=reportUtil.uploadPicReport(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo);
+        }catch (Exception exception){
+            logger.error("Error occured when getOrderFileUploadReport ",exception);
+        }
+        return orderProductUploadFileReportWithSummary;
+    }
+
     public void fillDataActionPincode(List<Map.Entry<String,List<String>>> tableDataAction){
         tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Standard Delivery",new ArrayList<String>(
             Arrays.asList("Edit","Enable/Disable"))));
@@ -215,4 +229,5 @@ public class ReportMapper {
         tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Quantity",new ArrayList<String>(
             Arrays.asList("Edit"))));
     }
+
 }
