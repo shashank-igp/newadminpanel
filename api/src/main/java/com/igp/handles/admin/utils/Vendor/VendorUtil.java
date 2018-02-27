@@ -25,14 +25,19 @@ public class VendorUtil
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
+        String shippingTypeClause=null;
         try {
+            if(shippingType!=0){
+                shippingTypeClause=" and avp.ship_type = "+shippingType;
+            }else {
+                shippingTypeClause="";
+            }
             connection = Database.INSTANCE.getReadOnlyConnection();
             String statement = "select * from associate a join vendor_extra_info v on a.associate_id=v.associate_id join "
                 + " AA_vendor_pincode  avp on avp.vendor_id = a.associate_id where a.associate_status =1 and v.type = 2 and "
-                + " avp.flag_enabled = 1 and avp.pincode = ? and avp.ship_type = ? GROUP  by avp.vendor_id ";
+                + " avp.flag_enabled = 1 and avp.pincode = ? "+shippingTypeClause+" GROUP  by avp.vendor_id ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,pincode);
-            preparedStatement.setInt(2,shippingType);
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()){
