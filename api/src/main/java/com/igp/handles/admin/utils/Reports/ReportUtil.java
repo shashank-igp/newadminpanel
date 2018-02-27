@@ -109,9 +109,7 @@ public class ReportUtil {
                 orderReportObjectModel.setPincode(resultSet.getInt("Pincode"));
                 orderReportObjectModel.setDelivery_Date(resultSet.getString("Delivery_Date"));
                 orderReportObjectModel.setDeliveryType(resultSet.getString("Delivery_Type"));
-                orderReportObjectModel.setRecipienName(resultSet.getString("Recipient_Name"));
                 orderReportObjectModel.setPrice(resultSet.getDouble("Amount"));
-                orderReportObjectModel.setPhoneNumber(resultSet.getString("Phone"));
                 orderReportObjectModel.setStatus(resultSet.getInt("status"));
                 String vendorName = resultSet.getString("vendorName");
                 if(vendorName==null || vendorName.equals("")){

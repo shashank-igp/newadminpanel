@@ -61,7 +61,7 @@ public class Reports {
         }
 
         reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Date","Occasion","City","Pincode","Delivery_Date"
-            ,"Delivery_Type","Recipient_Name","Phone","Amount","Status"});
+            ,"Delivery_Type","Amount","Status"});
         ReportOrderWithSummaryModel reportOrderWithSummaryModel1 = reportMapper.getOrderReportMapper(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,status,deliveryDateFrom,deliveryDateTo);
         reportResponse.setSummary(reportOrderWithSummaryModel1.getSummaryModelList());
         List<Object> objectList = new ArrayList<Object>(reportOrderWithSummaryModel1.getOrderReportObjectModelList());

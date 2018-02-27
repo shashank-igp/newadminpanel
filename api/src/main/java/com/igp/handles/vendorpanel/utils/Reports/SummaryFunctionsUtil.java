@@ -481,10 +481,9 @@ public class SummaryFunctionsUtil
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement = query;
             preparedStatement = connection.prepareStatement(statement);
-
+            logger.debug("sql query in getCount "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             if(resultSet.next()){
-
                 total=resultSet.getInt("totalNo");
             }
         }catch (Exception exception) {
