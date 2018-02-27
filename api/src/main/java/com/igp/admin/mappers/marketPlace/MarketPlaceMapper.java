@@ -89,7 +89,7 @@ public class MarketPlaceMapper {
                 List<String> list = new ArrayList<>();
                 for (int j = 0; j < 20; j++) {
                     Cell header_cell = header_row.getCell(j);
-                    list.add(header_cell.getStringCellValue());
+                    list.add(header_cell.getStringCellValue().trim());
                     // filled list with column names.
                 }
                 // now we store all the values start from next row
@@ -139,18 +139,6 @@ public class MarketPlaceMapper {
     public List<ValidationModel> refineDataAndPopulateModels( Map<Integer, Map<String, String>> data,String userValue, Integer fk_associate_id) {
         List<ValidationModel> validationModelList = new ArrayList<>();
         MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
-        Map<Integer, String> serviceType = new HashMap<Integer, String>() {
-
-            {
-                put(1, Constants.getSTANDARD());
-                put(2, Constants.getFIXED());
-                put(3, Constants.getMIDNIGHT());
-                put(4, Constants.getSameDay());
-            }
-
-        };
-
-
 
         for (Map.Entry<Integer, Map<String, String>> entry : data.entrySet()) {
             // revisiting each map i.e. each row
@@ -225,11 +213,14 @@ public class MarketPlaceMapper {
                         }
 
 
+                        String address = column.get("AddressLine1").trim().replace("\n"," ");
+                        String address2 = column.get("AddressLine2").trim().replace("\n"," ");
+
                         userModel = new UserModel.UserBuilder()
                             .id(null)
                             .firstname(fname)
                             .lastname(lname)
-                            .addressField1(column.get("AddressLine1")+","+column.get("AddressLine2")+" " +column.get("City")+ "," + column.get("State"))
+                            .addressField1(address+","+address2+" " +column.get("City")+ "," + column.get("State"))
                             .state(column.get("State"))
                             .city(column.get("City"))
                             .postcode(zipCode)
@@ -281,7 +272,6 @@ public class MarketPlaceMapper {
                             .name(column.get("ProductName"))
                             .serviceDate("1970-01-01")
                             .serviceTypeId(1 + "")
-                            .serviceType(serviceType.get(1))
                             .serviceCharge(new BigDecimal(0))
                             .displayAttrList(new HashMap<>())
                             .perProductDiscount(new BigDecimal(0))
@@ -292,12 +282,11 @@ public class MarketPlaceMapper {
 
 
                         String detail = column.get("PO Number") + "(#)" +
-                            column.get("ProgramName") + "(#)" +
                             column.get("MemberName") + "(#)" +
                             userModel.getMobile() + "(#)" +
                             column.get("Email") + "(#)" +
-                            column.get("AddressLine1") + "(#)" +
-                            column.get("AddressLine2") + "(#)" +
+                            address + "(#)" +
+                            address2 + "(#)" +
                             column.get("City") + "(#)" +
                             column.get("State") + "(#)" +
                             userModel.getPostcode() + "(#)" +
@@ -343,11 +332,12 @@ public class MarketPlaceMapper {
                             }
                         }
 
+                        String address = column.get("Address").trim().replace("\n"," ");
                         userModel = new UserModel.UserBuilder()
                             .id(null)
                             .firstname(fname)
                             .lastname(lname)
-                            .addressField1(column.get("Address")+","+column.get("City")+ "," + column.get("State"))
+                            .addressField1(address+","+column.get("City")+ "," + column.get("State"))
                             .state(column.get("State"))
                             .city(column.get("City"))
                             .postcode(zipCode)
@@ -413,7 +403,6 @@ public class MarketPlaceMapper {
                             .sellingPrice(new BigDecimal(sellingPrice))
                             .serviceDate(column.get("Delivery Date"))
                             .serviceTypeId(4 + "")
-                            .serviceType(serviceType.get(4))
                             .serviceCharge(new BigDecimal(0))
                             .displayAttrList(new HashMap<>())
                             .perProductDiscount(new BigDecimal(0))
@@ -470,16 +459,18 @@ public class MarketPlaceMapper {
                             }
                         }
 
+                        String address = column.get("Address").trim().replace("\n"," ");
+
                         userModel = new UserModel.UserBuilder()
                             .id(null)
                             .firstname(fname)
                             .lastname(lname)
-                            .addressField1(column.get("Address")+","+column.get("City")+ "," + column.get("State"))
+                            .addressField1(address+","+column.get("City")+ "," + column.get("State"))
                             .state(column.get("State"))
                             .city(column.get("City"))
                             .postcode(zipCode)
                             .email(column.get("Sender Email").trim())
-                            .mobile("123456789")
+                            .mobile(column.get("Sender Mobile"))
                             .mobilePrefix("91")
                             .password(millis + "")
                             .countryId(99)
@@ -540,7 +531,6 @@ public class MarketPlaceMapper {
                             .sellingPrice(new BigDecimal(sellingPrice))
                             .serviceDate(column.get("Delivery Date"))
                             .serviceTypeId(0 + "")
-                            .serviceType("")
                             .serviceCharge(new BigDecimal(0))
                             .displayAttrList(new HashMap<>())
                             .perProductDiscount(new BigDecimal(0))
@@ -658,9 +648,9 @@ public class MarketPlaceMapper {
                                 Integer prodQty = productModel.getQuantity();
                                 if (prodCode == "" || prodCode == null || prodQty <= 0) {
                                     // product details incomplete.
-                                    logger.error("Incomplete Product Details.");
+                                    logger.error("Incomplete/Invalid Product Details.");
                                     validationModel.setError(Boolean.TRUE);
-                                    validationModel.setMessage("Incomplete Product Details.");
+                                    validationModel.setMessage("Incomplete/Invalid Product Details.");
                                 } else {
                                     // product details are not empty so bring product details to the model.
                                     validationModel = marketPlaceOrderUtil.validateAndGetProductDetails(validationModel);
