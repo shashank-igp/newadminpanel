@@ -43,10 +43,10 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setInt(1, fkAssociateId);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.first()) {
-               int type = resultSet.getInt("aa.associate_type_id");
-               if(type==1){
-                   result=true;
-               }
+                int type = resultSet.getInt("aa.associate_type_id");
+                if(type==1){
+                    result=true;
+                }
             }
         } catch (Exception exception) {
             logger.error("Error at finding associate type :", exception);
@@ -720,16 +720,40 @@ public class MarketPlaceOrderUtil {
         }
         return orderId;
     }
-    public String getMobilePrefixByCountryId(String countryId) {
+    public int getCountryId(String countryName) {
+        int countryId = 0;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
-        String mobilePrefix = null;
+
+        try {
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            String statement = "SELECT countries_id FROM countries WHERE countries_name = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                countryId = Integer.valueOf(resultSet.getString("countries_id"));
+            }
+        } catch (Exception exception) {
+            logger.error("Exception in getting country id from database", exception);
+        } finally {
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return countryId;
+    }
+
+    public String getMobilePrefixByCountryId(int countryId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String mobilePrefix = "0";
         try {
             connection = Database.INSTANCE.getReadOnlyConnection();
             String statement = "SELECT mprefix FROM country_mobile_prefix WHERE id = ?";
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setString(1, countryId);
+            preparedStatement.setInt(1, countryId);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.first()) {
                 mobilePrefix = resultSet.getString("mprefix");
@@ -743,6 +767,34 @@ public class MarketPlaceOrderUtil {
         }
         return mobilePrefix;
     }
+
+    public String getProductIdForLoyaltyOnly(String productCode) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            String statement = "select distinct f.product_sku from prep_sku_attribution a join prep_ticket_index f on f.id = a.prep_id join prep_sku s on s.prep_sku_id = f.id join prep_ticket_index b on b.id = s.prep_id where a.festival_config like '96|%' or a.festival_config like '%|96|%' and (b.barcode = ? or f.product_sku = ?)  limit 1;";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1, productCode);
+            preparedStatement.setString(2, productCode);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.first()) {
+                productCode = resultSet.getString("product_sku");
+            }
+            else {
+                productCode = "";
+            }
+        } catch (Exception exception) {
+            logger.error("Error", exception);
+        } finally {
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return productCode;
+    }
+
 
     public ValidationModel checkCorpOrderExists(ValidationModel validationModel){
         CheckCorpOrderModel checkCorpOrderModel = new CheckCorpOrderModel();
