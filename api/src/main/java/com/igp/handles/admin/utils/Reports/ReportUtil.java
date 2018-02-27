@@ -6,7 +6,6 @@ import com.igp.handles.admin.mappers.Reports.ReportMapper;
 import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.admin.models.Vendor.VendorInfoModel;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
-import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Report.ReportOrderWithSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.SummaryModel;
 import com.igp.handles.vendorpanel.models.Report.orderReportObjectModel;
@@ -14,10 +13,7 @@ import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -144,11 +140,11 @@ public class ReportUtil {
             reportOrderWithSummaryModel.setOrderReportObjectModelList(orderReportObjectList);
             SummaryModel summaryModelTotalOrders= new SummaryModel();
             summaryModelTotalOrders.setLabel("Total orders");
-            summaryModelTotalOrders.setValue(count+"");
+            summaryModelTotalOrders.setValue(String.valueOf(count));
             summaryModelList.add(summaryModelTotalOrders);
             SummaryModel summaryModelTotalAmount= new SummaryModel();
             summaryModelTotalAmount.setLabel("Total Amount");
-            summaryModelTotalAmount.setValue(amt+"");
+            summaryModelTotalAmount.setValue(String.valueOf(amt));
             summaryModelList.add(summaryModelTotalAmount);
             reportOrderWithSummaryModel.setSummaryModelList(summaryModelList);
             reportOrderWithSummaryModel.setTotalAmountSummary(totalPrice);
@@ -894,4 +890,89 @@ public class ReportUtil {
         return barcodeReportResponseModel;
     }
 
+    public OrderProductUploadFileReportWithSummary uploadPicReport(String fkAssociateId, String startDate, String endDate, String startLimit,
+        String endLimit, Integer orderNo, String deliveryDateFrom, String deliveryDateTo){
+        Connection connection=null;
+        ResultSet resultSet=null;
+        String statement;
+        PreparedStatement preparedStatement=null;
+        List<OrderProductUploadFileModel> orderProductUploadFileModelList=new ArrayList<>();
+        OrderProductUploadFileReportWithSummary orderProductUploadFileReportWithSummary =new OrderProductUploadFileReportWithSummary();
+        List<SummaryModel> summaryModelList=new ArrayList<>();
+        int count=0;
+        try {
+
+            StringBuilder sb=new StringBuilder("");
+
+            if (startDate!=null && !startDate.isEmpty() ){
+                sb.append("and o.date_purchased >='"+startDate+"'");
+            }
+
+            if (endDate!=null && !endDate.isEmpty()){
+                sb.append("and o.date_purchased <='"+endDate+"'");
+            }
+
+            if(deliveryDateFrom!=null && !deliveryDateFrom.isEmpty() ){
+                sb.append(" and opei.delivery_date >='"+deliveryDateFrom+"'");
+            }
+
+            if (deliveryDateTo!=null && !deliveryDateTo.isEmpty()){
+                sb.append("  and opei.delivery_date <='"+deliveryDateTo+"' ");
+            }
+
+            if (fkAssociateId!=null && !fkAssociateId.isEmpty()){
+                sb.append("  and vap.fk_associate_id ='"+fkAssociateId+"' ");
+            }
+
+            if (orderNo!=null )
+            {
+                sb.append("and op.orders_id="+orderNo+"");
+            }
+
+            connection=Database.INSTANCE.getReadOnlyConnection();
+            statement="select o.orders_id,a.associate_name,o.date_purchased,opei.delivery_date,vp.type, "
+                + "group_concat(vp.file_path,'') as path , p.products_name_for_url as product_image_url, count(*) as total_count"
+                + " from orders o join orders_products op on o.orders_id = op.orders_id  join order_product_extra_info "
+                + " opei on op.orders_products_id =  opei.order_product_id left  join  vp_file_upload vp on "
+                + " vp.orders_products_id = op.orders_products_id join associate a on a.associate_id = op.fk_associate_id "
+                + " join products p on p.products_id=op.products_id and p.fk_associate_id = 72 "
+                +sb.toString()+" group by op.orders_products_id,vp.type limit "+startLimit+","+endLimit+" ";
+            preparedStatement = connection.prepareStatement(statement);
+            logger.debug("sql query in while getting uploaded photos for orders "+preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                String path=null;
+                OrderProductUploadFileModel orderProductUploadFileModel=new OrderProductUploadFileModel();
+                orderProductUploadFileModel.setOrderNo(resultSet.getString("o.orders_id"));
+                orderProductUploadFileModel.setVendorName(resultSet.getString("a.associate_name"));
+                orderProductUploadFileModel.setDate(resultSet.getString("o.date_purchased"));
+                orderProductUploadFileModel.setDeliveryDate(resultSet.getString("opei.delivery_date"));
+                orderProductUploadFileModel.setProductActualPhoto(resultSet.getString("product_image_url"));
+                path=resultSet.getString("path")==null?"":resultSet.getString("path");
+                if(resultSet.getInt("vp.type")==0){
+                    String [] tempStringArray=path.split(",");
+                    orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
+                }else {
+                    String [] tempStringArray=path.split(",");
+                    orderProductUploadFileModel.setProductPhotosDelivered(Arrays.asList(tempStringArray));
+                }
+                orderProductUploadFileModelList.add(orderProductUploadFileModel);
+                count=resultSet.getInt("total_count");
+            }
+            orderProductUploadFileReportWithSummary.setOrderProductUploadFileModelList(orderProductUploadFileModelList);
+            SummaryModel summaryModelTotalOrders= new SummaryModel();
+            summaryModelTotalOrders.setLabel("Total orders");
+            summaryModelTotalOrders.setValue(String.valueOf(count));
+            summaryModelList.add(summaryModelTotalOrders);
+            orderProductUploadFileReportWithSummary.setOrderProductUploadFileModelList(orderProductUploadFileModelList);
+            orderProductUploadFileReportWithSummary.setSummaryModelList(summaryModelList);
+        }catch (Exception exception){
+            logger.error("Exception in connection : ", exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return orderProductUploadFileReportWithSummary;
+    }
 }

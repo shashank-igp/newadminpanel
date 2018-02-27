@@ -750,7 +750,7 @@ public class OrderUtil {
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()){
-                logs+=resultSet.getString("orders_history_comment");
+                logs+=resultSet.getString("orders_history_comment")+"\n";
             }
         }catch (Exception exception){
             logger.error("Exception in connection", exception);
