@@ -774,7 +774,7 @@ public class MarketPlaceOrderUtil {
         ResultSet resultSet = null;
         try {
             connection = Database.INSTANCE.getReadOnlyConnection();
-            String statement = "select distinct f.product_sku from prep_sku_attribution a join prep_ticket_index f on f.id = a.prep_id join prep_sku s on s.prep_sku_id = f.id join prep_ticket_index b on b.id = s.prep_id where a.festival_config like '96|%' or a.festival_config like '%|96|%' and (b.barcode = ? or f.product_sku = ?)  limit 1;";
+            String statement = "select distinct f.product_sku from prep_sku_attribution a join prep_ticket_index f on f.id = a.prep_id join prep_sku s on s.prep_sku_id = f.id join prep_ticket_index b on b.id = s.prep_id where (a.festival_config like '96|%' or a.festival_config like '%|96|%') and (b.barcode = ? or f.product_sku = ?)  limit 1";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, productCode);
             preparedStatement.setString(2, productCode);
