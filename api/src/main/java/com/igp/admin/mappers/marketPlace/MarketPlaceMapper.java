@@ -2,19 +2,12 @@ package com.igp.admin.mappers.marketPlace;
 
 import com.igp.admin.models.marketPlace.*;
 import com.igp.admin.utils.marketPlace.MarketPlaceOrderUtil;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.poi.hssf.usermodel.HSSFWorkbook;
-import org.apache.poi.openxml4j.opc.OPCPackage;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import org.apache.poi.ss.usermodel.*;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -192,7 +185,7 @@ public class MarketPlaceMapper {
                             quantity = (int) d;
                         }
 
-                        String name = column.get("MemberName").trim();
+                        String name = column.get("MemberName").trim().replace("\\sNA\\s","");
                         String fname = "";
                         String lname = "";
 
@@ -200,12 +193,18 @@ public class MarketPlaceMapper {
 
                             if (name.contains(" ")) {
                                 String[] nameArray = name.trim().split(" ");
+
                                 fname = nameArray[0];
                                 if (nameArray.length > 1) {
-                                    lname = name.trim().substring(fname.length() + 1, name.trim().length());
 
-                                } else {
-                                    fname = column.get("MemberName");
+                                    for(int i=1;i<nameArray.length-1;i++){
+                                        if(fname.length()+nameArray[i].length()<20){
+                                            fname+=" "+nameArray[i];
+                                        }else {
+                                            break;
+                                        }
+                                    }
+                                    lname = name.trim().substring(fname.length() + 1, name.trim().length());
                                 }
                             } else {
                                 fname = column.get("MemberName");
