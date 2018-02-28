@@ -185,7 +185,7 @@ public class MarketPlaceMapper {
                             quantity = (int) d;
                         }
 
-                        String name = column.get("MemberName").trim().replace("\\sNA\\s","");
+                        String name = column.get("MemberName").trim().replace("\\sNA\\s"," ").replaceAll("\\sna\\s"," ").replaceAll("\\sNa\\s"," ");
                         String fname = "";
                         String lname = "";
 
@@ -304,7 +304,7 @@ public class MarketPlaceMapper {
                     } else if(fk_associate_id==841){
                         //Interflora International
 
-                        String name = column.get("Sender Name").trim();
+                        String name = column.get("Sender Name").trim().replace("\\sNA\\s","");;
                         String fname = "";
                         String lname = "";
 
@@ -312,12 +312,18 @@ public class MarketPlaceMapper {
 
                             if (name.contains(" ")) {
                                 String[] nameArray = name.trim().split(" ");
+
                                 fname = nameArray[0];
                                 if (nameArray.length > 1) {
-                                    lname = name.trim().substring(fname.length() + 1, name.trim().length());
 
-                                } else {
-                                    fname = column.get("Sender Name");
+                                    for(int i=1;i<nameArray.length-1;i++){
+                                        if(fname.length()+nameArray[i].length()<20){
+                                            fname+=" "+nameArray[i];
+                                        }else {
+                                            break;
+                                        }
+                                    }
+                                    lname = name.trim().substring(fname.length() + 1, name.trim().length());
                                 }
                             } else {
                                 fname = column.get("Sender Name");
@@ -431,7 +437,7 @@ public class MarketPlaceMapper {
                     }else if(fk_associate_id==556){
                         // corporate
 
-                        String name = column.get("Sender Name").trim();
+                        String name = column.get("Sender Name").trim().replaceAll("\\sNA\\s","");
                         String fname = "";
                         String lname = "";
 
@@ -439,12 +445,18 @@ public class MarketPlaceMapper {
 
                             if (name.contains(" ")) {
                                 String[] nameArray = name.trim().split(" ");
+
                                 fname = nameArray[0];
                                 if (nameArray.length > 1) {
-                                    lname = name.trim().substring(fname.length() + 1, name.trim().length());
 
-                                } else {
-                                    fname = column.get("Sender Name");
+                                    for(int i=1;i<nameArray.length-1;i++){
+                                        if(fname.length()+nameArray[i].length()<20){
+                                            fname+=" "+nameArray[i];
+                                        }else {
+                                            break;
+                                        }
+                                    }
+                                    lname = name.trim().substring(fname.length() + 1, name.trim().length());
                                 }
                             } else {
                                 fname = column.get("Sender Name");

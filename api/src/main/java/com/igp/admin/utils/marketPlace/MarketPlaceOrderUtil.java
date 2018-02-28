@@ -153,8 +153,8 @@ public class MarketPlaceOrderUtil {
                 shippingAddress.getMobile() == null || Objects.equals(shippingAddress.getMobile(), "") ||
                 shippingAddress.getPostcode() == null || Objects.equals(shippingAddress.getPostcode(), "") ||
                 shippingAddress.getCountryId() == null || Objects.equals(shippingAddress.getCountryId(), "")
-             //  || shippingAddress.getState() == null || Objects.equals(shippingAddress.getState(), "") ||
-            //    shippingAddress.getCity() == null || Objects.equals(shippingAddress.getCity(), "")
+                //  || shippingAddress.getState() == null || Objects.equals(shippingAddress.getState(), "") ||
+                //    shippingAddress.getCity() == null || Objects.equals(shippingAddress.getCity(), "")
                 ){
 
                 logger.error("Delivery Details can't be empty.");
@@ -434,6 +434,7 @@ public class MarketPlaceOrderUtil {
                     orderTempBasketModel.setServiceTypeId(new Integer(productModel.getServiceTypeId()));
                     orderTempBasketModel.setServiceDate(productModel.getServiceDate()); // check format of storing it
                     orderTempBasketModel.setServiceTime("");
+                    orderTempBasketModel.setProductSellingPrice(productModel.getSellingPrice());
                     Integer tempOrderBasketId = createTempOrderBasket(orderTempBasketModel);
                     if (tempOrderBasketId != null) {
                         if (insertIntoOrdersTempBasketExtraInfo(orderTempBasketModel, tempOrderBasketId))
@@ -485,7 +486,7 @@ public class MarketPlaceOrderUtil {
             connection = Database.INSTANCE.getReadWriteConnection();
             statement = "INSERT INTO orders_temp_basket (customers_id, products_id, products_quantity, orders_temp_id, " +
                 "fk_associate_id, products_base_currency, products_base_currency_value, products_base_currency_value_inr, " +
-                "special_charges, shipping_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "special_charges, shipping_type,final_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setInt(1, orderTempBasketModel.getCustomerId());
@@ -498,6 +499,7 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setInt(8, orderTempBasketModel.getBaseCurrencyValueInr()); // to be updated based on the current prices and products_base_currency.
             preparedStatement.setBigDecimal(9, orderTempBasketModel.getServiceCharges());
             preparedStatement.setString(10, orderTempBasketModel.getServiceType());
+            preparedStatement.setBigDecimal(11,orderTempBasketModel.getProductSellingPrice());
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {

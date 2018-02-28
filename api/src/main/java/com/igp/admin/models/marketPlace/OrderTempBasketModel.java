@@ -1,5 +1,6 @@
 package com.igp.admin.models.marketPlace;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigDecimal;
@@ -56,6 +57,19 @@ public class OrderTempBasketModel {
 
     @JsonProperty("sdate")
     private String serviceDate;
+
+    @JsonIgnore
+    private BigDecimal productSellingPrice;
+
+    public BigDecimal getProductSellingPrice()
+    {
+        return productSellingPrice;
+    }
+
+    public void setProductSellingPrice(BigDecimal productSellingPrice)
+    {
+        this.productSellingPrice = productSellingPrice;
+    }
 
     public Integer getCustomerId() {
         return customerId;
