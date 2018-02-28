@@ -26,7 +26,7 @@ public class OrderProductUploadFileModel {
     @JsonProperty("Proof_Of_Delivery")
     private List<String> productPhotosDelivered;
 
-    @JsonProperty("Product_Photo")
+    @JsonProperty("Product_Image")
     private String productActualPhoto;
 
     public String getProductActualPhoto()
