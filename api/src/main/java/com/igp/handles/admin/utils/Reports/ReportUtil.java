@@ -912,7 +912,7 @@ public class ReportUtil {
         List<OrderProductUploadFileModel> orderProductUploadFileModelList=new ArrayList<>();
         OrderProductUploadFileReportWithSummary orderProductUploadFileReportWithSummary =new OrderProductUploadFileReportWithSummary();
         List<SummaryModel> summaryModelList=new ArrayList<>();
-        String queryForCount,whereCause=null;
+        String queryForCount;
         int count=0;
         try {
 
@@ -942,12 +942,7 @@ public class ReportUtil {
             {
                 sb.append("and op.orders_id="+orderNo+"");
             }
-            if(!sb.toString().equals("")){
-                whereCause="where "+sb.toString();
-            }else {
-                whereCause="";
-            }
-            queryForCount="select count(distinct op.orders_products_id) as totalNo  from orders o join orders_products op on o.orders_id = op.orders_id  join order_product_extra_info   opei on op.orders_products_id =  opei.order_product_id left  join  vp_file_upload vp on   vp.orders_products_id = op.orders_products_id join associate a on a.associate_id = op.fk_associate_id   join products p on p.products_id=op.products_id and p.fk_associate_id = 72 "+whereCause;
+            queryForCount="select count(distinct op.orders_products_id) as totalNo  from orders o join orders_products op on o.orders_id = op.orders_id  join order_product_extra_info   opei on op.orders_products_id =  opei.order_product_id left  join  vp_file_upload vp on   vp.orders_products_id = op.orders_products_id join associate a on a.associate_id = op.fk_associate_id   join products p on p.products_id=op.products_id and p.fk_associate_id = 72 where 1=1 "+sb.toString();
             count=SummaryFunctionsUtil.getCount(queryForCount);
 
             connection=Database.INSTANCE.getReadOnlyConnection();
@@ -956,8 +951,8 @@ public class ReportUtil {
                 + " from orders o join orders_products op on o.orders_id = op.orders_id  join order_product_extra_info "
                 + " opei on op.orders_products_id =  opei.order_product_id left  join  vp_file_upload vp on "
                 + " vp.orders_products_id = op.orders_products_id join associate a on a.associate_id = op.fk_associate_id "
-                + " join products p on p.products_id=op.products_id and p.fk_associate_id = 72 "
-                +whereCause+" group by op.orders_products_id,vp.type limit "+startLimit+","+endLimit+" ";
+                + " join products p on p.products_id=op.products_id and p.fk_associate_id = 72 where 1=1 "
+                +sb.toString()+" group by op.orders_products_id,vp.type limit "+startLimit+","+endLimit+" ";
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in while getting uploaded photos for orders "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
