@@ -278,7 +278,7 @@ public class MarketPlaceOrderUtil {
                 ProductModel productModel1 = new ProductModel.Builder()
                     .id(resultSet.getInt("products.products_id"))
                     .quantity(productModel.getQuantity())
-                    .name(resultSet.getString("newigp_product_extra_info.display_name"))
+                    .name(resultSet.getString("products.products_name"))
                     .sellingPrice(productModel.getSellingPrice())
                     .serviceDate(productModel.getServiceDate())
                     .giftBox(productModel.getGiftBox())
