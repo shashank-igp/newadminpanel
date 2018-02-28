@@ -1,6 +1,7 @@
 package com.igp.handles.admin.utils.Reports;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.igp.config.Environment;
 import com.igp.config.instance.Database;
 import com.igp.handles.admin.mappers.Reports.ReportMapper;
 import com.igp.handles.admin.models.Reports.*;
@@ -912,10 +913,11 @@ public class ReportUtil {
         List<OrderProductUploadFileModel> orderProductUploadFileModelList=new ArrayList<>();
         OrderProductUploadFileReportWithSummary orderProductUploadFileReportWithSummary =new OrderProductUploadFileReportWithSummary();
         List<SummaryModel> summaryModelList=new ArrayList<>();
-        String queryForCount;
+        String queryForCount, s3BaseUrl="",s3BucketName="";;
         int count=0;
         try {
-
+            s3BaseUrl= Environment.getS3baseUrl();
+            s3BucketName=Environment.getVendorPanelS3uploadBucketname();
             StringBuilder sb=new StringBuilder("");
 
             if (startDate!=null && !startDate.isEmpty() ){
@@ -972,6 +974,9 @@ public class ReportUtil {
                     orderProductUploadFileModel.setProductPhotosDelivered(Arrays.asList(tempStringArray));
                 }else {
                     String [] tempStringArray=path.split(",");
+                    for(int i=0;i<tempStringArray.length;i++){
+                        tempStringArray[i]=s3BaseUrl+"/"+s3BucketName+"/"+tempStringArray[i];
+                    }
                     if(resultSet.getInt("vp.type")==0){
                         orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
                     }else {

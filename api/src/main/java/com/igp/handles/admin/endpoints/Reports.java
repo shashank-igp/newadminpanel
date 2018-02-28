@@ -447,7 +447,7 @@ public class Reports {
         }
 
         reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Date","Delivery_Date"
-            ,"Product_Photo","Out_Of_Delivery","Proof_Of_Delivery"});
+            ,"Product_Image","Out_Of_Delivery","Proof_Of_Delivery"});
         OrderProductUploadFileReportWithSummary orderProductUploadFileReportWithSummary = reportMapper.getOrderFileUploadReport(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo);
         reportResponse.setSummary(orderProductUploadFileReportWithSummary.getSummaryModelList());
         List<Object> objectList = new ArrayList<Object>(orderProductUploadFileReportWithSummary.getOrderProductUploadFileModelList());
