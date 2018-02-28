@@ -799,7 +799,7 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setString(2, productCode);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.first()) {
-                productCode = resultSet.getString("product_sku");
+                productCode = resultSet.getString("p.products_code");
             }
             else {
                 productCode = "";
