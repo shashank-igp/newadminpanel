@@ -497,7 +497,7 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setInt(8, orderTempBasketModel.getBaseCurrencyValueInr()); // to be updated based on the current prices and products_base_currency.
             preparedStatement.setBigDecimal(9, orderTempBasketModel.getServiceCharges());
             preparedStatement.setString(10, orderTempBasketModel.getServiceType());
-            preparedStatement.setBigDecimal(11,orderTempBasketModel.getProductSellingPrice());
+            preparedStatement.setBigDecimal(11,orderTempBasketModel.getProductSellingPrice().divide(new BigDecimal(orderTempBasketModel.getQuantity().intValue())));
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
