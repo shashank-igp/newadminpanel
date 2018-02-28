@@ -253,7 +253,7 @@ public class MarketPlaceOrderUtil {
 
         };
         try {
-            if (prodCode == "" || prodCode == null || prodCode.length() != 9 ) {
+            if (prodCode == "" || prodCode == null) {
                 logger.debug("product details : "+productModel);
                 throw new Exception("Product Code is Wrong.");
             }
@@ -263,6 +263,7 @@ public class MarketPlaceOrderUtil {
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, prodCode);
             resultSet = preparedStatement.executeQuery();
+
             if (resultSet.next()) {
                 //- trying to convert the prices from INR to USD.
                 BigDecimal inrPrice = resultSet.getBigDecimal("products.products_mrp");
