@@ -766,8 +766,8 @@ public class MarketPlaceMapper {
             marketPlaceTempOrderModel.setDeliveryMessageModel(validationModel.getDeliveryMessageModel()); // change it later
             logger.debug("TEMP-ORDER DEBUGGING : " + validationModel.getDeliveryMessageModel());
 
-            marketPlaceTempOrderModel.setComment("0");
-            logger.debug("TEMP-ORDER DEBUGGING : " + "setComment"+"0");
+            marketPlaceTempOrderModel.setComment("");
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setComment"+"");
 
             marketPlaceTempOrderModel.setDeliveryDate(productModel.getServiceDate());
             logger.debug("TEMP-ORDER DEBUGGING : " + "setDeliveryDate "+productModel.getServiceDate());
