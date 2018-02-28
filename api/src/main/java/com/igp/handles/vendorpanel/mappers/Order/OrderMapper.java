@@ -207,6 +207,7 @@ public class OrderMapper
 
         }
 
+        logger.debug("tempOrderProductsMap for "+fkassociateId+tempOrderProductsMap.toString());
 
 
 
