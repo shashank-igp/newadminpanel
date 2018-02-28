@@ -258,8 +258,8 @@ public class MarketPlaceOrderUtil {
                 throw new Exception("Product Code is Wrong.");
             }
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = "SELECT * FROM products INNER JOIN newigp_product_extra_info WHERE " +
-                "products.products_id = newigp_product_extra_info.products_id AND products.products_code = ?";
+            statement = "SELECT * FROM products LEFT JOIN newigp_product_extra_info ON " +
+                "products.products_id = newigp_product_extra_info.products_id WHERE products.products_code = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, prodCode);
             resultSet = preparedStatement.executeQuery();

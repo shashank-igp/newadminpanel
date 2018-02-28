@@ -185,7 +185,8 @@ public class MarketPlaceMapper {
                             quantity = (int) d;
                         }
 
-                        String name = column.get("MemberName").replaceAll("\\sNA\\s"," ").replaceAll("\\sna\\s"," ").replaceAll("\\sNa\\s"," ").trim();
+                        String name = " "+column.get("MemberName")+" ";
+                        name=name.replaceAll("\\sNA\\s"," ").replaceAll("\\sna\\s"," ").replaceAll("\\sNa\\s"," ").trim();
                         String fname = "";
                         String lname = "";
 
