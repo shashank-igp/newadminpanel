@@ -284,7 +284,7 @@ public class DashboardMapper {
                     boolean flagForUniqueness=false;
                     int slaCode= slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1);
                     String key=orderId + "," + deliveryDate + "," + shippingType;
-                    flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId);
+                    flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId,status);
 
 //                    logger.debug("slacode  on layer "+slaCode+" with orderId "+orderDetailsPerOrderProduct.getOrdersId());
 
@@ -655,7 +655,7 @@ public class DashboardMapper {
                     int slaCode= orderDetailsPerOrderProduct.getSlaCode();
 
                     String key=orderId + "," + deliveryDate + "," + shippingType;
-                    flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId);
+                    flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId,status);
 
                     if (flagForUniqueness && deliveryDate.getTime() == specificDate.getTime()){
                         if(status.equals("Processed") && vendorId==72){ // unassigned -> not alloted

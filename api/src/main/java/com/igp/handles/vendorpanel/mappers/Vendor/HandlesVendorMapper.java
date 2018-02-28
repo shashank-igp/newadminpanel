@@ -257,7 +257,7 @@ public class HandlesVendorMapper {
                         orderIdData.put("alert", false + "");
 
                         String key=orderId + "," + deliveryDate + "," + shippingType;
-                        flagForUniqueness=checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,Integer.parseInt(fkAssociateId));
+                        flagForUniqueness=checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,Integer.parseInt(fkAssociateId),status);
 
                         logger.debug("Key : status" + status + "-" + key);
                         if (flagForUniqueness)
@@ -436,7 +436,7 @@ public class HandlesVendorMapper {
                         orderIdData.put("alert", false + "");
 
                         String key=orderId + "," + deliveryDate + "," + shippingType;
-                        flagForUniqueness=checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,Integer.parseInt(fkAssociateId));
+                        flagForUniqueness=checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,Integer.parseInt(fkAssociateId),status);
                         logger.debug("Key : status" + status + "-" + key);
                         if (flagForUniqueness)
                         {
@@ -615,7 +615,7 @@ public class HandlesVendorMapper {
                     {
                         String key=orderId + "," + deliveryDate + "," + shippingType;
                         flagForUniqueness=checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,
-                                                            Integer.parseInt(fkAssociateId));
+                                                            Integer.parseInt(fkAssociateId),status);
                         if (flagForUniqueness)
                         {
 //                            orderTotalWhole++;
@@ -791,7 +791,7 @@ public class HandlesVendorMapper {
                     String key = orderId + "," + deliveryDate + "," + shippingType + "," + deliveryTime + "," + status;
 
                     flagForUniqueness=checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,
-                                                    Integer.parseInt(fkAssociateId));
+                                                    Integer.parseInt(fkAssociateId),status);
 
                     if (flagForUniqueness)
                     {
@@ -852,16 +852,16 @@ public class HandlesVendorMapper {
 
 
     public boolean checkUniqueUnit(Long orderId,Date deliveryDate,String shippingType,String deliveryTime,
-                            Map<String,Set<String>> uniqueUnitsMap,int vendorId){
+                            Map<String,Set<String>> uniqueUnitsMap,int vendorId,String status){
         boolean flagForUniqueness=false;
 
 
-        String key=orderId + "," + deliveryDate + "," + shippingType+ "," + vendorId;
+        String key=orderId + "," + deliveryDate + "," + shippingType+ "," + vendorId+ "," + status;
 
         if(shippingType.equalsIgnoreCase("Any time") ||  shippingType.equalsIgnoreCase("Same Day")){
             if(uniqueUnitsMap.containsKey(key)==false){  // simple key not exist so we have to check if that unit can be clubbed or not
-                String key1=orderId + "," + deliveryDate + ",Fix Time"+ "," + vendorId;
-                String key2=orderId + "," + deliveryDate + ",Midnight"+ "," + vendorId;
+                String key1=orderId + "," + deliveryDate + ",Fix Time"+ "," + vendorId+ "," + status;
+                String key2=orderId + "," + deliveryDate + ",Midnight"+ "," + vendorId+ "," + status;
                 if(uniqueUnitsMap.containsKey(key1)|| uniqueUnitsMap.containsKey(key2) ){
                     flagForUniqueness=false;
                 }
@@ -877,8 +877,8 @@ public class HandlesVendorMapper {
             }
         }
         else if(shippingType.equalsIgnoreCase("Fix Time") || shippingType.equalsIgnoreCase("Midnight") ) {
-            String key1=orderId + "," + deliveryDate + ",Any time"+ "," + vendorId;
-            String key2=orderId + "," + deliveryDate + ",Same Day"+ "," + vendorId;
+            String key1=orderId + "," + deliveryDate + ",Any time"+ "," + vendorId+ "," + status;
+            String key2=orderId + "," + deliveryDate + ",Same Day"+ "," + vendorId+ "," + status;
 
             if(uniqueUnitsMap.containsKey(key)==false){
 
