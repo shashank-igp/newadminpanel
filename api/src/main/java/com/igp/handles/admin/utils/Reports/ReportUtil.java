@@ -941,10 +941,12 @@ public class ReportUtil {
             {
                 sb.append("and op.orders_id="+orderNo+"");
             }
+            String queryForCount="select count(*) as totalNo  from orders o join orders_products op on o.orders_id = op.orders_id  join order_product_extra_info   opei on op.orders_products_id =  opei.order_product_id left  join  vp_file_upload vp on   vp.orders_products_id = op.orders_products_id join associate a on a.associate_id = op.fk_associate_id   join products p on p.products_id=op.products_id and p.fk_associate_id = 72 "+sb.toString()+" group by op.orders_products_id,vp.type ";
+            count=SummaryFunctionsUtil.getCount(queryForCount);
 
             connection=Database.INSTANCE.getReadOnlyConnection();
             statement="select o.orders_id,a.associate_name,o.date_purchased,opei.delivery_date,vp.type, "
-                + "group_concat(vp.file_path,'') as path , p.products_name_for_url as product_image_url, count(*) as total_count"
+                + "group_concat(vp.file_path,'') as path , p.products_name_for_url as product_image_url "
                 + " from orders o join orders_products op on o.orders_id = op.orders_id  join order_product_extra_info "
                 + " opei on op.orders_products_id =  opei.order_product_id left  join  vp_file_upload vp on "
                 + " vp.orders_products_id = op.orders_products_id join associate a on a.associate_id = op.fk_associate_id "
@@ -970,7 +972,6 @@ public class ReportUtil {
                     orderProductUploadFileModel.setProductPhotosDelivered(Arrays.asList(tempStringArray));
                 }
                 orderProductUploadFileModelList.add(orderProductUploadFileModel);
-                count=resultSet.getInt("total_count");
             }
             orderProductUploadFileReportWithSummary.setOrderProductUploadFileModelList(orderProductUploadFileModelList);
             SummaryModel summaryModelTotalOrders= new SummaryModel();
