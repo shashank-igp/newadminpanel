@@ -662,7 +662,11 @@ public class MarketPlaceMapper {
                                     // product details incomplete.
                                     logger.error("Incomplete/Invalid Product Details.");
                                     validationModel.setError(Boolean.TRUE);
-                                    validationModel.setMessage("Incomplete/Invalid Product Details.");
+                                    if(prodCode == "" || prodCode == null){
+                                        validationModel.setMessage("Incomplete/Invalid Product Details.");
+                                    }else if(prodQty <= 0){
+                                        validationModel.setMessage("Product Quantity is zero. ");
+                                    }
                                 } else {
                                     // product details are not empty so bring product details to the model.
                                     validationModel = marketPlaceOrderUtil.validateAndGetProductDetails(validationModel);
