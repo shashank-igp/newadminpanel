@@ -42,14 +42,15 @@ public class Reports {
 
         ReportResponse reportResponse = new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
-        startDate=getTimestampString(startDate,0);
-        endDate=getTimestampString(endDate,0);
+
         if(deliveryDateFrom==null&&deliveryDateTo==null&&status==null&&orderNo==null&&endDate==null&&startDate==null){
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
             LocalDate localDate = LocalDate.now();
             deliveryDateFrom=dtf.format(localDate);
             //set today's date by default
         }
+        startDate=getTimestampString(startDate,0);
+        endDate=getTimestampString(endDate,0);
         deliveryDateTo=getTimestampString(deliveryDateTo,0);
         deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
 
@@ -426,14 +427,15 @@ public class Reports {
 
         ReportResponse reportResponse = new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
-        startDate=getTimestampString(startDate,0);
-        endDate=getTimestampString(endDate,0);
+
         if(deliveryDateFrom==null&&deliveryDateTo==null&&orderNo==null&&endDate==null&&startDate==null){
             DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
             LocalDate localDate = LocalDate.now();
             deliveryDateFrom=dtf.format(localDate);
             //set today's date by default
         }
+        startDate=getTimestampString(startDate,0);
+        endDate=getTimestampString(endDate,0);
         deliveryDateTo=getTimestampString(deliveryDateTo,0);
         deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
 
