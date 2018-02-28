@@ -3,9 +3,7 @@ package com.igp.admin.utils.marketPlace;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.igp.admin.mappers.marketPlace.Constants;
 import com.igp.admin.models.marketPlace.*;
-import com.igp.admin.models.marketPlace.APIOrderResponseModel;
 import com.igp.admin.utils.httpRequest.HttpRequestUtil;
-import com.igp.config.Environment;
 import com.igp.config.SecretProperties;
 import com.igp.config.instance.Database;
 import org.apache.commons.io.FileUtils;
@@ -795,7 +793,7 @@ public class MarketPlaceOrderUtil {
         ResultSet resultSet = null;
         try {
             connection = Database.INSTANCE.getReadOnlyConnection();
-            String statement = "select p.products_code from products p left join prep_ticket_index f on f f.fk_products_id = p.products_id left join prep_sku_attribution a on f.id = a.prep_id left join prep_sku s on s.prep_sku_id = f.id left join prep_ticket_index b on b.id = s.prep_id where ((a.festival_config like '96|%' or a.festival_config like '%|96|%') and b.barcode = ? ) or (p.products_code = ?) order by p.products_id desc limit 1";
+            String statement = "select p.products_code from products p left join prep_ticket_index f on f.fk_products_id = p.products_id left join prep_sku_attribution a on f.id = a.prep_id left join prep_sku s on s.prep_sku_id = f.id left join prep_ticket_index b on b.id = s.prep_id where ((a.festival_config like '96|%' or a.festival_config like '%|96|%') and b.barcode = ? ) or (p.products_code = ?) order by p.products_id desc limit 1";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, productCode);
             preparedStatement.setString(2, productCode);
