@@ -968,7 +968,7 @@ public class ReportUtil {
                 orderProductUploadFileModel.setProductActualPhoto(resultSet.getString("product_image_url"));
                 path=resultSet.getString("path");
                 if(path==null){
-                    path="";
+                    path="NA";
                     String [] tempStringArray=path.split(",");
                     orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
                     orderProductUploadFileModel.setProductPhotosDelivered(Arrays.asList(tempStringArray));
