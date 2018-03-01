@@ -428,12 +428,12 @@ public class Reports {
         ReportResponse reportResponse = new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
 
-        if(deliveryDateFrom==null&&deliveryDateTo==null&&orderNo==null&&endDate==null&&startDate==null){
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-            LocalDate localDate = LocalDate.now();
-            deliveryDateFrom=dtf.format(localDate);
-            //set today's date by default
-        }
+//        if(deliveryDateFrom==null&&deliveryDateTo==null&&orderNo==null&&endDate==null&&startDate==null){
+//            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+//            LocalDate localDate = LocalDate.now();
+//            deliveryDateFrom=dtf.format(localDate);
+//            //set today's date by default
+//        }
         startDate=getTimestampString(startDate,0);
         endDate=getTimestampString(endDate,0);
         deliveryDateTo=getTimestampString(deliveryDateTo,0);
