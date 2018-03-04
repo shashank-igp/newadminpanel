@@ -915,6 +915,8 @@ public class ReportUtil {
         List<SummaryModel> summaryModelList=new ArrayList<>();
         String queryForCount, s3BaseUrl="",s3BucketName="";;
         int count=0;
+        String pathOutForDelivery=null;
+        String pathDelivered=null;
         try {
             s3BaseUrl= Environment.getS3baseUrl();
             s3BucketName=Environment.getVendorPanelS3uploadBucketname();
@@ -948,40 +950,41 @@ public class ReportUtil {
             count=SummaryFunctionsUtil.getCount(queryForCount);
 
             connection=Database.INSTANCE.getReadOnlyConnection();
-            statement="select o.orders_id,a.associate_name,o.date_purchased,opei.delivery_date,vp.type, "
-                + "group_concat(vp.file_path,'') as path , npei.m_img as product_image_url "
+            statement="select o.orders_id,a.associate_name,o.date_purchased,opei.delivery_date, "
+                + " group_concat(if(vp.type=0,vp.file_path,null) separator ',') outForDelivery , "
+                + " group_concat(if(vp.type=1,vp.file_path,null) separator ',') proofOfDelivery "
                 + " from orders o join orders_products op on o.orders_id = op.orders_id  join order_product_extra_info "
                 + " opei on op.orders_products_id =  opei.order_product_id left  join  vp_file_upload vp on "
                 + " vp.orders_products_id = op.orders_products_id join associate a on a.associate_id = op.fk_associate_id "
                 + " join products p on p.products_id=op.products_id and p.fk_associate_id = 72 join newigp_product_extra_info as  npei on npei.products_id=op.products_id where 1=1 "
-                +sb.toString()+" group by op.orders_products_id,vp.type limit "+startLimit+","+endLimit+" ";
+                +sb.toString()+" group by op.orders_products_id limit "+startLimit+","+endLimit+" ";
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in while getting uploaded photos for orders "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()){
-                String path=null;
                 OrderProductUploadFileModel orderProductUploadFileModel=new OrderProductUploadFileModel();
                 orderProductUploadFileModel.setOrderNo(resultSet.getString("o.orders_id"));
                 orderProductUploadFileModel.setVendorName(resultSet.getString("a.associate_name"));
                 orderProductUploadFileModel.setDate(resultSet.getString("o.date_purchased"));
                 orderProductUploadFileModel.setDeliveryDate(resultSet.getString("opei.delivery_date"));
                 orderProductUploadFileModel.setProductActualPhoto(resultSet.getString("product_image_url"));
-                path=resultSet.getString("path");
-                if(path==null){
-                    path="NA";
-                    String [] tempStringArray=path.split(",");
+                pathOutForDelivery=resultSet.getString("outForDelivery");
+                pathDelivered=resultSet.getString("proofOfDelivery");
+                if(pathOutForDelivery==null){
+                    pathOutForDelivery="NA";
+                    String [] tempStringArray=pathOutForDelivery.split(",");
                     orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
+                }else if(pathOutForDelivery!=null){
+                    String [] tempStringArray=pathOutForDelivery.split(",");
+                    orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
+                }
+                if(pathDelivered==null) {
+                    pathDelivered="NA";
+                    String [] tempStringArray=pathDelivered.split(",");
                     orderProductUploadFileModel.setProductPhotosDelivered(Arrays.asList(tempStringArray));
-                }else {
-                    String [] tempStringArray=path.split(",");
-                    for(int i=0;i<tempStringArray.length;i++){
-                        tempStringArray[i]=s3BaseUrl+"/"+s3BucketName+"/"+tempStringArray[i];
-                    }
-                    if(resultSet.getInt("vp.type")==0){
-                        orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
-                    }else {
-                        orderProductUploadFileModel.setProductPhotosDelivered(Arrays.asList(tempStringArray));
-                    }
+                }else if(pathDelivered!=null){
+                    String [] tempStringArray=pathDelivered.split(",");
+                    orderProductUploadFileModel.setProductPhotosDelivered(Arrays.asList(tempStringArray));
                 }
                 orderProductUploadFileModelList.add(orderProductUploadFileModel);
             }
