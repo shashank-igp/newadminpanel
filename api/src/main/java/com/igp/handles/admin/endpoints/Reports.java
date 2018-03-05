@@ -14,7 +14,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import static com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil.getTimestampString;
 
@@ -43,30 +45,34 @@ public class Reports {
         ReportResponse reportResponse = new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
 
-        if(deliveryDateFrom==null&&deliveryDateTo==null&&status==null&&orderNo==null&&endDate==null&&startDate==null){
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-            LocalDate localDate = LocalDate.now();
-            deliveryDateFrom=dtf.format(localDate);
-            //set today's date by default
-        }
-        startDate=getTimestampString(startDate,0);
-        endDate=getTimestampString(endDate,0);
-        deliveryDateTo=getTimestampString(deliveryDateTo,0);
-        deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
+        try {
+            if(deliveryDateFrom==null&&deliveryDateTo==null&&status==null&&orderNo==null&&endDate==null&&startDate==null){
+                DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+                LocalDate localDate = LocalDate.now();
+                deliveryDateFrom=dtf.format(localDate);
+                //set today's date by default
+            }
+            startDate=getTimestampString(startDate,0);
+            endDate=getTimestampString(endDate,0);
+            deliveryDateTo=getTimestampString(deliveryDateTo,0);
+            deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
 
-        if(deliveryDateFrom!=null&&deliveryDateTo!=null){
-            deliveryDateTo=getTimestampString(deliveryDateTo,1);
-        }
-        if(startDate!=null&&endDate!=null){
-            endDate=getTimestampString(endDate,1);
-        }
+            if(deliveryDateFrom!=null&&deliveryDateTo!=null){
+                deliveryDateTo=getTimestampString(deliveryDateTo,1);
+            }
+            if(startDate!=null&&endDate!=null){
+                endDate=getTimestampString(endDate,1);
+            }
 
-        reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Date","Occasion","City","Pincode","Delivery_Date"
-            ,"Delivery_Type","Amount","Status"});
-        ReportOrderWithSummaryModel reportOrderWithSummaryModel1 = reportMapper.getOrderReportMapper(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,status,deliveryDateFrom,deliveryDateTo);
-        reportResponse.setSummary(reportOrderWithSummaryModel1.getSummaryModelList());
-        List<Object> objectList = new ArrayList<Object>(reportOrderWithSummaryModel1.getOrderReportObjectModelList());
-        reportResponse.setTableData( objectList);
+            reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Date","Occasion","City","Pincode","Delivery_Date"
+                ,"Delivery_Type","Amount","Status"});
+            ReportOrderWithSummaryModel reportOrderWithSummaryModel1 = reportMapper.getOrderReportMapper(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,status,deliveryDateFrom,deliveryDateTo);
+            reportResponse.setSummary(reportOrderWithSummaryModel1.getSummaryModelList());
+            List<Object> objectList = new ArrayList<Object>(reportOrderWithSummaryModel1.getOrderReportObjectModelList());
+            reportResponse.setTableData( objectList);
+        }catch (Exception exception){
+            logger.error("Error occured at getOrderReport ",exception);
+        }
         return reportResponse;
     }
 
@@ -78,14 +84,18 @@ public class Reports {
                                            @QueryParam("endLimit") String endLimit){
         ReportResponse reportResponse = new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
-        List<Map.Entry<String,List<String>>> tableDataAction = new ArrayList<>();
-        reportResponse.setTableHeaders(new String[]{"Vendor Name","Pincode","Standard Delivery","Fixed Time Delivery","Midnight Delivery"});
-        reportMapper.fillDataActionPincode(tableDataAction);
-        reportResponse.setTableDataAction(tableDataAction);
-        PincodeModelListHavingSummaryModel pincodeModelListHavingSummaryModel = ReportMapper.getPincodeSummaryDetails(fkAssociateId,startLimit,endLimit);
-        reportResponse.setSummary(pincodeModelListHavingSummaryModel.getSummaryModelList());
-        List<Object> objectList = new ArrayList<Object>(pincodeModelListHavingSummaryModel.getPincodeTableDataModelList());
-        reportResponse.setTableData(objectList);
+        try {
+            List<Map.Entry<String,List<String>>> tableDataAction = new ArrayList<>();
+            reportResponse.setTableHeaders(new String[]{"Vendor Name","Pincode","Standard Delivery","Fixed Time Delivery","Midnight Delivery"});
+            reportMapper.fillDataActionPincode(tableDataAction);
+            reportResponse.setTableDataAction(tableDataAction);
+            PincodeModelListHavingSummaryModel pincodeModelListHavingSummaryModel = ReportMapper.getPincodeSummaryDetails(fkAssociateId,startLimit,endLimit);
+            reportResponse.setSummary(pincodeModelListHavingSummaryModel.getSummaryModelList());
+            List<Object> objectList = new ArrayList<Object>(pincodeModelListHavingSummaryModel.getPincodeTableDataModelList());
+            reportResponse.setTableData(objectList);
+        }catch (Exception exception){
+            logger.error("Error occured at getPincodeReport ",exception);
+        }
         return reportResponse;
     }
 
@@ -99,23 +109,27 @@ public class Reports {
                                                      @QueryParam("flag") @DefaultValue("0") int flag){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
-        Boolean result = false;
-        String message="";
-        if (flag == 1){
-            message = "Enable/Disable "+shipType+" for Pincode "+pincode+" : ";
+        try{
+            Boolean result = false;
+            String message="";
+            if (flag == 1){
+                message = "Enable/Disable "+shipType+" for Pincode "+pincode+" : ";
+            }
+            else {
+                message = "Update the price of "+shipType+" for Pincode "+pincode+" to "+updatePrice+" : ";
+            }
+            boolean status = reportMapper.updatePincodeMapper(flag,fkAssociateId,pincode,shipType,updatePrice,message,field);
+            if(status == false){
+                handleServiceResponse.setError(true);
+                handleServiceResponse.setErrorCode("ERROR OCCURRED HANDELING PINCODE");
+            }
+            else {
+                result = true;
+            }
+            handleServiceResponse.setResult(result);
+        }catch (Exception exception){
+            logger.error("Error occured at updatePincodeDetail ",exception);
         }
-        else {
-            message = "Update the price of "+shipType+" for Pincode "+pincode+" to "+updatePrice+" : ";
-        }
-        boolean status = reportMapper.updatePincodeMapper(flag,fkAssociateId,pincode,shipType,updatePrice,message,field);
-        if(status == false){
-            handleServiceResponse.setError(true);
-            handleServiceResponse.setErrorCode("ERROR OCCURRED HANDELING PINCODE");
-        }
-        else {
-            result = true;
-        }
-        handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
 
@@ -128,13 +142,17 @@ public class Reports {
                                                     @DefaultValue("0")@QueryParam("price") int price){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
-        boolean result;
-        result = reportMapper.addNewComponentMapper(fkAssociateId,componentCode,componentName,type, price);
-        if(result == false){
-            handleServiceResponse.setError(true);
-            handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING COMPONENT");
+        try{
+            boolean result;
+            result = reportMapper.addNewComponentMapper(fkAssociateId,componentCode,componentName,type, price);
+            if(result == false){
+                handleServiceResponse.setError(true);
+                handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING COMPONENT");
+            }
+            handleServiceResponse.setResult(result);
+        }catch (Exception exception){
+            logger.error("Error occured at addVendorComponent ",exception);
         }
-        handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
     @POST
@@ -146,13 +164,17 @@ public class Reports {
                                                   @QueryParam("shipCharge") int shipCharge){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
-        boolean result;
-        result = reportMapper.addNewVendorPincodeMapper(fkAssociateId,pincode,cityId,shipType,shipCharge);
-        if(result == false){
-            handleServiceResponse.setError(true);
-            handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING PINCODE");
+        try{
+            boolean result;
+            result = reportMapper.addNewVendorPincodeMapper(fkAssociateId,pincode,cityId,shipType,shipCharge);
+            if(result == false){
+                handleServiceResponse.setError(true);
+                handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING PINCODE");
+            }
+            handleServiceResponse.setResult(result);
+        }catch (Exception exception){
+            logger.error("Error occured at addVendorPincode ",exception);
         }
-        handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
 
@@ -163,15 +185,19 @@ public class Reports {
                                           @QueryParam("endLimit") String endLimit ){
 
         ReportResponse reportResponse = new ReportResponse();
-        List<Map.Entry<String,List<String>>> tableDataAction = new ArrayList<>();
         ReportMapper reportMapper = new ReportMapper();
-        reportResponse.setTableHeaders(new String[]{"Component_Id_Hide","Component Image","Component_Name","Price","InStock"});
-        com.igp.handles.vendorpanel.mappers.Reports.ReportMapper.fillDataActionComponent(tableDataAction);
-        reportResponse.setTableDataAction(tableDataAction);
-        ProductModelListHavingSummaryModel productModelListHavingSummaryModel = reportMapper.getProductSummaryDetails(fkAssociateId,startLimit,endLimit);
-        reportResponse.setSummary(productModelListHavingSummaryModel.getSummaryModelList());
-        List<Object> objectList = new ArrayList<Object>(productModelListHavingSummaryModel.getProductTableDataModelList());
-        reportResponse.setTableData(objectList);
+        try{
+            List<Map.Entry<String,List<String>>> tableDataAction = new ArrayList<>();
+            reportResponse.setTableHeaders(new String[]{"Component_Id_Hide","Component Image","Component_Name","Price","InStock"});
+            com.igp.handles.vendorpanel.mappers.Reports.ReportMapper.fillDataActionComponent(tableDataAction);
+            reportResponse.setTableDataAction(tableDataAction);
+            ProductModelListHavingSummaryModel productModelListHavingSummaryModel = reportMapper.getProductSummaryDetails(fkAssociateId,startLimit,endLimit);
+            reportResponse.setSummary(productModelListHavingSummaryModel.getSummaryModelList());
+            List<Object> objectList = new ArrayList<Object>(productModelListHavingSummaryModel.getProductTableDataModelList());
+            reportResponse.setTableData(objectList);
+        }catch (Exception exception){
+            logger.error("Error occured at getVendorReport ",exception);
+        }
 
         return reportResponse;
     }
@@ -185,25 +211,29 @@ public class Reports {
                                                        @DefaultValue("-1") @QueryParam("inStock") int inStock,
                                                        @QueryParam("field") String field){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
-        String message = "",componentName = "";
         ReportMapper reportMapper = new ReportMapper();
-        componentName= SummaryFunctionsUtil.getComponentName(componentId);
-        if (updatePrice!=-1){
-            message="Change price of component "+componentName+" to "+updatePrice+" : ";
-        }
-        else if(inStock==1){
-            message="Change status of component "+componentName+" to Instock : ";
-        }
-        else {
-            message="Change status of component "+componentName+" to Out of stock : ";
-        }
+        try{
+            String message = "",componentName = "";
+            componentName= SummaryFunctionsUtil.getComponentName(componentId);
+            if (updatePrice!=-1){
+                message="Change price of component "+componentName+" to "+updatePrice+" : ";
+            }
+            else if(inStock==1){
+                message="Change status of component "+componentName+" to Instock : ";
+            }
+            else {
+                message="Change status of component "+componentName+" to Out of stock : ";
+            }
 
-        boolean result = reportMapper.updateComponentMapper(fkAssociateId,componentId,message,updatePrice,inStock,field);
-        if(result == false){
-            handleServiceResponse.setError(true);
-            handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING COMPONENT INFO");
+            boolean result = reportMapper.updateComponentMapper(fkAssociateId,componentId,message,updatePrice,inStock,field);
+            if(result == false){
+                handleServiceResponse.setError(true);
+                handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING COMPONENT INFO");
+            }
+            handleServiceResponse.setResult(result);
+        }catch (Exception exception){
+            logger.error("Error occured at updateComponentDetail ",exception);
         }
-        handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
 
@@ -427,28 +457,27 @@ public class Reports {
 
         ReportResponse reportResponse = new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
+        try {
 
-//        if(deliveryDateFrom==null&&deliveryDateTo==null&&orderNo==null&&endDate==null&&startDate==null){
-//            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-//            LocalDate localDate = LocalDate.now();
-//            deliveryDateFrom=dtf.format(localDate);
-//            //set today's date by default
-//        }
-        startDate=getTimestampString(startDate,0);
-        deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
-        deliveryDateTo=getTimestampString(deliveryDateTo,0);
-        if(startDate!=null&&endDate!=null){
-            endDate=getTimestampString(endDate,1);
-        }else {
-            endDate=getTimestampString(endDate,0);
+            startDate=getTimestampString(startDate,0);
+            deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
+            deliveryDateTo=getTimestampString(deliveryDateTo,0);
+            if(startDate!=null&&endDate!=null){
+                endDate=getTimestampString(endDate,1);
+            }else {
+                endDate=getTimestampString(endDate,0);
+            }
+
+            reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Date","Delivery_Date"
+                ,"Product_Image","Out_Of_Delivery","Proof_Of_Delivery"});
+            OrderProductUploadFileReportWithSummary orderProductUploadFileReportWithSummary = reportMapper.getOrderFileUploadReport(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo);
+            reportResponse.setSummary(orderProductUploadFileReportWithSummary.getSummaryModelList());
+            List<Object> objectList = new ArrayList<Object>(orderProductUploadFileReportWithSummary.getOrderProductUploadFileModelList());
+            reportResponse.setTableData( objectList);
+
+        }catch (Exception exception){
+            logger.error("Error occured at getOrderFileUploadReport ",exception);
         }
-
-        reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Date","Delivery_Date"
-            ,"Product_Image","Out_Of_Delivery","Proof_Of_Delivery"});
-        OrderProductUploadFileReportWithSummary orderProductUploadFileReportWithSummary = reportMapper.getOrderFileUploadReport(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo);
-        reportResponse.setSummary(orderProductUploadFileReportWithSummary.getSummaryModelList());
-        List<Object> objectList = new ArrayList<Object>(orderProductUploadFileReportWithSummary.getOrderProductUploadFileModelList());
-        reportResponse.setTableData( objectList);
         return reportResponse;
     }
 
