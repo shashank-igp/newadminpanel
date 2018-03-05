@@ -436,12 +436,7 @@ public class Reports {
 //        }
         startDate=getTimestampString(startDate,0);
         deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
-
-        if(deliveryDateFrom!=null&&deliveryDateTo!=null){
-            deliveryDateTo=getTimestampString(deliveryDateTo,1);
-        }else {
-            deliveryDateTo=getTimestampString(deliveryDateTo,0);
-        }
+        deliveryDateTo=getTimestampString(deliveryDateTo,0);
         if(startDate!=null&&endDate!=null){
             endDate=getTimestampString(endDate,1);
         }else {
