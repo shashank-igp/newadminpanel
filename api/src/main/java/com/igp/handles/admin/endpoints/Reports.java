@@ -53,15 +53,13 @@ public class Reports {
                 //set today's date by default
             }
             startDate=getTimestampString(startDate,0);
-            endDate=getTimestampString(endDate,0);
             deliveryDateTo=getTimestampString(deliveryDateTo,0);
             deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
 
-            if(deliveryDateFrom!=null&&deliveryDateTo!=null){
-                deliveryDateTo=getTimestampString(deliveryDateTo,1);
-            }
             if(startDate!=null&&endDate!=null){
                 endDate=getTimestampString(endDate,1);
+            }else {
+                endDate=getTimestampString(endDate,0);
             }
 
             reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Date","Occasion","City","Pincode","Delivery_Date"
