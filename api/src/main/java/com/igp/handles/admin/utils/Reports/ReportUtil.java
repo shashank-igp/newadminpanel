@@ -321,7 +321,6 @@ public class ReportUtil {
             preparedStatement.setInt(5,shipCharge);
             preparedStatement.setInt(6,-1);
             logger.debug("sql statement check: "+preparedStatement);
-            preparedStatement = connection.prepareStatement(statement);
             status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Pincode could not be added, plz check sql query");
