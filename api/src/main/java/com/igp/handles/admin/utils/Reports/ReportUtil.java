@@ -975,6 +975,9 @@ public class ReportUtil {
                     orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
                 }else if(pathOutForDelivery!=null){
                     String [] tempStringArray=pathOutForDelivery.split(",");
+                    for(int i=0;i<tempStringArray.length;i++){
+                        tempStringArray[i]=s3BaseUrl+"/"+s3BucketName+"/"+tempStringArray[i];
+                    }
                     orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
                 }
                 if(pathDelivered==null) {
@@ -983,6 +986,9 @@ public class ReportUtil {
                     orderProductUploadFileModel.setProductPhotosDelivered(Arrays.asList(tempStringArray));
                 }else if(pathDelivered!=null){
                     String [] tempStringArray=pathDelivered.split(",");
+                    for(int i=0;i<tempStringArray.length;i++){
+                        tempStringArray[i]=s3BaseUrl+"/"+s3BucketName+"/"+tempStringArray[i];
+                    }
                     orderProductUploadFileModel.setProductPhotosDelivered(Arrays.asList(tempStringArray));
                 }
                 orderProductUploadFileModelList.add(orderProductUploadFileModel);
