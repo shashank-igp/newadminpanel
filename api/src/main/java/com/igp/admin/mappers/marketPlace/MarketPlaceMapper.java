@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -132,6 +133,9 @@ public class MarketPlaceMapper {
     public List<ValidationModel> refineDataAndPopulateModels( Map<Integer, Map<String, String>> data,String userValue, Integer fk_associate_id) {
         List<ValidationModel> validationModelList = new ArrayList<>();
         MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
+
+        SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
+        Date todayDate=new Date();
 
         for (Map.Entry<Integer, Map<String, String>> entry : data.entrySet()) {
             // revisiting each map i.e. each row
@@ -265,21 +269,37 @@ public class MarketPlaceMapper {
                             }
                             itemCode = marketPlaceOrderUtil.getProductIdForLoyaltyOnly(itemCode);
                         }
-                        productModel = new ProductModel.Builder()
-                            .productCode(itemCode)
-                            .quantity(quantity)
-                            .sellingPrice(new BigDecimal(sellingPrice))
-                            .name(column.get("ProductName"))
-                            .serviceDate("1970-01-01")
-                            .serviceTypeId(1 + "")
-                            .serviceCharge(new BigDecimal(0))
-                            .displayAttrList(new HashMap<>())
-                            .perProductDiscount(new BigDecimal(0))
-                            .giftBox(0)
-                            .voucher(null)
-                            .fkId(0)
-                            .build();
-
+                        if(marketPlaceOrderUtil.handelProductOrNot(itemCode)){
+                            productModel = new ProductModel.Builder()
+                                .productCode(itemCode)
+                                .quantity(quantity)
+                                .sellingPrice(new BigDecimal(sellingPrice))
+                                .name(column.get("ProductName"))
+                                .serviceDate(simpleDateFormat.format(todayDate))
+                                .serviceTypeId(String.valueOf(4))
+                                .serviceCharge(new BigDecimal(0))
+                                .displayAttrList(new HashMap<>())
+                                .perProductDiscount(new BigDecimal(0))
+                                .giftBox(0)
+                                .voucher(null)
+                                .fkId(0)
+                                .build();
+                        }else {
+                            productModel = new ProductModel.Builder()
+                                .productCode(itemCode)
+                                .quantity(quantity)
+                                .sellingPrice(new BigDecimal(sellingPrice))
+                                .name(column.get("ProductName"))
+                                .serviceDate("1970-01-01")
+                                .serviceTypeId(1 + "")
+                                .serviceCharge(new BigDecimal(0))
+                                .displayAttrList(new HashMap<>())
+                                .perProductDiscount(new BigDecimal(0))
+                                .giftBox(0)
+                                .voucher(null)
+                                .fkId(0)
+                                .build();
+                        }
 
                         String detail = column.get("PO Number") + "(#)" +
                             column.get("MemberName") + "(#)" +
