@@ -970,7 +970,7 @@ public class ReportUtil {
                 pathOutForDelivery=resultSet.getString("outForDelivery");
                 pathDelivered=resultSet.getString("proofOfDelivery");
                 if(pathOutForDelivery==null){
-                    pathOutForDelivery="NA";
+                    pathOutForDelivery="";
                     String [] tempStringArray=pathOutForDelivery.split(",");
                     orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
                 }else if(pathOutForDelivery!=null){
@@ -981,7 +981,7 @@ public class ReportUtil {
                     orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
                 }
                 if(pathDelivered==null) {
-                    pathDelivered="NA";
+                    pathDelivered="";
                     String [] tempStringArray=pathDelivered.split(",");
                     orderProductUploadFileModel.setProductPhotosDelivered(Arrays.asList(tempStringArray));
                 }else if(pathDelivered!=null){
