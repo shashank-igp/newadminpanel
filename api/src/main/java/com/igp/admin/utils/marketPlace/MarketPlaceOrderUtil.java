@@ -884,5 +884,30 @@ public class MarketPlaceOrderUtil {
         }
         return fileUploadModel;
     }
+    public boolean handelProductOrNot(String productCode){
+        boolean result=false;
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String statement=null;
+        try {
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement="select * from products where products_code = ? and fk_associate_id = 72";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1, productCode);
+            resultSet=preparedStatement.executeQuery();
+            if (resultSet.first()) {
+                result=true;
+            }
+
+        }catch (Exception exception){
+            logger.error("Error in connection ", exception);
+        }finally {
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
+    }
 
 }
