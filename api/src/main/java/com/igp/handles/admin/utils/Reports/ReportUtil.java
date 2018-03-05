@@ -952,7 +952,7 @@ public class ReportUtil {
             connection=Database.INSTANCE.getReadOnlyConnection();
             statement="select o.orders_id,a.associate_name,o.date_purchased,opei.delivery_date, "
                 + " group_concat(if(vp.type=0,vp.file_path,null) separator ',') outForDelivery , "
-                + " group_concat(if(vp.type=1,vp.file_path,null) separator ',') proofOfDelivery "
+                + " group_concat(if(vp.type=1,vp.file_path,null) separator ',') proofOfDelivery,npei.m_img as product_image_url "
                 + " from orders o join orders_products op on o.orders_id = op.orders_id  join order_product_extra_info "
                 + " opei on op.orders_products_id =  opei.order_product_id left  join  vp_file_upload vp on "
                 + " vp.orders_products_id = op.orders_products_id join associate a on a.associate_id = op.fk_associate_id "
