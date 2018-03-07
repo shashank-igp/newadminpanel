@@ -138,6 +138,8 @@ public class Reports {
                                                     @QueryParam("componentName") String componentName,
                                                     @DefaultValue("0")@QueryParam("type") int type,
                                                     @DefaultValue("0")@QueryParam("price") int price){
+
+        // `type` tinyint(1) NOT NULL DEFAULT '0' COMMENT '0 for General, 1 for Cake-Only'
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
         try{
@@ -153,6 +155,41 @@ public class Reports {
         }
         return handleServiceResponse;
     }
+
+    @PUT
+    @Path("/v1/admin/handels/handleComponentChange")
+    public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") int fkAssociateId,
+        @QueryParam("componentId") String componentId,
+        @DefaultValue("-1") @QueryParam("updatePrice")int updatePrice,
+        @DefaultValue("-1") @QueryParam("inStock") int inStock,
+        @QueryParam("field") String field){
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
+        ReportMapper reportMapper = new ReportMapper();
+        try{
+            String message = "",componentName = "";
+            componentName= SummaryFunctionsUtil.getComponentName(componentId);
+            if (updatePrice!=-1){
+                message="Change price of component "+componentName+" to "+updatePrice+" : ";
+            }
+            else if(inStock==1){
+                message="Change status of component "+componentName+" to Instock : ";
+            }
+            else {
+                message="Change status of component "+componentName+" to Out of stock : ";
+            }
+
+            boolean result = reportMapper.updateComponentMapper(fkAssociateId,componentId,message,updatePrice,inStock,field);
+            if(result == false){
+                handleServiceResponse.setError(true);
+                handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING COMPONENT INFO");
+            }
+            handleServiceResponse.setResult(result);
+        }catch (Exception exception){
+            logger.error("Error occured at updateComponentDetail ",exception);
+        }
+        return handleServiceResponse;
+    }
+
     @POST
     @Path("/v1/admin/handels/addVendorPincode")
     public HandleServiceResponse addVendorPincode(@QueryParam("fkAssociateId") int fkAssociateId,
@@ -200,40 +237,6 @@ public class Reports {
         return reportResponse;
     }
 
-
-    @PUT
-    @Path("/v1/admin/handels/handleComponentChange")
-    public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") int fkAssociateId,
-                                                       @QueryParam("componentId") String componentId,
-                                                       @DefaultValue("-1") @QueryParam("updatePrice")int updatePrice,
-                                                       @DefaultValue("-1") @QueryParam("inStock") int inStock,
-                                                       @QueryParam("field") String field){
-        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
-        ReportMapper reportMapper = new ReportMapper();
-        try{
-            String message = "",componentName = "";
-            componentName= SummaryFunctionsUtil.getComponentName(componentId);
-            if (updatePrice!=-1){
-                message="Change price of component "+componentName+" to "+updatePrice+" : ";
-            }
-            else if(inStock==1){
-                message="Change status of component "+componentName+" to Instock : ";
-            }
-            else {
-                message="Change status of component "+componentName+" to Out of stock : ";
-            }
-
-            boolean result = reportMapper.updateComponentMapper(fkAssociateId,componentId,message,updatePrice,inStock,field);
-            if(result == false){
-                handleServiceResponse.setError(true);
-                handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING COMPONENT INFO");
-            }
-            handleServiceResponse.setResult(result);
-        }catch (Exception exception){
-            logger.error("Error occured at updateComponentDetail ",exception);
-        }
-        return handleServiceResponse;
-    }
 
     @GET
     @Path("/v1/admin/handels/getPayoutAndTaxesReport")

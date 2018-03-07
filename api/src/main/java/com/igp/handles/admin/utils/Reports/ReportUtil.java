@@ -970,9 +970,7 @@ public class ReportUtil {
                 pathOutForDelivery=resultSet.getString("outForDelivery");
                 pathDelivered=resultSet.getString("proofOfDelivery");
                 if(pathOutForDelivery==null){
-                    pathOutForDelivery="";
-                    String [] tempStringArray=pathOutForDelivery.split(",");
-                    orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
+                    orderProductUploadFileModel.setProductPhotosOutOfDelivery(new ArrayList<>());
                 }else if(pathOutForDelivery!=null){
                     String [] tempStringArray=pathOutForDelivery.split(",");
                     for(int i=0;i<tempStringArray.length;i++){
@@ -981,9 +979,7 @@ public class ReportUtil {
                     orderProductUploadFileModel.setProductPhotosOutOfDelivery(Arrays.asList(tempStringArray));
                 }
                 if(pathDelivered==null) {
-                    pathDelivered="";
-                    String [] tempStringArray=pathDelivered.split(",");
-                    orderProductUploadFileModel.setProductPhotosDelivered(Arrays.asList(tempStringArray));
+                    orderProductUploadFileModel.setProductPhotosDelivered(new ArrayList<>());
                 }else if(pathDelivered!=null){
                     String [] tempStringArray=pathDelivered.split(",");
                     for(int i=0;i<tempStringArray.length;i++){
