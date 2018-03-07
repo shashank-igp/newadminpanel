@@ -62,7 +62,7 @@ public class ReportMapper {
         boolean result,response=false;
         ReportUtil reportUtil =  new ReportUtil();
         String message="Added new Component : Name :- "+componentName+" With Price :- "+price+" : ";
-        result = SummaryFunctionsUtil.addVendorComponent(fkAssociateId+"",componentCode,componentName,type,"dummy.jpg",price);
+        result = SummaryFunctionsUtil.addVendorComponent(String.valueOf(fkAssociateId),componentCode,componentName,type,"dummy.jpg",price);
         if(result==true){
             response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message+"Done");
         }

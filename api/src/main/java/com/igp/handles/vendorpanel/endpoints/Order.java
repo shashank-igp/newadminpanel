@@ -86,7 +86,6 @@ public class Order {
     {
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         Boolean ifSucessfull=false;
-        //String orderProductsIds1=orderProductsIds.replace(",","','");
         ifSucessfull=doUpdateOrderProductsStatus(orderId,fkAssociateId,status,orderProductsIds,recipientInfo,
                     rejectionMessage,commentsDelivered,recipientName,rejectionType);
 

@@ -265,19 +265,22 @@ public class SlaCompliant {
                         slaCodeAdmin=0;
                     }else if( ( deliveryDateFormat.compareTo(cal3.getTime())==0 && currentHour <=9  ) || ( deliveryDateFormat.compareTo(cal2.getTime())==0  ) ){
                         if(flag == 0) {
-                            if (currentHour == 9 && (currentMin > 0) && deliveryDateFormat.compareTo(cal2.getTime()) != 0) {
+                            if (currentHour >= 9  && deliveryDateFormat.compareTo(cal2.getTime()) != 0) {
+                                //if(currentHour==9 && (currentMin > 0))
                                 slaCode = 204;
                             } else {
                                 slaCode = 24;
                             }
                         }else {
-                            if (currentHour < 9 && deliveryDateFormat.compareTo(cal2.getTime()) != 0){
-                                slaCodeAdmin = 24;
-                            }else if(currentHour == 9 && (currentMin <= 45) && deliveryDateFormat.compareTo(cal2.getTime()) != 0){
-                                slaCodeAdmin = 24;
+                            if(currentHour >= 8 && (currentMin >= 45) && deliveryDateFormat.compareTo(cal2.getTime()) != 0){
+                                if(currentHour == 8 && (currentMin <= 45)){
+                                    slaCodeAdmin = 24;
+                                }else {
+                                    slaCodeAdmin = 204;
+                                }
                             }
                             else {
-                                slaCodeAdmin = 204;
+                                slaCodeAdmin = 24;
                             }
                         }
 
@@ -399,18 +402,20 @@ public class SlaCompliant {
                         slaCodeAdmin=0;
                     }else if(deliveryDateFormat.compareTo(cal3.getTime())==0 && currentHour <=9 || ( deliveryDateFormat.compareTo(cal2.getTime())==0  ) ) {
                         if (flag == 0) {
-                            if (currentHour == 9 && (currentMin > 0) && deliveryDateFormat.compareTo(cal2.getTime()) != 0) {
+                            if (currentHour >= 9  && deliveryDateFormat.compareTo(cal2.getTime()) != 0) {
                                 slaCode = 404;
                             } else {
                                 slaCode = 44;
                             }
                         } else {
-                            if (currentHour < 9 && deliveryDateFormat.compareTo(cal2.getTime()) != 0) {
-                                slaCodeAdmin = 44;
-                            } else if (currentHour == 9 && (currentMin <= 45) && deliveryDateFormat.compareTo(cal2.getTime()) != 0) {
-                                slaCodeAdmin = 44;
+                            if (currentHour >= 8 && (currentMin <= 45) && deliveryDateFormat.compareTo(cal2.getTime()) != 0) {
+                                if(currentHour == 8 && (currentMin <= 45)){
+                                    slaCodeAdmin = 44;
+                                }else {
+                                    slaCodeAdmin = 404;
+                                }
                             } else {
-                                slaCodeAdmin = 404;
+                                slaCodeAdmin = 44;
                             }
                         }
                     }else {
