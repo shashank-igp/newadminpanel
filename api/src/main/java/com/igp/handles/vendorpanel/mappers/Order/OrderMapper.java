@@ -207,10 +207,6 @@ public class OrderMapper
 
         }
 
-        logger.debug("tempOrderProductsMap for "+fkassociateId+tempOrderProductsMap.toString());
-
-
-
         for (Map.Entry<String, Order> entry : tempOrderProductsMap.entrySet()) {
             String key = entry.getKey();
             try {
@@ -339,7 +335,7 @@ public class OrderMapper
 
                 slaCode = slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,flagForAdminPanel);
 
-//                logger.debug("slacode  on layer "+slaCode+" with orderProductId "+ordersProducts.getOrderProductId());
+                logger.debug("slacode  in prepare orders  "+slaCode+" with orderId "+ordersProducts.getOrderId()+" and orderProductId "+ordersProducts.getOrderProductId());
 
                 ordersProducts.setSlaFlag(OrderUtil.isSLASatisfied(slaCode));
                 ordersProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(slaCode));
