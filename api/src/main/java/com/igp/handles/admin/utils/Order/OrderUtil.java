@@ -209,7 +209,7 @@ public class OrderUtil {
                     .deliveryCountry(resultSet.getString("delivery_country"))
                     .deliveryEmail(resultSet.getString("delivery_email_address"))
                     .deliveryMobile(resultSet.getString("delivery_mobile"))
-                    .datePurchased(resultSet.getDate("date_purchased"))
+                    .datePurchased(resultSet.getString("date_purchased"))
                     .orderProducts(ordersProductsList)
                     .build();
             }

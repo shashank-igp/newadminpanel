@@ -198,8 +198,6 @@ public class OrderMapper
                     order.setOrderNetProductPrice(order.getOrderNetProductPrice()+orderProducts.getVendorPrice());
                     order.setComponentTotal(order.getComponentTotal()+orderProducts.getComponentTotal());
                 }
-
-
             }
             catch (Exception e){
                 logger.error("Exception while generating orders",e);
@@ -324,7 +322,7 @@ public class OrderMapper
                 OrderDetailsPerOrderProduct orderDetailsPerOrderProduct = new OrderDetailsPerOrderProduct();
 
                 orderDetailsPerOrderProduct.setAssignTime(ordersProducts.getAssignTime());
-                orderDetailsPerOrderProduct.setPurchasedTime(formatter.format(order.getDatePurchased()));
+                orderDetailsPerOrderProduct.setPurchasedTime((order.getDatePurchased()));
                 orderDetailsPerOrderProduct.setDeliveryDate(ordersProducts.getOrderProductExtraInfo().getDeliveryDate());
                 orderDetailsPerOrderProduct.setShippingType(String.valueOf(ordersProducts.getOrderProductExtraInfo().getDeliveryType()));
                 orderDetailsPerOrderProduct.setDeliveryStatus(ordersProducts.getDeliveryStatus()==1 ? true:false);
