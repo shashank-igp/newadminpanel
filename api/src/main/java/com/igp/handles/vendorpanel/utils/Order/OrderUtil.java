@@ -571,6 +571,7 @@ public class OrderUtil
         PreparedStatement preparedStatement = null;
         Order order=null;
         int addressType=0;
+        SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             if(forAdminPanelOrNot==true){
@@ -628,7 +629,8 @@ public class OrderUtil
                     .deliveryCountry(resultSet.getString("delivery_country"))
                     .deliveryEmail(resultSet.getString("delivery_email_address"))
                     .deliveryMobile(resultSet.getString("delivery_mobile"))
-                    .datePurchased(resultSet.getDate("date_purchased"))
+                    .datePurchased(resultSet.getTimestamp("date_purchased"))
+                    //.datePurchased(formatter.parse(resultSet.getString("date_purchased")))
                     .ordersStatus(resultSet.getString("orders_status"))
                     .commments(resultSet.getString("comments"))
                     .delivery_instruction(resultSet.getString("delivery_instruction"))
