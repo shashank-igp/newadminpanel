@@ -286,7 +286,7 @@ public class DashboardMapper {
                     String key=orderId + "," + deliveryDate + "," + shippingType;
                     flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId,status);
 
-//                    logger.debug("slacode  on layer "+slaCode+" with orderId "+orderDetailsPerOrderProduct.getOrdersId());
+                    logger.debug("slacode  in handels panel Dashboard  "+slaCode+" with orderId "+orderDetailsPerOrderProduct.getOrdersId()+" and orderProductId "+orderDetailsPerOrderProduct.getOrdersProductsId());
 
                     if (flagForUniqueness){
 

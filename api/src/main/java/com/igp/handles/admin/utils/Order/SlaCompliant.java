@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 
 /**
  * Created by shanky on 9/2/18.
@@ -20,7 +21,7 @@ public class SlaCompliant {
         String status,assignTime,shippingType,deliveryDate,deliveryTime,purchasedTime;
         int deliveryStatus;
         SimpleDateFormat formatter1=new SimpleDateFormat("yyyy-MM-dd");
-
+        formatter1.setTimeZone(TimeZone.getTimeZone("IST"));
         status=orderDetailsPerOrderProduct.getOrderProductStatus();
         assignTime=orderDetailsPerOrderProduct.getAssignTime();
         shippingType=orderDetailsPerOrderProduct.getShippingType();
@@ -35,6 +36,7 @@ public class SlaCompliant {
         int slaCode=-2;
         int slaCodeAdmin = -2;
         SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        formatter.setTimeZone(TimeZone.getTimeZone("IST"));
         Date timeAssigned=null;
         Date assignTimeNoTimeStamp=null;
         Date deliveryDateFormat=null;
