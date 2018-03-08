@@ -332,7 +332,7 @@ public class OrderMapper
                 orderDetailsPerOrderProduct.setDeliveryTime(ordersProducts.getOrderProductExtraInfo().getDeliveryTime());
                 orderDetailsPerOrderProduct.setOrdersId(new Long(order.getOrderId()));
                 orderDetailsPerOrderProduct.setOrdersProductsId(new Long(ordersProducts.getOrderProductId()));
-
+                orderDetailsPerOrderProduct.setVendorId(Integer.parseInt(ordersProducts.getFkAssociateId()));
                 slaCode = slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,flagForAdminPanel);
 
                 logger.debug("slacode  in prepare orders  "+slaCode+" with orderId "+ordersProducts.getOrderId()+" and orderProductId "+ordersProducts.getOrderProductId());
