@@ -304,9 +304,9 @@ public class OrderUtil
                     .productCostPrice(resultSet.getInt("opei.product_cost_price"))
                     .build();
 
-                if(!ordersProducts.getTimeSlaVoilates().equalsIgnoreCase("")&&orderProductExtraInfo.getDeliveryTime().equalsIgnoreCase("")){
-                    orderProductExtraInfo.setDeliveryTime(ordersProducts.getTimeSlaVoilates());
-                }
+//                if(!ordersProducts.getTimeSlaVoilates().equalsIgnoreCase("")&&orderProductExtraInfo.getDeliveryTime().equalsIgnoreCase("")){
+//                    orderProductExtraInfo.setDeliveryTime(ordersProducts.getTimeSlaVoilates());
+//                }
 
                 if(forAdminPanelOrNot==false){
                     if(orderProductExtraInfo.getDeliveryType()==2){
@@ -629,7 +629,7 @@ public class OrderUtil
                     .deliveryCountry(resultSet.getString("delivery_country"))
                     .deliveryEmail(resultSet.getString("delivery_email_address"))
                     .deliveryMobile(resultSet.getString("delivery_mobile"))
-                    .datePurchased(resultSet.getDate("date_purchased"))
+                    .datePurchased(resultSet.getString("date_purchased"))
                     .ordersStatus(resultSet.getString("orders_status"))
                     .commments(resultSet.getString("comments"))
                     .delivery_instruction(resultSet.getString("delivery_instruction"))

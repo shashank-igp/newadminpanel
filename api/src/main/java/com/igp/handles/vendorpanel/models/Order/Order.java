@@ -81,7 +81,7 @@ public class Order implements Serializable {
     private Date lastModified = null;
 
 
-    private Date				datePurchased			= null;
+    private String				datePurchased			= null;
 
 
     private BigDecimal shippingCost = null;
@@ -369,7 +369,7 @@ public class Order implements Serializable {
         return lastModified;
     }
 
-    public Date getDatePurchased()
+    public String getDatePurchased()
     {
         return datePurchased;
     }
@@ -693,7 +693,7 @@ public class Order implements Serializable {
         private String               deliveryEmail;
         private String               deliveryMobile;
         private Date                 lastModified;
-        private Date                 datePurchased;
+        private String                 datePurchased;
         private BigDecimal           shippingCost;
         private BigDecimal           shippingCostInInr;
         private BigDecimal           ordersProductDiscount;
@@ -878,7 +878,7 @@ public class Order implements Serializable {
             return this;
         }
 
-        public Builder datePurchased(Date val)
+        public Builder datePurchased(String val)
         {
             datePurchased = val;
             return this;
