@@ -861,8 +861,8 @@ public class HandlesVendorMapper {
         if(shippingType.equalsIgnoreCase("Any time") ||  shippingType.equalsIgnoreCase("Same Day")){
             if(uniqueUnitsMap.containsKey(key)==false){  // simple key not exist so we have to check if that unit can be clubbed or not
                 String key1=orderId + "," + deliveryDate + ",Fix Time"+ "," + vendorId+ "," + status;
-                String key2=orderId + "," + deliveryDate + ",Midnight"+ "," + vendorId+ "," + status;
-                if(uniqueUnitsMap.containsKey(key1)|| uniqueUnitsMap.containsKey(key2) ){
+                //String key2=orderId + "," + deliveryDate + ",Midnight"+ "," + vendorId+ "," + status;
+                if(uniqueUnitsMap.containsKey(key1) ){// || uniqueUnitsMap.containsKey(key2) ){
                     flagForUniqueness=false;
                 }
                 else {
@@ -876,7 +876,7 @@ public class HandlesVendorMapper {
                 flagForUniqueness=false;
             }
         }
-        else if(shippingType.equalsIgnoreCase("Fix Time") || shippingType.equalsIgnoreCase("Midnight") ) {
+        else if(shippingType.equalsIgnoreCase("Fix Time")) {
             String key1=orderId + "," + deliveryDate + ",Any time"+ "," + vendorId+ "," + status;
             String key2=orderId + "," + deliveryDate + ",Same Day"+ "," + vendorId+ "," + status;
 
@@ -901,6 +901,15 @@ public class HandlesVendorMapper {
                         flagForUniqueness=false;
                     }
                 }
+            }
+        }else if(shippingType.equalsIgnoreCase("Midnight")){
+            if(uniqueUnitsMap.containsKey(key)==false){
+                flagForUniqueness=true;
+                Set<String> deliveryTimeSet=new HashSet<>();
+                deliveryTimeSet.add(deliveryTime);
+                uniqueUnitsMap.put(key,deliveryTimeSet);
+            }else {
+                flagForUniqueness=false;
             }
         }
         if(flagForUniqueness==false){
