@@ -24,6 +24,7 @@ public class DashboardDetail {
     private Map<String,String> notShippedPendingOrderCount=new HashMap<>();
     private Map<String,String> notDeliveredTotalOrderCount=new HashMap<>();
     private Map<String,String> notDeliveredPendingOrderCount=new HashMap<>();
+    Map<String,String> attemptedDeliveryOrders=new HashMap<>();
 
 
 
@@ -33,6 +34,16 @@ public class DashboardDetail {
     private Map<String, Map<String,Map<String, Set<Map<String, String>>>>> dateStatusOrderIdNoBreachMap = new HashMap<>();
     private Map<String, Map<String,Map<String, Set<Map<String, String>>>>> dateStatusOrderIdAlertMap    = new HashMap<>();
     private Map<String,Map<String,Map<String,String>>> leftOutOrderToOrderProductIdMap2=new HashMap<>();
+
+    public Map<String, String> getAttemptedDeliveryOrders()
+    {
+        return attemptedDeliveryOrders;
+    }
+
+    public void setAttemptedDeliveryOrders(Map<String, String> attemptedDeliveryOrders)
+    {
+        this.attemptedDeliveryOrders = attemptedDeliveryOrders;
+    }
 
     public Map<String, Map<String, Map<String, String>>> getLeftOutOrderToOrderProductIdMap2()
     {

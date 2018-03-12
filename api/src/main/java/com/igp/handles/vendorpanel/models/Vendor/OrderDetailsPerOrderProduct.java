@@ -33,6 +33,23 @@ public class OrderDetailsPerOrderProduct
 
     private String purchasedTime;
 
+    private int deliveryAttemptFlag;
+
+    public boolean isDeliveryStatus()
+    {
+        return deliveryStatus;
+    }
+
+    public int getDeliveryAttemptFlag()
+    {
+        return deliveryAttemptFlag;
+    }
+
+    public void setDeliveryAttemptFlag(int deliveryAttemptFlag)
+    {
+        this.deliveryAttemptFlag = deliveryAttemptFlag;
+    }
+
     public String getPurchasedTime()
     {
         return purchasedTime;

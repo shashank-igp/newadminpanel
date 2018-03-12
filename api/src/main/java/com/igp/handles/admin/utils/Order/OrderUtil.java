@@ -25,7 +25,7 @@ public class OrderUtil {
     private static final Logger logger = LoggerFactory.getLogger(OrderUtil.class);
 
 
-    public boolean insertIntoOrderHistory(Order order,int vendorId,String ordersHistoryComment){
+    public boolean insertIntoOrderHistory(int orderId,int vendorId,String ordersHistoryComment){
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         String statement;
@@ -35,7 +35,7 @@ public class OrderUtil {
             statement="insert into orders_history (fk_orders_id,fk_associate_login_id,fk_associate_user_id,orders_history_comment, "
                 + " orders_history_time,fk_associate_id,fk_payout_reason_id,deliver_date) VALUES  ( ?,?,?,?,now(),?,0,'0000-00-00')";
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1,order.getOrderId()); // orderID
+            preparedStatement.setInt(1,orderId); // orderID
             preparedStatement.setString(2,"Handels"); //fk_associate_login_id
             preparedStatement.setString(3,"Handels"); //fk_associate_user_id
             preparedStatement.setString(4,ordersHistoryComment);
@@ -67,13 +67,14 @@ public class OrderUtil {
         boolean result=false;
         try{
             //            connection = Database.INSTANCE.getReadWriteConnection();
-            statement="UPDATE orders_products set orders_product_status = ? , fk_associate_id = ? , delivery_status = ? where "
+            statement="UPDATE orders_products set orders_product_status = ? , fk_associate_id = ? , delivery_status = ? , delivery_attempt = ? where "
                 + " orders_products_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1,"Processed");
             preparedStatement.setInt(2,vendorId);
             preparedStatement.setInt(3,0);
-            preparedStatement.setInt(4,orderProductId);
+            preparedStatement.setInt(4,0);
+            preparedStatement.setInt(5,orderProductId);
 
             Integer status = preparedStatement.executeUpdate();
 
@@ -299,7 +300,7 @@ public class OrderUtil {
                 logger.debug("step-7 assignReassignOrder after complete insertion in VAP,OP,trackorders");
 
 
-                insertIntoOrderHistory(order,vendorId,ordersHistoryComment);
+                insertIntoOrderHistory(orderId,vendorId,ordersHistoryComment);
 
                 createOrdersProductsComponentsInfo(componentList,order);
             }
@@ -399,7 +400,7 @@ public class OrderUtil {
         return result;
     }
     public boolean updateVendorAssignPrice(int orderId,int productId,
-                                                            Double vendorPrice,Double shippingCharge,int orderProductId){
+        Double vendorPrice,Double shippingCharge,int orderProductId){
         boolean result=true;
         Connection connection = null;
         String statement,shippingChargeClause="",vendorPriceClause="";
@@ -432,7 +433,7 @@ public class OrderUtil {
             } else {
                 result=true;
                 orderHistoryComment="Price changes happened for product "+ordersProducts.getProductName()+" to "+comment1+comment2;
-                insertIntoOrderHistory(order,Integer.parseInt(ordersProducts.getFkAssociateId()),orderHistoryComment);
+                insertIntoOrderHistory(orderId,Integer.parseInt(ordersProducts.getFkAssociateId()),orderHistoryComment);
             }
 
         }catch (Exception exception){
@@ -634,7 +635,7 @@ public class OrderUtil {
         return ordersProducts;
     }
     public boolean updateDeliveryDetails(int orderId,int orderProductId,int productId,String deliveryDate,String deliveryTime,
-                                        int deliveryType){
+        int deliveryType){
         boolean result=false;
         Connection connection = null;
         String statement,deliveryDateClause="",deliveryTimeClause="",deliveryTypeClause="";
@@ -666,7 +667,7 @@ public class OrderUtil {
 
             connection = Database.INSTANCE.getReadWriteConnection();
             statement=" UPDATE order_product_extra_info set "+deliveryDateClause+deliveryTimeClause+deliveryTypeClause
-                        +" attributes = attributes where order_id = ? and order_product_id = ? ";
+                +" attributes = attributes where order_id = ? and order_product_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
 
             preparedStatement.setInt(1,orderId);
@@ -721,8 +722,8 @@ public class OrderUtil {
                             orderHistoryComment="Delivery Detail changes for product "+ordersProducts.getProductName()+" from "
                                 +orderProductExtraInfo.getDeliveryDate()+" "+orderProductExtraInfo.getDeliveryTime()+" "
                                 +Constants.getDeliveryType(String.valueOf(orderProductExtraInfo.getDeliveryType()))+" to "
-                            +deliveryDateClause+"  "+deliveryTimeClause+"  "+deliveryTypeClause;
-                            insertIntoOrderHistory(order,Integer.parseInt(ordersProducts.getFkAssociateId()),orderHistoryComment);
+                                +deliveryDateClause+"  "+deliveryTimeClause+"  "+deliveryTypeClause;
+                            insertIntoOrderHistory(orderId,Integer.parseInt(ordersProducts.getFkAssociateId()),orderHistoryComment);
                         }
                     }
                 }
@@ -761,26 +762,23 @@ public class OrderUtil {
         }
         return logs;
     }
-    public boolean cancelOrder(int orderId,int orderProductId,String comment){
+    public boolean cancelOrder(int orderId,String orderProductIdString,String comment){
         boolean result=false;
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
-        Order order=null;
         try{
-            order=getOrderRelatedInfo(orderId,orderProductId);
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement="update orders_products set orders_product_status = ?  where orders_products_id = ? ";
+            statement="update orders_products set orders_product_status = ?  where orders_products_id in ( "+ orderProductIdString +"  ) ";
             preparedStatement = connection.prepareStatement(statement);
 
             preparedStatement.setString(1,"Rejected");
-            preparedStatement.setInt(2,orderProductId);
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Failed to update orders_products while marking that orderProduct as cancelled ");
             } else {
-                if(insertIntoOrderHistory(order,0,"order is cancelled , reason is "+comment)){
+                if(insertIntoOrderHistory(orderId,0,"order is cancelled , reason is "+comment)){
                     result=true;
                 }
             }
@@ -788,6 +786,37 @@ public class OrderUtil {
         }catch (Exception exception){
             logger.error("Exception in connection", exception);
         } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+
+        return result;
+    }
+    public boolean updateOrderProductForApproveAttemptedDeliveryOrder(int orderId,String orderProductIdList){
+        boolean result=false;
+        Connection connection = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        Order order=null;
+        int vendorId=0;
+        try{
+            order=getOrderRelatedInfo(orderId,Integer.parseInt(orderProductIdList.split(",")[0]));
+            vendorId=Integer.parseInt(order.getOrderProducts().get(0).getFkAssociateId());
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement="update orders_products set delivery_attempt = ?  where orders_products_id in ( "+orderProductIdList+" ) ";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,2);
+            Integer status = preparedStatement.executeUpdate();
+            if (status == 0) {
+                logger.error("Failed to update orders_products while approving that order for re-delivery attempt ");
+            } else {
+                if(insertIntoOrderHistory(orderId,vendorId,"order is approve to be re-delivered by New Handels panel ")){
+                    result=true;
+                }
+            }
+        }catch(Exception exception){
+            logger.error("Exception in connection", exception);
+        }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
         }

@@ -64,7 +64,6 @@ public class Order {
                 break;
         }
 
-
         List<com.igp.handles.vendorpanel.models.Order.Order> orders=orderMapper.getOrderByStatusDate(scopeId,fkAssociateId,status,date1,
                                                                                         orderAction,section,isfuture);
         response.addHeader("token",request.getHeader("token"));

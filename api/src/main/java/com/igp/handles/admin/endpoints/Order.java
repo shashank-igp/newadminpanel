@@ -195,13 +195,12 @@ public class Order {
     }
     @POST
     @Path("/v1/admin/handels/cancelOrder")
-    public HandleServiceResponse cancelOrder(@QueryParam("orderId") int orderId,@QueryParam("orderProductId")int orderProductId
-                                        ,@QueryParam("comment")String comment,@DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
+    public HandleServiceResponse cancelOrder(@QueryParam("orderId") int orderId,@QueryParam("orderProductId")String orderProductIdString,@QueryParam("comment")String comment,@DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         boolean result=false;
         try{
-            result=orderMapper.cancelOrder(orderId,orderProductId,comment,handleServiceResponse,orderProductIdList);
+            result=orderMapper.cancelOrder(orderId,orderProductIdString,comment,handleServiceResponse,orderProductIdList);
             if(result){
 //                handleServiceResponse.setResult(result);
             }else{
@@ -214,6 +213,20 @@ public class Order {
             logger.error("error while getting OrderLog",exception);
         }
 
+        return handleServiceResponse;
+    }
+    @POST
+    @Path("/v1/admin/handels/approveDeliveryAttempt")
+    public HandleServiceResponse approveDeliveryAttempt(@QueryParam("orderId") int orderId,@DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
+        HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
+        OrderMapper orderMapper=new OrderMapper();
+        boolean result=false;
+        try{
+            result=orderMapper.approveDeliveryAttempt(orderId,orderProductIdList);
+            handleServiceResponse.setResult(result);
+        }catch (Exception exception){
+            logger.error("error while getting approveDeliveryAttempt ",exception);
+        }
         return handleServiceResponse;
     }
 

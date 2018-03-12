@@ -26,6 +26,7 @@ public class OrderMapper {
         com.igp.handles.vendorpanel.mappers.Order.OrderMapper orderMapperVendorPanel=new com.igp.handles.vendorpanel.mappers.Order.OrderMapper();
         String status="",slaClause=null;
         int fkassociateId=-1;
+        int deliveryAttemptFlag=0;
         Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap = new HashMap<>();
         try{
 
@@ -57,11 +58,14 @@ public class OrderMapper {
                     slaClause="(100,401,402,403,404)";
                 }else if(subCategory.equals("total")){
                     status="OutForDelivery";
+                }else if(subCategory.equals("attemptedDelivery")){
+                    status="Shipped";
+                    deliveryAttemptFlag=1;
                 }
             }
 
             List<OrdersProducts> orderProductList = orderUtilVendorPanel.getOrderProductsByStatusDate("1",fkassociateId,status,date,
-                section,  isfuture,ordersProductExtraInfoMap,true,slaClause);
+                section,  isfuture,ordersProductExtraInfoMap,true,slaClause,deliveryAttemptFlag);
             orders=orderMapperVendorPanel.prepareOrders(orderAction,orderProductList,ordersProductExtraInfoMap,"",true);
 
         }catch (Exception exception){
@@ -251,7 +255,7 @@ public class OrderMapper {
         }
         return orders;
     }
-    public boolean cancelOrder(int orderId,int orderProductId,String comment,HandleServiceResponse handleServiceResponse,String orderProductIdList){
+    public boolean cancelOrder(int orderId,String orderProductIdString,String comment,HandleServiceResponse handleServiceResponse,String allOrderProductIdList){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         String restOrderProductIdList="";
@@ -259,17 +263,19 @@ public class OrderMapper {
         String mailerAction;
         MailUtil mailUtil=new MailUtil();
         try {
-            OrdersProducts ordersProducts=orderUtil.getProductId(orderProductId);
-            restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(String.valueOf(orderProductId),orderProductIdList);
+            restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(orderProductIdString,allOrderProductIdList);
+
+
+            OrdersProducts ordersProducts=orderUtil.getProductId(Integer.parseInt(orderProductIdString.split(",")[0]));
             if(!restOrderProductIdList.equals("")){
                 orderList=getOrder(orderId,restOrderProductIdList);
             }
-            result=orderUtil.cancelOrder(orderId,orderProductId,comment);
+            result=orderUtil.cancelOrder(orderId,orderProductIdString,comment);
             if(result){
-                mailerAction="cancelorder&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
+                mailerAction="cancelorder&orderid="+orderId+"&orderproductids="+orderProductIdString+"&associd="+ordersProducts.getFkAssociateId();
 
                 if(mailUtil.sendGenericMail(mailerAction,"","","")){
-                    logger.debug("Mail successfully sent for cancelling orderId "+orderId+" with orderProductId "+orderProductId);
+                    logger.debug("Mail successfully sent for cancelling orderId "+orderId+" with orderProductId "+orderProductIdString);
                 }
                 handleServiceResponse.setResult(orderList);
             }
@@ -281,6 +287,19 @@ public class OrderMapper {
     public List<Order> mergeOrderList(List<Order> orderList,List<Order> orderList1){
         return ListUtils.union(orderList,orderList1);
     }
+
+    public boolean approveDeliveryAttempt(int orderId,String orderProductIdList){
+        boolean result=false;
+        com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
+        try{
+            result=orderUtil.updateOrderProductForApproveAttemptedDeliveryOrder(orderId,orderProductIdList);
+        }catch(Exception exception){
+            logger.error("error while approveDeliveryAttempt ",exception);
+        }
+
+        return result;
+    }
+
     public String findIntersectionOfTwoCommaSeparatedStrings(String one,String two){
         // ( A U B ) == B   , ( A ∩ B ) == A  , !( A ∩ B )  part of B which is not in A .....   consider B as a big circle and A is reside withIn B
         String interSection="";

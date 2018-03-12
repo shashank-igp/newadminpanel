@@ -36,7 +36,7 @@ public class VendorUtil
             statement = "select torder.orders_id, ( CASE WHEN torder.deliveredDate!='0000-00-00 00:00:00' THEN torder.deliveredDate END ) as deliveredDate,"
                 + "vap.delivery_date ,op.orders_product_status,op.delivery_status  ,vap.delivery_time , vap.shipping_type ,op.sla_code ,"
                 + "( CASE WHEN torder.outForDeliveryDate !='0000-00-00 00:00:00' THEN torder.outForDeliveryDate END ) as  outForDeliveryDate,op.orders_products_id  "
-                + "from vendor_assign_price vap join orders_products op on vap.orders_id = op.orders_id and vap.products_id = op.products_id  "
+                + " , op.delivery_attempt from vendor_assign_price vap join orders_products op on vap.orders_id = op.orders_id and vap.products_id = op.products_id  "
                 + " left join trackorders torder on op.orders_id = torder.orders_id and op.orders_products_id = torder.orders_products_id  "
                 + " where  op.orders_product_status in ('Processed','Confirmed'" +pStatus + ") and  vap.fk_associate_id = ?  and "
                 + "DATE_FORMAT(vap.delivery_date,'%Y-%m-%d') "+dateComapareSymbol+" ? and vap.shipping_type !='Any time'  and  vap.shipping_type !='' ";
@@ -60,6 +60,7 @@ public class VendorUtil
                 orderDetailsPerOrderProduct.setShippingType(resultSet.getString("vap.shipping_type"));
                 orderDetailsPerOrderProduct.setSlaCode(resultSet.getInt("op.sla_code"));
                 orderDetailsPerOrderProduct.setOrdersProductsId(resultSet.getLong("op.orders_products_id"));
+                orderDetailsPerOrderProduct.setDeliveryAttemptFlag(resultSet.getInt("op.delivery_attempt"));
                 listOfOrderIdAsPerVendor.add(orderDetailsPerOrderProduct);
             }
 

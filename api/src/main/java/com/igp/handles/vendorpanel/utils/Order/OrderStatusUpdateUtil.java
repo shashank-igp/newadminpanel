@@ -27,6 +27,7 @@ public class OrderStatusUpdateUtil {
         String recipientInfo,String rejectionMessage,String commentsDelivered,String recipientName,int rejectionType){
         Boolean result=false;
         String productIds="";
+        int deliveryAttemptFlag=0;
         try
         {
             productIds=getProductsIds(orderProductIds);
@@ -56,8 +57,8 @@ public class OrderStatusUpdateUtil {
 
                     break;
                 case "Delivered":
-
-                    result=markDelivered(orderId,fkAssociateId,status,orderProductIds);
+                    deliveryAttemptFlag=0;
+                    result=markDelivered(orderId,fkAssociateId,status,orderProductIds,deliveryAttemptFlag);
                     if (result){
                         updateHandelsHistory(orderId, recipientInfo, rejectionMessage, recipientInfo,rejectionMessage,
                             status,orderProductIds,commentsDelivered,recipientName,rejectionType,fkAssociateId);
@@ -75,9 +76,12 @@ public class OrderStatusUpdateUtil {
                             orderProductIds,commentsDelivered,recipientName,rejectionType,fkAssociateId);
                     }
                     break;
-                case "PutOnHold":
-                    // orderDao.updateOrderStatus(scopeId, fkAssociateId,
-                    // orderId, "PutOnHold");
+                case "AttemptedDelivery":
+                    deliveryAttemptFlag=1;
+                    result=markDelivered(orderId,fkAssociateId,status,orderProductIds,deliveryAttemptFlag);
+                    if(result){
+                        updateOrderHistory( status,orderId ,orderProductIds,fkAssociateId);
+                    }
                     break;
                 default:
                     try {
@@ -160,7 +164,7 @@ public class OrderStatusUpdateUtil {
 
 
     }
-    public static Boolean   markDelivered(int orderId, String fkAssociateId, String status, String orderProductIds){
+    public static Boolean   markDelivered(int orderId, String fkAssociateId, String status, String orderProductIds,int deliveryAttemptFlag){
 
         Connection connection = null;
         String statement;
@@ -168,12 +172,10 @@ public class OrderStatusUpdateUtil {
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "update orders_products as op inner join trackorders as tk on op.orders_products_id=tk.orders_products_id and  op.orders_id=tk.orders_id  set tk.deliveredDate=now() ,op.delivery_status= 1 where  op.orders_id=? and op.fk_associate_id in(?) and op.orders_products_id in ( "+orderProductIds+") ";
+            statement = "update orders_products as op inner join trackorders as tk on op.orders_products_id=tk.orders_products_id and  op.orders_id=tk.orders_id  set tk.deliveredDate=now() ,op.delivery_status= 1,op.delivery_attempt = case when op.delivery_attempt = 2 then 3 else  "+ deliveryAttemptFlag +" end where  op.orders_id=? and op.fk_associate_id in(?) and op.orders_products_id in ( "+orderProductIds+") ";
             preparedStatement = connection.prepareStatement(statement);
-            // preparedStatement.setString(1,status);
             preparedStatement.setInt(1,orderId);
             preparedStatement.setString(2,fkAssociateId);
-            //   preparedStatement.setString(3,orderProductIds);
             logger.debug("sql query "+preparedStatement);
             Integer rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated>0){
@@ -391,23 +393,18 @@ public class OrderStatusUpdateUtil {
         String statement;
         String stringToUpdate="";
         if (status.equals("Delivered")){
-
             stringToUpdate="Products delivered : "+ordersProductsIds+" for orderId "+orderId+" using Vendor Upload Panel ";
-
         }
-
         else if (status.equals("Confirmed")){
-
             stringToUpdate="Products Confirmed : "+ordersProductsIds+" for orderId "+orderId+" using Vendor Upload Panel ";
-
         }
-
         else if (status.equals("OutForDelivery")){
             stringToUpdate="Products OutForDelivery : "+ordersProductsIds+" for orderId "+orderId+" using Vendor Upload Panel ";
         }
-
         else if (status.equals("Rejected")){
             stringToUpdate="Products Rejected : "+ordersProductsIds+" for orderId "+orderId+" using Vendor Upload Panel ";
+        }else if(status.equals("AttemptedDelivery")){
+            stringToUpdate="Try To Attempt delivery of : "+ordersProductsIds+" for orderId "+orderId+" using Vendor Upload Panel ";
         }
 
 

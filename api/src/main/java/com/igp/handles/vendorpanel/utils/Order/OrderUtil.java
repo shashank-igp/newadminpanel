@@ -82,6 +82,7 @@ public class OrderUtil
                     .slaCode(resultSet.getInt("op.sla_code"))
                     .personalized(resultSet.getBoolean("npei.flag_personalize"))
                     .timeSlaVoilates(getTimeWhenColorChangesforOrderProduct(resultSet.getInt("op.sla_code")))
+                    .deliveryAttemptFlag(resultSet.getInt("op.delivery_attempt"))
                     .build();
 
                 ordersProducts.setVendorName(vendorUtil.getVendorInfo(Integer.parseInt(ordersProducts.getFkAssociateId())).getAssociateName());
@@ -99,11 +100,19 @@ public class OrderUtil
                     .productCostPrice(resultSet.getInt("opei.product_cost_price"))
                     .build();
 
-                if(forAdminPanelOrNot==false){
-//                    if(!ordersProducts.getTimeSlaVoilates().equalsIgnoreCase("")&&orderProductExtraInfo.getDeliveryTime().equalsIgnoreCase("")){
-//                        orderProductExtraInfo.setDeliveryTime(ordersProducts.getTimeSlaVoilates());
-//                    }
+                if(ordersProducts.getOrdersProductStatus().equals("Shipped")){
+                    if(ordersProducts.getDeliveryStatus()==0){
+                        ordersProducts.setOrdersProductStatus("OutForDelivery");
+                    }else {
+                        if(ordersProducts.getDeliveryAttemptFlag()==1||ordersProducts.getDeliveryAttemptFlag()==2){
+                            ordersProducts.setOrdersProductStatus("AttemptedDelivery");
+                        }else {
+                            ordersProducts.setOrdersProductStatus("Delivered");
+                        }
+                    }
+                }
 
+                if(forAdminPanelOrNot==false){
                     if(orderProductExtraInfo.getDeliveryType()==2){
                         String[] timeSlotArray=orderProductExtraInfo.getDeliveryTime().split(" hrs - ");
                         int secondTimeSlot=Integer.parseInt(timeSlotArray[1].substring(0,2))-1;
@@ -127,12 +136,12 @@ public class OrderUtil
 
     public List<OrdersProducts> getOrderProductsByStatusDate(String scopeId, int fkAssociateId, String status,
         Date date, String section, boolean isfuture,Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap,
-        boolean forAdminPanelOrNot,String slaClause){
+        boolean forAdminPanelOrNot,String slaClause,int deliveryAttemptFlag){
 
         //  forAdminPanelOrNot  == true i.e request comes from admin panel and if == false then request is for vendor Panel
         Connection connection = null;
         ResultSet resultSet = null;
-        String statement="",fkAssociateIdWhereClause="";
+        String statement="",fkAssociateIdWhereClause="",deliveryAttemptClause;
         PreparedStatement preparedStatement = null;
         VendorUtil vendorUtil=new VendorUtil();
         List<OrdersProducts> listOfOrderProducts=new ArrayList<>();
@@ -154,6 +163,7 @@ public class OrderUtil
             }else {
                 slaClause="";
             }
+            deliveryAttemptClause=" and op.delivery_attempt = "+deliveryAttemptFlag+" ";
             switch (status)
             {
                 case "Processing":
@@ -246,7 +256,7 @@ public class OrderUtil
                         + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                         + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
                         + " where op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 1 and  "
-                        + " DATE_FORMAT(track.deliveredDate,'%Y-%m-%d') = ? and op.orders_product_status='Shipped' order by track.deliveryDate asc ";
+                        + " DATE_FORMAT(track.deliveredDate,'%Y-%m-%d') = ? and op.orders_product_status='Shipped' "+ deliveryAttemptClause +" order by track.deliveryDate asc ";
                     break;
                 case "all":
                     statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
@@ -286,6 +296,7 @@ public class OrderUtil
                     .slaCode(resultSet.getInt("op.sla_code"))
                     .personalized(resultSet.getBoolean("npei.flag_personalize"))
                     .timeSlaVoilates(getTimeWhenColorChangesforOrderProduct(resultSet.getInt("op.sla_code")))
+                    .deliveryAttemptFlag(resultSet.getInt("op.delivery_attempt"))
                     .build();
 
                 ordersProducts.setVendorName(vendorUtil.getVendorInfo(Integer.parseInt(ordersProducts.getFkAssociateId())).getAssociateName());
@@ -304,9 +315,17 @@ public class OrderUtil
                     .productCostPrice(resultSet.getInt("opei.product_cost_price"))
                     .build();
 
-//                if(!ordersProducts.getTimeSlaVoilates().equalsIgnoreCase("")&&orderProductExtraInfo.getDeliveryTime().equalsIgnoreCase("")){
-//                    orderProductExtraInfo.setDeliveryTime(ordersProducts.getTimeSlaVoilates());
-//                }
+                if(ordersProducts.getOrdersProductStatus().equals("Shipped")){
+                    if(ordersProducts.getDeliveryStatus()==0){
+                        ordersProducts.setOrdersProductStatus("OutForDelivery");
+                    }else {
+                        if(ordersProducts.getDeliveryAttemptFlag()==1||ordersProducts.getDeliveryAttemptFlag()==2){
+                            ordersProducts.setOrdersProductStatus("AttemptedDelivery");
+                        }else {
+                            ordersProducts.setOrdersProductStatus("Delivered");
+                        }
+                    }
+                }
 
                 if(forAdminPanelOrNot==false){
                     if(orderProductExtraInfo.getDeliveryType()==2){

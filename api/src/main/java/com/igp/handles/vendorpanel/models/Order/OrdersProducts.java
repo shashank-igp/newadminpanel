@@ -110,7 +110,19 @@ public class OrdersProducts implements Serializable{
 
     private boolean					personalized									= false;
 
-    private String vendorName=null;
+    private int deliveryAttemptFlag;
+
+    public int getDeliveryAttemptFlag()
+    {
+        return deliveryAttemptFlag;
+    }
+
+    public void setOrdersProductStatus(String ordersProductStatus)
+    {
+        this.ordersProductStatus = ordersProductStatus;
+    }
+
+    private String vendorName =null;
 
     public String getVendorName()
     {
@@ -432,6 +444,7 @@ public class OrdersProducts implements Serializable{
         componentList = builder.componentList;
         orderProductExtraInfo = builder.orderProductExtraInfo;
         timeSlaVoilates=builder.timeSlaVoilates;
+        this.deliveryAttemptFlag=builder.deliveryAttemptFlag;
     }
 
     public static final class Builder
@@ -472,6 +485,8 @@ public class OrdersProducts implements Serializable{
         private List<OrderComponent>  componentList;
         private OrderProductExtraInfo orderProductExtraInfo;
         private String timeSlaVoilates;
+
+        private int deliveryAttemptFlag;
 
         public Builder()
         {
@@ -688,6 +703,12 @@ public class OrdersProducts implements Serializable{
         }
         public Builder timeSlaVoilates(String val){
             timeSlaVoilates=val;
+            return this;
+        }
+
+        public Builder deliveryAttemptFlag(int val)
+        {
+            deliveryAttemptFlag = val;
             return this;
         }
 
