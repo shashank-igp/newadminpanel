@@ -750,6 +750,7 @@ public class MarketPlaceOrderUtil {
             connection = Database.INSTANCE.getReadOnlyConnection();
             String statement = "SELECT countries_id FROM countries WHERE countries_name = ?";
             preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1,countryName);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 countryId = Integer.valueOf(resultSet.getString("countries_id"));
@@ -909,5 +910,34 @@ public class MarketPlaceOrderUtil {
         }
         return result;
     }
+
+    public void findFirstAndLastName(String name){
+        String fname = "";
+        String lname = "";
+
+        if (name != null) {
+
+            if (name.contains(" ")) {
+                String[] nameArray = name.trim().split(" ");
+
+                fname = nameArray[0];
+                if (nameArray.length > 1) {
+
+                    for(int i=1;i<nameArray.length-1;i++){
+                        if(fname.length()+nameArray[i].length()<20){
+                            fname+=" "+nameArray[i];
+                        }else {
+                            break;
+                        }
+                    }
+                    lname = name.trim().substring(fname.length() + 1, name.trim().length());
+                }
+            } else {
+                fname = name;
+            }
+        }
+    }
+
+
 
 }
