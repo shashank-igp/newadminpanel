@@ -33,9 +33,6 @@ public class DashboardMapper {
         Date deliveryDate = null;
 
         Map<String, Map<String,Map<String, Set<Map<String, String>>>>> dateStatusOrderIdAllMap      = dashboardDetail.getDateStatusOrderIdAllMap();
-        Map<String, Map<String,Map<String, Set<Map<String, String>>>>> dateStatusOrderIdNoBreachMap = dashboardDetail.getDateStatusOrderIdNoBreachMap();
-        Map<String, Map<String,Map<String, Set<Map<String, String>>>>> dateStatusOrderIdAlertMap    = dashboardDetail.getDateStatusOrderIdAlertMap();
-
         Date todayDate = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
         Date tomorrowDate = DateUtils.addDays(todayDate, 1);
         Date futureDate = DateUtils.addDays(todayDate, 2);
@@ -151,107 +148,11 @@ public class DashboardMapper {
         statusCountMap3.put("notConfirmed",statusCountMap07);
         dateStatusCountAllMap.put("future",statusCountMap3);
 
-
-        Map<String,Map<String, Map<String, Map<String, String>>>> noBreachStatusCountAllMap =dashboardDetail
-            .getDateStatusCountNoBreachMap();
-
-        Map<String, Map<String,Map<String, String>>> statusCountMap4 = new HashMap<>();
-        Map<String,Map<String, String>> statusCountMap08 = new HashMap<>();
-        statusCountMap08.put("notAlloted",hp.copyMap(dataMap));
-        statusCountMap08.put("processing",hp.copyMap(dataMap));
-        statusCountMap4.put("unAssigned",statusCountMap08);
-        Map<String,Map<String, String>> statusCountMap09 = new HashMap<>();
-        statusCountMap09.put("pending",hp.copyMap(dataMap));
-        statusCountMap09.put("total",hp.copyMap(dataMap));
-        statusCountMap4.put("notConfirmed",statusCountMap09);
-        noBreachStatusCountAllMap.put("past",statusCountMap4);
-
-        Map<String, Map<String,Map<String, String>>> statusCountMap5 = new HashMap<>();
-        Map<String,Map<String, String>> statusCountMap010 = new HashMap<>();
-        statusCountMap010.put("notAlloted",hp.copyMap(dataMap));
-        statusCountMap010.put("processing",hp.copyMap(dataMap));
-        statusCountMap5.put("unAssigned",statusCountMap010);
-        Map<String,Map<String, String>> statusCountMap011 = new HashMap<>();
-        statusCountMap011.put("pending",hp.copyMap(dataMap));
-        statusCountMap011.put("total",hp.copyMap(dataMap));
-        statusCountMap5.put("notConfirmed",statusCountMap011);
-        noBreachStatusCountAllMap.put("today",statusCountMap5);
-
-        Map<String, Map<String,Map<String, String>>> statusCountMap6 = new HashMap<>();
-        Map<String,Map<String, String>> statusCountMap012 = new HashMap<>();
-        statusCountMap012.put("notAlloted",hp.copyMap(dataMap));
-        statusCountMap012.put("processing",hp.copyMap(dataMap));
-        statusCountMap6.put("unAssigned",statusCountMap012);
-        Map<String,Map<String, String>> statusCountMap013 = new HashMap<>();
-        statusCountMap013.put("pending",hp.copyMap(dataMap));
-        statusCountMap013.put("total",hp.copyMap(dataMap));
-        statusCountMap6.put("notConfirmed",statusCountMap013);
-        noBreachStatusCountAllMap.put("tomorrow",statusCountMap6);
-
-        Map<String, Map<String,Map<String, String>>> statusCountMap7 = new HashMap<>();
-        Map<String,Map<String, String>> statusCountMap014 = new HashMap<>();
-        statusCountMap014.put("notAlloted",hp.copyMap(dataMap));
-        statusCountMap014.put("processing",hp.copyMap(dataMap));
-        statusCountMap7.put("unAssigned",statusCountMap014);
-        Map<String,Map<String, String>> statusCountMap015 = new HashMap<>();
-        statusCountMap015.put("pending",hp.copyMap(dataMap));
-        statusCountMap015.put("total",hp.copyMap(dataMap));
-        statusCountMap7.put("notConfirmed",statusCountMap015);
-        noBreachStatusCountAllMap.put("future",statusCountMap7);
-
-
-        Map<String,Map<String, Map<String, Map<String, String>>>> alertStatusCountAllMap =dashboardDetail
-            .getDateStatusCountAlertMap();
-
-        Map<String, Map<String,Map<String, String>>> statusCountMap8 = new HashMap<>();
-        Map<String,Map<String, String>> statusCountMap016 = new HashMap<>();
-        statusCountMap016.put("notAlloted",hp.copyMap(dataMap));
-        statusCountMap016.put("processing",hp.copyMap(dataMap));
-        statusCountMap8.put("unAssigned",statusCountMap016);
-        Map<String,Map<String, String>> statusCountMap017 = new HashMap<>();
-        statusCountMap017.put("pending",hp.copyMap(dataMap));
-        statusCountMap017.put("total",hp.copyMap(dataMap));
-        statusCountMap8.put("notConfirmed",statusCountMap017);
-        alertStatusCountAllMap.put("past",statusCountMap8);
-
-        Map<String, Map<String,Map<String, String>>> statusCountMap9 = new HashMap<>();
-        Map<String,Map<String, String>> statusCountMap018 = new HashMap<>();
-        statusCountMap018.put("notAlloted",hp.copyMap(dataMap));
-        statusCountMap018.put("processing",hp.copyMap(dataMap));
-        statusCountMap9.put("unAssigned",statusCountMap018);
-        Map<String,Map<String, String>> statusCountMap019 = new HashMap<>();
-        statusCountMap019.put("pending",hp.copyMap(dataMap));
-        statusCountMap019.put("total",hp.copyMap(dataMap));
-        statusCountMap9.put("notConfirmed",statusCountMap019);
-        alertStatusCountAllMap.put("today",statusCountMap9);
-
-        Map<String, Map<String,Map<String, String>>> statusCountMap10 = new HashMap<>();
-        Map<String,Map<String, String>> statusCountMap020 = new HashMap<>();
-        statusCountMap020.put("notAlloted",hp.copyMap(dataMap));
-        statusCountMap020.put("processing",hp.copyMap(dataMap));
-        statusCountMap10.put("unAssigned",statusCountMap020);
-        Map<String,Map<String, String>> statusCountMap021 = new HashMap<>();
-        statusCountMap021.put("pending",hp.copyMap(dataMap));
-        statusCountMap021.put("total",hp.copyMap(dataMap));
-        statusCountMap10.put("notConfirmed",statusCountMap021);
-        alertStatusCountAllMap.put("tomorrow",statusCountMap10);
-
-        Map<String, Map<String,Map<String, String>>> statusCountMap11 = new HashMap<>();
-        Map<String,Map<String, String>> statusCountMap022 = new HashMap<>();
-        statusCountMap022.put("notAlloted",hp.copyMap(dataMap));
-        statusCountMap022.put("processing",hp.copyMap(dataMap));
-        statusCountMap11.put("unAssigned",statusCountMap022);
-        Map<String,Map<String, String>> statusCountMap023 = new HashMap<>();
-        statusCountMap023.put("pending",hp.copyMap(dataMap));
-        statusCountMap023.put("total",hp.copyMap(dataMap));
-        statusCountMap11.put("notConfirmed",statusCountMap023);
-        alertStatusCountAllMap.put("future",statusCountMap11);
-
-
         Map<String,String> notShippedTotalOrderCount = hp.copyMap(dataMap);
         Map<String,String> notShippedPendingOrderCount = hp.copyMap(dataMap);
         Map<String,String> notDeliveredTotalOrderCount = hp.copyMap(dataMap);
         Map<String,String> notDeliveredPendingOrderCount = hp.copyMap(dataMap);
+        Map<String,String> attemptedDeliveryOrders=hp.copyMap(dataMap);
 
         int orderTotalWhole=0;
         int notAssignedOrdersTotalWhole=0;
@@ -284,6 +185,7 @@ public class DashboardMapper {
                     boolean flagForUniqueness=false;
                     int slaCode= slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,1);
                     String key=orderId + "," + deliveryDate + "," + shippingType;
+                    int deliveryAttemptFlag=orderDetailsPerOrderProduct.getDeliveryAttemptFlag();
                     flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId,status);
 
                     logger.debug("slacode  in handels panel Dashboard  "+slaCode+" with orderId "+orderDetailsPerOrderProduct.getOrdersId()+" and orderProductId "+orderDetailsPerOrderProduct.getOrdersProductsId());
@@ -522,13 +424,13 @@ public class DashboardMapper {
                                 orderTotalWhole++;
                                 int count=Integer.parseInt(notShippedTotalOrderCount.get("count"));
                                 count++;
-                                notShippedTotalOrderCount.put("count",count+"");
+                                notShippedTotalOrderCount.put("count",String.valueOf(count));
                                 notShippedTotalOrderCount.put("sla",String.valueOf(true));
                                 if(OrderUtil.isHighAlertActionRequired(slaCode)){
                                     orderTotalWhole++;
                                     int alertCount=Integer.parseInt(notShippedPendingOrderCount.get("count"));
                                     alertCount++;
-                                    notShippedPendingOrderCount.put("count",alertCount+"");
+                                    notShippedPendingOrderCount.put("count",String.valueOf(alertCount));
                                     notShippedPendingOrderCount.put("alert", String.valueOf(true));
                                 }
                             }
@@ -542,17 +444,25 @@ public class DashboardMapper {
                                 orderTotalWhole++;
                                 int count=Integer.parseInt(notDeliveredTotalOrderCount.get("count"));
                                 count++;
-                                notDeliveredTotalOrderCount.put("count",count+"");
+                                notDeliveredTotalOrderCount.put("count",String.valueOf(count));
                                 notDeliveredTotalOrderCount.put("sla",String.valueOf(true));
                                 if(OrderUtil.isHighAlertActionRequired(slaCode)){
                                     orderTotalWhole++;
                                     int alertCount=Integer.parseInt(notDeliveredPendingOrderCount.get("count"));
                                     alertCount++;
-                                    notDeliveredPendingOrderCount.put("count",alertCount+"");
+                                    notDeliveredPendingOrderCount.put("count",String.valueOf(alertCount));
                                     notDeliveredPendingOrderCount.put("alert", String.valueOf(true));
                                 }
                             }
-
+                        }
+                        else if(status.equals("Shipped") && deliverystatus == true && deliveryAttemptFlag == 1){
+                            //attempted delivery but somehow could'nt
+                            //deliveryAttemptFlag=0 no hassle , deliveryAttemptFlag=1 raised ,
+                            // deliveryAttemptFlag = 2 approve from handels team to deliver again ,
+                            // deliveryAttemptFlag = 3 finally re-delivery
+                            int count=Integer.parseInt(attemptedDeliveryOrders.get("count"));
+                            count++;
+                            attemptedDeliveryOrders.put("count",String.valueOf(count));
 
                         }
                     }
@@ -563,6 +473,7 @@ public class DashboardMapper {
                     dashboardDetail.setOrderTotalWhole(orderTotalWhole);
                     dashboardDetail.setNotAssignedOrdersTotalWhole(notAssignedOrdersTotalWhole);
                     dashboardDetail.setNotConfirmedOrdersTotalWhole(notConfirmedOrdersTotalWhole);
+                    dashboardDetail.setAttemptedDeliveryOrders(attemptedDeliveryOrders);
                 }catch (Exception exception){
                     logger.error("Exception occured ",exception);
                 }

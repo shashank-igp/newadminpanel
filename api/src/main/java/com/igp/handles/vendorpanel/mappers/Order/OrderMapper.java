@@ -58,9 +58,15 @@ public class OrderMapper
         OrderUtil orderUtil = new OrderUtil();
         List<Order> orders=new ArrayList<>();
         Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap = new HashMap<>();
+        int deliveryAttemptFlag=0;
         try{
+
+            if(status.equals("AttemptedDelivery")){
+                status="Shipped";
+                deliveryAttemptFlag=1;
+            }
             List<OrdersProducts> orderProductList = orderUtil.getOrderProductsByStatusDate(scopeId,fkassociateId,status,date,
-                section,  isfuture,ordersProductExtraInfoMap,false,null);
+                section,  isfuture,ordersProductExtraInfoMap,false,null,deliveryAttemptFlag);
             orders=prepareOrders(orderAction,orderProductList,ordersProductExtraInfoMap,status,false);
         }
         catch (Exception e){
