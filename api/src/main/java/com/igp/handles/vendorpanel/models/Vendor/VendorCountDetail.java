@@ -32,11 +32,33 @@ public class VendorCountDetail {
     private int newOrderTotalHighAlert=0;
     private int confirmOrderTotalWholeHighAlert=0;
     private int outOfDeliveryOrderTotalHighAlert=0;
+    private int deliveryAttemptRaiseRequestCount=0;
+    private int deliveryAttemptApproveCount=0;
 
     private Map<String, Map<String, Set<Map<String, String>>>> dateStatusOrderIdAllMap      = new HashMap<>();
     private Map<String, Map<String, Set<Map<String, String>>>> dateStatusOrderIdNoBreachMap = new HashMap<>();
     private Map<String, Map<String, Set<Map<String, String>>>> dateStatusOrderIdAlertMap    = new HashMap<>();
     private Map<String,Map<String,Map<String,String>>> leftOutOrderToOrderProductIdMap2=new HashMap<>();
+
+    public int getDeliveryAttemptRaiseRequestCount()
+    {
+        return deliveryAttemptRaiseRequestCount;
+    }
+
+    public void setDeliveryAttemptRaiseRequestCount(int deliveryAttemptRaiseRequestCount)
+    {
+        this.deliveryAttemptRaiseRequestCount = deliveryAttemptRaiseRequestCount;
+    }
+
+    public int getDeliveryAttemptApproveCount()
+    {
+        return deliveryAttemptApproveCount;
+    }
+
+    public void setDeliveryAttemptApproveCount(int deliveryAttemptApproveCount)
+    {
+        this.deliveryAttemptApproveCount = deliveryAttemptApproveCount;
+    }
 
     public Map<String, Map<String, Map<String, String>>> getLeftOutOrderToOrderProductIdMap2()
     {

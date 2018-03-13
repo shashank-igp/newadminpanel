@@ -60,6 +60,7 @@ public class DashboardUtil {
                 orderDetailsPerOrderProduct.setVendorId(resultSet.getInt("op.fk_associate_id"));
                 orderDetailsPerOrderProduct.setAssignTime(resultSet.getString("vendor_assign_time"));
                 orderDetailsPerOrderProduct.setPurchasedTime(resultSet.getString("o.date_purchased"));
+                orderDetailsPerOrderProduct.setDeliveryAttemptFlag(resultSet.getInt("op.delivery_attempt"));
                 listOfOrderIdAsPerVendor.add(orderDetailsPerOrderProduct);
             }
 

@@ -249,6 +249,7 @@ public class HandlesVendorMapper {
                     boolean flagForUniqueness=false;
                     Map<String, String> orderIdData = new HashMap<>();
                     int slaCode= orderDetailsPerOrderProduct.getSlaCode();
+                    int deliveryAttemptFlag=orderDetailsPerOrderProduct.getDeliveryAttemptFlag();
                     if (status.equals("Processed") && deliverystatus == false)
                     {
                         orderIdData.put("orderId", orderId + "");
@@ -608,19 +609,24 @@ public class HandlesVendorMapper {
                     }
                     else if (status.equals("Shipped") && deliverystatus == true
                         && deliveredDate.getTime() == todayDate.getTime())
-					/*
-					 * else if (status.equals("Confirmed") && deliverystatus ==
-					 * true && deliveryDate.getTime() == todayDate.getTime())
-					 */
                     {
                         String key=orderId + "," + deliveryDate + "," + shippingType;
                         flagForUniqueness=checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,
                                                             Integer.parseInt(fkAssociateId),status);
-                        if (flagForUniqueness)
+                        if (flagForUniqueness )
                         {
 //                            orderTotalWhole++;
-                            vendorCountDetail
-                                .setDeliveredTodayOrderCount(vendorCountDetail.getDeliveredTodayOrderCount() + 1);
+                            if(deliveryAttemptFlag == 0 || deliveryAttemptFlag==3){ // 0 means regular flow product delivered
+                                vendorCountDetail                                   // 3 means vendor reattempt delivery and finally did it
+                                    .setDeliveredTodayOrderCount(vendorCountDetail.getDeliveredTodayOrderCount() + 1);
+                            }else if(deliveryAttemptFlag==1) {
+                                //raised issue for delivery attempt
+                                vendorCountDetail.setDeliveryAttemptRaiseRequestCount(vendorCountDetail.getDeliveryAttemptApproveCount()+1);
+                            }else if(deliveryAttemptFlag==2){
+                                //approve by handles team to go ahead for re-delivery
+                                vendorCountDetail.setDeliveryAttemptApproveCount(vendorCountDetail.getDeliveryAttemptApproveCount()+1);
+                            }
+
                         }
                     }
                     else if (status.equals("Shipped") && deliverystatus == false
