@@ -64,6 +64,9 @@ public class OrderMapper
             if(status.equals("AttemptedDelivery")){
                 status="Shipped";
                 deliveryAttemptFlag=1;
+            }else if(status.equals("ApprovedAttemptedDelivery")){
+                status="Shipped";
+                deliveryAttemptFlag=2;
             }
             List<OrdersProducts> orderProductList = orderUtil.getOrderProductsByStatusDate(scopeId,fkassociateId,status,date,
                 section,  isfuture,ordersProductExtraInfoMap,false,null,deliveryAttemptFlag);
