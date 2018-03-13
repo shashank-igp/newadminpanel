@@ -321,9 +321,11 @@ public class OrderUtil
                     if(ordersProducts.getDeliveryStatus()==0){
                         ordersProducts.setOrdersProductStatus("OutForDelivery");
                     }else {
-                        if(ordersProducts.getDeliveryAttemptFlag()==1||ordersProducts.getDeliveryAttemptFlag()==2){
+                        if(ordersProducts.getDeliveryAttemptFlag()==1){
                             ordersProducts.setOrdersProductStatus("AttemptedDelivery");
-                        }else {
+                        }else if(ordersProducts.getDeliveryAttemptFlag()==2) {
+                            ordersProducts.setOrdersProductStatus("ApprovedAttemptedDelivery");
+                        } else {
                             ordersProducts.setOrdersProductStatus("Shipped");
                         }
                     }
