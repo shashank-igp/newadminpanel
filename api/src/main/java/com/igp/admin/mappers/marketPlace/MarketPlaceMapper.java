@@ -395,6 +395,11 @@ public class MarketPlaceMapper {
                         int countryId = marketPlaceOrderUtil.getCountryId(column.get("Country"));
                         String mprefix = marketPlaceOrderUtil.getMobilePrefixByCountryId(countryId);
 
+                        String phone = column.get("Mobile");
+
+                        if (!phone.isEmpty()) {
+                            phone = new BigDecimal(column.get("Mobile")).toPlainString();
+                        }
                         addressModel.setTitle("");
                         addressModel.setFirstname(fname);
                         addressModel.setLastname(lname);
@@ -403,7 +408,7 @@ public class MarketPlaceMapper {
                         addressModel.setCity(userModel.getCity());
                         addressModel.setState(userModel.getState());
                         addressModel.setCountryId(countryId+"");
-                        addressModel.setMobile(column.get("Mobile"));
+                        addressModel.setMobile(phone);
                         addressModel.setMobilePrefix(mprefix);
                         addressModel.setAddressType(0); // home
 
@@ -492,7 +497,11 @@ public class MarketPlaceMapper {
                         }
 
                         String address = column.get("Address").trim().replace("\n"," ");
+                        String phone = column.get("Sender Mobile");
 
+                        if (!phone.isEmpty()) {
+                            phone = new BigDecimal(column.get("Sender Mobile")).toPlainString();
+                        }
                         userModel = new UserModel.UserBuilder()
                             .id(null)
                             .firstname(fname)
@@ -502,7 +511,7 @@ public class MarketPlaceMapper {
                             .city(column.get("City"))
                             .postcode(zipCode)
                             .email(column.get("Sender Email").trim())
-                            .mobile(column.get("Sender Mobile"))
+                            .mobile(phone)
                             .mobilePrefix("91")
                             .password(millis + "")
                             .countryId(99)
@@ -526,9 +535,14 @@ public class MarketPlaceMapper {
                                 fname = column.get("Deliver To");
                             }
                         }
-                        int countryId = marketPlaceOrderUtil.getCountryId(column.get("Country"));
+                        int countryId = marketPlaceOrderUtil.getCountryId(column.get("Country").trim());
                         String mprefix = marketPlaceOrderUtil.getMobilePrefixByCountryId(countryId);
 
+                        phone = column.get("Mobile");
+
+                        if (!phone.isEmpty()) {
+                            phone = new BigDecimal(column.get("Mobile")).toPlainString();
+                        }
                         addressModel.setTitle("");
                         addressModel.setFirstname(fname);
                         addressModel.setLastname(lname);
@@ -537,7 +551,7 @@ public class MarketPlaceMapper {
                         addressModel.setCity(userModel.getCity());
                         addressModel.setState(userModel.getState());
                         addressModel.setCountryId(countryId+"");
-                        addressModel.setMobile(column.get("Mobile"));
+                        addressModel.setMobile(phone);
                         addressModel.setMobilePrefix(mprefix);
                         addressModel.setAddressType(0); // home
 
@@ -574,7 +588,7 @@ public class MarketPlaceMapper {
 
                         String detail = column.get("Order No") + "(#)" +
                             column.get("Sender Name") + "(#)" +
-                            userModel.getMobile() + "(#)" +
+                            phone + "(#)" +
                             userModel.getEmail() + "(#)" +
                             userModel.getAddressField1() + "(#)" +
                             userModel.getPostcode() + "(#)" +
