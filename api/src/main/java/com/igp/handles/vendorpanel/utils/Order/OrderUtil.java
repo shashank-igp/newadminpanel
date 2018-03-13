@@ -107,7 +107,7 @@ public class OrderUtil
                         if(ordersProducts.getDeliveryAttemptFlag()==1||ordersProducts.getDeliveryAttemptFlag()==2){
                             ordersProducts.setOrdersProductStatus("AttemptedDelivery");
                         }else {
-                            ordersProducts.setOrdersProductStatus("Delivered");
+                            ordersProducts.setOrdersProductStatus("Shipped");
                         }
                     }
                 }
@@ -322,7 +322,7 @@ public class OrderUtil
                         if(ordersProducts.getDeliveryAttemptFlag()==1||ordersProducts.getDeliveryAttemptFlag()==2){
                             ordersProducts.setOrdersProductStatus("AttemptedDelivery");
                         }else {
-                            ordersProducts.setOrdersProductStatus("Delivered");
+                            ordersProducts.setOrdersProductStatus("Shipped");
                         }
                     }
                 }
