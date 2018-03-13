@@ -447,7 +447,7 @@ public class ReportUtil {
         String column;
         PreparedStatement preparedStatement = null;
         try {
-            if(field.equals("reqPrice")){
+            if(field!=null && field.equals("reqPrice")){
                 column="req_price="+updatePrice;
             }
             else if (updatePrice!=-1){
