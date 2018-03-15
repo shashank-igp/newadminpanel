@@ -276,13 +276,13 @@ public class ReportUtil {
         PreparedStatement preparedStatement = null;
         try {
             connection = Database.INSTANCE.getReadWriteConnection();
-            if(field.equals("pincode")){
+            if(field!=null && field.equals("pincode")){
                 statement = "update AA_vendor_pincode set flag_enabled="+flag+" where vendor_id=" + fk_associate_id + " and pincode=" + pincode;
                 preparedStatement = connection.prepareStatement(statement);
                 logger.debug("sql query in updateVendorPincode " + preparedStatement);
                 result = preparedStatement.executeUpdate();
             }else {
-                if (field.equals("reqPrice")){
+                if (field!=null && field.equals("reqPrice")){
                     updateClause = "req_price=" + updatePrice;
                 }
                 else if (flag == 1) {

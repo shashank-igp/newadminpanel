@@ -15,6 +15,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
@@ -355,8 +356,8 @@ public class MarketPlaceOrderUtil {
                 "customers_id, address_book_id, gender, firstname, lastname, email_address, " +
                 "street_address, city, state, postcode, country, relation, comments, delivery_instruction, " +
                 "date_of_delivery, extra_value, order_product_total, order_product_discount, shipping_charges, shipping_charges_in_inr, " +
-                "telephone_number, fk_associate_id, voucher_code, call_agent_name, call_customer_issue, campaignTracking, orders_temp_date) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())";
+                "telephone_number, fk_associate_id, voucher_code,themeid,call_agent_name, call_customer_issue, campaignTracking, orders_temp_date) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, now())";
 
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setInt(1, orderTempModel.getCustomerId());
@@ -397,9 +398,10 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setString(21, orderTempModel.getShippingAddressModel().getMobile());
             preparedStatement.setInt(22, orderTempModel.getAssociateId());
             preparedStatement.setString(23, orderTempModel.getVoucher());
-            preparedStatement.setString(24, "call_agent_name");
-            preparedStatement.setString(25, "call_customer_issue");
-            preparedStatement.setString(26, "campaignTracking");
+            preparedStatement.setInt(24,orderTempModel.getOccasionId());
+            preparedStatement.setString(25, "call_agent_name");
+            preparedStatement.setString(26, "call_customer_issue");
+            preparedStatement.setString(27, "campaignTracking");
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Failed to create tempOrder");
@@ -485,7 +487,7 @@ public class MarketPlaceOrderUtil {
             connection = Database.INSTANCE.getReadWriteConnection();
             statement = "INSERT INTO orders_temp_basket (customers_id, products_id, products_quantity, orders_temp_id, " +
                 "fk_associate_id, products_base_currency, products_base_currency_value, products_base_currency_value_inr, " +
-                "special_charges, shipping_type,final_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                "special_charges, shipping_type, final_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setInt(1, orderTempBasketModel.getCustomerId());
@@ -498,7 +500,7 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setInt(8, orderTempBasketModel.getBaseCurrencyValueInr()); // to be updated based on the current prices and products_base_currency.
             preparedStatement.setBigDecimal(9, orderTempBasketModel.getServiceCharges());
             preparedStatement.setString(10, orderTempBasketModel.getServiceType());
-            preparedStatement.setBigDecimal(11,orderTempBasketModel.getProductSellingPrice().divide(new BigDecimal(orderTempBasketModel.getQuantity().intValue())));
+            preparedStatement.setBigDecimal(11,orderTempBasketModel.getProductSellingPrice().divide(new BigDecimal(orderTempBasketModel.getQuantity()), 3, RoundingMode.HALF_UP));
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
@@ -606,7 +608,7 @@ public class MarketPlaceOrderUtil {
                 columns = ", c.customers_dob = ?";
                 isChangeDob = 1;
             }
-            if (Objects.equals(userModel.getCountryId(), "99") && !userModel.getPostcode().isEmpty() && userModel.getPostcode()!=null) {
+            if (userModel.getCountryId()==99 && !userModel.getPostcode().isEmpty() && userModel.getPostcode()!=null && !userModel.getPostcode().equalsIgnoreCase("none")) {
                 Map<String, String> data = getStateAndCityByPin(userModel.getPostcode());
                 if (data.get("error").equals("0")) {
                     userModel.setState(data.get("state"));
@@ -614,8 +616,7 @@ public class MarketPlaceOrderUtil {
                     userModel.setMobilePrefix("91");
                 } else {
                     //pincode entered was not found in the database.
-                    logger.debug("Pincode not found in our database.");
-                    throw new Exception("We do not serve this Pincode.");
+                    logger.debug("Pincode for Customer not found in our database.");
                 }
             }
 
@@ -623,7 +624,7 @@ public class MarketPlaceOrderUtil {
             statement = "UPDATE customers c INNER JOIN n_user ce ON ce.id = c.customers_id SET " +
                 " c.customers_firstname = ?, c.customers_lastname = ?, c.customers_mobile = ? ," +
                 " ce.int_mob_prefix = ? , c.customers_country_id = ? , c.customers_street_address = ? ," +
-                " c.customers_postcode = ? , c.customers_city = ? , c.customers_state = ? "+columns + " WHERE c.customers_id = ?";
+                " c.customers_postcode = ? , c.customers_city = ? , c.customers_state = ? , c.fk_associate_id = ? "+columns + " WHERE c.customers_id = ?";
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
 
             preparedStatement.setString(1, userModel.getFirstname());
@@ -631,17 +632,18 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setString(3, userModel.getMobile());
             preparedStatement.setString(4, userModel.getMobilePrefix());
             preparedStatement.setInt(5, userModel.getCountryId());
-            preparedStatement.setString(6, userModel.getAddressField1()==null?"":userModel.getAddressField1());
-            preparedStatement.setString(7, userModel.getPostcode()==null?"":userModel.getPostcode());
-            preparedStatement.setString(8, userModel.getCity()==null?"":userModel.getCity());
-            preparedStatement.setString(9, userModel.getState()==null?"":userModel.getState());
+            preparedStatement.setString(6, userModel.getAddressField1()==null?"none":userModel.getAddressField1());
+            preparedStatement.setString(7, userModel.getPostcode()==null?"none":userModel.getPostcode());
+            preparedStatement.setString(8, userModel.getCity()==null?"none":userModel.getCity());
+            preparedStatement.setString(9, userModel.getState()==null?"none":userModel.getState());
+            preparedStatement.setInt(10, userModel.getAssociateId());
 
             if (isChangeDob == 1){
-                preparedStatement.setString(10, userModel.getDob());
-                preparedStatement.setInt(11, custId);
+                preparedStatement.setString(11, userModel.getDob());
+                preparedStatement.setInt(12, custId);
             }
             else {
-                preparedStatement.setInt(10, custId);
+                preparedStatement.setInt(11, custId);
             }
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
