@@ -2,6 +2,7 @@ package com.igp.admin.mappers.marketPlace;
 
 import com.igp.admin.models.marketPlace.*;
 import com.igp.admin.utils.marketPlace.MarketPlaceOrderUtil;
+import org.apache.poi.hssf.usermodel.HSSFDateUtil;
 import org.apache.poi.ss.usermodel.*;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -63,7 +65,6 @@ public class MarketPlaceMapper {
         Map<Integer, Map<String, String>> data= new HashMap<>();
         int NUM_COLUMNS = 20;
         MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
-
         try {
             FileUploadModel fileUploadModel = marketPlaceOrderUtil.uploadTheFile(multiPart, filePrefix);
             boolean chkExtension = fileUploadModel.getFileExtension().equalsIgnoreCase("xls") || fileUploadModel.getFileExtension().equalsIgnoreCase("xlsx");
@@ -99,7 +100,10 @@ public class MarketPlaceMapper {
 
                         if (currentCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
                             a.put(list.get(currCol), currentCell.getNumericCellValue() + "");
-                        } else if (currentCell.getCellType() == Cell.CELL_TYPE_STRING) {
+                            if (HSSFDateUtil.isCellDateFormatted(currentCell)) {
+                                a.put(list.get(currCol), currentCell.getDateCellValue() + "");
+                            }
+                        } else  if (currentCell.getCellType() == Cell.CELL_TYPE_STRING) {
                             a.put(list.get(currCol), currentCell.getRichStringCellValue() + "");
                         } else if (currentCell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
                             a.put(list.get(currCol), currentCell.getBooleanCellValue() + "");
@@ -135,6 +139,7 @@ public class MarketPlaceMapper {
         MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
 
         SimpleDateFormat simpleDateFormat=new SimpleDateFormat("yyyy-MM-dd");
+        //   SimpleDateFormat simpleDateFormat1 = new SimpleDateFormat("dd/MM/yyyy");
         Date todayDate=new Date();
 
         for (Map.Entry<Integer, Map<String, String>> entry : data.entrySet()) {
@@ -358,7 +363,7 @@ public class MarketPlaceMapper {
                             }
                         }
 
-                        String address = column.get("Address").trim().replace("\n"," ");
+                        String address = column.get("Address").trim().replace("\n"," ").replace("–"," ");
                         userModel = new UserModel.UserBuilder()
                             .id(null)
                             .firstname(fname)
@@ -403,6 +408,7 @@ public class MarketPlaceMapper {
                         addressModel.setTitle("");
                         addressModel.setFirstname(fname);
                         addressModel.setLastname(lname);
+                        addressModel.setEmail("");
                         addressModel.setStreetAddress(userModel.getAddressField1());
                         addressModel.setPostcode(userModel.getPostcode());
                         addressModel.setCity(userModel.getCity());
@@ -412,7 +418,7 @@ public class MarketPlaceMapper {
                         addressModel.setMobilePrefix(mprefix);
                         addressModel.setAddressType(0); // home
 
-                        deliveryMessageModel.setMessage(column.get("Gift Msg"));
+                        deliveryMessageModel.setMessage(column.get("Gift Msg").trim().equalsIgnoreCase("na")?"":column.get("Gift Msg").trim());
 
                         String sP = column.get("Amount");
                         int sellingPrice = 0;
@@ -428,11 +434,21 @@ public class MarketPlaceMapper {
                             quantity = (int) d;
                         }
 
+                        String strDate1 = "";
+
+                        try {
+                            SimpleDateFormat formatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
+                            Date strDate = formatter.parse(column.get("Delivery Date"));
+                            strDate1 = simpleDateFormat.format(strDate);
+                        }catch (ParseException ex) {
+                            strDate1 = "";
+                        }
+
                         productModel = new ProductModel.Builder()
                             .productCode(column.get("Product Code").trim())
                             .quantity(quantity)
                             .sellingPrice(new BigDecimal(sellingPrice))
-                            .serviceDate(column.get("Delivery Date"))
+                            .serviceDate(strDate1)
                             .serviceTypeId(4 + "")
                             .serviceCharge(new BigDecimal(0))
                             .displayAttrList(new HashMap<>())
@@ -443,7 +459,7 @@ public class MarketPlaceMapper {
                             .build();
 
 
-                        String detail = column.get("Order No") + "(#)" +
+                        String detail = column.get("Order No").split("\\.")[0] + "(#)" +
                             column.get("Sender Name") + "(#)" +
                             userModel.getMobile() + "(#)" +
                             userModel.getEmail() + "(#)" +
@@ -455,9 +471,9 @@ public class MarketPlaceMapper {
 
                         extraInfoModel = new ExtraInfoModel.Builder()
                             .gstNo("")
-                            .relId(column.get("Order No"))
+                            .relId(column.get("Order No").split("\\.")[0])
                             .marketData(detail)
-                            .marketName("InterfloraInternational")
+                            .marketName("InterFloraInt")
                             .build();
 
                     }else if(fk_associate_id==556){
@@ -491,16 +507,14 @@ public class MarketPlaceMapper {
                         String zipCode = column.get("Pincode");
                         if (!zipCode.isEmpty()) {
                             zipCode = zipCode.trim();
-                            if (zipCode.length() >= 6) {
-                                zipCode = zipCode.substring(0, 6);
-                            }
+                            zipCode = zipCode.split("\\.")[0];
                         }
 
-                        String address = column.get("Address").trim().replace("\n"," ");
-                        String phone = column.get("Sender Mobile");
+                        String address = column.get("Address").trim().replace("\n"," ").replace("–"," ");
+                        String phone = column.get("Sender Mobile").trim().split("\\.")[0];
 
                         if (!phone.isEmpty()) {
-                            phone = new BigDecimal(column.get("Sender Mobile")).toPlainString();
+                            phone = new BigDecimal(phone).toPlainString();
                         }
                         userModel = new UserModel.UserBuilder()
                             .id(null)
@@ -538,7 +552,7 @@ public class MarketPlaceMapper {
                         int countryId = marketPlaceOrderUtil.getCountryId(column.get("Country").trim());
                         String mprefix = marketPlaceOrderUtil.getMobilePrefixByCountryId(countryId);
 
-                        phone = column.get("Mobile");
+                        phone = column.get("Mobile").trim();
 
                         if (!phone.isEmpty()) {
                             phone = new BigDecimal(column.get("Mobile")).toPlainString();
@@ -547,6 +561,7 @@ public class MarketPlaceMapper {
                         addressModel.setFirstname(fname);
                         addressModel.setLastname(lname);
                         addressModel.setStreetAddress(userModel.getAddressField1());
+                        addressModel.setEmail("");
                         addressModel.setPostcode(userModel.getPostcode());
                         addressModel.setCity(userModel.getCity());
                         addressModel.setState(userModel.getState());
@@ -555,7 +570,7 @@ public class MarketPlaceMapper {
                         addressModel.setMobilePrefix(mprefix);
                         addressModel.setAddressType(0); // home
 
-                        deliveryMessageModel.setMessage(column.get("Gift Msg"));
+                        deliveryMessageModel.setMessage(column.get("Gift Msg").trim().equalsIgnoreCase("na")?"":column.get("Gift Msg").trim());
 
                         String sP = column.get("Amount");
                         int sellingPrice = 0;
@@ -570,23 +585,51 @@ public class MarketPlaceMapper {
                             double d = Double.parseDouble(quant);
                             quantity = (int) d;
                         }
+                        String strDate1 = "";
 
-                        productModel = new ProductModel.Builder()
-                            .productCode(column.get("Product Code").trim())
-                            .quantity(quantity)
-                            .sellingPrice(new BigDecimal(sellingPrice))
-                            .serviceDate(column.get("Delivery Date"))
-                            .serviceTypeId(0 + "")
-                            .serviceCharge(new BigDecimal(0))
-                            .displayAttrList(new HashMap<>())
-                            .perProductDiscount(new BigDecimal(0))
-                            .giftBox(0)
-                            .voucher(null)
-                            .fkId(0)
-                            .build();
+                        try {
+                            SimpleDateFormat formatter = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy");
+                            Date strDate = formatter.parse(column.get("Delivery Date"));
+                            strDate1 = simpleDateFormat.format(strDate);
+                        }catch (ParseException ex) {
+                            strDate1 = "";
+                        }
+
+                        String itemCode = column.get("Product Code").trim();
+                        if(marketPlaceOrderUtil.handelProductOrNot(itemCode)){
+                            productModel = new ProductModel.Builder()
+                                .productCode(itemCode)
+                                .quantity(quantity)
+                                .sellingPrice(new BigDecimal(sellingPrice))
+                                .name(column.get("ProductName"))
+                                .serviceDate(strDate1)
+                                .serviceTypeId(String.valueOf(4))
+                                .serviceCharge(new BigDecimal(0))
+                                .displayAttrList(new HashMap<>())
+                                .perProductDiscount(new BigDecimal(0))
+                                .giftBox(0)
+                                .voucher(null)
+                                .fkId(0)
+                                .build();
+                        }else {
+                            productModel = new ProductModel.Builder()
+                                .productCode(itemCode)
+                                .quantity(quantity)
+                                .sellingPrice(new BigDecimal(sellingPrice))
+                                .name(column.get("ProductName"))
+                                .serviceDate(strDate1)
+                                .serviceTypeId(1 + "")
+                                .serviceCharge(new BigDecimal(0))
+                                .displayAttrList(new HashMap<>())
+                                .perProductDiscount(new BigDecimal(0))
+                                .giftBox(0)
+                                .voucher(null)
+                                .fkId(0)
+                                .build();
+                        }
 
 
-                        String detail = column.get("Order No") + "(#)" +
+                        String detail = column.get("Order No").split("\\.")[0] + "(#)" +
                             column.get("Sender Name") + "(#)" +
                             phone + "(#)" +
                             userModel.getEmail() + "(#)" +
@@ -597,8 +640,8 @@ public class MarketPlaceMapper {
                             sellingPrice;
 
                         extraInfoModel = new ExtraInfoModel.Builder()
-                            .gstNo(column.get("GST"))
-                            .relId(column.get("Order No"))
+                            .gstNo(column.get("GST").split("\\.")[0])
+                            .relId(column.get("Order No").split("\\.")[0])
                             .marketData(detail)
                             .marketName("Corporate")
                             .build();
@@ -803,10 +846,13 @@ public class MarketPlaceMapper {
             logger.debug("TEMP-ORDER DEBUGGING : " + "setDeliveryInstr"+"   ");
 
             marketPlaceTempOrderModel.setDeliveryMessageModel(validationModel.getDeliveryMessageModel()); // change it later
-            logger.debug("TEMP-ORDER DEBUGGING : " + validationModel.getDeliveryMessageModel());
+            logger.debug("TEMP-ORDER DEBUGGING : " + validationModel.getDeliveryMessageModel().toString());
 
-            marketPlaceTempOrderModel.setComment("");
-            logger.debug("TEMP-ORDER DEBUGGING : " + "setComment"+"");
+            marketPlaceTempOrderModel.setComment(validationModel.getDeliveryMessageModel().getMessage());
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setComment"+validationModel.getDeliveryMessageModel().getMessage());
+
+            marketPlaceTempOrderModel.setOccasionId(17);
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setOccassionId 17");
 
             marketPlaceTempOrderModel.setDeliveryDate(productModel.getServiceDate());
             logger.debug("TEMP-ORDER DEBUGGING : " + "setDeliveryDate "+productModel.getServiceDate());
@@ -831,9 +877,8 @@ public class MarketPlaceMapper {
             logger.debug("TEMP-ORDER DEBUGGING : " + "setServiceCharge "+productModel.getServiceCharge());
             logger.debug("TEMP-ORDER DEBUGGING : " + "setGiftBox "+productModel.getGiftBox());
 
-
-
             orderTempId  = marketPlaceOrderUtil.createTempOrder(marketPlaceTempOrderModel, productModel);
+
             logger.debug("Retruned from function DEBUGGING : " + "createTempOrder "+orderTempId);
 
             if (orderTempId!=0) {
