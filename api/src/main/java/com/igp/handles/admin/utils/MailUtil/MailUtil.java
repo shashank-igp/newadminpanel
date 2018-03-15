@@ -13,21 +13,25 @@ import java.net.URLEncoder;
  */
 public class MailUtil {
     private static final Logger logger = LoggerFactory.getLogger(MailUtil.class);
-    public boolean sendGenericMail(String action , String subject , String body,String recipient){
+    public boolean sendGenericMail(String action , String subject , String body,String recipient,boolean noReply){
         boolean result=false;
 
         try
         {
             URL url = new URL("http://admin.indiangiftsportal.com/myshop/sendEmail.php");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            String postData = "";
+            String postData = "",noReplyString="";
             // CURLOPT_POST
             con.setRequestMethod("POST");
 
             // CURLOPT_FOLLOWLOCATION
             con.setInstanceFollowRedirects(true);
 
-            postData+="action="+action+"&sub="+subject+"&to="+recipient+"&body="+ URLEncoder.encode(body,"UTF-8");
+            if(noReply){
+                noReplyString="&noreply=1";
+            }
+
+            postData+="action="+action+"&sub="+subject+noReplyString+"&to="+recipient+"&body="+ URLEncoder.encode(body,"UTF-8");
 
             con.setRequestProperty("Content-length", String.valueOf(postData.length()));
 
