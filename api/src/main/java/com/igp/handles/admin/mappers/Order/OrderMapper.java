@@ -148,7 +148,7 @@ public class OrderMapper {
             }
             //mailService will be integrated here with orderProductIdsWhichAreActuallyAssigned
             mailerAction="assignorder&orderid="+orderId+"&orderproductids="+orderProductIdsWhichAreActuallyAssigned+"&associd="+vendorId;
-            if(mailUtil.sendGenericMail(mailerAction,"","","")){
+            if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
                 logger.debug("Mail successfully sent for assign/reassign of orderId "+orderId+" with orderProductId "+orderProductIdsWhichAreActuallyAssigned);
             }
             handleServiceResponse.setResult(orderList);
@@ -179,7 +179,7 @@ public class OrderMapper {
 
             if(result){
                 mailerAction="orderpricechange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
-                if(mailUtil.sendGenericMail(mailerAction,"","","")){
+                if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
                     logger.debug("Mail successfully sent for Price changes of orderId "+orderId+" with orderProductId "+orderProductId);
                 }
             }
@@ -209,7 +209,7 @@ public class OrderMapper {
                         orderList=getOrder(orderId,restOrderProductIdList);
                     }
                     mailerAction="orderdeliverychange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
-                    if(mailUtil.sendGenericMail(mailerAction,"","","")){
+                    if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
                         logger.debug("Mail successfully sent for Delivery Detail changes of  orderId "+orderId+" with orderProductId "+orderProductId);
                     }
                 }else{
@@ -274,7 +274,7 @@ public class OrderMapper {
             if(result){
                 mailerAction="cancelorder&orderid="+orderId+"&orderproductids="+orderProductIdString+"&associd="+ordersProducts.getFkAssociateId();
 
-                if(mailUtil.sendGenericMail(mailerAction,"","","")){
+                if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
                     logger.debug("Mail successfully sent for cancelling orderId "+orderId+" with orderProductId "+orderProductIdString);
                 }
                 handleServiceResponse.setResult(orderList);

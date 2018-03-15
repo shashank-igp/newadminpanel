@@ -18,7 +18,7 @@ public class MailMapper {
         VendorUtil vendorUtil=new VendorUtil();
         try{
             VendorInfoModel vendorInfoModel=vendorUtil.getVendorInfo(vendorId);
-            result=mailUtil.sendGenericMail("",subject,mailBody,vendorInfoModel.getEmail());
+            result=mailUtil.sendGenericMail("",subject,mailBody,vendorInfoModel.getEmail(),true);
         }catch (Exception exception){
             logger.error("error occured while sending mail to vendor ",exception);
         }
