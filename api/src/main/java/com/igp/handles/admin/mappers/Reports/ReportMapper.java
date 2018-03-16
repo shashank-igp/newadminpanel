@@ -83,8 +83,8 @@ public class ReportMapper {
         }
         return response;
     }
-    public PayoutAndTaxReportSummaryModel getPayoutAndTaxes(int fkAssociateId,int orderId,String orderDateFrom,String orderDeliveryDateFrom,
-                                                            String orderDeliveryDateTo,String orderDateTo,String startLimit,String endLimit){
+    public PayoutAndTaxReportSummaryModel getPayoutAndTaxes(int fkAssociateId,int orderId,String orderDateFrom,String orderDateTo,String orderDeliveryDateFrom,
+                                                            String orderDeliveryDateTo,String startLimit,String endLimit){
         PayoutAndTaxesReport payoutAndTaxesReport=new PayoutAndTaxesReport();
         PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=null;
         VendorUtil vendorUtil=new VendorUtil();
