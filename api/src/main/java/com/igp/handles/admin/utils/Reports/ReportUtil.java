@@ -268,7 +268,7 @@ public class ReportUtil {
         }
         return pincodeModelListHavingSummaryModel;
     }
-    public int updateVendorPincode(int flag,int fk_associate_id,int pincode,int shipType,int updatePrice, String field) {
+    public int updateVendorPincode(Integer flag,int fk_associate_id,int pincode,int shipType,int updatePrice, String field) {
         Connection connection = null;
         String statement;
         String updateClause="";
@@ -439,7 +439,7 @@ public class ReportUtil {
         }
         return productModelListHavingSummaryModel;
     }
-    public boolean updateProductComponent(int fkAssociateId,String  componentId,int updatePrice, int inStock , String field) {
+    public boolean updateProductComponent(int fkAssociateId,String  componentId,int updatePrice, String inStock , String field) {
         Connection connection = null;
         String statement;
         int status = 0;
@@ -707,12 +707,12 @@ public class ReportUtil {
                         if(approveReject==true){
                             // request is to enable.
                             message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Approved";
-                            result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,1,"");
+                            result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,"1","");
                         }
                         else {
                             // request to enable rejected.
                             message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Rejected";
-                            result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,0,"");
+                            result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,"0","");
                         }
                     }
                 }
@@ -724,12 +724,12 @@ public class ReportUtil {
                         if (approveReject == true) {
                             // request is to update the price.
                             message = "Change price of component " + productTableDataModel.getComponentName() + " to " + actionHandels.getRequestValue() + " : Accepted";
-                            result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, Integer.parseInt(actionHandels.getRequestValue()), 1, "");
+                            result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, Integer.parseInt(actionHandels.getRequestValue()), "1", "");
 
                         } else {
                             // request to update the price rejected.
                             message = "Change price of component " + productTableDataModel.getComponentName() + " to " + actionHandels.getRequestValue() + " : ";
-                            result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, -1, 1, "reqPrice");
+                            result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, -1, "1", "reqPrice");
                         }
                     }
                 }

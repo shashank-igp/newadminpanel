@@ -34,11 +34,11 @@ public class Reports {
     @GET
     @Path("/v1/handels/getOrderReport")
     public ReportResponse getOrderReport(@QueryParam("fkAssociateId") String fkAssociateId,
-        @QueryParam("orderDateFrom") String startDate, @QueryParam("orderDateTo")String endDate ,
-        @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ,
-        @QueryParam("orderNumber") Integer orderNo,@QueryParam("delhiveryDate") String delhiveryDate,
-        @QueryParam("status")  String status,@QueryParam("deliveryDateFrom") String deliveryDateFrom,
-        @QueryParam("deliveryDateTo") String deliveryDateTo){
+                                         @QueryParam("orderDateFrom") String startDate, @QueryParam("orderDateTo")String endDate ,
+                                         @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ,
+                                         @QueryParam("orderNumber") Integer orderNo,@QueryParam("delhiveryDate") String delhiveryDate,
+                                         @QueryParam("status")  String status,@QueryParam("deliveryDateFrom") String deliveryDateFrom,
+                                         @QueryParam("deliveryDateTo") String deliveryDateTo){
 
         ReportResponse reportResponse=new ReportResponse();
         startDate=getTimestampString(startDate,0);
@@ -48,7 +48,7 @@ public class Reports {
         deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
 
         reportResponse.setTableHeaders(new String[]{"Order_No","Date","Occasion","City","Pincode","Delivery_Date"
-                                    ,"Delivery_Type","Recipient_Name","Phone","Amount","Status"});
+            ,"Delivery_Type","Recipient_Name","Phone","Amount","Status"});
         ReportOrderWithSummaryModel reportOrderWithSummaryModel1= null;
         reportOrderWithSummaryModel1=getSummaryDetails(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,delhiveryDate,status,deliveryDateFrom,deliveryDateTo);
         reportResponse.setSummary(reportOrderWithSummaryModel1.getSummaryModelList());
@@ -80,24 +80,28 @@ public class Reports {
 
     @PUT
     @Path("/v1/handels/handleComponentChange")
-    public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") String fkAssociateId, @QueryParam("componentId") String componentId, @QueryParam("price")String updatePrice , @QueryParam("inStock") Boolean inStock){
+    public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") String fkAssociateId,
+                                                       @QueryParam("componentId") String componentId,
+                                                       @QueryParam("price")String updatePrice ,
+                                                       @QueryParam("inStock") Boolean inStock){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         Integer updateflag=0;
         String message="",componentName="";
         componentName= SummaryFunctionsUtil.getComponentName(componentId);
         if (inStock!=null){
-            updateflag=1;
             if(inStock==true){
+                updateflag=1;
                 message="Need to change status of component "+componentName+" to Instock";
             }else {
+                updateflag=2;
                 message="Need to change status of component "+componentName+" to Out of stock";
             }
         }
         else if (updatePrice!=null){
-            updateflag=2;
+            updateflag=3;
             message="Need to change price of component "+componentName+" to "+updatePrice;
         }
-        boolean result=updateComponentMapper(updateflag,fkAssociateId,componentId);
+        boolean result=updateComponentMapper(updateflag,fkAssociateId,componentId,updatePrice);
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
@@ -125,20 +129,29 @@ public class Reports {
 
     @PUT
     @Path("/v1/handels/handlePincodeChange")
-    public HandleServiceResponse updatePincodeDetail(@QueryParam("fkAssociateId") String fkAssociateId, @QueryParam("pincode") String pincode, @QueryParam("shipCharge")Double updatePrice , @QueryParam("shipType") String shipType,@QueryParam("updateStatus") Integer updateStatus){
+    public HandleServiceResponse updatePincodeDetail(@QueryParam("fkAssociateId") String fkAssociateId,
+                                                     @QueryParam("pincode") String pincode,
+                                                     @QueryParam("shipCharge")Double updatePrice ,
+                                                     @QueryParam("shipType") String shipType,
+                                                     @QueryParam("updateStatus") Integer updateStatus){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         Integer updateflag=0;
         boolean result=true;
         String message="";
         if (updateStatus!=null){
-            updateflag=1;
-            message="Need to Enable/Disable "+shipType+" for pincode "+pincode;
+            if(updateStatus==1){
+                updateflag=1;
+                message="Need to Enable "+shipType+" for pincode "+pincode;
+            }else {
+                updateflag=2;
+                message="Need to Disable "+shipType+" for pincode "+pincode;
+            }
         }
         else if (updatePrice!=null){
-            updateflag=2;
+            updateflag=3;
             message="Need to update the price of "+shipType+" for pincode "+pincode+" to "+updatePrice;
         }
-//        boolean result=updatePincodetMapper(updateflag,fkAssociateId,pincode,shipType,updateStatus,updatePrice);
+        result=updatePincodeMapper(updateflag,fkAssociateId,pincode,shipType,updateStatus,updatePrice);
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
@@ -158,8 +171,8 @@ public class Reports {
     @POST
     @Path("/v1/handels/addVendorPincode")
     public HandleServiceResponse addVendorPincode(@QueryParam("fkAssociateId") String fkAssociateId,@QueryParam("pincode") int pincode,
-        @DefaultValue("0")@QueryParam("cityId") int cityId,@QueryParam("shipType") int shipType,@QueryParam("shipCharge")int shipCharge
-        ){
+                                                  @DefaultValue("0")@QueryParam("cityId") int cityId,@QueryParam("shipType") int shipType,@QueryParam("shipCharge")int shipCharge
+    ){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         boolean result=false;
         result=ReportMapper.addVendorPincode(fkAssociateId,pincode,cityId,shipType,shipCharge);
@@ -170,9 +183,9 @@ public class Reports {
     @GET
     @Path("/v1/handels/getPayoutAndTaxesReport")
     public ReportResponse getPayoutAndTaxes(@QueryParam("fkAssociateId") int fkAssociateId, @QueryParam("orderNumber")int orderId,
-                                        @QueryParam("orderDateFrom") String orderDateFrom, @QueryParam("orderDateTo")String orderDateTo,
-                                        @QueryParam("deliveryDateFrom") String orderDeliveryDateFrom,@QueryParam("deliveryDateTo") String orderDeliveryDateTo,
-                                        @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
+                                            @QueryParam("orderDateFrom") String orderDateFrom, @QueryParam("orderDateTo")String orderDateTo,
+                                            @QueryParam("deliveryDateFrom") String orderDeliveryDateFrom,@QueryParam("deliveryDateTo") String orderDeliveryDateTo,
+                                            @QueryParam("startLimit") String startLimit, @QueryParam("endLimit") String endLimit ){
         ReportResponse reportResponse=new ReportResponse();
         ReportMapper reportMapper=new ReportMapper();
 
@@ -192,8 +205,8 @@ public class Reports {
             }
 
             PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=reportMapper.getPayoutAndTaxes(fkAssociateId,
-                                                                        orderId,orderDateFrom,orderDateTo,orderDeliveryDateFrom,
-                                                                        orderDeliveryDateTo,startLimit,endLimit);
+                orderId,orderDateFrom,orderDateTo,orderDeliveryDateFrom,
+                orderDeliveryDateTo,startLimit,endLimit);
             reportResponse.setSummary(payoutAndTaxReportSummaryModel.getSummaryModelList());
             List<Object> objectList = new ArrayList<Object>(payoutAndTaxReportSummaryModel.getOrderTaxReportList());
             reportResponse.setTableData(objectList);

@@ -33,7 +33,7 @@ public class ReportMapper {
         return pincodeModelListHavingSummaryModel;
     }
 
-    public boolean updatePincodeMapper(int flag,int fk_associate_id,int pincode,int shipType,int updatePrice, String message, String field){
+    public boolean updatePincodeMapper(Integer flag,int fk_associate_id,int pincode,int shipType,int updatePrice, String message, String field){
         ReportUtil reportUtil = new ReportUtil();
         boolean response=false;
         int result = reportUtil.updateVendorPincode(flag,fk_associate_id,pincode,shipType,updatePrice,field);
@@ -74,7 +74,7 @@ public class ReportMapper {
         return productModelListHavingSummaryModel;
     }
 
-    public boolean updateComponentMapper(int fkAssociateId,String componentId, String message, int updatePrice,int inStock, String field){
+    public boolean updateComponentMapper(int fkAssociateId,String componentId, String message, int updatePrice,String inStock, String field){
         ReportUtil reportUtil = new ReportUtil();
         boolean response = false;
         boolean result=reportUtil.updateProductComponent(fkAssociateId,componentId,updatePrice,inStock,field);

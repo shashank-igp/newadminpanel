@@ -39,12 +39,12 @@ public class ReportMapper {
         return  pincodeModelListWithSummary;
 
     }
-    public static boolean updateComponentMapper(Integer flag,String fk_associate_id,String  componentId){
-        boolean result=updateVendorComponet(flag,fk_associate_id,componentId);
+    public static boolean updateComponentMapper(Integer flag,String fk_associate_id,String  componentId,String price){
+        boolean result=updateVendorComponent(flag,fk_associate_id,componentId,price);
         return result;
     }
 
-    public static boolean updatePincodetMapper(Integer flag,String fk_associate_id,String pincode,Integer shipType,Integer updateStatus,Double updatePrice){
+    public static boolean updatePincodeMapper(Integer flag,String fk_associate_id,String pincode,String shipType,Integer updateStatus,Double updatePrice){
         boolean result=updateVendorPincode(flag,fk_associate_id,pincode,shipType,updateStatus,updatePrice);
         return result;
     }
