@@ -104,13 +104,13 @@ public class Reports {
                                                      @QueryParam("shipCharge")int updatePrice,
                                                      @QueryParam("field") String field,
                                                      @QueryParam("shipType") int shipType,
-                                                     @QueryParam("flag") @DefaultValue("0") int flag){
+                                                     @QueryParam("updateStatus") Integer flag){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
         try{
             Boolean result = false;
             String message="";
-            if (flag == 1){
+            if (flag != null){
                 message = "Enable/Disable "+shipType+" for Pincode "+pincode+" : ";
             }
             else {
@@ -161,7 +161,7 @@ public class Reports {
     public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") int fkAssociateId,
         @QueryParam("componentId") String componentId,
         @DefaultValue("-1") @QueryParam("updatePrice")int updatePrice,
-        @DefaultValue("-1") @QueryParam("inStock") int inStock,
+        @DefaultValue("-1") @QueryParam("inStock") String inStock,
         @QueryParam("field") String field){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
@@ -171,10 +171,10 @@ public class Reports {
             if (updatePrice!=-1){
                 message="Change price of component "+componentName+" to "+updatePrice+" : ";
             }
-            else if(inStock==1){
+            else if(inStock.equals("1")){
                 message="Change status of component "+componentName+" to Instock : ";
             }
-            else {
+            else  if(inStock.equals("0")){
                 message="Change status of component "+componentName+" to Out of stock : ";
             }
 

@@ -36,7 +36,7 @@ public class SummaryFunctionsUtil
             sb.append("and oe.delivery_date='"+delhiveryDate+"'");
 
         }
-         if (startDate!=null && !startDate.isEmpty() ){
+        if (startDate!=null && !startDate.isEmpty() ){
             sb.append("and vap.assign_time >='"+startDate+"'");
         }
 
@@ -44,15 +44,15 @@ public class SummaryFunctionsUtil
             sb.append("and vap.assign_time <='"+endDate+"'");
         }
 
-         if(deliveryDateFrom!=null && !deliveryDateFrom.isEmpty() ){
+        if(deliveryDateFrom!=null && !deliveryDateFrom.isEmpty() ){
             sb.append(" and oe.delivery_date >='"+deliveryDateFrom+"'");
         }
 
         if (deliveryDateTo!=null && !deliveryDateTo.isEmpty()){
-             sb.append("  and oe.delivery_date <='"+deliveryDateTo+"' ");
+            sb.append("  and oe.delivery_date <='"+deliveryDateTo+"' ");
         }
 
-         if (orderNo!=null )
+        if (orderNo!=null )
         {
             sb.append("and vap.orders_id="+orderNo+"");
         }
@@ -75,7 +75,7 @@ public class SummaryFunctionsUtil
 
         PreparedStatement preparedStatement = null;
         try{
-                connection = Database.INSTANCE.getReadOnlyConnection();
+            connection = Database.INSTANCE.getReadOnlyConnection();
             statement = " select  vap.assign_time as Date,vap.orders_id as  Order_No,oo.occasion_name as Ocassion , "
                 + " o.delivery_city as City ,o.delivery_postcode as Pincode ,vap.delivery_date  as Delivery_Date , "
                 + " op.orders_product_status as opStatus,op.shipping_type_g as Delivery_Type  , o.delivery_name as "
@@ -200,21 +200,35 @@ public class SummaryFunctionsUtil
 
     }
 
-    public static boolean updateVendorComponet(Integer flag,String fk_associate_id,String  componentId ) {
+    public static boolean updateVendorComponent(Integer flag,String fk_associate_id,String  componentId, String price) {
+        boolean result = false;
+
+
         Connection connection = null;
         String statement;
-        boolean result = false;
         PreparedStatement preparedStatement = null;
         try {
+            if(flag == 1){
+                // bring it in stock.
+                statement = "update AA_vendor_to_components set req_price = price where fk_associate_id=" + fk_associate_id + " and fk_component_id=" + componentId + " ";
+                // copy the same price in req_price
 
-
+            }else if(flag == 2) {
+                // mark it out of stock.
+                statement = "update AA_vendor_to_components set InStock = 0 where fk_associate_id=" + fk_associate_id + " and fk_component_id=" + componentId + " ";
+            }
+            else {
+                // flag = 3 i.e. change the price.
+                statement = "update AA_vendor_to_components set req_price = "+price+" where fk_associate_id=" + fk_associate_id + " and fk_component_id=" + componentId + " ";
+                // copy the requested price in req_price
+            }
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "update AA_vendor_to_components set flag_change="+flag+" where fk_associate_id="+fk_associate_id+" and fk_component_id="+componentId+" ";
             preparedStatement = connection.prepareStatement(statement);
-            logger.debug("sql query in updateVendorComponet "+preparedStatement);
+            logger.debug("sql query in updateVendorComponet " + preparedStatement);
             Integer nums = preparedStatement.executeUpdate();
-            if (nums!=null){result = true;}
-
+            if (nums != null) {
+                result = true;
+            }
 
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);
@@ -222,6 +236,7 @@ public class SummaryFunctionsUtil
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
         }
+
         return result;
 
     }
@@ -312,22 +327,35 @@ public class SummaryFunctionsUtil
 
     }
 
-    public static boolean updateVendorPincode(Integer flag,String fk_associate_id,String pincode,Integer shipType,Integer updateStatus,Double updatePrice ) {
+    public static boolean updateVendorPincode(Integer flag,String fk_associate_id,String pincode,String shipType,Integer updateStatus,Double price ) {
         Connection connection = null;
         String statement;
         String updateClause="";
         boolean result = false;
         PreparedStatement preparedStatement = null;
         try {
-            if (updateStatus!=null){
-                updateClause=",flag_enabled="+updateStatus+"";
+
+            if(flag == 1){
+                // Enable ship type for pincode.
+                statement = "update AA_vendor_pincode set req_price = ship_charge where vendor_id="+fk_associate_id+" and pincode="+pincode+" and  ship_type="+shipType+" ";
+                // copy the same price in req_price
+
+            }else if(flag == 2) {
+                // Disable ship type for pincode.
+                statement = "update AA_vendor_pincode set flag_enabled=0 where vendor_id="+fk_associate_id+" and pincode="+pincode+" and  ship_type="+shipType+" ";
+            }
+            else {
+                // flag = 3 i.e. change the price.
+                statement = "update AA_vendor_pincode set req_price = "+price+" where vendor_id="+fk_associate_id+" and pincode="+pincode+" and  ship_type="+shipType+" ";
+                // copy the requested price in req_price
             }
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "update AA_vendor_pincode set flag_change="+flag+""+updateClause+" where vendor_id="+fk_associate_id+" and pincode="+pincode+" and  ship_type="+shipType+" ";
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in updateVendorPincode "+preparedStatement);
             Integer nums = preparedStatement.executeUpdate();
-            if (nums!=null){result = true;}
+            if (nums!=null){
+                result = true;
+            }
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);
         } finally {
@@ -466,7 +494,7 @@ public class SummaryFunctionsUtil
             e.printStackTrace();
         }
 
-         return  "";
+        return  "";
     }
 
     public static Integer getCount(String query){
