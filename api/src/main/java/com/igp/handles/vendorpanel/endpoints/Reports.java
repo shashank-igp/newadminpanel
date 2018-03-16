@@ -181,10 +181,15 @@ public class Reports {
                 ,"pincode","order status","taxable amount","tax","total amount","payment status"});
 
 
-            orderDateFrom=getTimestampString(orderDateFrom,2);
-            orderDateTo=getTimestampString(orderDateTo,2);
+            orderDateFrom=getTimestampString(orderDateFrom,0);
             orderDeliveryDateFrom=getTimestampString(orderDeliveryDateFrom,2);
             orderDeliveryDateTo=getTimestampString(orderDeliveryDateTo,2);
+
+            if(orderDateFrom!=null&&orderDateTo!=null){
+                orderDateTo=getTimestampString(orderDateTo,1);
+            }else {
+                orderDateTo=getTimestampString(orderDateTo,0);
+            }
 
             PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel=reportMapper.getPayoutAndTaxes(fkAssociateId,
                                                                         orderId,orderDateFrom,orderDateTo,orderDeliveryDateFrom,

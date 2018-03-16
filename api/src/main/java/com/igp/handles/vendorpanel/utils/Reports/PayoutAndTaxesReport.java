@@ -24,7 +24,7 @@ public class PayoutAndTaxesReport {
 
         PayoutAndTaxReportSummaryModel payoutAndTaxReportSummaryModel = new PayoutAndTaxReportSummaryModel();
         Connection connection = null;
-        String statement;
+        String statement,countStatement;
         List <SummaryModel> summaryModelList=new ArrayList<>();
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
@@ -39,22 +39,22 @@ public class PayoutAndTaxesReport {
                 sb.append(" and o.orders_id = "+orderId+" ");
             }
             if(orderDateFrom != null && !orderDateFrom.isEmpty()){
-                sb.append(" and date_format(o.date_purchased,'%Y-%d-%m') >= '"+orderDateFrom+"' ");
+                sb.append(" and o.date_purchased >= '"+orderDateFrom+"' ");
             }
             if(orderDateTo != null && !orderDateTo.isEmpty()){
-                sb.append(" and date_format(o.date_purchased,'%Y-%d-%m') <= '"+orderDateTo+"' ");
+                sb.append(" and o.date_purchased <= '"+orderDateTo+"' ");
             }
             if(orderDeliveryDateFrom != null && !orderDeliveryDateFrom.isEmpty()){
-                sb.append(" and date_format(o.date_of_delivery,'%Y-%d-%m') >= '"+orderDeliveryDateFrom+"' ");
+                sb.append(" and o.date_of_delivery  >= '"+orderDeliveryDateFrom+"' ");
             }
             if(orderDeliveryDateTo != null && !orderDeliveryDateTo.isEmpty()){
-                sb.append(" and date_format(o.date_of_delivery,'%Y-%d-%m') <= '"+orderDeliveryDateTo+"' ");
+                sb.append(" and o.date_of_delivery <= '"+orderDeliveryDateTo+"' ");
             }
 
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement = "select o.orders_id as orderId, sum(gvd.taxable) as taxableAmount ,sum(gvd.amt) as totalAmount, "
                 + "(sum(gvd.igst)+sum(gvd.sgst)+sum(gvd.cgst)) as tax , o.delivery_postcode as pincode,  "
-                + "date_format(o.date_purchased,'%Y-%d-%m') datePurchased,date_format(o.date_of_delivery,'%Y-%d-%m') "
+                + "date_format(o.date_purchased,'%Y-%m-%d') datePurchased,date_format(o.date_of_delivery,'%Y-%m-%d') "
                 + " dateOfDelivery , gvd.invoice_num invoiceNum , thp.orders_id as paymentCheckOrderId "
                 + " , min(case when op.orders_product_status = 'Processed' then 1 when op.orders_product_status = 'Confirmed' "
                 + " then 2 when op.orders_product_status = 'Shipped' then 3 else 4 end ) status, max(op.delivery_status) "
@@ -63,6 +63,7 @@ public class PayoutAndTaxesReport {
                 + "  where gvd.vendorID = "+fkAssociateId+"  "+sb.toString()+" group by o.orders_id "
                 + "  limit "+startLimit+","+endLimit+" ";
 
+            countStatement="select count(distinct gvd.order_id) as distinctDrderIdCount, sum(gvd.taxable) as taxableAmount ,sum(gvd.amt) as totalAmount from orders o  left join tax_handels_payout thp on o.orders_id = thp.orders_id  join gst_vendors_dom_new gvd on o.orders_id =gvd.order_id where gvd.vendorID = "+fkAssociateId+"  "+sb.toString();
 
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in getPayoutAndTaxes "+preparedStatement);
@@ -109,7 +110,7 @@ public class PayoutAndTaxesReport {
                 orderReportObjectModelList.add(orderTaxReport);
             }
 
-            amountList=getSummaryDataForPayoutAndTaxes(totalOrderCount,fkAssociateId);
+            amountList=getSummaryDataForPayoutAndTaxes(totalOrderCount,countStatement);
 
 
             SummaryModel summaryModel=new SummaryModel();
@@ -254,7 +255,7 @@ public class PayoutAndTaxesReport {
             Database.INSTANCE.closeResultSet(resultSet);
         }
     }
-    public List<Double> getSummaryDataForPayoutAndTaxes(AtomicInteger totalOrders,int fkAssociateId){
+    public List<Double> getSummaryDataForPayoutAndTaxes(AtomicInteger totalOrders,String countStatement){
 
         String statement;
         ResultSet resultSet = null;
@@ -265,10 +266,8 @@ public class PayoutAndTaxesReport {
         List<Double> amountList = new ArrayList<>();
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = "select count(distinct order_id) as distinctDrderIdCount, sum(gvd.taxable) as taxableAmount, "
-                + " sum(gvd.amt) as totalAmount from  gst_vendors_dom_new gvd where gvd.vendorID = ? ";
+            statement = countStatement;
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1,fkAssociateId);
             logger.debug("sql query in getSummaryDataForPayoutAndTaxes "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             if(resultSet.next()){
