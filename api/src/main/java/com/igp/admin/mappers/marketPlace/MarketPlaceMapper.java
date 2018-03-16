@@ -234,7 +234,7 @@ public class MarketPlaceMapper {
                             .city(column.get("City"))
                             .postcode(zipCode)
                             .email(column.get("Email").trim().isEmpty()?"asif@tokenz.com":column.get("Email").trim())
-                            .mobile(phone)
+                            .mobile(phone.split("\\.")[0])
                             .mobilePrefix(mprefix)
                             .password(millis + "")
                             .countryId(99)
@@ -511,7 +511,7 @@ public class MarketPlaceMapper {
                         }
 
                         String address = column.get("Address").trim().replace("\n"," ").replace("–"," ");
-                        String phone = column.get("Sender Mobile").trim().split("\\.")[0];
+                        String phone = column.get("Sender Mobile").trim();
 
                         if (!phone.isEmpty()) {
                             phone = new BigDecimal(phone).toPlainString();
@@ -525,7 +525,7 @@ public class MarketPlaceMapper {
                             .city(column.get("City"))
                             .postcode(zipCode)
                             .email(column.get("Sender Email").trim())
-                            .mobile(phone)
+                            .mobile(phone.split("\\.")[0])
                             .mobilePrefix("91")
                             .password(millis + "")
                             .countryId(99)
@@ -566,7 +566,7 @@ public class MarketPlaceMapper {
                         addressModel.setCity(userModel.getCity());
                         addressModel.setState(userModel.getState());
                         addressModel.setCountryId(countryId+"");
-                        addressModel.setMobile(phone);
+                        addressModel.setMobile(phone.split("\\.")[0]);
                         addressModel.setMobilePrefix(mprefix);
                         addressModel.setAddressType(0); // home
 
