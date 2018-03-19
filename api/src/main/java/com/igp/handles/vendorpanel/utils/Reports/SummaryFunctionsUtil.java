@@ -254,61 +254,70 @@ public class SummaryFunctionsUtil
         String totalQuery="";
         List <SummaryModel> summaryModelList=new ArrayList<>();
         ResultSet resultSet = null;
-        Map<String,Map<String,String>> pincodeShipTypeAndShipChargeMap=new HashMap<>();
+        Map<Integer,Map<Integer,Integer>> pincodeShipTypeAndShipChargeMap=new HashMap<>();
 
         PreparedStatement preparedStatement = null;
         try{
-
-
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = " select vendor_id as vId,city_id as cId,pincode,ship_type,ship_charge,flag_enabled from AA_vendor_pincode where vendor_id="+fkAssociateId+" limit "+startLimit+","+endLimit+" ";
+            statement = " select * from AA_vendor_pincode where vendor_id="+fkAssociateId+" order by pincode limit "+startLimit+","+endLimit+" ";
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query "+preparedStatement);
             totalQuery = " select count(distinct pincode) as totalno from AA_vendor_pincode where vendor_id="+fkAssociateId+"";
             resultSet = preparedStatement.executeQuery();
-            List flagList = new ArrayList<>();
+
             while(resultSet.next()) {
-                String pincode=resultSet.getString("pincode").trim();
-                String shipType=resultSet.getString("ship_type").trim();
-                String shipCharge=resultSet.getString("ship_charge").trim();
-                int flagEnabled = resultSet.getInt("flag_enabled");
-                if(pincodeShipTypeAndShipChargeMap.get(pincode)==null){
-                    Map<String,String> shipTypeToChargeMap=new HashMap<>();
-                    shipTypeToChargeMap.put(shipType,shipCharge);
-                    pincodeShipTypeAndShipChargeMap.put(pincode,shipTypeToChargeMap);
+                VendorPincodeModel vendorPincodeModel = new VendorPincodeModel();
+
+                vendorPincodeModel.setPincode(resultSet.getInt("pincode"));
+                vendorPincodeModel.setCityId(resultSet.getInt("city_id"));
+                vendorPincodeModel.setFlagEnabled(resultSet.getInt("flag_enabled"));
+                vendorPincodeModel.setReqdPrice(resultSet.getInt("req_price"));
+                vendorPincodeModel.setShipTypeId(resultSet.getInt("ship_type"));
+                vendorPincodeModel.setShipCharge(resultSet.getInt("ship_charge"));
+
+                if(pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode())==null){
+                    Map<Integer,Integer> shipTypeToChargeMap=new HashMap<>();
+                    if(vendorPincodeModel.getFlagEnabled()==1) {
+                        shipTypeToChargeMap.put(vendorPincodeModel.getShipTypeId(), vendorPincodeModel.getShipCharge());
+                    }else {
+                        shipTypeToChargeMap.put(vendorPincodeModel.getShipTypeId(), null);
+                        // when the ship type at pincode is disabled so it must be not servicable
+                    }
+                    pincodeShipTypeAndShipChargeMap.put(vendorPincodeModel.getPincode(),shipTypeToChargeMap);
                 }else {
-                    pincodeShipTypeAndShipChargeMap.get(pincode).put(shipType,shipCharge);
-                }
-                flagList.add(flagEnabled);
-            }
-            int i = 0;
-            for(Map.Entry<String,Map<String,String>> entry:pincodeShipTypeAndShipChargeMap.entrySet()){
-                PincodeReportModel pincodeReportModel=new PincodeReportModel();
-                String pincode = entry.getKey();
-                pincodeReportModel.setPincode(pincode);
-                Map<String,String> shipTypeToChargeMap=entry.getValue();
-                for (Map.Entry<String,String> entry1:shipTypeToChargeMap.entrySet()){
-                    String shipType=entry1.getKey();
-                    String shipCharge=entry1.getValue();
-                    if(shipType.equalsIgnoreCase("1")){
-                        pincodeReportModel.setStandardDeliveryCharge(shipCharge);
-                    }else if(shipType.equalsIgnoreCase("2")){
-                        pincodeReportModel.setFixedTimeDeliveryCharge(shipCharge);
-                    }else if(shipType.equalsIgnoreCase("3")){
-                        pincodeReportModel.setMidnightDeliveryCharge(shipCharge);
+                    if(vendorPincodeModel.getFlagEnabled()==1) {
+                        pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode()).put(vendorPincodeModel.getShipTypeId(),vendorPincodeModel.getShipCharge());
+                    }else {
+                        pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode()).put(vendorPincodeModel.getShipTypeId(),null);
                     }
                 }
-                if(pincodeReportModel.getStandardDeliveryCharge()==null || flagList.get(i).equals(0)){
+            }
+            for(Map.Entry<Integer,Map<Integer,Integer>> entry:pincodeShipTypeAndShipChargeMap.entrySet()){
+                PincodeReportModel pincodeReportModel=new PincodeReportModel();
+                int pincode = entry.getKey();
+                pincodeReportModel.setPincode(pincode);
+                Map<Integer,Integer> shipTypeToChargeMap=entry.getValue();
+                for (Map.Entry<Integer,Integer> entry1:shipTypeToChargeMap.entrySet()){
+                    int shipType=entry1.getKey();
+                    Integer shipCharge=entry1.getValue();
+                    if(shipType==1 && shipCharge!=null){
+                        pincodeReportModel.setStandardDeliveryCharge(shipCharge.toString());
+                    }else if(shipType==2 && shipCharge!=null){
+                        pincodeReportModel.setFixedTimeDeliveryCharge(shipCharge.toString());
+                    }else if(shipType==3 && shipCharge!=null){
+                        pincodeReportModel.setMidnightDeliveryCharge(shipCharge.toString());
+                    }
+                }
+                if(pincodeReportModel.getStandardDeliveryCharge()==null){
                     pincodeReportModel.setStandardDeliveryCharge("Not Serviceable");
                 }
-                if(pincodeReportModel.getFixedTimeDeliveryCharge()==null || flagList.get(i).equals(0)){
+                if(pincodeReportModel.getFixedTimeDeliveryCharge()==null){
                     pincodeReportModel.setFixedTimeDeliveryCharge("Not Serviceable");
                 }
-                if(pincodeReportModel.getMidnightDeliveryCharge()==null || flagList.get(i).equals(0)){
+                if(pincodeReportModel.getMidnightDeliveryCharge()==null){
                     pincodeReportModel.setMidnightDeliveryCharge("Not Serviceable");
                 }
                 pincodeReportModelList.add(pincodeReportModel);
-                i++;
             }
             pincodeModelListWithSummary.setPincodeReportModelList(pincodeReportModelList);
 
@@ -318,7 +327,6 @@ public class SummaryFunctionsUtil
             summaryModelList.add(summaryModelTotalPincodes);
 
             pincodeModelListWithSummary.setSummaryModelList(summaryModelList);
-
 
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);

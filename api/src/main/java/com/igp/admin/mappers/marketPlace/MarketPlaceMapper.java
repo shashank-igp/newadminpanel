@@ -97,8 +97,10 @@ public class MarketPlaceMapper {
                     int count = 0;
                     for (int currCol = 0; currCol < NUM_COLUMNS; currCol++) {
                         Cell currentCell = currentRow.getCell(currCol);
-
-                        if (currentCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
+                        if (currentCell == null) {
+                            a.put(list.get(currCol), "");
+                            count++;
+                        } else if (currentCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
                             a.put(list.get(currCol), currentCell.getNumericCellValue() + "");
                             if (HSSFDateUtil.isCellDateFormatted(currentCell)) {
                                 a.put(list.get(currCol), currentCell.getDateCellValue() + "");
