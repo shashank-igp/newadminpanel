@@ -249,7 +249,7 @@ public class Reports {
         ReportMapper reportMapper=new ReportMapper();
         try{
             reportResponse.setTableHeaders(new String[]{"vendorId","vendor","invoice number","orderId","date purchased","delivery date"
-                ,"pincode","password","order status","taxable amount","tax","total amount","payment status"});
+                ,"pincode","order status","taxable amount","tax","total amount","payment status"});
 
             orderDateFrom=getTimestampString(orderDateFrom,0);
             orderDeliveryDateFrom=getTimestampString(orderDeliveryDateFrom,2);

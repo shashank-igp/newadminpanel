@@ -228,16 +228,17 @@ public class OrderMapper {
         }
         return result;
     }
-    public String getOrderLog(int orderId){
+    public List<Map.Entry<String,String>> getOrderLog(int orderId){
         String logs="";
+        List<Map.Entry<String,String>> orderMapLog=new ArrayList<>();
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         try {
-            logs=orderUtil.getOrderLog(orderId);
+           orderMapLog =orderUtil.getOrderLog(orderId);
         }catch (Exception exception){
             logger.error("error while getting OrderLog",exception);
 
         }
-        return logs;
+        return orderMapLog;
     }
     public List<Order> getOrder(int orderId,String orderProductIdList){
         List<Order> orders = new ArrayList<>();
@@ -297,6 +298,16 @@ public class OrderMapper {
             logger.error("error while approveDeliveryAttempt ",exception);
         }
 
+        return result;
+    }
+    public boolean addVendorInstruction(int orderId,int fkAssociateId,String instruction){
+        boolean result=false;
+        com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
+        try{
+            result=orderUtil.addVendorInstruction(orderId,fkAssociateId,instruction);
+        }catch(Exception exception){
+            logger.error("error while adding VendorInstruction ",exception);
+        }
         return result;
     }
 
