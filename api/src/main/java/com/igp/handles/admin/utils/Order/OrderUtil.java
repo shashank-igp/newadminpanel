@@ -15,8 +15,10 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by shanky on 22/1/18.
@@ -736,22 +738,26 @@ public class OrderUtil {
         }
         return result;
     }
-    public String getOrderLog(int orderId){
-        String logs="";
+    public  List<Map.Entry<String,String>> getOrderLog(int orderId){
+        String insertTime="",log="";
         Connection connection = null;
         ResultSet resultSet = null;
         String statement;
         PreparedStatement preparedStatement = null;
+        List<Map.Entry<String,String>> orderLogMap=new ArrayList<>();
+
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement="SELECT  * from orders_history where fk_orders_id = ? ";
+            statement="SELECT  * from orders_history where fk_orders_id = ? order by orders_history_id desc";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,orderId);
 
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()){
-                logs+=resultSet.getString("orders_history_comment")+"\n";
+                insertTime=resultSet.getString("orders_history_time");
+                log=resultSet.getString("orders_history_comment");
+                orderLogMap.add(new AbstractMap.SimpleEntry(insertTime,log));
             }
         }catch (Exception exception){
             logger.error("Exception in connection", exception);
@@ -760,7 +766,7 @@ public class OrderUtil {
             Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
-        return logs;
+        return orderLogMap;
     }
     public boolean cancelOrder(int orderId,String orderProductIdString,String comment){
         boolean result=false;
@@ -821,6 +827,33 @@ public class OrderUtil {
             Database.INSTANCE.closeConnection(connection);
         }
 
+        return result;
+    }
+    public boolean addVendorInstruction(int orderId,int fkAssociateId,String instruction){
+        boolean result=false;
+        Connection connection = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        try{
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement="INSERT INTO vendor_instructions (orders_id,products_id,instruction_msg,associate_id,insertTime) VALUES (?,?,?,?,now()) ";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,orderId);
+            preparedStatement.setInt(2,0);
+            preparedStatement.setString(3,instruction);
+            preparedStatement.setInt(4,fkAssociateId);
+            Integer status = preparedStatement.executeUpdate();
+            if (status == 0) {
+                logger.error("Failed to insert vendor_instructions");
+            } else {
+                result=true;
+            }
+        }catch(Exception exception){
+            logger.error("Exception in connection", exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
         return result;
     }
 

@@ -36,7 +36,6 @@ public class Vendor {
         }catch (Exception exception){
             logger.error("Exception getting vendor List ",exception);
         }
-
         return handleServiceResponse;
     }
 }

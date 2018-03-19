@@ -166,7 +166,7 @@ public class Order {
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         try{
-            Map<String,String> orderLog=new HashMap<>();
+            Map<String,List<Map.Entry<String,String>>> orderLog=new HashMap<>();
             orderLog.put("logs",orderMapper.getOrderLog(orderId));
             handleServiceResponse.setResult(orderLog);
 
@@ -226,6 +226,20 @@ public class Order {
             handleServiceResponse.setResult(result);
         }catch (Exception exception){
             logger.error("error while getting approveDeliveryAttempt ",exception);
+        }
+        return handleServiceResponse;
+    }
+    @POST
+    @Path("/v1/admin/handels/addVendorInstruction")
+    public HandleServiceResponse addVendorInstruction(@QueryParam("orderId") int orderId,@QueryParam("fkAssociateId") int fkAssociateId,@QueryParam("message") String instruction){
+        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        OrderMapper orderMapper=new OrderMapper();
+        boolean result=false;
+        try{
+            result=orderMapper.addVendorInstruction(orderId,fkAssociateId,instruction);
+            handleServiceResponse.setResult(result);
+        }catch (Exception exception){
+            logger.error("error while getting addVendorInstruction ",exception);
         }
         return handleServiceResponse;
     }
