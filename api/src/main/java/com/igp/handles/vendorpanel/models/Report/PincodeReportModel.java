@@ -9,7 +9,7 @@ public class PincodeReportModel {
 
 
     @JsonProperty("Pincode")
-    private String pincode;
+    private Integer pincode;
 
     @JsonProperty("Standard Delivery")
     private String  standardDeliveryCharge;
@@ -20,42 +20,35 @@ public class PincodeReportModel {
     @JsonProperty("Midnight Delivery")
     private String  midnightDeliveryCharge;
 
-    public String getStandardDeliveryCharge()
-    {
-        return standardDeliveryCharge;
-    }
-
-    public void setStandardDeliveryCharge(String standardDeliveryCharge)
-    {
-        this.standardDeliveryCharge = standardDeliveryCharge;
-    }
-
-    public String getFixedTimeDeliveryCharge()
-    {
-        return fixedTimeDeliveryCharge;
-    }
-
-    public void setFixedTimeDeliveryCharge(String fixedTimeDeliveryCharge)
-    {
-        this.fixedTimeDeliveryCharge = fixedTimeDeliveryCharge;
-    }
-
-    public String getMidnightDeliveryCharge()
-    {
-        return midnightDeliveryCharge;
-    }
-
-    public void setMidnightDeliveryCharge(String midnightDeliveryCharge)
-    {
-        this.midnightDeliveryCharge = midnightDeliveryCharge;
-    }
-
-    public String getPincode() {
+    public Integer getPincode() {
         return pincode;
     }
 
-    public void setPincode(String pincode) {
+    public void setPincode(Integer pincode) {
         this.pincode = pincode;
     }
 
+    public String getStandardDeliveryCharge() {
+        return standardDeliveryCharge;
+    }
+
+    public void setStandardDeliveryCharge(String standardDeliveryCharge) {
+        this.standardDeliveryCharge = standardDeliveryCharge;
+    }
+
+    public String getFixedTimeDeliveryCharge() {
+        return fixedTimeDeliveryCharge;
+    }
+
+    public void setFixedTimeDeliveryCharge(String fixedTimeDeliveryCharge) {
+        this.fixedTimeDeliveryCharge = fixedTimeDeliveryCharge;
+    }
+
+    public String getMidnightDeliveryCharge() {
+        return midnightDeliveryCharge;
+    }
+
+    public void setMidnightDeliveryCharge(String midnightDeliveryCharge) {
+        this.midnightDeliveryCharge = midnightDeliveryCharge;
+    }
 }
