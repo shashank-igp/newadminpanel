@@ -261,15 +261,17 @@ public class SummaryFunctionsUtil
 
 
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = " select vendor_id as vId,city_id as cId,pincode,ship_type,ship_charge from AA_vendor_pincode where vendor_id="+fkAssociateId+" limit "+startLimit+","+endLimit+" ";
+            statement = " select vendor_id as vId,city_id as cId,pincode,ship_type,ship_charge,flag_enabled from AA_vendor_pincode where vendor_id="+fkAssociateId+" limit "+startLimit+","+endLimit+" ";
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query "+preparedStatement);
             totalQuery = " select count(distinct pincode) as totalno from AA_vendor_pincode where vendor_id="+fkAssociateId+"";
             resultSet = preparedStatement.executeQuery();
+            List flagList = new ArrayList<>();
             while(resultSet.next()) {
                 String pincode=resultSet.getString("pincode").trim();
                 String shipType=resultSet.getString("ship_type").trim();
                 String shipCharge=resultSet.getString("ship_charge").trim();
+                int flagEnabled = resultSet.getInt("flag_enabled");
                 if(pincodeShipTypeAndShipChargeMap.get(pincode)==null){
                     Map<String,String> shipTypeToChargeMap=new HashMap<>();
                     shipTypeToChargeMap.put(shipType,shipCharge);
@@ -277,7 +279,9 @@ public class SummaryFunctionsUtil
                 }else {
                     pincodeShipTypeAndShipChargeMap.get(pincode).put(shipType,shipCharge);
                 }
+                flagList.add(flagEnabled);
             }
+            int i = 0;
             for(Map.Entry<String,Map<String,String>> entry:pincodeShipTypeAndShipChargeMap.entrySet()){
                 PincodeReportModel pincodeReportModel=new PincodeReportModel();
                 String pincode = entry.getKey();
@@ -294,16 +298,17 @@ public class SummaryFunctionsUtil
                         pincodeReportModel.setMidnightDeliveryCharge(shipCharge);
                     }
                 }
-                if(pincodeReportModel.getStandardDeliveryCharge()==null){
+                if(pincodeReportModel.getStandardDeliveryCharge()==null || flagList.get(i).equals(0)){
                     pincodeReportModel.setStandardDeliveryCharge("Not Serviceable");
                 }
-                if(pincodeReportModel.getFixedTimeDeliveryCharge()==null){
+                if(pincodeReportModel.getFixedTimeDeliveryCharge()==null || flagList.get(i).equals(0)){
                     pincodeReportModel.setFixedTimeDeliveryCharge("Not Serviceable");
                 }
-                if(pincodeReportModel.getMidnightDeliveryCharge()==null){
+                if(pincodeReportModel.getMidnightDeliveryCharge()==null || flagList.get(i).equals(0)){
                     pincodeReportModel.setMidnightDeliveryCharge("Not Serviceable");
                 }
                 pincodeReportModelList.add(pincodeReportModel);
+                i++;
             }
             pincodeModelListWithSummary.setPincodeReportModelList(pincodeReportModelList);
 

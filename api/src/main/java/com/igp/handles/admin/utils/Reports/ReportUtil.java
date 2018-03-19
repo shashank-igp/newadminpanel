@@ -190,7 +190,7 @@ public class ReportUtil {
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement = " select a.vendor_id as vId,a.city_id as cId,a.pincode,a.ship_type," +
-                "a.ship_charge,a.req_price,aso.associate_name from AA_vendor_pincode as a " +
+                "a.ship_charge,a.req_price,aso.associate_name,a.flag_enabled from AA_vendor_pincode as a " +
                 "JOIN associate_user as au ON a.vendor_id = au.fk_associate_login_id JOIN" +
                 " associate as aso on au.fk_associate_login_id=aso.associate_id " +
                 "where vendor_id="+fkAssociateId+" limit "+startLimit+","+endLimit+" ";
@@ -198,12 +198,14 @@ public class ReportUtil {
             logger.debug("sql query "+preparedStatement);
             totalQuery = " select count(distinct pincode) as totalno from AA_vendor_pincode where vendor_id="+fkAssociateId+"";
             resultSet = preparedStatement.executeQuery();
+            List flagList = new ArrayList<>();
             while(resultSet.next()) {
                 Map<String,TableDataActionHandels> shipTypeAndTableMap = new HashMap<>();
                 String pincode=resultSet.getString("a.pincode").trim();
                 String shipType=resultSet.getString("a.ship_type").trim();
                 String shipCharge=resultSet.getString("a.ship_charge").trim();
                 String reqPrice=resultSet.getString("a.req_price").trim();
+                int flagEnabled = resultSet.getInt("flag_enabled");
                 TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
                 tableDataActionHandels.setValue(shipCharge);
                 tableDataActionHandels.setRequestValue(reqPrice);
@@ -217,7 +219,9 @@ public class ReportUtil {
                     pincodeShipTypeAndShipChargeMap.get(pincode).put(shipType,tableDataActionHandels);
                 }
                 vendorName  = resultSet.getString("aso.associate_name");
+                flagList.add(flagEnabled);
             }
+            int i = 0;
             for(Map.Entry<String,Map<String,TableDataActionHandels>> entry:pincodeShipTypeAndShipChargeMap.entrySet()){
                 PincodeTableDataModel pincodeTableDataModel =new PincodeTableDataModel();
                 String pincode = entry.getKey();
@@ -237,18 +241,19 @@ public class ReportUtil {
                 TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
                 tableDataActionHandels.setValue("Not Serviceable");
                 tableDataActionHandels.setRequestValue("-1");
-                if(pincodeTableDataModel.getStandardDeliveryCharge()==null){
+                if(pincodeTableDataModel.getStandardDeliveryCharge()==null || flagList.get(i).equals(0)){
                     pincodeTableDataModel.setStandardDeliveryCharge(tableDataActionHandels);
                 }
-                if(pincodeTableDataModel.getFixedTimeDeliveryCharge()==null){
+                if(pincodeTableDataModel.getFixedTimeDeliveryCharge()==null || flagList.get(i).equals(0)){
                     pincodeTableDataModel.setFixedTimeDeliveryCharge(tableDataActionHandels);
                 }
-                if(pincodeTableDataModel.getMidnightDeliveryCharge()==null){
+                if(pincodeTableDataModel.getMidnightDeliveryCharge()==null || flagList.get(i).equals(0)){
                     pincodeTableDataModel.setMidnightDeliveryCharge(tableDataActionHandels);
                 }
                 pincodeTableDataModel.setVendorId(fkAssociateId);
                 pincodeTableDataModel.setVendorName(vendorName);
                 pincodeTableDataModelList.add(pincodeTableDataModel);
+                i++;
             }
             pincodeModelListHavingSummaryModel.setPincodeTableDataModelList(pincodeTableDataModelList);
 

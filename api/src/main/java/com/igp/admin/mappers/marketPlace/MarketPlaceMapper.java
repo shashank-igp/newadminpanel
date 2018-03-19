@@ -458,8 +458,13 @@ public class MarketPlaceMapper {
                             .fkId(72)
                             .build();
 
+                        String relId = column.get("Order No");
 
-                        String detail = column.get("Order No").split("\\.")[0] + "(#)" +
+                        if (!relId.isEmpty()) {
+                            relId = new BigDecimal(column.get("Order No")).toPlainString();
+                        }
+
+                        String detail = relId + "(#)" +
                             column.get("Sender Name") + "(#)" +
                             userModel.getMobile() + "(#)" +
                             userModel.getEmail() + "(#)" +
@@ -471,7 +476,7 @@ public class MarketPlaceMapper {
 
                         extraInfoModel = new ExtraInfoModel.Builder()
                             .gstNo("")
-                            .relId(column.get("Order No").split("\\.")[0])
+                            .relId(relId)
                             .marketData(detail)
                             .marketName("InterFloraInt")
                             .build();
