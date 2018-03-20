@@ -353,7 +353,7 @@ public class Reports {
     }
     @PUT
     @Path("/v1/admin/handels/approveAndReject")
-    public HandleServiceResponse approveAndReject(@QueryParam("approveReject") boolean approveReject, // true : approve, false : reject
+    public HandleServiceResponse approveAndReject(@QueryParam("approveReject") String approveReject, // 1 : approve, 0 : reject
                                                   @QueryParam("reportType") String reportType,
                                                   @QueryParam("colName") String columnName,
                                                   @QueryParam("fkAssociateId") int fkAssociateId,
