@@ -351,7 +351,7 @@ public class Reports {
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
-    @PUT
+    @POST
     @Path("/v1/admin/handels/approveAndReject")
     public HandleServiceResponse approveAndReject(@QueryParam("approveReject") String approveReject, // 1 : approve, 0 : reject
                                                   @QueryParam("reportType") String reportType,
