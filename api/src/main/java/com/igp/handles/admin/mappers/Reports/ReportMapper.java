@@ -140,10 +140,14 @@ public class ReportMapper {
         }
         return result;
     }
-    public boolean approveAndRejectMapper(String object, String reportName, String columnName, int fkAssociateId, boolean approveReject){
+    public boolean approveAndRejectMapper(String object, String reportName, String columnName, int fkAssociateId, String approveAndReject){
         ReportUtil reportUtil = new ReportUtil();
         boolean response = false;
         try{
+            boolean approveReject = false;
+            if(approveAndReject.equals("1")){
+                approveReject = true;
+            }
             response =  reportUtil.approveAndRejectUtil(object,reportName,columnName,fkAssociateId,approveReject);
 
         }catch (Exception exception){

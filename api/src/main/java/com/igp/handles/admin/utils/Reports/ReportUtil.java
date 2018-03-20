@@ -297,8 +297,9 @@ public class ReportUtil {
             }else {
                 if (field!=null && field.equals("reqPrice")){
                     updateClause = "req_price=" + updatePrice;
-                }
-                else if (flag == 1) {
+                } else if (flag!=null && flag == 1) {
+                    updateClause = "flag_enabled=" + flag+",req_price = -1 ";
+                } else if (flag!=null && flag == 0) {
                     updateClause = "flag_enabled=" + flag+",req_price = -1 ";
                 } else {
                     updateClause = "ship_charge=" + updatePrice+",req_price = -1 ";
@@ -704,19 +705,22 @@ public class ReportUtil {
                     if(approveReject==true) {
                         // request is to update the price.
                         message = "Update the price of " + shipType + " for Pincode " + pincodeTableDataModel.getPincode() + " to " + actionHandels.getRequestValue() + " : Request Accepted";
-                        result = reportMapper.updatePincodeMapper(0, fkAssociateId, Integer.parseInt(pincodeTableDataModel.getPincode()), shipType, Integer.parseInt(actionHandels.getRequestValue()), message, "");
+                        result = reportMapper.updatePincodeMapper(null, fkAssociateId, Integer.parseInt(pincodeTableDataModel.getPincode()), shipType, Integer.parseInt(actionHandels.getRequestValue()), message, "");
 
                     } else {
                         // request to update the price rejected.
                         message = "Update the price of " + shipType + " for Pincode " + pincodeTableDataModel.getPincode() + " to " + actionHandels.getRequestValue() + " : Request Rejected";
-                        reportMapper.updatePincodeMapper(0,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,-1,message,"reqPrice");
+                        reportMapper.updatePincodeMapper(null,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,-1,message,"reqPrice");
                     }
                 }
             }else if(reportName.equals("getVendorReport")){
                 ProductTableDataModel productTableDataModel = objectMapper.readValue(object,ProductTableDataModel.class);
+
                 if(columnName.equals("InStock")){
                     actionHandels = productTableDataModel.getInStock();
+
                     if(actionHandels.getValue().equals(actionHandels.getRequestValue())){
+
                         if(approveReject==true){
                             // request is to enable.
                             message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Approved";
@@ -732,8 +736,12 @@ public class ReportUtil {
                 else {
                     actionHandels = productTableDataModel.getPrice();
                     //for update price
-                    if(!actionHandels.getValue().equals(actionHandels.getRequestValue())) {
+                    int value = new Double(actionHandels.getValue()).intValue();
+                    int reqValue = new Double(actionHandels.getRequestValue()).intValue();
 
+                    if(value!=reqValue) {
+
+                        //  i.e. price change
                         if (approveReject == true) {
                             // request is to update the price.
                             message = "Change price of component " + productTableDataModel.getComponentName() + " to " + actionHandels.getRequestValue() + " : Accepted";
