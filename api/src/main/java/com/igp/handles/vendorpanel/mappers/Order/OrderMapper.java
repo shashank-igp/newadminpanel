@@ -28,10 +28,11 @@ public class OrderMapper
 
 
     public static  Boolean  doUpdateOrderProductsStatus(int orderId,String fkAssociateId,String status,String orderProductsIds,String recipientInfo,
-                                                            String rejectionMessage,String commentsDelivered,String recipientName,int rejectionType){
+                                                            String rejectionMessage,String commentsDelivered,String recipientName,int rejectionType
+                                                            ,String ipAddress,String userAgent){
         Boolean isUpdateSucessfull=false;
         isUpdateSucessfull=updateStatusForOrderUtil(orderId,fkAssociateId,status,orderProductsIds,recipientInfo,
-                                                rejectionMessage,commentsDelivered,recipientName,rejectionType);
+                                                rejectionMessage,commentsDelivered,recipientName,rejectionType,ipAddress,userAgent);
         return  isUpdateSucessfull;
     }
 

@@ -85,8 +85,10 @@ public class Order {
     {
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         Boolean ifSucessfull=false;
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
         ifSucessfull=doUpdateOrderProductsStatus(orderId,fkAssociateId,status,orderProductsIds,recipientInfo,
-                    rejectionMessage,commentsDelivered,recipientName,rejectionType);
+                    rejectionMessage,commentsDelivered,recipientName,rejectionType,ipAddress,userAgent);
 
         handleServiceResponse.setResult(ifSucessfull);
         response.addHeader("token",request.getHeader("token"));

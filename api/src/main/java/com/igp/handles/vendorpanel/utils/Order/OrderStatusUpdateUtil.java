@@ -1,6 +1,7 @@
 package com.igp.handles.vendorpanel.utils.Order;
 
 import com.igp.config.instance.Database;
+import com.igp.handles.admin.utils.Order.OrderUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,8 +13,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.Arrays;
-import java.util.List;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -24,20 +25,29 @@ public class OrderStatusUpdateUtil {
     private static final Logger logger = LoggerFactory.getLogger(OrderStatusUpdateUtil.class);
 
     public static Boolean updateStatusForOrderUtil(int orderId,String fkAssociateId,String status,String orderProductIds,
-        String recipientInfo,String rejectionMessage,String commentsDelivered,String recipientName,int rejectionType){
+        String recipientInfo,String rejectionMessage,String commentsDelivered,String recipientName,int rejectionType
+        ,String ipAddress,String userAgent){
         Boolean result=false;
-        String productIds="";
+        String productIds="",stringToUpdate="";
         int deliveryAttemptFlag=0;
+        com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new OrderUtil();
         try
         {
             productIds=getProductsIds(orderProductIds);
+            String[] productIdArray=productIds.split(",");
             switch (status)
             {
                 case "Confirmed":
                     result=markConfirmedOrdersProducts(orderId,fkAssociateId,status,orderProductIds);
                     if (result){
+                        stringToUpdate="Products Confirmed : "+productIds+" for orderId "+orderId+" using Vendor Upload Panel ";
                         updateOrderToStatusOrPartiallyStatus(orderId,status);
-                        updateOrderHistory( status,orderId ,orderProductIds,fkAssociateId);
+                        updateOrderHistory( stringToUpdate,orderId ,orderProductIds,fkAssociateId);
+                        for(int i=0;i<productIdArray.length;i++){
+                            orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),
+                                Integer.parseInt(fkAssociateId),stringToUpdate,ipAddress,userAgent,
+                                "status_change","Confirmed");
+                        }
                     }
                     else {
                         result=false;
@@ -47,9 +57,15 @@ public class OrderStatusUpdateUtil {
                 case "OutForDelivery":
                     result=markOutForDelivery(orderId,fkAssociateId,"Shipped",orderProductIds);
                     if (result) {
+                        stringToUpdate="Products OutForDelivery : "+productIds+" for orderId "+orderId+" using Vendor Upload Panel ";
                         sendEmailForOrder(orderId, status, fkAssociateId, productIds);
                         updateOrderToStatusOrPartiallyStatus(orderId, "Shipped");
-                        updateOrderHistory(status, orderId, orderProductIds, fkAssociateId);
+                        updateOrderHistory(stringToUpdate, orderId, orderProductIds, fkAssociateId);
+                        for(int i=0;i<productIdArray.length;i++){
+                            orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),
+                                Integer.parseInt(fkAssociateId),stringToUpdate,ipAddress,userAgent,
+                                "status_change","OutForDelivery");
+                        }
                     }
                     else {
                         result=false;
@@ -60,10 +76,16 @@ public class OrderStatusUpdateUtil {
                     deliveryAttemptFlag=0;
                     result=markDelivered(orderId,fkAssociateId,status,orderProductIds,deliveryAttemptFlag);
                     if (result){
+                        stringToUpdate="Products delivered : "+productIds+" for orderId "+orderId+" using Vendor Upload Panel ";
                         updateHandelsHistory(orderId, recipientInfo, rejectionMessage, recipientInfo,rejectionMessage,
                             status,orderProductIds,commentsDelivered,recipientName,rejectionType,fkAssociateId);
                         sendEmailForOrder(orderId,status,fkAssociateId,productIds);
-                        updateOrderHistory( status,orderId ,orderProductIds,fkAssociateId);
+                        updateOrderHistory( stringToUpdate,orderId ,orderProductIds,fkAssociateId);
+                        for(int i=0;i<productIdArray.length;i++){
+                            orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),
+                                Integer.parseInt(fkAssociateId),stringToUpdate,ipAddress,userAgent,
+                                "status_change","Delivered");
+                        }
                     }
                     break;
                 case "Rejected":
@@ -71,16 +93,28 @@ public class OrderStatusUpdateUtil {
                     // orderId, "Rejected");
                     result=markRejected(orderId,fkAssociateId,status,orderProductIds);
                     if (result){
-                        updateOrderHistory( status,orderId ,orderProductIds,fkAssociateId);
+                        stringToUpdate="Products Rejected : "+productIds+" for orderId "+orderId+" using Vendor Upload Panel ";
+                        updateOrderHistory( stringToUpdate,orderId ,orderProductIds,fkAssociateId);
                         updateHandelsHistory(orderId, recipientInfo, rejectionMessage, recipientInfo,rejectionMessage,status,
                             orderProductIds,commentsDelivered,recipientName,rejectionType,fkAssociateId);
+                        for(int i=0;i<productIdArray.length;i++){
+                            orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),
+                                Integer.parseInt(fkAssociateId),stringToUpdate,ipAddress,userAgent,
+                                "status_change","Rejected");
+                        }
                     }
                     break;
                 case "AttemptedDelivery":
                     deliveryAttemptFlag=1;
                     result=markDelivered(orderId,fkAssociateId,status,orderProductIds,deliveryAttemptFlag);
                     if(result){
-                        updateOrderHistory( status,orderId ,orderProductIds,fkAssociateId);
+                        stringToUpdate="Try To Attempt delivery of : "+productIds+" for orderId "+orderId+" using Vendor Upload Panel ";
+                        updateOrderHistory( stringToUpdate,orderId ,orderProductIds,fkAssociateId);
+                        for(int i=0;i<productIdArray.length;i++){
+                            orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),
+                                Integer.parseInt(fkAssociateId),stringToUpdate,ipAddress,userAgent,
+                                "status_change","attempted");
+                        }
                     }
                     break;
                 default:
@@ -388,26 +422,9 @@ public class OrderStatusUpdateUtil {
 
     }
 
-    public static void updateOrderHistory(String status, int orderId, String ordersProductsIds, String fkAssociateId){
+    public static void updateOrderHistory(String stringToUpdate, int orderId, String ordersProductsIds, String fkAssociateId){
         Connection connection = null;
         String statement;
-        String stringToUpdate="";
-        if (status.equals("Delivered")){
-            stringToUpdate="Products delivered : "+ordersProductsIds+" for orderId "+orderId+" using Vendor Upload Panel ";
-        }
-        else if (status.equals("Confirmed")){
-            stringToUpdate="Products Confirmed : "+ordersProductsIds+" for orderId "+orderId+" using Vendor Upload Panel ";
-        }
-        else if (status.equals("OutForDelivery")){
-            stringToUpdate="Products OutForDelivery : "+ordersProductsIds+" for orderId "+orderId+" using Vendor Upload Panel ";
-        }
-        else if (status.equals("Rejected")){
-            stringToUpdate="Products Rejected : "+ordersProductsIds+" for orderId "+orderId+" using Vendor Upload Panel ";
-        }else if(status.equals("AttemptedDelivery")){
-            stringToUpdate="Try To Attempt delivery of : "+ordersProductsIds+" for orderId "+orderId+" using Vendor Upload Panel ";
-        }
-
-
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
