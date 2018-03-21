@@ -247,9 +247,15 @@ public class Order {
         boolean result=false;
         String ipAddress=request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
+        Map<String,List<OrderLogModel>> orderLog=new HashMap<>();
         try{
             result=orderMapper.addVendorInstruction(orderId,orderProductIdString,fkAssociateId,instruction,ipAddress,userAgent);
-            handleServiceResponse.setResult(result);
+            if(result){
+                orderLog.put("logs",orderMapper.getOrderLog(orderId));
+                handleServiceResponse.setResult(orderLog);
+            }else{
+                handleServiceResponse.setResult(orderLog);
+            }
         }catch (Exception exception){
             logger.error("error while getting addVendorInstruction ",exception);
         }
