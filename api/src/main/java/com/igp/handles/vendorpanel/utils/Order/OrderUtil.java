@@ -254,11 +254,21 @@ public class OrderUtil
                 }
                 break;
                 case "Shipped":
-                    statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize   from orders_products as op inner join trackorders as track on op.orders_id = track.orders_id "
-                        + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
-                        + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                        + " where op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 1 and  "
-                        + " DATE_FORMAT(track.deliveredDate,'%Y-%m-%d') = ? and op.orders_product_status='Shipped' "+ deliveryAttemptClause +" order by track.deliveryDate asc ";
+                    if(deliveryAttemptFlag==1){
+                        Date pastDate = DateUtils.addDays(date, -7); // get past 7
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize   from orders_products as op inner join trackorders as track on op.orders_id = track.orders_id "
+                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                            + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
+                            + " where op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 1 and  "
+                            +  " opei.delivery_date >= '"+ new SimpleDateFormat("yyyy-MM-dd").format(pastDate) + "' and  opei.delivery_date <= ? "
+                            + " and op.orders_product_status='Shipped' "+ deliveryAttemptClause +" order by track.deliveryDate asc ";
+                    }else {
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize   from orders_products as op inner join trackorders as track on op.orders_id = track.orders_id "
+                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                            + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
+                            + " where op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 1 and  "
+                            + " DATE_FORMAT(track.deliveredDate,'%Y-%m-%d') = ? and op.orders_product_status='Shipped' "+ deliveryAttemptClause +" order by track.deliveryDate asc ";
+                    }
                     break;
                 case "all":
                     statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "

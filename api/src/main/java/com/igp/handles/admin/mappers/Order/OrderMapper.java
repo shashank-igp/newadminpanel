@@ -7,6 +7,7 @@ import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
 import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
+import com.igp.handles.vendorpanel.utils.Order.OrderStatusUpdateUtil;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
 import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
@@ -136,7 +137,7 @@ public class OrderMapper {
                     if(!restOrderProductIdList.equals("")){
 
                         //this is because if something happend while assigning and reassigning orderProduct then it will be in the other list
-                         orderList=getOrder(orderId,orderProductIdsWhichAreActuallyAssigned);
+                        orderList=getOrder(orderId,orderProductIdsWhichAreActuallyAssigned);
                         orderList = mergeOrderList(orderList, getOrder(orderId,restOrderProductIdList));
                     }else {
                         orderList=getOrder(orderId,orderProductIdString);
@@ -227,7 +228,7 @@ public class OrderMapper {
         List<OrderLogModel> orderLogModelList=new ArrayList<>();
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         try {
-           orderLogModelList =orderUtil.getOrderLog(orderId);
+            orderLogModelList =orderUtil.getOrderLog(orderId);
         }catch (Exception exception){
             logger.error("error while getting OrderLog",exception);
 
@@ -294,11 +295,15 @@ public class OrderMapper {
 
         return result;
     }
-    public boolean addVendorInstruction(int orderId,int productId,int fkAssociateId,String instruction,String ipAddress,String userAgent){
+    public boolean addVendorInstruction(int orderId,String orderProductIdString,int fkAssociateId,String instruction,String ipAddress,String userAgent){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         try{
-            result=orderUtil.insertIntoHandelOrderHistory(orderId,productId,fkAssociateId,instruction,ipAddress,userAgent,"instruction","from_igp");
+            String productIds=OrderStatusUpdateUtil.getProductsIds(orderProductIdString);
+            String[] productIdArray=productIds.split(",");
+            for(int i=0;i<productIdArray.length;i++){
+                result=orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),fkAssociateId,instruction,ipAddress,userAgent,"instruction","from_igp");
+            }
         }catch(Exception exception){
             logger.error("error while adding VendorInstruction ",exception);
         }

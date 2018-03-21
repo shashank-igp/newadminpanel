@@ -81,6 +81,7 @@ public class OrderStatusUpdateUtil {
                             status,orderProductIds,commentsDelivered,recipientName,rejectionType,fkAssociateId);
                         sendEmailForOrder(orderId,status,fkAssociateId,productIds);
                         updateOrderHistory( stringToUpdate,orderId ,orderProductIds,fkAssociateId);
+                        stringToUpdate+=" with Recipient Information "+recipientName+" and  "+recipientInfo;
                         for(int i=0;i<productIdArray.length;i++){
                             orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),
                                 Integer.parseInt(fkAssociateId),stringToUpdate,ipAddress,userAgent,
