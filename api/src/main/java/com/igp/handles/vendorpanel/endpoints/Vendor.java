@@ -52,7 +52,9 @@ public class Vendor {
                                                 @QueryParam("orderProductIds") String orderProductIds,@QueryParam("vendorIssue") String vendorIssue){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         VendorUtil vendorUtil=new VendorUtil();
-        handleServiceResponse.setResult(vendorUtil.saveVendorIssueInHandelsHistory(orderProductIds,orderId,fkAssociateId,vendorIssue));
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+        handleServiceResponse.setResult(vendorUtil.saveVendorIssueInHandelsHistory(orderProductIds,orderId,fkAssociateId,vendorIssue,ipAddress,userAgent));
         return handleServiceResponse;
     }
     @GET

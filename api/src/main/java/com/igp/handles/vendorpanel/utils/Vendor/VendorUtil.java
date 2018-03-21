@@ -1,9 +1,12 @@
 package com.igp.handles.vendorpanel.utils.Vendor;
 
 import com.igp.config.instance.Database;
+import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
+import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
 import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerOrderProduct;
 import com.igp.handles.vendorpanel.models.Vendor.VendorInstruction;
 import com.igp.handles.vendorpanel.utils.Order.OrderStatusUpdateUtil;
+import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -101,15 +104,18 @@ public class VendorUtil
 
         return festivalDate;
     }
-    public boolean saveVendorIssueInHandelsHistory(String orderProductIds,int orderId,String fkAssociateId,String vendorIssue){
+    public boolean saveVendorIssueInHandelsHistory(String orderProductIds,int orderId,String fkAssociateId,String vendorIssue,String ipAddress,String userAgent){
         boolean result=false;
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
         int rejectionType=9; // for alternate number/address issue
+        Map<Integer, OrderProductExtraInfo> ordersProductExtraInfoMap=new HashMap<>();
         try{
-
+            OrderUtil orderUtil=new OrderUtil();
+            com.igp.handles.admin.utils.Order.OrderUtil adminOrderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
             List<String> orderProductsLists = Arrays.asList(orderProductIds.split(","));
+            List<OrdersProducts> ordersProducts=orderUtil.getOrderProducts("1",orderId,fkAssociateId,ordersProductExtraInfoMap,orderProductIds,true);
             StringBuilder sb=new StringBuilder("VALUES");
             for (int i = 0; i < orderProductsLists.size(); i++) {
                 if (i==orderProductsLists.size()-1){
@@ -118,7 +124,6 @@ public class VendorUtil
                 else {
                     sb.append("(" + orderProductsLists.get(i) + "," + orderId + "," + rejectionType + ",'" + vendorIssue + "',now()),");
                 }
-
             }
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="INSERT INTO `handels_history` (`orders_products_id`,`orders_id`, `rejection_type` , `rejection_message`, `insertTime`) "+sb.toString()+" ON DUPLICATE KEY UPDATE orders_id="+orderId+",rejection_type="+rejectionType+",rejection_message='"+vendorIssue+"' ,insertTime= now();";
@@ -128,6 +133,9 @@ public class VendorUtil
             if(rows>0){
                 result=true;
                 OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(orderId,fkAssociateId,"Alternate Number/Address issues",vendorIssue);
+                for(int i=0;i<ordersProducts.size();i++){
+                    adminOrderUtil.insertIntoHandelOrderHistory(orderId, ordersProducts.get(i).getProductId(),Integer.parseInt(fkAssociateId),vendorIssue,ipAddress,userAgent,"instruction","to_igp");
+                }
             }
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);
@@ -137,6 +145,37 @@ public class VendorUtil
         }
 
         return result;
+    }
+    public List<VendorInstruction> getVendorInstructionNew(String fkAssociateId){
+        List<VendorInstruction> vendorOrderInstruction=new ArrayList<>();
+        Connection connection = null;
+        String statement;
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement = "SELECT orders_id,message from handel_order_history "
+                + " where fk_associate_id = ? and insert_time >= date_add(now(),interval -2 day) and action = ? and sub_action = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,Integer.parseInt(fkAssociateId));
+            preparedStatement.setString(2,"instruction");
+            preparedStatement.setString(3,"from_igp");
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                VendorInstruction vendorInstruction=new VendorInstruction();
+                vendorInstruction.setOrderId(resultSet.getString("orders_id"));
+                vendorInstruction.setInstruction(resultSet.getString("message"));
+                vendorOrderInstruction.add(vendorInstruction);
+            }
+        } catch (Exception exception) {
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return vendorOrderInstruction;
     }
     public List<VendorInstruction> getVendorInstruction(String fkAssociateId){
         List<VendorInstruction> vendorOrderInstruction=new ArrayList<>();
