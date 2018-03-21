@@ -298,11 +298,11 @@ public class ReportUtil {
                 if (field!=null && field.equals("reqPrice")){
                     updateClause = "req_price=" + updatePrice;
                 } else if (flag!=null && flag == 1) {
-                    updateClause = "flag_enabled=" + flag+",req_price = -1 ";
+                    updateClause = "flag_enabled=" + flag +",req_price = -1 ";
                 } else if (flag!=null && flag == 0) {
-                    updateClause = "flag_enabled=" + flag+",req_price = -1 ";
+                    updateClause = "flag_enabled=" + flag +",req_price = -1 ";
                 } else {
-                    updateClause = "ship_charge=" + updatePrice+",req_price = -1 ";
+                    updateClause = "ship_charge=" + updatePrice +",req_price = -1 ";
                 }
                 statement = "update AA_vendor_pincode set " + updateClause + " where vendor_id=" + fk_associate_id + " and pincode=" + pincode + " and  ship_type=" + shipType + " ";
                 preparedStatement = connection.prepareStatement(statement);
@@ -684,7 +684,7 @@ public class ReportUtil {
                         shipType = 2;
                         break;
                     case "Midnight Delivery" :
-                        actionHandels = pincodeTableDataModel.getFixedTimeDeliveryCharge();
+                        actionHandels = pincodeTableDataModel.getMidnightDeliveryCharge();
                         shipType = 3;
                         break;
                 }
