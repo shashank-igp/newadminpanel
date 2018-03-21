@@ -241,14 +241,14 @@ public class Order {
     }
     @POST
     @Path("/v1/admin/handels/addVendorInstruction")
-    public HandleServiceResponse addVendorInstruction(@Context HttpServletRequest request,@QueryParam("orderId") int orderId,@QueryParam("productId") int productId,@QueryParam("fkAssociateId") int fkAssociateId,@QueryParam("message") String instruction){
+    public HandleServiceResponse addVendorInstruction(@Context HttpServletRequest request,@QueryParam("orderId") int orderId,@QueryParam("orderProductId") String orderProductIdString,@QueryParam("fkAssociateId") int fkAssociateId,@QueryParam("message") String instruction){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         boolean result=false;
         String ipAddress=request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
         try{
-            result=orderMapper.addVendorInstruction(orderId,productId,fkAssociateId,instruction,ipAddress,userAgent);
+            result=orderMapper.addVendorInstruction(orderId,orderProductIdString,fkAssociateId,instruction,ipAddress,userAgent);
             handleServiceResponse.setResult(result);
         }catch (Exception exception){
             logger.error("error while getting addVendorInstruction ",exception);
