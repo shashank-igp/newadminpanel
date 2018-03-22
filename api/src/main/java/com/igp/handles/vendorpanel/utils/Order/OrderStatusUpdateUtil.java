@@ -81,7 +81,13 @@ public class OrderStatusUpdateUtil {
                             status,orderProductIds,commentsDelivered,recipientName,rejectionType,fkAssociateId);
                         sendEmailForOrder(orderId,status,fkAssociateId,productIds);
                         updateOrderHistory( stringToUpdate,orderId ,orderProductIds,fkAssociateId);
-                        stringToUpdate+=" with Recipient Information "+recipientName+" and  "+recipientInfo;
+                        if(commentsDelivered==null||commentsDelivered.equals("")){
+                            commentsDelivered=" none ";
+                        }
+                        if(recipientName==null||recipientName.equals("")){
+                            recipientName=" none ";
+                        }
+                        stringToUpdate+=" with Recipient Information "+recipientName+" and comments =  "+commentsDelivered;
                         for(int i=0;i<productIdArray.length;i++){
                             orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),
                                 Integer.parseInt(fkAssociateId),stringToUpdate,ipAddress,userAgent,
@@ -111,6 +117,13 @@ public class OrderStatusUpdateUtil {
                     if(result){
                         stringToUpdate="Try To Attempt delivery of : "+productIds+" for orderId "+orderId+" using Vendor Upload Panel ";
                         updateOrderHistory( stringToUpdate,orderId ,orderProductIds,fkAssociateId);
+                        if(commentsDelivered==null||commentsDelivered.equals("")){
+                            commentsDelivered=" none ";
+                        }
+                        if(recipientName==null||recipientName.equals("")){
+                            recipientName=" none ";
+                        }
+                        stringToUpdate+=" with Recipient Information "+recipientName+" and comments =  "+commentsDelivered;
                         for(int i=0;i<productIdArray.length;i++){
                             orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),
                                 Integer.parseInt(fkAssociateId),stringToUpdate,ipAddress,userAgent,
