@@ -327,14 +327,14 @@ public class Reports {
 
     @POST
     @Path("/v1/admin/handels/addNewVendor")
-    public HandleServiceResponse addNewVendor(@QueryParam("Vendor_Name") String vendorName,
-                                              @QueryParam("Contact_Person") String contactPerson,
-                                              @QueryParam("Email") String email,
-                                              @QueryParam("Address") String address,
-                                              @QueryParam("User_Id") String user,
-                                              @QueryParam("Password") String password,
-                                              @QueryParam("Phone") String phone,
-                                              @DefaultValue("1") @QueryParam("Status") int status){
+    public HandleServiceResponse addNewVendor(@QueryParam("associateName") String vendorName,
+                                              @QueryParam("contactPerson") String contactPerson,
+                                              @QueryParam("email") String email,
+                                              @QueryParam("address") String address,
+                                              @QueryParam("user") String user,
+                                              @QueryParam("password") String password,
+                                              @QueryParam("phone") String phone,
+                                              @DefaultValue("1") @QueryParam("status") int status){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
         boolean result = false;

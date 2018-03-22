@@ -46,6 +46,9 @@ public class ReportMapper {
     public boolean addNewVendorPincodeMapper(int fkAssociateId,int pincode,int cityId,int shipType,int shipCharge){
         Map<Integer,String> map= new HashMap<>();
         ReportUtil reportUtil = new ReportUtil();
+        if(shipType==4){
+            shipType = 1;
+        }
         map.put(1,"Standard Delivery");
         map.put(2,"Fixed Time Delivery");
         map.put(3,"Mid Night Delivery");
