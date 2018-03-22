@@ -4,6 +4,8 @@ package com.igp.handles.vendorpanel.mappers.Reports;
  * Created by shal on 22/9/17.
  */
 
+import com.igp.handles.admin.models.Reports.PincodeModelListHavingSummaryModel;
+import com.igp.handles.admin.models.Reports.ProductModelListHavingSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.*;
 import com.igp.handles.vendorpanel.utils.Order.OrderStatusUpdateUtil;
 import com.igp.handles.vendorpanel.utils.Reports.PayoutAndTaxesReport;
@@ -25,18 +27,16 @@ public class ReportMapper {
         reportOrderWithSummaryModel=getSummaryDetailsForVendor(fkAssociateId,startDate,endDate,startLimit,endLimit,orderNo,delhiveryDate,status,deliveryDateFrom,deliveryDateTo);
         return reportOrderWithSummaryModel;
     }
-    public static VendorModelListWithSummary getVendorSummaryDetails(String fkAssociateId,String startLimit,String endLimit){
+    public static ProductModelListHavingSummaryModel getVendorSummaryDetails(String fkAssociateId, String startLimit, String endLimit){
 
-        VendorModelListWithSummary vendorModelListWithSummary=null;
-        vendorModelListWithSummary=getVendorDetailsFunction(fkAssociateId,startLimit,endLimit);
-        return  vendorModelListWithSummary;
+        ProductModelListHavingSummaryModel productModelListHavingSummaryModel=getVendorDetailsFunction(fkAssociateId,startLimit,endLimit);
+        return  productModelListHavingSummaryModel;
 
     }
-    public static PincodeModelListWithSummary getPincodeSummaryDetails(String fkAssociateId, String startLimit, String endLimit){
+    public static PincodeModelListHavingSummaryModel getPincodeSummaryDetails(String fkAssociateId, String startLimit, String endLimit){
 
-        PincodeModelListWithSummary pincodeModelListWithSummary=null;
-        pincodeModelListWithSummary=getPincodeDetailsFunction(fkAssociateId,startLimit,endLimit);
-        return  pincodeModelListWithSummary;
+        PincodeModelListHavingSummaryModel pincodeModelListHavingSummaryModel=getPincodeDetailsFunction(fkAssociateId,startLimit,endLimit);
+        return  pincodeModelListHavingSummaryModel;
 
     }
     public static boolean updateComponentMapper(Integer flag,String fk_associate_id,String  componentId,String price){
