@@ -121,7 +121,7 @@ public class Order {
         com.igp.handles.admin.mappers.Order.OrderMapper orderMapper=new com.igp.handles.admin.mappers.Order.OrderMapper();
         try{
             Map<String,List<OrderLogModel>> orderLog=new HashMap<>();
-            orderLog.put("logs",orderMapper.getOrderLog(orderId));
+            orderLog.put("logs",orderMapper.getOrderLog(orderId,"message"));
             handleServiceResponse.setResult(orderLog);
 
         }catch (Exception exception){

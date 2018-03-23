@@ -224,11 +224,11 @@ public class OrderMapper {
         }
         return result;
     }
-    public List<OrderLogModel> getOrderLog(int orderId){
+    public List<OrderLogModel> getOrderLog(int orderId,String type){
         List<OrderLogModel> orderLogModelList=new ArrayList<>();
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         try {
-            orderLogModelList =orderUtil.getOrderLog(orderId);
+            orderLogModelList =orderUtil.getOrderLog(orderId,type);
         }catch (Exception exception){
             logger.error("error while getting OrderLog",exception);
 

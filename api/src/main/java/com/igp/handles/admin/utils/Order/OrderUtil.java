@@ -741,7 +741,7 @@ public class OrderUtil {
         }
         return result;
     }
-    public List<OrderLogModel> getOrderLog(int orderId){
+    public List<OrderLogModel> getOrderLog(int orderId,String type){
         String insertTime="",log="";
         Connection connection = null;
         ResultSet resultSet = null;
@@ -751,10 +751,16 @@ public class OrderUtil {
         VendorUtil vendorUtil=new VendorUtil();
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement="SELECT  * from handel_order_history where orders_id = ? order by handel_order_history_id desc";
-            preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1,orderId);
-
+            if(type.equals("message")){
+                statement="SELECT  * from handel_order_history where orders_id = ? and action = ?  order by handel_order_history_id desc";
+                preparedStatement = connection.prepareStatement(statement);
+                preparedStatement.setInt(1,orderId);
+                preparedStatement.setString(2,"instruction");
+            }else{
+                statement="SELECT  * from handel_order_history where orders_id = ? order by handel_order_history_id desc";
+                preparedStatement = connection.prepareStatement(statement);
+                preparedStatement.setInt(1,orderId);
+            }
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()){
