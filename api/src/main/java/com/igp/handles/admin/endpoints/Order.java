@@ -173,7 +173,7 @@ public class Order {
         OrderMapper orderMapper=new OrderMapper();
         try{
             Map<String,List<OrderLogModel>> orderLog=new HashMap<>();
-            orderLog.put("logs",orderMapper.getOrderLog(orderId));
+            orderLog.put("logs",orderMapper.getOrderLog(orderId,"all"));
             handleServiceResponse.setResult(orderLog);
 
         }catch (Exception exception){
@@ -250,7 +250,7 @@ public class Order {
         Map<String,List<OrderLogModel>> orderLog=new HashMap<>();
         try{
             result=orderMapper.addVendorInstruction(orderId,orderProductIdString,fkAssociateId,instruction,ipAddress,userAgent);
-            orderLog.put("logs",orderMapper.getOrderLog(orderId));
+            orderLog.put("logs",orderMapper.getOrderLog(orderId,"all"));
             handleServiceResponse.setResult(orderLog);
         }catch (Exception exception){
             logger.error("error while getting addVendorInstruction ",exception);

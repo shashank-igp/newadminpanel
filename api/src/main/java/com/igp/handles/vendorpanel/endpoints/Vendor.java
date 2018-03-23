@@ -83,7 +83,7 @@ public class Vendor {
     @Path("/v1/handels/addVendorInstruction")
     public HandleServiceResponse saveVendorInstruction(@Context HttpServletResponse response,@Context HttpServletRequest request,
         @QueryParam("fkAssociateId") String fkAssociateId,@QueryParam("orderId") int orderId,
-        @QueryParam("orderProductIds") String orderProductIds,@QueryParam("vendorIssue") String vendorIssue){
+        @QueryParam("orderProductId") String orderProductIds,@QueryParam("message") String vendorIssue){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         VendorUtil vendorUtil=new VendorUtil();
         String ipAddress=request.getRemoteAddr();
@@ -92,7 +92,7 @@ public class Vendor {
         Map<String,List<OrderLogModel>> orderLog=new HashMap<>();
         try{
             vendorUtil.saveVendorIssueInHandelsHistory(orderProductIds,orderId,fkAssociateId,vendorIssue,ipAddress,userAgent);
-            orderLog.put("logs",orderMapper.getOrderLog(orderId));
+            orderLog.put("logs",orderMapper.getOrderLog(orderId,"message"));
             handleServiceResponse.setResult(orderLog);
         }catch (Exception exception){
             logger.error("error while adding vendor instruction from vendor in vendor panel ",exception);
