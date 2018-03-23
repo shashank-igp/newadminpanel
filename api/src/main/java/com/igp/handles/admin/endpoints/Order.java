@@ -177,7 +177,7 @@ public class Order {
             handleServiceResponse.setResult(orderLog);
 
         }catch (Exception exception){
-            logger.error("error while getting OrderLog",exception);
+            logger.error("error while getting OrderLog Handel panel ",exception);
         }
 
         return handleServiceResponse;
