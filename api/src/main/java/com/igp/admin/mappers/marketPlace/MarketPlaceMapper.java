@@ -718,7 +718,7 @@ public class MarketPlaceMapper {
                     extraInfoModel = validationModel.getExtraInfoModel();
                     productModel = validationModel.getProductModel();
                     // check if order already exists.
-                    validationModel = marketPlaceOrderUtil.checkCorpOrderExists(validationModel);
+                    validationModel = marketPlaceOrderUtil.checkIfCorpOrderExists(validationModel);
                     if (validationModel.getError() == false) {
                         // order doesn't exist, so create a new order.
 
@@ -769,7 +769,13 @@ public class MarketPlaceMapper {
                                             if (marketPlaceTempOrderModel.getTempOrderId() != 0) {
                                                 // create order by hitting api
                                                 logger.debug("Temp Order Created successfully : " + marketPlaceTempOrderModel.getTempOrderId());
-                                                orderId = marketPlaceOrderUtil.createOrder(marketPlaceTempOrderModel, extraInfoModel);
+                                               validationModel = marketPlaceOrderUtil.checkIfCorpOrderExists(validationModel);
+                                               if(validationModel.getError()==false){
+                                                   // order doesn't exist checked again
+                                                   orderId = marketPlaceOrderUtil.createOrder(marketPlaceTempOrderModel, extraInfoModel);
+                                               }else {
+                                                   logger.debug("Tried to create duplicate order for same row.");
+                                               }
                                                 if (orderId == 0) {
                                                     validationModel.setError(Boolean.TRUE);
                                                     validationModel.setMessage("Error at order creation.");

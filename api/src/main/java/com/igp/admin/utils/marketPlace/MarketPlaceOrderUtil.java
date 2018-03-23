@@ -98,7 +98,7 @@ public class MarketPlaceOrderUtil {
                     userModel.setId(null);
                     // customer doesn't exist therefore create a new customer.
                     String postData = objectMapper.writeValueAsString(userModel);
-                    String custResponse = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/signup",new ArrayList<>());
+                    String custResponse = httpRequestUtil.sendCurlRequest(postData, "http://localhost:8083/v1/signup",new ArrayList<>());
                     generalUserResponseModel = objectMapper.readValue(custResponse, GeneralUserResponseModel.class);
                     // populate cust id hash in customer and address model.
                     authResponseModel = generalUserResponseModel.getData();
@@ -110,7 +110,7 @@ public class MarketPlaceOrderUtil {
                     else {
                         // since new customer created therefore update rest of the details.
                         String postData1 = objectMapper.writeValueAsString(userModel2);
-                        String custUpdate = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/signup",new ArrayList<>());
+                        String custUpdate = httpRequestUtil.sendCurlRequest(postData1, "http://localhost:8083/v1/signup",new ArrayList<>());
                         generalUserResponseModel = objectMapper.readValue(custUpdate, GeneralUserResponseModel.class);
                         authResponseModel =  generalUserResponseModel.getData();
                         // storing idHash and id in proper fields.
@@ -173,7 +173,7 @@ public class MarketPlaceOrderUtil {
             }
             // model didn't return any error and now work on address book.
             String postData = objectMapper.writeValueAsString(shippingAddress);
-            String addressExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/user/checkaddress",new ArrayList<>());
+            String addressExist = httpRequestUtil.sendCurlRequest(postData, "http://localhost:8083/v1/user/checkaddress",new ArrayList<>());
             generalShipResponseModel = objectMapper.readValue(addressExist, GeneralShipResponseModel.class);
             shippingAddress = generalShipResponseModel.getData();
 
@@ -181,7 +181,7 @@ public class MarketPlaceOrderUtil {
                 logger.error("Couldn't get proper address.");
                 // create new address entry.
                 String postData1 = objectMapper.writeValueAsString(shippingAddress);
-                String createAddress = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/user/address",new ArrayList<>());
+                String createAddress = httpRequestUtil.sendCurlRequest(postData1, "http://localhost:8083/v1/user/address",new ArrayList<>());
                 if(createAddress.contains("error")){
                     throw new Exception("Problem in Delivery Details.");
 
@@ -694,7 +694,7 @@ public class MarketPlaceOrderUtil {
             headerKeyValueModel.setValue("BO-Panel");
             headerKeyValueModelList.add(headerKeyValueModel);
             String postData = objectMapper.writeValueAsString(marketPlaceOrderModel);
-            String orderRequest = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/checkout/order",headerKeyValueModelList);
+            String orderRequest = httpRequestUtil.sendCurlRequest(postData, "http://localhost:8083/v1/checkout/order",headerKeyValueModelList);
             generalOrderResponseModel = objectMapper.readValue(orderRequest, GeneralOrderResponseModel.class);
             Map<String, APIOrderResponseModel> orderResponse = generalOrderResponseModel.getData();
             APIOrderResponseModel apiOrderResponseModel = orderResponse.get("payment");
@@ -820,7 +820,7 @@ public class MarketPlaceOrderUtil {
     }
 
 
-    public ValidationModel checkCorpOrderExists(ValidationModel validationModel){
+    public ValidationModel checkCorpOrderExistsByHttpCall(ValidationModel validationModel){
         CheckCorpOrderModel checkCorpOrderModel = new CheckCorpOrderModel();
         ObjectMapper objectMapper = new ObjectMapper();
         HttpRequestUtil httpRequestUtil = new HttpRequestUtil();
@@ -832,7 +832,7 @@ public class MarketPlaceOrderUtil {
             checkCorpOrderModel.setOrderId(0);
             if(!checkCorpOrderModel.getRelId().isEmpty()||!checkCorpOrderModel.getRelId().equals("0")) {
                 String postData = objectMapper.writeValueAsString(checkCorpOrderModel);
-                String orderExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/corporate/corpordercheck",new ArrayList<>());
+                String orderExist = httpRequestUtil.sendCurlRequest(postData, "http://localhost:8083/v1/corporate/corpordercheck",new ArrayList<>());
                 generalAddressResponseModel = objectMapper.readValue(orderExist, GenerateCheckCorpOrderResponseModel.class);
                 checkCorpOrderModel = generalAddressResponseModel.getData();
                 if (checkCorpOrderModel.getError() == false) {
@@ -853,6 +853,35 @@ public class MarketPlaceOrderUtil {
         }
         return validationModel;
     }
+    public ValidationModel checkIfCorpOrderExists(ValidationModel validationModel) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            validationModel.setError(false);
+            connection = Database.INSTANCE.getReadWriteConnection();
+            String statement = "SELECT orders_id from orders WHERE rl_req_ID = ? and fk_associate_id = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1, validationModel.getExtraInfoModel().getRelId());
+            preparedStatement.setInt(2, validationModel.getFkAssociateId());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.first()) {
+                // when order exists
+                logger.debug("ORDER-ID ALREADY EXISTS IN ORDERS TABLE, CAN'T TAKE YOUR REQUEST");
+                throw new Exception("Duplicate Order.");
+            }
+        } catch (Exception exception) {
+            validationModel.setError(true);
+            validationModel.setMessage("Duplicate Order.");
+            logger.error("Exception at check order exists : " + exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return validationModel;
+    }
+
 
     public FileUploadModel uploadTheFile(FormDataMultiPart multiPart, String filePrefix){
         FileUploadModel fileUploadModel = new FileUploadModel();
