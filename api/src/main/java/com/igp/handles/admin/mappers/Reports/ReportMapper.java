@@ -54,7 +54,7 @@ public class ReportMapper {
         map.put(3,"Mid Night Delivery");
         boolean result,response=false;
         String message="Added new pincode :- "+pincode+" with shipping type :- "+map.get(shipType)+" and shipping charge :- "+shipCharge+" : ";
-        result = reportUtil.addNewVendorPincodeUtil(fkAssociateId,pincode,cityId,shipType,shipCharge);
+        result = reportUtil.addNewVendorPincodeUtil(fkAssociateId,pincode,cityId,shipType,shipCharge,1);
         if(result==true){
             response = reportUtil.setVendorGeneralInstruction(fkAssociateId,0,pincode+"",message+"Done");
         }
@@ -65,7 +65,7 @@ public class ReportMapper {
         boolean result,response=false;
         ReportUtil reportUtil =  new ReportUtil();
         String message="Added new Component : Name :- "+componentName+" With Price :- "+price+" : ";
-        result = SummaryFunctionsUtil.addVendorComponent(String.valueOf(fkAssociateId),componentCode,componentName,type,"dummy.jpg",price);
+        result = reportUtil.addVendorComponent(String.valueOf(fkAssociateId),componentCode,componentName,type,"dummy.jpg",price);
         if(result==true){
             response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message+"Done");
         }
