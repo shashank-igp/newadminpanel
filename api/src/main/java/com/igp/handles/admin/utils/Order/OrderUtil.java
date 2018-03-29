@@ -258,8 +258,14 @@ public class OrderUtil {
             componentTotal=orderUtil.getProductComponents(ordersProducts.getProductId(),vendorId,
                 ordersProducts.getProducts_code(),componentList,orderProductExtraInfo,false);
             vendorPrice=componentTotal*ordersProducts.getProductQuantity();
-            shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
-                orderProductExtraInfo.getDeliveryType());
+            if(orderProductExtraInfo.getDeliveryType()==4){
+                shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
+                    1);
+            }else {
+                shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
+                    orderProductExtraInfo.getDeliveryType());
+            }
+
 
 
             if(checkIfVendorHasAllProductComponent(vendorId,ordersProducts.getProducts_code())==false){
