@@ -164,7 +164,7 @@ public class OrderMapper {
     public boolean orderPriceChanges(int orderId,int orderProductId,int componentId,Double componentPrice,Double shippingCharge,String ipAddress,String userAgent){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
-        Double vendorPrice=0.0;
+        Double vendorPrice=null;
         int productId=0;
         String mailerAction;
         MailUtil mailUtil=new MailUtil();
