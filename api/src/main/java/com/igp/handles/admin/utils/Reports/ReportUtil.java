@@ -61,29 +61,26 @@ public class ReportUtil {
             sb.append("and op.orders_id="+orderNo+"");
         }
         else if (status !=null && !status.isEmpty() ){
-            if (status.equals("Delivered")){
-                sb.append("and op.delivery_status=1");
+            String[] statusArray=status.split(",");
+            String statusWhereClause="";
+            for(int i=0;i<statusArray.length;i++){
+                if(statusArray[i].equals("OutForDelivery")||statusArray[i].equals("Delivered")){
+                    statusWhereClause+="'Shipped',";
+//                    sb.append("and  op.orders_product_status='Shipped' and op.delivery_status=0 ");
+                }
+                else
+                {
+                    statusWhereClause+="'"+statusArray[i]+"',";
+//                    sb.append("and op.orders_product_status='"+status+"'");
+                }
             }
-            else if(status.equals("OutForDelivery")){
-                sb.append("and  op.orders_product_status='Shipped' and op.delivery_status=0 ");
-            }
-            else
-            {
-                sb.append("and op.orders_product_status='"+status+"'");
+            statusWhereClause=statusWhereClause.substring(0,statusWhereClause.length()-1);
+            if(status.contains("Delivered")){
+                sb.append(" and op.orders_product_status in ( "+statusWhereClause+" ) and op.delivery_status = 1 ");
+            }else {
+                sb.append(" and op.orders_product_status in ( "+statusWhereClause+" ) and op.delivery_status = 0 ");
             }
         }
-//        String queryCount = "select count(*) as totalNo  from orders_products as op LEFT JOIN vendor_assign_price as  vap "
-//            + " on op.orders_id=vap.orders_id  and  op.products_id=vap.products_id  inner join order_product_extra_info "
-//            + " as oe on op.orders_products_id=oe.order_product_id inner  join  orders as o on  vap.orders_id=o.orders_id" +
-//            " inner join  orders_occasions  as oo  on o.orders_occasionid=oo.occasion_id where " +
-//            "(op.fk_associate_id=72 OR op.fk_associate_id=vap.fk_associate_id) "+sb.toString();
-//        int count =SummaryFunctionsUtil.getCount(queryCount);
-//        String amount = "select sum((vap.vendor_price+vap.shipping)) as totalNo  from orders_products as op LEFT JOIN vendor_assign_price as  vap "
-//            + " on op.orders_id=vap.orders_id  and  op.products_id=vap.products_id  inner join order_product_extra_info "
-//            + " as oe on op.orders_products_id=oe.order_product_id inner  join  orders as o on  vap.orders_id=o.orders_id" +
-//            " inner join  orders_occasions  as oo  on o.orders_occasionid=oo.occasion_id where " +
-//            "(op.fk_associate_id=72 OR op.fk_associate_id=vap.fk_associate_id) "+sb.toString();
-//        int amt =SummaryFunctionsUtil.getCount(amount);
 
         PreparedStatement preparedStatement = null;
         try{
