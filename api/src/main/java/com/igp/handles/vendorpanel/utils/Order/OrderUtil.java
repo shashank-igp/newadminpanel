@@ -1,8 +1,6 @@
 package com.igp.handles.vendorpanel.utils.Order;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.igp.admin.mappers.marketPlace.Constants;
-import com.igp.config.SelectionCode;
 import com.igp.config.instance.Database;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import com.igp.handles.vendorpanel.models.Order.Order;
@@ -13,7 +11,6 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -608,25 +605,24 @@ public class OrderUtil
         PreparedStatement preparedStatement = null;
         Order order=null;
         int addressType=0;
-        Map<String,String> storeIdMap=null;
-        Constants constants=new Constants();
-
-        SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             if(forAdminPanelOrNot==true){
                 statement="select o.*,( case when  ab.address_type is not null then ab.address_type else 0 end )  as "
-                    + " address_type,oc.occasion_name as occasion  from orders as o left join orders_temp ot on o.orders_temp_id=ot.orders_temp_id "
+                    + " address_type,oc.occasion_name as occasion, a.associate_name as associate_name  from orders as o left join orders_temp ot on o.orders_temp_id=ot.orders_temp_id "
                     + " left join address_book ab on  ab.address_book_id=ot.address_book_id left join orders_occasions "
-                    + " as oc on o.orders_occasionid = oc.occasion_id where o.orders_id = ? limit 1";
+                    + " as oc on o.orders_occasionid = oc.occasion_id left join associate a on a.associate_id = o.fk_associate_id "
+                    + " where o.orders_id = ? limit 1";
                 preparedStatement = connection.prepareStatement(statement);
                 preparedStatement.setInt(1,orderId);
             }else {
                 statement="select o.*,group_concat(vi.instruction_msg SEPARATOR ' \n ') as instruction_msg, "
-                    + " ( case when  ab.address_type is not null then ab.address_type else 0 end )  as address_type,oc.occasion_name as occasion "
+                    + " ( case when  ab.address_type is not null then ab.address_type else 0 end )  as address_type, "
+                    + " oc.occasion_name as occasion, a.associate_name as associate_name "
                     + " from orders as o left join orders_temp ot on o.orders_temp_id=ot.orders_temp_id "
                     + " left join address_book ab on  ab.address_book_id=ot.address_book_id left join vendor_instructions as vi ON "
                     + " o.orders_id=vi.orders_id left join orders_occasions as oc on o.orders_occasionid = oc.occasion_id "
+                    + " left join associate a on a.associate_id = o.fk_associate_id "
                     + " where o.orders_id = ?  and  vi.associate_id = ? limit 1";
                 preparedStatement = connection.prepareStatement(statement);
                 preparedStatement.setInt(1,orderId);
@@ -649,7 +645,7 @@ public class OrderUtil
                 if(forAdminPanelOrNot==false){
                     orderInstr=resultSet.getString("instruction_msg")==null ? "":resultSet.getString("instruction_msg");
                 }
-                orderSource=constants.getStoreIdMap().get(resultSet.getString("fk_associate_id"));
+                orderSource=resultSet.getString("associate_name");
                 orderOccasion=resultSet.getString("occasion");
                 order=new Order.Builder()
                     .orderId(resultSet.getInt("orders_id"))
