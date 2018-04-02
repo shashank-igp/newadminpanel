@@ -1,6 +1,5 @@
 package com.igp.handles.vendorpanel.utils.Order;
 
-import com.igp.admin.mappers.marketPlace.Constants;
 import com.igp.config.instance.Database;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import com.igp.handles.vendorpanel.models.Order.Order;

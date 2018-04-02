@@ -326,7 +326,7 @@ public class OrderUtil {
         boolean result=true;
         Connection connection = null;
         ResultSet resultSet = null,resultSet1 = null;
-        String statement,statement1,componentIds="";
+        String statement,statement1,componentIds=null;
         PreparedStatement preparedStatement = null,preparedStatement1 = null;
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
@@ -340,7 +340,7 @@ public class OrderUtil {
             if(resultSet.next()){
                 componentIds=resultSet.getString("componentIds");
 
-                if(!componentIds.equals("")){
+                if( componentIds != null && !componentIds.equals("") ){
 
                     try{
                         statement1="select * from AA_vendor_to_components where fk_associate_id = ? and fk_component_id in "+componentIds ;
@@ -608,7 +608,7 @@ public class OrderUtil {
 
         return orderComponent;
     }
-    public List<OrdersProducts> getProductId(String orderProductIds){
+    public List<OrdersProducts> getOrderProductList(String orderProductIds){
         Connection connection = null;
         ResultSet resultSet = null;
         String statement;
@@ -800,7 +800,7 @@ public class OrderUtil {
         String statement,orderHistoryComment="";
         PreparedStatement preparedStatement = null;
         try{
-            List<OrdersProducts> ordersProductsList=getProductId(orderProductIdString);
+            List<OrdersProducts> ordersProductsList=getOrderProductList(orderProductIdString);
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="update orders_products set orders_product_status = ?  where orders_products_id in ( "+ orderProductIdString +"  ) ";
             preparedStatement = connection.prepareStatement(statement);
@@ -837,7 +837,7 @@ public class OrderUtil {
         int vendorId=0;
         List<OrdersProducts> ordersProducts=null;
         try{
-            ordersProducts=getProductId(orderProductIdList);
+            ordersProducts=getOrderProductList(orderProductIdList);
             vendorId=Integer.parseInt(ordersProducts.get(0).getFkAssociateId());
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="update orders_products set delivery_attempt = ?  where orders_products_id in ( "+orderProductIdList+" ) ";
