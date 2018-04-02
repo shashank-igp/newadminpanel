@@ -169,7 +169,7 @@ public class OrderMapper {
         String mailerAction;
         MailUtil mailUtil=new MailUtil();
         try {
-            List<OrdersProducts> ordersProducts=orderUtil.getProductId(String.valueOf(orderProductId));
+            List<OrdersProducts> ordersProducts=orderUtil.getOrderProductList(String.valueOf(orderProductId));
             productId=ordersProducts.get(0).getProductId();
             OrderComponent orderComponent=orderUtil.getOrderComponent(orderId,productId,componentId);
 
@@ -202,7 +202,7 @@ public class OrderMapper {
         MailUtil mailUtil=new MailUtil();
         try{
             restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(String.valueOf(orderProductId),orderProductIdList);
-            List<OrdersProducts> ordersProducts=orderUtil.getProductId(String.valueOf(orderProductId));
+            List<OrdersProducts> ordersProducts=orderUtil.getOrderProductList(String.valueOf(orderProductId));
             productId=ordersProducts.get(0).getProductId();
             result=orderUtil.updateDeliveryDetails(orderId,orderProductId,productId,deliveryDate,deliveryTime,deliveryType,Integer.parseInt(ordersProducts.get(0).getFkAssociateId()),ipAddress,userAgent);
             if(result){
@@ -262,7 +262,7 @@ public class OrderMapper {
             restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(orderProductIdString,allOrderProductIdList);
 
 
-            List<OrdersProducts> ordersProducts=orderUtil.getProductId(orderProductIdString);
+            List<OrdersProducts> ordersProducts=orderUtil.getOrderProductList(orderProductIdString);
             if(!restOrderProductIdList.equals("")){
                 orderList=getOrder(orderId,restOrderProductIdList);
             }
