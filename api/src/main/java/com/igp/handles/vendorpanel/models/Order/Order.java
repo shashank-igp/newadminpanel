@@ -204,6 +204,10 @@ public class Order implements Serializable {
 
     private String					deliverWhen				= "";
 
+    private String                  orderSource             ="";
+
+    private String                  orderOccasion           ="";
+
     private double componentTotal=0.0;
 
     private double priceAdjustment=0.0;
@@ -215,6 +219,16 @@ public class Order implements Serializable {
     public Map<String, List<String>> getUploadedFilePath()
     {
         return uploadedFilePath;
+    }
+
+    public String getOrderSource()
+    {
+        return orderSource;
+    }
+
+    public String getOrderOccasion()
+    {
+        return orderOccasion;
     }
 
     public void setUploadedFilePath(Map<String, List<String>> uploadedFilePath)
@@ -665,6 +679,8 @@ public class Order implements Serializable {
         vendorDeliveryCharge = builder.vendorDeliveryCharge;
         vendorOrderTotal = builder.vendorOrderTotal;
         deliverWhen = builder.deliverWhen;
+        orderSource=builder.orderSource;
+        orderOccasion=builder.orderOccasion;
         orderProducts = builder.orderProducts;
     }
 
@@ -734,6 +750,8 @@ public class Order implements Serializable {
         private double               vendorDeliveryCharge;
         private double               vendorOrderTotal;
         private String               deliverWhen;
+        private String                  orderSource;
+        private String                  orderOccasion;
         private List<OrdersProducts> orderProducts;
 
         public Builder()
@@ -1121,6 +1139,18 @@ public class Order implements Serializable {
         public Builder deliverWhen(String val)
         {
             deliverWhen = val;
+            return this;
+        }
+
+        public Builder orderSource(String val)
+        {
+            orderSource = val;
+            return this;
+        }
+
+        public Builder orderOccasion(String val)
+        {
+            orderOccasion = val;
             return this;
         }
 
