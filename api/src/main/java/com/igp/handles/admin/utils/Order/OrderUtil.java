@@ -328,6 +328,7 @@ public class OrderUtil {
         ResultSet resultSet = null,resultSet1 = null;
         String statement,statement1,componentIds=null;
         PreparedStatement preparedStatement = null,preparedStatement1 = null;
+        int numRows=0;
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement="select concat('(',concat(group_concat(fk_component_id,''),')')) as componentIds "
@@ -351,11 +352,15 @@ public class OrderUtil {
                         resultSet1 = preparedStatement1.executeQuery();
 
                         while (resultSet1.next()){
+                            numRows=numRows+1;
                             String vendorComponentID=resultSet1.getString("fk_component_id");
                             if(!componentIds.contains(vendorComponentID)){
                                 result=false;
                                 break;
                             }
+                        }
+                        if(numRows==0){
+                            result=false;
                         }
                     }catch (Exception exception){
                         logger.error("Exception in connection", exception);
