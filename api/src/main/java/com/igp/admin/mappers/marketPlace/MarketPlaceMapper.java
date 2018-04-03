@@ -107,6 +107,8 @@ public class MarketPlaceMapper {
                             }
                         } else  if (currentCell.getCellType() == Cell.CELL_TYPE_STRING) {
                             a.put(list.get(currCol), currentCell.getRichStringCellValue() + "");
+
+                         //   a.put(list.get(currCol), currentCell.getRichStringCellValue() + "");
                         } else if (currentCell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
                             a.put(list.get(currCol), currentCell.getBooleanCellValue() + "");
                         } else if (currentCell.getCellType() == Cell.CELL_TYPE_BLANK) {

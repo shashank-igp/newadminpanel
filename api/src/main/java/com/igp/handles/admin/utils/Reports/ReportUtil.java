@@ -209,15 +209,13 @@ public class ReportUtil {
                 vendorPincodeModel.setShipCharge(resultSet.getInt("ship_charge"));
 
                 TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
-                if(vendorPincodeModel.getFlagEnabled()==1) {
                     tableDataActionHandels.setValue(vendorPincodeModel.getShipCharge()+"");
-                }else {
-                    tableDataActionHandels.setValue(null);
-                    // when the ship type at pincode is disabled so it must be not servicable
-                }
                 tableDataActionHandels.setRequestValue(vendorPincodeModel.getReqdPrice()+"");
                 if(vendorPincodeModel.getReqdPrice()!=-1){
                     tableDataActionHandels.setRequestType("Approve/Reject");
+                }else if(vendorPincodeModel.getFlagEnabled()==0 && vendorPincodeModel.getReqdPrice()==-1){
+                    tableDataActionHandels.setValue(null);
+                    // when the ship type at pincode is disabled so it must be not servicable
                 }
                 shipTypeAndTableMap.put(vendorPincodeModel.getShipTypeId(),tableDataActionHandels);
                 if(pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode()+"")==null){
