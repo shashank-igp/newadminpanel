@@ -103,7 +103,7 @@ public class OrderMapper {
                             restOrderProductIdList+=","+orderProductId[i]+",";
                         }
                     }else if(result==2||result==3){
-                        return result;
+                        result=result;
                     }
                 }else if(action.equalsIgnoreCase("reassign")) {
                     result=orderUtil.reassignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order,action,ipAddress,userAgent);
@@ -119,7 +119,7 @@ public class OrderMapper {
                             restOrderProductIdList+=","+orderProductId[i]+",";
                         }
                     }else if(result==2||result==3){
-                        return result;
+                        result=result;
                     }
                 }
             }
