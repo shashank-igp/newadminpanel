@@ -98,6 +98,7 @@ public class MarketPlaceOrderUtil {
                     userModel.setId(null);
                     // customer doesn't exist therefore create a new customer.
                     String postData = objectMapper.writeValueAsString(userModel);
+                    logger.debug("Postdata for /v1/signup : "+ postData);
                     String custResponse = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/signup",new ArrayList<>());
                     generalUserResponseModel = objectMapper.readValue(custResponse, GeneralUserResponseModel.class);
                     // populate cust id hash in customer and address model.
@@ -110,6 +111,7 @@ public class MarketPlaceOrderUtil {
                     else {
                         // since new customer created therefore update rest of the details.
                         String postData1 = objectMapper.writeValueAsString(userModel2);
+                        logger.debug("Postdata1 for /v1/signup : "+ postData1);
                         String custUpdate = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/signup",new ArrayList<>());
                         generalUserResponseModel = objectMapper.readValue(custUpdate, GeneralUserResponseModel.class);
                         authResponseModel =  generalUserResponseModel.getData();
@@ -173,6 +175,7 @@ public class MarketPlaceOrderUtil {
             }
             // model didn't return any error and now work on address book.
             String postData = objectMapper.writeValueAsString(shippingAddress);
+            logger.debug("Postdata : "+ postData);
             String addressExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/user/checkaddress",new ArrayList<>());
             generalShipResponseModel = objectMapper.readValue(addressExist, GeneralShipResponseModel.class);
             shippingAddress = generalShipResponseModel.getData();
@@ -181,6 +184,7 @@ public class MarketPlaceOrderUtil {
                 logger.error("Couldn't get proper address.");
                 // create new address entry.
                 String postData1 = objectMapper.writeValueAsString(shippingAddress);
+                logger.debug("Postdata1 for /v1/user/address : "+ postData1);
                 String createAddress = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/user/address",new ArrayList<>());
                 if(createAddress.contains("error")){
                     throw new Exception("Problem in Delivery Details.");
@@ -832,6 +836,7 @@ public class MarketPlaceOrderUtil {
             checkCorpOrderModel.setOrderId(0);
             if(!checkCorpOrderModel.getRelId().isEmpty()||!checkCorpOrderModel.getRelId().equals("0")) {
                 String postData = objectMapper.writeValueAsString(checkCorpOrderModel);
+                logger.debug("Postdata corpcheck: "+ postData);
                 String orderExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/corporate/corpordercheck",new ArrayList<>());
                 generalAddressResponseModel = objectMapper.readValue(orderExist, GenerateCheckCorpOrderResponseModel.class);
                 checkCorpOrderModel = generalAddressResponseModel.getData();
