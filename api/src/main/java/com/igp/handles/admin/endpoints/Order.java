@@ -87,22 +87,25 @@ public class Order {
             logger.debug("step-1 assignReassignOrder with "+action);
 
              result=orderMapper.assignReassignOrder(action,orderId,orderProductIdString,vendorId,allOrderProductIdList,orderList,handleServiceResponse,ipAddress,userAgent);
-            if(result==1){
-//                handleServiceResponse.setResult(orderList);
-            }else if(result==2){
-                handleServiceResponse.setError(true);
-                handleServiceResponse.setResult(false);
-                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because all required components are not available !!");
-            }else if(result==3){
-                handleServiceResponse.setError(true);
-                handleServiceResponse.setResult(false);
-                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because already assigned to this vendor !!");
-            }
-            else{
-                handleServiceResponse.setError(true);
-                handleServiceResponse.setResult(false);
-                handleServiceResponse.setErrorMessage("could not assign the order to this vendor please try again !!");
-            }
+
+             //no need to send such  redundant info ... since we have to send which product been assign or not with reason
+
+//            if(result==1){
+//               handleServiceResponse.setResult(orderList);
+//            }else if(result==2){
+//                handleServiceResponse.setError(true);
+//                handleServiceResponse.setResult(false);
+//                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because all required components are not available !!");
+//            }else if(result==3){
+//                handleServiceResponse.setError(true);
+//                handleServiceResponse.setResult(false);
+//                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because already assigned to this vendor !!");
+//            }
+//            else{
+//                handleServiceResponse.setError(true);
+//                handleServiceResponse.setResult(false);
+//                handleServiceResponse.setErrorMessage("could not assign the order to this vendor please try again !!");
+//            }
         }catch (Exception exception){
             logger.error("error while assignReassignOrder",exception);
         }
