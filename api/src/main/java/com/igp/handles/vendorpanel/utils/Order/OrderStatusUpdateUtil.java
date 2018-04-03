@@ -187,11 +187,12 @@ public class OrderStatusUpdateUtil {
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "update orders_products as op inner join trackorders as tk on op.orders_products_id=tk.orders_products_id and  op.orders_id=tk.orders_id  set tk.outForDeliveryDate=now() ,op.orders_product_status= ? where  op.orders_id=? and op.fk_associate_id in(?) and op.orders_products_id in ( "+orderProductIds+") ";
+            statement = "update orders_products as op inner join trackorders as tk on op.orders_products_id=tk.orders_products_id and  op.orders_id=tk.orders_id  set tk.outForDeliveryDate=now() ,op.orders_product_status= ? , op.delivery_status = ? where  op.orders_id=? and op.fk_associate_id in(?) and op.orders_products_id in ( "+orderProductIds+") ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1,status);
-            preparedStatement.setInt(2,orderId);
-            preparedStatement.setString(3,fkAssociateId);
+            preparedStatement.setInt(2,0);
+            preparedStatement.setInt(3,orderId);
+            preparedStatement.setString(4,fkAssociateId);
             //     preparedStatement.setString(4,orderProductIds);
             logger.debug("sql query "+preparedStatement);
             Integer rowsUpdated = preparedStatement.executeUpdate();
@@ -212,7 +213,7 @@ public class OrderStatusUpdateUtil {
 
 
     }
-    public static Boolean   markDelivered(int orderId, String fkAssociateId, String status, String orderProductIds,int deliveryAttemptFlag){
+    public static Boolean markDelivered(int orderId, String fkAssociateId, String status, String orderProductIds,int deliveryAttemptFlag){
 
         Connection connection = null;
         String statement;
@@ -220,10 +221,11 @@ public class OrderStatusUpdateUtil {
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "update orders_products as op inner join trackorders as tk on op.orders_products_id=tk.orders_products_id and  op.orders_id=tk.orders_id  set tk.deliveredDate=now() ,op.delivery_status= 1,op.delivery_attempt = case when op.delivery_attempt = 2 then 3 else  "+ deliveryAttemptFlag +" end where  op.orders_id=? and op.fk_associate_id in(?) and op.orders_products_id in ( "+orderProductIds+") ";
+            statement = "update orders_products as op inner join trackorders as tk on op.orders_products_id=tk.orders_products_id and  op.orders_id=tk.orders_id  set tk.deliveredDate=now() , op.orders_product_status = ? ,op.delivery_status= 1,op.delivery_attempt = case when op.delivery_attempt = 2 then 3 else  "+ deliveryAttemptFlag +" end where  op.orders_id=? and op.fk_associate_id in(?) and op.orders_products_id in ( "+orderProductIds+") ";
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1,orderId);
-            preparedStatement.setString(2,fkAssociateId);
+            preparedStatement.setString(1,"Shipped");
+            preparedStatement.setInt(2,orderId);
+            preparedStatement.setString(3,fkAssociateId);
             logger.debug("sql query "+preparedStatement);
             Integer rowsUpdated = preparedStatement.executeUpdate();
             if (rowsUpdated>0){
