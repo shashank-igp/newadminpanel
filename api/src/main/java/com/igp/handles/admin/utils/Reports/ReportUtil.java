@@ -762,7 +762,7 @@ public class ReportUtil {
                 if(columnName.equals("InStock")){
                     actionHandels = productTableDataModel.getInStock();
 
-                    if(actionHandels.getValue().equals(actionHandels.getRequestValue())){
+                    if(actionHandels.getValue().equals("Out of Stock") && actionHandels.getRequestValue().equals("In Stock")){
 
                         if(approveReject==true){
                             // request is to enable.
