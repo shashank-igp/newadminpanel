@@ -174,11 +174,13 @@ public class MarketPlaceOrderUtil {
                 }
             }
             // model didn't return any error and now work on address book.
-            String postData = objectMapper.writeValueAsString(shippingAddress);
-            logger.debug("Postdata : "+ postData);
-            String addressExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/user/checkaddress",new ArrayList<>());
-            generalShipResponseModel = objectMapper.readValue(addressExist, GeneralShipResponseModel.class);
-            shippingAddress = generalShipResponseModel.getData();
+           shippingAddress.setAid(checkForAddressExactMatch(shippingAddress,validationModel.getUserModel().getId()));
+
+//            String postData = objectMapper.writeValueAsString(shippingAddress);
+//            logger.debug("Postdata : "+ postData);
+//            String addressExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/user/checkaddress",new ArrayList<>());
+//            generalShipResponseModel = objectMapper.readValue(addressExist, GeneralShipResponseModel.class);
+//            shippingAddress = generalShipResponseModel.getData();
 
             if (shippingAddress.getAid() == "" || shippingAddress.getAid() == null) {
                 logger.error("Couldn't get proper address.");
@@ -973,7 +975,58 @@ public class MarketPlaceOrderUtil {
             }
         }
     }
-
+    public String checkForAddressExactMatch(AddressModel addressModel, String userId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String addressId="";
+        try {
+            String selectRel = "";
+            if (addressModel.getRelation() != null) {
+                selectRel = "AND a.entry_relation = ?";
+            }
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            String statement = "SELECT * FROM address_book as a LEFT JOIN address_book_to_customers as b ON a.address_book_id = b.address_book_id" +
+                " LEFT JOIN address_book_extra_info as c ON b.address_book_id = c.address_book_id WHERE a.entry_gender = ? AND " +
+                " a.entry_firstname = ? AND a.entry_lastname = ? AND  a.entry_street_address = ? AND  " +
+                "a.entry_postcode = ? AND a.entry_city = ? AND  a.entry_state = ? AND  a.entry_country_id = ?  AND  " +
+                "a.entry_email_address = ? AND a.mobile = ?  AND  a.address_type = ? AND b.customers_id = ? "+selectRel;
+            preparedStatement = connection.prepareStatement(statement);
+            if(addressModel.getTitle().equalsIgnoreCase("Mr."))
+                preparedStatement.setString(1, "m");
+            else if(addressModel.getTitle().equalsIgnoreCase("Ms."))
+                preparedStatement.setString(1, "f");
+            else
+                preparedStatement.setString(1,"");
+            preparedStatement.setString(2, addressModel.getFirstname());
+            preparedStatement.setString(3, addressModel.getLastname());
+            preparedStatement.setString(4, addressModel.getStreetAddress());
+            preparedStatement.setString(5, addressModel.getPostcode());
+            preparedStatement.setString(6, addressModel.getCity());
+            preparedStatement.setString(7, addressModel.getState());
+            preparedStatement.setString(8, addressModel.getCountryId());
+            preparedStatement.setString(9, addressModel.getEmail());
+            preparedStatement.setString(10, addressModel.getMobile());
+            preparedStatement.setInt(11,addressModel.getAddressType());
+            preparedStatement.setString(12,userId);
+            if (selectRel!="") {
+                preparedStatement.setString(13, addressModel.getRelation());
+            }
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.first()) {
+                addressId=resultSet.getString("address_book_id");
+            } else {
+                logger.debug("Address-To-Customer mismatch");
+            }
+        } catch (Exception exception) {
+            logger.error("Error", exception);
+        } finally {
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return addressId;
+    }
 
 
 }
