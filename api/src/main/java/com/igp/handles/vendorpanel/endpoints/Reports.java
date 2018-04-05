@@ -82,7 +82,7 @@ public class Reports {
     @Path("/v1/handels/handleComponentChange")
     public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") String fkAssociateId,
                                                        @QueryParam("componentId") String componentId,
-                                                       @QueryParam("updatePrice")String updatePrice ,
+                                                       @QueryParam("updatePrice") String updatePrice ,
                                                        @QueryParam("inStock") Boolean inStock){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         Integer updateflag=0;
