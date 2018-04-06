@@ -26,10 +26,6 @@ public class Vendor {
         try {
             if(shippingType==4){
                 shippingType=1;
-            }else if(shippingType==2) {
-                shippingType=3;
-            }else if (shippingType==3){
-                shippingType=2;
             }
             List<VendorInfoModel> vendorInfoModelList=vendorMapper.getVendorList(pincode,shippingType);
             handleServiceResponse.setResult(vendorInfoModelList);

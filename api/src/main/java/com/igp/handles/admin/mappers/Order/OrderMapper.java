@@ -1,11 +1,13 @@
 package com.igp.handles.admin.mappers.Order;
 
+import com.igp.handles.admin.models.Order.OrderLogModel;
 import com.igp.handles.admin.utils.MailUtil.MailUtil;
 import com.igp.handles.vendorpanel.models.Order.Order;
 import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
 import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
+import com.igp.handles.vendorpanel.utils.Order.OrderStatusUpdateUtil;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
 import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
@@ -75,7 +77,7 @@ public class OrderMapper {
         return orders;
     }
     public int assignReassignOrder(String action,int orderId,String orderProductIdString,int vendorId,String allOrderProductIdList,
-        List<Order> orderList,HandleServiceResponse handleServiceResponse){
+        List<Order> orderList,HandleServiceResponse handleServiceResponse,String ipAddress,String userAgent){
         int result=0;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
 
@@ -93,7 +95,7 @@ public class OrderMapper {
                 logger.debug("step-2 assignReassignOrder with orderProductId "+orderProductId+" and restOrderProductIdList "+restOrderProductIdList);
 
                 if(action.equalsIgnoreCase("assign")){
-                    result=orderUtil.assignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order);
+                    result=orderUtil.assignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order,action,ipAddress,userAgent);
                     if(result!=1){
                         if(restOrderProductIdList.equals("")){
                             restOrderProductIdList+=orderProductId[i]+",";
@@ -101,10 +103,10 @@ public class OrderMapper {
                             restOrderProductIdList+=","+orderProductId[i]+",";
                         }
                     }else if(result==2||result==3){
-                        return result;
+                        result=result;
                     }
                 }else if(action.equalsIgnoreCase("reassign")) {
-                    result=orderUtil.reassignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order);
+                    result=orderUtil.reassignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order,action,ipAddress,userAgent);
 
                     if(ordersProducts.getOrdersProductStatus().equals("Processed")
                         &&!ordersProducts.getFkAssociateId().equals("72")){
@@ -117,7 +119,7 @@ public class OrderMapper {
                             restOrderProductIdList+=","+orderProductId[i]+",";
                         }
                     }else if(result==2||result==3){
-                        return result;
+                        result=result;
                     }
                 }
             }
@@ -135,7 +137,7 @@ public class OrderMapper {
                     if(!restOrderProductIdList.equals("")){
 
                         //this is because if something happend while assigning and reassigning orderProduct then it will be in the other list
-                         orderList=getOrder(orderId,orderProductIdsWhichAreActuallyAssigned);
+                        orderList=getOrder(orderId,orderProductIdsWhichAreActuallyAssigned);
                         orderList = mergeOrderList(orderList, getOrder(orderId,restOrderProductIdList));
                     }else {
                         orderList=getOrder(orderId,orderProductIdString);
@@ -159,26 +161,26 @@ public class OrderMapper {
 
         return result;
     }
-    public boolean orderPriceChanges(int orderId,int orderProductId,int componentId,Double componentPrice,Double shippingCharge){
+    public boolean orderPriceChanges(int orderId,int orderProductId,int componentId,Double componentPrice,Double shippingCharge,String ipAddress,String userAgent){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
-        Double vendorPrice=0.0;
+        Double vendorPrice=null;
         int productId=0;
         String mailerAction;
         MailUtil mailUtil=new MailUtil();
         try {
-            OrdersProducts ordersProducts=orderUtil.getProductId(orderProductId);
-            productId=ordersProducts.getProductId();
+            List<OrdersProducts> ordersProducts=orderUtil.getOrderProductList(String.valueOf(orderProductId));
+            productId=ordersProducts.get(0).getProductId();
             OrderComponent orderComponent=orderUtil.getOrderComponent(orderId,productId,componentId);
 
             if(componentPrice!=null && orderComponent != null){
                 orderUtil.updateComponentPriceOrderLevel(orderId,productId,componentId,componentPrice);
                 vendorPrice = Double.valueOf(orderComponent.getQuantity())*componentPrice ;
             }
-            result=orderUtil.updateVendorAssignPrice(orderId,productId,vendorPrice,shippingCharge,orderProductId);
+            result=orderUtil.updateVendorAssignPrice(orderId,productId,vendorPrice,shippingCharge,orderProductId,Integer.parseInt(ordersProducts.get(0).getFkAssociateId()),ipAddress,userAgent);
 
             if(result){
-                mailerAction="orderpricechange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
+                mailerAction="orderpricechange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.get(0).getFkAssociateId();
                 if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
                     logger.debug("Mail successfully sent for Price changes of orderId "+orderId+" with orderProductId "+orderProductId);
                 }
@@ -190,7 +192,7 @@ public class OrderMapper {
         return result;
     }
     public boolean deliveryDetailChanges(int orderId,int orderProductId,String deliveryDate,String deliveryTime,int deliveryType,
-        HandleServiceResponse handleServiceResponse,String orderProductIdList){
+        HandleServiceResponse handleServiceResponse,String orderProductIdList,String ipAddress,String userAgent){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         int productId=0;
@@ -200,26 +202,20 @@ public class OrderMapper {
         MailUtil mailUtil=new MailUtil();
         try{
             restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(String.valueOf(orderProductId),orderProductIdList);
-            OrdersProducts ordersProducts=orderUtil.getProductId(orderProductId);
-            productId=ordersProducts.getProductId();
-            result=orderUtil.updateDeliveryDetails(orderId,orderProductId,productId,deliveryDate,deliveryTime,deliveryType);
+            List<OrdersProducts> ordersProducts=orderUtil.getOrderProductList(String.valueOf(orderProductId));
+            productId=ordersProducts.get(0).getProductId();
+            result=orderUtil.updateDeliveryDetails(orderId,orderProductId,productId,deliveryDate,deliveryTime,deliveryType,Integer.parseInt(ordersProducts.get(0).getFkAssociateId()),ipAddress,userAgent);
             if(result){
                 if(deliveryDate!=null){
                     if(!restOrderProductIdList.equals("")){
                         orderList=getOrder(orderId,restOrderProductIdList);
                     }
-                    mailerAction="orderdeliverychange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.getFkAssociateId();
+                    mailerAction="orderdeliverychange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.get(0).getFkAssociateId();
                     if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
                         logger.debug("Mail successfully sent for Delivery Detail changes of  orderId "+orderId+" with orderProductId "+orderProductId);
                     }
                 }else{
                     orderList=getOrder(orderId,orderProductIdList);
-//                    if(!restOrderProductIdList.equals("")){
-//                        orderList=getOrder(orderId,String.valueOf(orderProductId));
-//                        orderList=mergeOrderList(orderList,getOrder(orderId,restOrderProductIdList));
-//                    }else {
-//
-//                    }
                 }
                 handleServiceResponse.setResult(orderList);
             }
@@ -228,17 +224,16 @@ public class OrderMapper {
         }
         return result;
     }
-    public List<Map.Entry<String,String>> getOrderLog(int orderId){
-        String logs="";
-        List<Map.Entry<String,String>> orderMapLog=new ArrayList<>();
+    public List<OrderLogModel> getOrderLog(int orderId,String type){
+        List<OrderLogModel> orderLogModelList=new ArrayList<>();
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         try {
-           orderMapLog =orderUtil.getOrderLog(orderId);
+            orderLogModelList =orderUtil.getOrderLog(orderId,type);
         }catch (Exception exception){
             logger.error("error while getting OrderLog",exception);
 
         }
-        return orderMapLog;
+        return orderLogModelList;
     }
     public List<Order> getOrder(int orderId,String orderProductIdList){
         List<Order> orders = new ArrayList<>();
@@ -256,7 +251,7 @@ public class OrderMapper {
         }
         return orders;
     }
-    public boolean cancelOrder(int orderId,String orderProductIdString,String comment,HandleServiceResponse handleServiceResponse,String allOrderProductIdList){
+    public boolean cancelOrder(int orderId,String orderProductIdString,String comment,HandleServiceResponse handleServiceResponse,String allOrderProductIdList,String ipAddress,String userAgent){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         String restOrderProductIdList="";
@@ -267,13 +262,13 @@ public class OrderMapper {
             restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(orderProductIdString,allOrderProductIdList);
 
 
-            OrdersProducts ordersProducts=orderUtil.getProductId(Integer.parseInt(orderProductIdString.split(",")[0]));
+            List<OrdersProducts> ordersProducts=orderUtil.getOrderProductList(orderProductIdString);
             if(!restOrderProductIdList.equals("")){
                 orderList=getOrder(orderId,restOrderProductIdList);
             }
-            result=orderUtil.cancelOrder(orderId,orderProductIdString,comment);
+            result=orderUtil.cancelOrder(orderId,orderProductIdString,comment,ipAddress,userAgent);
             if(result){
-                mailerAction="cancelorder&orderid="+orderId+"&orderproductids="+orderProductIdString+"&associd="+ordersProducts.getFkAssociateId();
+                mailerAction="cancelorder&orderid="+orderId+"&orderproductids="+orderProductIdString+"&associd="+ordersProducts.get(0).getFkAssociateId();
 
                 if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
                     logger.debug("Mail successfully sent for cancelling orderId "+orderId+" with orderProductId "+orderProductIdString);
@@ -289,22 +284,26 @@ public class OrderMapper {
         return ListUtils.union(orderList,orderList1);
     }
 
-    public boolean approveDeliveryAttempt(int orderId,String orderProductIdList){
+    public boolean approveDeliveryAttempt(int orderId,String orderProductIdList,String ipAddress,String userAgent){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         try{
-            result=orderUtil.updateOrderProductForApproveAttemptedDeliveryOrder(orderId,orderProductIdList);
+            result=orderUtil.updateOrderProductForApproveAttemptedDeliveryOrder(orderId,orderProductIdList,ipAddress,userAgent);
         }catch(Exception exception){
             logger.error("error while approveDeliveryAttempt ",exception);
         }
 
         return result;
     }
-    public boolean addVendorInstruction(int orderId,int fkAssociateId,String instruction){
+    public boolean addVendorInstruction(int orderId,String orderProductIdString,int fkAssociateId,String instruction,String ipAddress,String userAgent){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         try{
-            result=orderUtil.addVendorInstruction(orderId,fkAssociateId,instruction);
+            String productIds=OrderStatusUpdateUtil.getProductsIds(orderProductIdString);
+            String[] productIdArray=productIds.split(",");
+            for(int i=0;i<productIdArray.length;i++){
+                result=orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),fkAssociateId,instruction,ipAddress,userAgent,"instruction","from_igp");
+            }
         }catch(Exception exception){
             logger.error("error while adding VendorInstruction ",exception);
         }

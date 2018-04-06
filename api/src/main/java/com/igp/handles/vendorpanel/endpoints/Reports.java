@@ -85,8 +85,8 @@ public class Reports {
     @Path("/v1/handels/handleComponentChange")
     public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") String fkAssociateId,
                                                        @QueryParam("componentId") String componentId,
-                                                       @QueryParam("price")String oldPrice,
-                                                       @QueryParam("reqPrice")String reqPrice,
+                                                       @QueryParam("updatePrice") String oldPrice,
+                                                       @QueryParam("reqPrice") String reqPrice,
                                                        @QueryParam("inStock") Boolean inStock){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         Integer updateflag=0;
@@ -196,23 +196,35 @@ public class Reports {
 
     @POST
     @Path("/v1/handels/addVendorComponent")
-    public HandleServiceResponse addVendorComponent(@QueryParam("fkAssociateId") String fkAssociateId,@QueryParam("componentCode") String componentCode,
-                                                    @QueryParam("componentName") String componentName,@DefaultValue("0")@QueryParam("type") int type,
+    public HandleServiceResponse addVendorComponent(@QueryParam("fkAssociateId") String fkAssociateId,
+                                                    @QueryParam("componentCode") String componentCode,
+                                                    @QueryParam("componentName") String componentName,
+                                                    @DefaultValue("0")@QueryParam("type") int type,
                                                     @DefaultValue("0")@QueryParam("price") int price){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
-        boolean result=false;
-        result=ReportMapper.addVendorComponent(fkAssociateId,componentCode,componentName,type, price);
+        ReportMapper reportMapper = new ReportMapper();
+        boolean result=reportMapper.addVendorComponent(fkAssociateId,componentCode,componentName,type, price);
+        if(result == false){
+            handleServiceResponse.setError(true);
+            handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING COMPONENT");
+        }
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }
     @POST
     @Path("/v1/handels/addVendorPincode")
-    public HandleServiceResponse addVendorPincode(@QueryParam("fkAssociateId") String fkAssociateId,@QueryParam("pincode") int pincode,
-                                                  @DefaultValue("0")@QueryParam("cityId") int cityId,@QueryParam("shipType") int shipType,@QueryParam("shipCharge")int shipCharge
-    ){
+    public HandleServiceResponse addVendorPincode(@QueryParam("fkAssociateId") String fkAssociateId,
+                                                  @QueryParam("pincode") int pincode,
+                                                  @DefaultValue("0")@QueryParam("cityId") int cityId,
+                                                  @QueryParam("shipType") int shipType,
+                                                  @QueryParam("shipCharge")int shipCharge){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
-        boolean result=false;
-        result=ReportMapper.addVendorPincode(fkAssociateId,pincode,cityId,shipType,shipCharge);
+        ReportMapper reportMapper = new ReportMapper();
+        boolean result = reportMapper.addVendorPincode(fkAssociateId,pincode,cityId,shipType,shipCharge);
+        if(result == false){
+            handleServiceResponse.setError(true);
+            handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING PINCODE");
+        }
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
     }

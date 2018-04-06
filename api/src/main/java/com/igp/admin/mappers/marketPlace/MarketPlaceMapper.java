@@ -107,6 +107,8 @@ public class MarketPlaceMapper {
                             }
                         } else  if (currentCell.getCellType() == Cell.CELL_TYPE_STRING) {
                             a.put(list.get(currCol), currentCell.getRichStringCellValue() + "");
+
+                            //   a.put(list.get(currCol), currentCell.getRichStringCellValue() + "");
                         } else if (currentCell.getCellType() == Cell.CELL_TYPE_BOOLEAN) {
                             a.put(list.get(currCol), currentCell.getBooleanCellValue() + "");
                         } else if (currentCell.getCellType() == Cell.CELL_TYPE_BLANK) {
@@ -274,6 +276,14 @@ public class MarketPlaceMapper {
                             } else {
                                 itemCode = itemCodeArray[0];
                             }
+                            // removes IGP-
+                            itemCodeArray = itemCode.split("--");
+                            itemCode = itemCodeArray[0];
+                            // removes --
+                            itemCodeArray = itemCode.split("—");
+                            itemCode = itemCodeArray[0];
+                            // removes —
+
                             itemCode = marketPlaceOrderUtil.getProductIdForLoyaltyOnly(itemCode);
                         }
                         if(marketPlaceOrderUtil.handelProductOrNot(itemCode)){
@@ -718,7 +728,7 @@ public class MarketPlaceMapper {
                     extraInfoModel = validationModel.getExtraInfoModel();
                     productModel = validationModel.getProductModel();
                     // check if order already exists.
-                    validationModel = marketPlaceOrderUtil.checkCorpOrderExists(validationModel);
+                    validationModel = marketPlaceOrderUtil.checkIfCorpOrderExists(validationModel);
                     if (validationModel.getError() == false) {
                         // order doesn't exist, so create a new order.
 
@@ -769,7 +779,13 @@ public class MarketPlaceMapper {
                                             if (marketPlaceTempOrderModel.getTempOrderId() != 0) {
                                                 // create order by hitting api
                                                 logger.debug("Temp Order Created successfully : " + marketPlaceTempOrderModel.getTempOrderId());
-                                                orderId = marketPlaceOrderUtil.createOrder(marketPlaceTempOrderModel, extraInfoModel);
+                                                validationModel = marketPlaceOrderUtil.checkIfCorpOrderExists(validationModel);
+                                                if(validationModel.getError()==false){
+                                                    // order doesn't exist checked again
+                                                    orderId = marketPlaceOrderUtil.createOrder(marketPlaceTempOrderModel, extraInfoModel);
+                                                }else {
+                                                    logger.debug("Tried to create duplicate order for same row.");
+                                                }
                                                 if (orderId == 0) {
                                                     validationModel.setError(Boolean.TRUE);
                                                     validationModel.setMessage("Error at order creation.");

@@ -1,5 +1,6 @@
 package com.igp.handles.vendorpanel.endpoints;
 
+import com.igp.handles.admin.models.Order.OrderLogModel;
 import com.igp.handles.vendorpanel.mappers.Order.OrderMapper;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import org.apache.commons.lang3.time.DateUtils;
@@ -14,7 +15,9 @@ import javax.ws.rs.core.MediaType;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.igp.handles.vendorpanel.mappers.Order.OrderMapper.doUpdateOrderProductsStatus;
 
@@ -85,8 +88,10 @@ public class Order {
     {
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         Boolean ifSucessfull=false;
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
         ifSucessfull=doUpdateOrderProductsStatus(orderId,fkAssociateId,status,orderProductsIds,recipientInfo,
-                    rejectionMessage,commentsDelivered,recipientName,rejectionType);
+                    rejectionMessage,commentsDelivered,recipientName,rejectionType,ipAddress,userAgent);
 
         handleServiceResponse.setResult(ifSucessfull);
         response.addHeader("token",request.getHeader("token"));
@@ -109,5 +114,20 @@ public class Order {
         handleServiceResponse.setResult(orders);
         return handleServiceResponse;
     }
+    @GET
+    @Path("/v1/handels/getOrderLog")
+    public HandleServiceResponse getOrderLog(@QueryParam("orderId") int orderId){
+        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        com.igp.handles.admin.mappers.Order.OrderMapper orderMapper=new com.igp.handles.admin.mappers.Order.OrderMapper();
+        try{
+            Map<String,List<OrderLogModel>> orderLog=new HashMap<>();
+            orderLog.put("logs",orderMapper.getOrderLog(orderId,"message"));
+            handleServiceResponse.setResult(orderLog);
 
+        }catch (Exception exception){
+            logger.error("error while getting OrderLog",exception);
+        }
+
+        return handleServiceResponse;
+    }
 }

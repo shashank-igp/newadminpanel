@@ -1,6 +1,7 @@
 package com.igp.handles.admin.endpoints;
 
 import com.igp.handles.admin.mappers.Order.OrderMapper;
+import com.igp.handles.admin.models.Order.OrderLogModel;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
@@ -71,11 +72,13 @@ public class Order {
 
     @POST
     @Path("/v1/admin/handels/assignReassignOrder")
-    public HandleServiceResponse assignReassignOrder(@QueryParam("action")String action , @QueryParam("orderId") int orderId,
+    public HandleServiceResponse assignReassignOrder(@Context HttpServletRequest request,@QueryParam("action")String action , @QueryParam("orderId") int orderId,
         @QueryParam("fkAssociateId") int vendorId,@QueryParam("orderProductId") String orderProductIdString
                                                 ,@DefaultValue("0")@QueryParam("orderProductIds") String allOrderProductIdList){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
         int result;
         List<com.igp.handles.vendorpanel.models.Order.Order> orderList=new ArrayList<>();
 
@@ -83,23 +86,26 @@ public class Order {
             //orderProductIdString == comma separated orderProductIds which we have to assign to a vendor
             logger.debug("step-1 assignReassignOrder with "+action);
 
-             result=orderMapper.assignReassignOrder(action,orderId,orderProductIdString,vendorId,allOrderProductIdList,orderList,handleServiceResponse);
-            if(result==1){
-//                handleServiceResponse.setResult(orderList);
-            }else if(result==2){
-                handleServiceResponse.setError(true);
-                handleServiceResponse.setResult(false);
-                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because all required components are not available !!");
-            }else if(result==3){
-                handleServiceResponse.setError(true);
-                handleServiceResponse.setResult(false);
-                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because already assigned to this vendor !!");
-            }
-            else{
-                handleServiceResponse.setError(true);
-                handleServiceResponse.setResult(false);
-                handleServiceResponse.setErrorMessage("could not assign the order to this vendor please try again !!");
-            }
+             result=orderMapper.assignReassignOrder(action,orderId,orderProductIdString,vendorId,allOrderProductIdList,orderList,handleServiceResponse,ipAddress,userAgent);
+
+             //no need to send such  redundant info ... since we have to send which product been assign or not with reason
+
+//            if(result==1){
+//               handleServiceResponse.setResult(orderList);
+//            }else if(result==2){
+//                handleServiceResponse.setError(true);
+//                handleServiceResponse.setResult(false);
+//                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because all required components are not available !!");
+//            }else if(result==3){
+//                handleServiceResponse.setError(true);
+//                handleServiceResponse.setResult(false);
+//                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because already assigned to this vendor !!");
+//            }
+//            else{
+//                handleServiceResponse.setError(true);
+//                handleServiceResponse.setResult(false);
+//                handleServiceResponse.setErrorMessage("could not assign the order to this vendor please try again !!");
+//            }
         }catch (Exception exception){
             logger.error("error while assignReassignOrder",exception);
         }
@@ -109,17 +115,19 @@ public class Order {
 
     @POST
     @Path("/v1/admin/handels/orderPriceChanges")
-    public HandleServiceResponse orderPriceChanges(@QueryParam("orderId")int orderId,@QueryParam("orderProductId")
+    public HandleServiceResponse orderPriceChanges(@Context HttpServletRequest request,@QueryParam("orderId")int orderId,@QueryParam("orderProductId")
         int orderProductId,@QueryParam("componentId") int componentId,@QueryParam("componentPrice") Double componentPrice,
         @QueryParam("shippingCharge") Double shippingCharge,
         @DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
 
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
         boolean result=false;
         List<com.igp.handles.vendorpanel.models.Order.Order> orderList=new ArrayList<>();
         try{
-            result=orderMapper.orderPriceChanges(orderId,orderProductId,componentId,componentPrice,shippingCharge);
+            result=orderMapper.orderPriceChanges(orderId,orderProductId,componentId,componentPrice,shippingCharge,ipAddress,userAgent);
             if(result==false){
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setResult(false);
@@ -128,7 +136,6 @@ public class Order {
                 orderList=orderMapper.getOrder(orderId,orderProductIdList);
                 handleServiceResponse.setResult(orderList);
             }
-
         }catch (Exception exception){
             logger.error("error while orderComponentPriceChange",exception);
         }
@@ -137,15 +144,17 @@ public class Order {
     }
     @POST
     @Path("/v1/admin/handels/deliveryDetailChanges")
-    public HandleServiceResponse deliveryDetailChanges(@QueryParam("orderId")int orderId,@QueryParam("orderProductId") int orderProductId
+    public HandleServiceResponse deliveryDetailChanges(@Context HttpServletRequest request,@QueryParam("orderId")int orderId,@QueryParam("orderProductId") int orderProductId
     ,@QueryParam("deliveryDate") String deliveryDate,@QueryParam("deliveryTime")String deliveryTime,@QueryParam("deliveryType") int deliveryType ,
         @DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
         boolean result=false;
         try{
             result=orderMapper.deliveryDetailChanges(orderId,orderProductId,deliveryDate,deliveryTime,deliveryType
-                ,handleServiceResponse,orderProductIdList);
+                ,handleServiceResponse,orderProductIdList,ipAddress,userAgent);
             if(result==false){
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setResult(false);
@@ -166,12 +175,12 @@ public class Order {
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         try{
-            Map<String,List<Map.Entry<String,String>>> orderLog=new HashMap<>();
-            orderLog.put("logs",orderMapper.getOrderLog(orderId));
+            Map<String,List<OrderLogModel>> orderLog=new HashMap<>();
+            orderLog.put("logs",orderMapper.getOrderLog(orderId,"all"));
             handleServiceResponse.setResult(orderLog);
 
         }catch (Exception exception){
-            logger.error("error while getting OrderLog",exception);
+            logger.error("error while getting OrderLog Handel panel ",exception);
         }
 
         return handleServiceResponse;
@@ -195,12 +204,14 @@ public class Order {
     }
     @POST
     @Path("/v1/admin/handels/cancelOrder")
-    public HandleServiceResponse cancelOrder(@QueryParam("orderId") int orderId,@QueryParam("orderProductId")String orderProductIdString,@QueryParam("comment")String comment,@DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
+    public HandleServiceResponse cancelOrder(@Context HttpServletRequest request,@QueryParam("orderId") int orderId,@QueryParam("orderProductId")String orderProductIdString,@QueryParam("comment")String comment,@DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
         boolean result=false;
         try{
-            result=orderMapper.cancelOrder(orderId,orderProductIdString,comment,handleServiceResponse,orderProductIdList);
+            result=orderMapper.cancelOrder(orderId,orderProductIdString,comment,handleServiceResponse,orderProductIdList,ipAddress,userAgent);
             if(result){
 //                handleServiceResponse.setResult(result);
             }else{
@@ -217,12 +228,14 @@ public class Order {
     }
     @POST
     @Path("/v1/admin/handels/approveDeliveryAttempt")
-    public HandleServiceResponse approveDeliveryAttempt(@QueryParam("orderId") int orderId,@DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
+    public HandleServiceResponse approveDeliveryAttempt(@Context HttpServletRequest request,@QueryParam("orderId") int orderId,@DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
         boolean result=false;
         try{
-            result=orderMapper.approveDeliveryAttempt(orderId,orderProductIdList);
+            result=orderMapper.approveDeliveryAttempt(orderId,orderProductIdList,ipAddress,userAgent);
             handleServiceResponse.setResult(result);
         }catch (Exception exception){
             logger.error("error while getting approveDeliveryAttempt ",exception);
@@ -231,13 +244,17 @@ public class Order {
     }
     @POST
     @Path("/v1/admin/handels/addVendorInstruction")
-    public HandleServiceResponse addVendorInstruction(@QueryParam("orderId") int orderId,@QueryParam("fkAssociateId") int fkAssociateId,@QueryParam("message") String instruction){
+    public HandleServiceResponse addVendorInstruction(@Context HttpServletRequest request,@QueryParam("orderId") int orderId,@QueryParam("orderProductId") String orderProductIdString,@QueryParam("fkAssociateId") int fkAssociateId,@QueryParam("message") String instruction){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         boolean result=false;
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+        Map<String,List<OrderLogModel>> orderLog=new HashMap<>();
         try{
-            result=orderMapper.addVendorInstruction(orderId,fkAssociateId,instruction);
-            handleServiceResponse.setResult(result);
+            result=orderMapper.addVendorInstruction(orderId,orderProductIdString,fkAssociateId,instruction,ipAddress,userAgent);
+            orderLog.put("logs",orderMapper.getOrderLog(orderId,"all"));
+            handleServiceResponse.setResult(orderLog);
         }catch (Exception exception){
             logger.error("error while getting addVendorInstruction ",exception);
         }

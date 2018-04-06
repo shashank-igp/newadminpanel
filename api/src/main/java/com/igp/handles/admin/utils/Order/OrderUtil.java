@@ -3,6 +3,7 @@ package com.igp.handles.admin.utils.Order;
 import com.igp.admin.mappers.marketPlace.Constants;
 import com.igp.config.instance.Database;
 import com.igp.handles.admin.mappers.Dashboard.DashboardMapper;
+import com.igp.handles.admin.models.Order.OrderLogModel;
 import com.igp.handles.admin.models.Vendor.VendorAssignModel;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import com.igp.handles.vendorpanel.models.Order.Order;
@@ -15,10 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by shanky on 22/1/18.
@@ -229,10 +227,10 @@ public class OrderUtil {
     }
 
 
-    public int reassignOrderToVendor(int orderId,int orderproductId,int vendorId,Order order){
+    public int reassignOrderToVendor(int orderId,int orderproductId,int vendorId,Order order,String action,String ipAddress,String userAgent){
         int result=0;
         try{
-            result=assignOrderToVendor(orderId,orderproductId,vendorId,order);
+            result=assignOrderToVendor(orderId,orderproductId,vendorId,order,action,ipAddress,userAgent);
         }catch (Exception exeception){
 
         }
@@ -240,7 +238,7 @@ public class OrderUtil {
     }
 
 
-    public int assignOrderToVendor(int orderId,int orderproductId,int vendorId,Order order){
+    public int assignOrderToVendor(int orderId,int orderproductId,int vendorId,Order order,String action,String ipAddress,String userAgent){
         int result=0;
         VendorUtil vendorUtil=new VendorUtil();
         VendorAssignModel vendorAssignModel=new VendorAssignModel();
@@ -260,8 +258,14 @@ public class OrderUtil {
             componentTotal=orderUtil.getProductComponents(ordersProducts.getProductId(),vendorId,
                 ordersProducts.getProducts_code(),componentList,orderProductExtraInfo,false);
             vendorPrice=componentTotal*ordersProducts.getProductQuantity();
-            shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
-                orderProductExtraInfo.getDeliveryType());
+            if(orderProductExtraInfo.getDeliveryType()==4){
+                shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
+                    1);
+            }else {
+                shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
+                    orderProductExtraInfo.getDeliveryType());
+            }
+
 
 
             if(checkIfVendorHasAllProductComponent(vendorId,ordersProducts.getProducts_code())==false){
@@ -303,8 +307,13 @@ public class OrderUtil {
 
 
                 insertIntoOrderHistory(orderId,vendorId,ordersHistoryComment);
-
                 createOrdersProductsComponentsInfo(componentList,order);
+
+                if(action.equals("reassign")){
+                    insertIntoHandelOrderHistory(orderId,ordersProducts.getProductId(),72,ordersHistoryComment,ipAddress,userAgent,"vendor_change","re_assign");
+                }else {
+                    insertIntoHandelOrderHistory(orderId,ordersProducts.getProductId(),72,ordersHistoryComment,ipAddress,userAgent,"vendor_change","assign");
+                }
             }
 
         }catch (Exception exception){
@@ -317,8 +326,9 @@ public class OrderUtil {
         boolean result=true;
         Connection connection = null;
         ResultSet resultSet = null,resultSet1 = null;
-        String statement,statement1,componentIds="";
+        String statement,statement1,componentIds=null;
         PreparedStatement preparedStatement = null,preparedStatement1 = null;
+        int numRows=0;
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement="select concat('(',concat(group_concat(fk_component_id,''),')')) as componentIds "
@@ -331,7 +341,7 @@ public class OrderUtil {
             if(resultSet.next()){
                 componentIds=resultSet.getString("componentIds");
 
-                if(!componentIds.equals("")){
+                if( componentIds != null && !componentIds.equals("") ){
 
                     try{
                         statement1="select * from AA_vendor_to_components where fk_associate_id = ? and fk_component_id in "+componentIds ;
@@ -342,11 +352,15 @@ public class OrderUtil {
                         resultSet1 = preparedStatement1.executeQuery();
 
                         while (resultSet1.next()){
+                            numRows=numRows+1;
                             String vendorComponentID=resultSet1.getString("fk_component_id");
                             if(!componentIds.contains(vendorComponentID)){
                                 result=false;
                                 break;
                             }
+                        }
+                        if(numRows==0){
+                            result=false;
                         }
                     }catch (Exception exception){
                         logger.error("Exception in connection", exception);
@@ -402,7 +416,7 @@ public class OrderUtil {
         return result;
     }
     public boolean updateVendorAssignPrice(int orderId,int productId,
-        Double vendorPrice,Double shippingCharge,int orderProductId){
+        Double vendorPrice,Double shippingCharge,int orderProductId,int vendorId,String ipAddress,String userAgent){
         boolean result=true;
         Connection connection = null;
         String statement,shippingChargeClause="",vendorPriceClause="";
@@ -436,6 +450,7 @@ public class OrderUtil {
                 result=true;
                 orderHistoryComment="Price changes happened for product "+ordersProducts.getProductName()+" to "+comment1+comment2;
                 insertIntoOrderHistory(orderId,Integer.parseInt(ordersProducts.getFkAssociateId()),orderHistoryComment);
+                insertIntoHandelOrderHistory(orderId,productId,72,orderHistoryComment,ipAddress,userAgent,"price_and_delivery_changes","price_change");
             }
 
         }catch (Exception exception){
@@ -598,23 +613,21 @@ public class OrderUtil {
 
         return orderComponent;
     }
-    public OrdersProducts getProductId(int orderProductId){
-        int productId=0;
+    public List<OrdersProducts> getOrderProductList(String orderProductIds){
         Connection connection = null;
         ResultSet resultSet = null;
         String statement;
         PreparedStatement preparedStatement = null;
-        OrdersProducts ordersProducts=null;
+        List<OrdersProducts> ordersProductsList=new ArrayList<>();
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement="SELECT  * from orders_products as  op where op.orders_products_id = ? ";
+            statement="SELECT  * from orders_products as  op where op.orders_products_id in ( "+orderProductIds+" ) ";
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1,orderProductId);
 
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
-            if(resultSet.next()){
-                ordersProducts = new OrdersProducts.Builder()
+            while(resultSet.next()){
+                OrdersProducts ordersProducts = new OrdersProducts.Builder()
                     .orderProductId(resultSet.getInt("op.orders_Products_Id"))
                     .orderId(resultSet.getInt("op.orders_id"))
                     .productId(resultSet.getInt("op.products_id"))
@@ -625,6 +638,7 @@ public class OrderUtil {
                     .ordersProductStatus(resultSet.getString("op.orders_product_status"))
                     .deliveryStatus(resultSet.getInt("op.delivery_status"))
                     .build();
+                ordersProductsList.add(ordersProducts);
             }
         }catch (Exception exception){
             logger.error("Exception in connection", exception);
@@ -634,10 +648,9 @@ public class OrderUtil {
             Database.INSTANCE.closeConnection(connection);
         }
 
-        return ordersProducts;
+        return ordersProductsList;
     }
-    public boolean updateDeliveryDetails(int orderId,int orderProductId,int productId,String deliveryDate,String deliveryTime,
-        int deliveryType){
+    public boolean updateDeliveryDetails(int orderId,int orderProductId,int productId,String deliveryDate,String deliveryTime, int deliveryType,int vendorId,String ipAddress,String userAgent){
         boolean result=false;
         Connection connection = null;
         String statement,deliveryDateClause="",deliveryTimeClause="",deliveryTypeClause="";
@@ -726,6 +739,7 @@ public class OrderUtil {
                                 +Constants.getDeliveryType(String.valueOf(orderProductExtraInfo.getDeliveryType()))+" to "
                                 +deliveryDateClause+"  "+deliveryTimeClause+"  "+deliveryTypeClause;
                             insertIntoOrderHistory(orderId,Integer.parseInt(ordersProducts.getFkAssociateId()),orderHistoryComment);
+                            insertIntoHandelOrderHistory(orderId,productId,72,orderHistoryComment,ipAddress,userAgent,"price_and_delivery_changes","delivery_changes");
                         }
                     }
                 }
@@ -738,26 +752,43 @@ public class OrderUtil {
         }
         return result;
     }
-    public  List<Map.Entry<String,String>> getOrderLog(int orderId){
+    public List<OrderLogModel> getOrderLog(int orderId,String type){
         String insertTime="",log="";
         Connection connection = null;
         ResultSet resultSet = null;
         String statement;
         PreparedStatement preparedStatement = null;
-        List<Map.Entry<String,String>> orderLogMap=new ArrayList<>();
-
+        List<OrderLogModel> orderLogModelList=new ArrayList<>();
+        VendorUtil vendorUtil=new VendorUtil();
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement="SELECT  * from orders_history where fk_orders_id = ? order by orders_history_id desc";
-            preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1,orderId);
-
+            if(type.equals("message")){
+                statement="SELECT  * from handel_order_history where orders_id = ? and action = ?  order by handel_order_history_id desc";
+                preparedStatement = connection.prepareStatement(statement);
+                preparedStatement.setInt(1,orderId);
+                preparedStatement.setString(2,"instruction");
+            }else{
+                statement="SELECT  * from handel_order_history where orders_id = ? order by handel_order_history_id desc";
+                preparedStatement = connection.prepareStatement(statement);
+                preparedStatement.setInt(1,orderId);
+            }
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()){
-                insertTime=resultSet.getString("orders_history_time");
-                log=resultSet.getString("orders_history_comment");
-                orderLogMap.add(new AbstractMap.SimpleEntry(insertTime,log));
+                OrderLogModel orderLogModel=new OrderLogModel();
+                insertTime=resultSet.getString("insert_time");
+                log=resultSet.getString("message").replaceAll("<Br>","");
+                orderLogModel.setDate(insertTime.split(" ")[0]);
+                orderLogModel.setTime(insertTime.split(" ")[1]);
+                orderLogModel.setMessage(log);
+                orderLogModel.setUser(vendorUtil.getVendorInfo(resultSet.getInt("fk_associate_id")).getAssociateName());
+                if(resultSet.getString("action").equals("instruction")){
+                    orderLogModel.setType("message");
+                }else {
+                    orderLogModel.setType("log");
+                }
+
+                orderLogModelList.add(orderLogModel);
             }
         }catch (Exception exception){
             logger.error("Exception in connection", exception);
@@ -766,14 +797,15 @@ public class OrderUtil {
             Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
-        return orderLogMap;
+        return orderLogModelList;
     }
-    public boolean cancelOrder(int orderId,String orderProductIdString,String comment){
+    public boolean cancelOrder(int orderId,String orderProductIdString,String comment,String ipAddress,String userAgent){
         boolean result=false;
         Connection connection = null;
-        String statement;
+        String statement,orderHistoryComment="";
         PreparedStatement preparedStatement = null;
         try{
+            List<OrdersProducts> ordersProductsList=getOrderProductList(orderProductIdString);
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="update orders_products set orders_product_status = ?  where orders_products_id in ( "+ orderProductIdString +"  ) ";
             preparedStatement = connection.prepareStatement(statement);
@@ -784,8 +816,12 @@ public class OrderUtil {
             if (status == 0) {
                 logger.error("Failed to update orders_products while marking that orderProduct as cancelled ");
             } else {
-                if(insertIntoOrderHistory(orderId,0,"order is cancelled , reason is "+comment)){
+                orderHistoryComment="order is cancelled , reason is "+comment;
+                if(insertIntoOrderHistory(orderId,0,orderHistoryComment)){
                     result=true;
+                }
+                for(OrdersProducts ordersProducts:ordersProductsList){
+                    insertIntoHandelOrderHistory(orderId,ordersProducts.getProductId(),72,orderHistoryComment,ipAddress,userAgent,"status_change","Rejected");
                 }
             }
 
@@ -798,16 +834,16 @@ public class OrderUtil {
 
         return result;
     }
-    public boolean updateOrderProductForApproveAttemptedDeliveryOrder(int orderId,String orderProductIdList){
+    public boolean updateOrderProductForApproveAttemptedDeliveryOrder(int orderId,String orderProductIdList,String ipAddress,String userAgent){
         boolean result=false;
         Connection connection = null;
-        String statement;
+        String statement,orderHistoryComment="";
         PreparedStatement preparedStatement = null;
-        Order order=null;
         int vendorId=0;
+        List<OrdersProducts> ordersProducts=null;
         try{
-            order=getOrderRelatedInfo(orderId,Integer.parseInt(orderProductIdList.split(",")[0]));
-            vendorId=Integer.parseInt(order.getOrderProducts().get(0).getFkAssociateId());
+            ordersProducts=getOrderProductList(orderProductIdList);
+            vendorId=Integer.parseInt(ordersProducts.get(0).getFkAssociateId());
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="update orders_products set delivery_attempt = ?  where orders_products_id in ( "+orderProductIdList+" ) ";
             preparedStatement = connection.prepareStatement(statement);
@@ -816,8 +852,12 @@ public class OrderUtil {
             if (status == 0) {
                 logger.error("Failed to update orders_products while approving that order for re-delivery attempt ");
             } else {
-                if(insertIntoOrderHistory(orderId,vendorId,"order is approve to be re-delivered by New Handels panel ")){
+                orderHistoryComment="order is approve to be re-delivered by New Handels panel ";
+                if(insertIntoOrderHistory(orderId,vendorId,orderHistoryComment)){
                     result=true;
+                }
+                for(OrdersProducts ordersProduct:ordersProducts){
+                    insertIntoHandelOrderHistory(orderId,ordersProduct.getProductId(),72,orderHistoryComment,ipAddress,userAgent,"status_change","attempted");
                 }
             }
         }catch(Exception exception){
@@ -829,22 +869,26 @@ public class OrderUtil {
 
         return result;
     }
-    public boolean addVendorInstruction(int orderId,int fkAssociateId,String instruction){
+    public boolean insertIntoHandelOrderHistory(int orderId,int productId,int fkAssociateId,String instruction,String ipAddress,String userAgent,String action,String subAction){
         boolean result=false;
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement="INSERT INTO vendor_instructions (orders_id,products_id,instruction_msg,associate_id,insertTime) VALUES (?,?,?,?,now()) ";
+            statement="INSERT INTO handel_order_history (orders_id,products_id,fk_associate_id,action,sub_action,message,ip,user_agent,insert_time) VALUES (?,?,?,?,?,?,?,?,now()) ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,orderId);
-            preparedStatement.setInt(2,0);
-            preparedStatement.setString(3,instruction);
-            preparedStatement.setInt(4,fkAssociateId);
+            preparedStatement.setInt(2,productId);
+            preparedStatement.setInt(3,fkAssociateId);
+            preparedStatement.setString(4,action);
+            preparedStatement.setString(5,subAction);
+            preparedStatement.setString(6,instruction);
+            preparedStatement.setString(7,ipAddress);
+            preparedStatement.setString(8,userAgent);
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
-                logger.error("Failed to insert vendor_instructions");
+                logger.error("Failed to insert handel_order_history");
             } else {
                 result=true;
             }

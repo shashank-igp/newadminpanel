@@ -46,12 +46,15 @@ public class ReportMapper {
     public boolean addNewVendorPincodeMapper(int fkAssociateId,int pincode,int cityId,int shipType,int shipCharge){
         Map<Integer,String> map= new HashMap<>();
         ReportUtil reportUtil = new ReportUtil();
+        if(shipType==4){
+            shipType = 1;
+        }
         map.put(1,"Standard Delivery");
         map.put(2,"Fixed Time Delivery");
         map.put(3,"Mid Night Delivery");
         boolean result,response=false;
         String message="Added new pincode :- "+pincode+" with shipping type :- "+map.get(shipType)+" and shipping charge :- "+shipCharge+" : ";
-        result = reportUtil.addNewVendorPincodeUtil(fkAssociateId,pincode,cityId,shipType,shipCharge);
+        result = reportUtil.addNewVendorPincodeUtil(fkAssociateId,pincode,cityId,shipType,shipCharge,1);
         if(result==true){
             response = reportUtil.setVendorGeneralInstruction(fkAssociateId,0,pincode+"",message+"Done");
         }
@@ -62,7 +65,7 @@ public class ReportMapper {
         boolean result,response=false;
         ReportUtil reportUtil =  new ReportUtil();
         String message="Added new Component : Name :- "+componentName+" With Price :- "+price+" : ";
-        result = SummaryFunctionsUtil.addVendorComponent(String.valueOf(fkAssociateId),componentCode,componentName,type,"dummy.jpg",price);
+        result = reportUtil.addVendorComponent(String.valueOf(fkAssociateId),componentCode,componentName,type,"dummy.jpg",price);
         if(result==true){
             response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message+"Done");
         }

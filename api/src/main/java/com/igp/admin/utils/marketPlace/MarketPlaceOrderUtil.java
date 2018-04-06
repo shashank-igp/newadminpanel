@@ -98,6 +98,7 @@ public class MarketPlaceOrderUtil {
                     userModel.setId(null);
                     // customer doesn't exist therefore create a new customer.
                     String postData = objectMapper.writeValueAsString(userModel);
+                    logger.debug("Postdata for /v1/signup : "+ postData);
                     String custResponse = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/signup",new ArrayList<>());
                     generalUserResponseModel = objectMapper.readValue(custResponse, GeneralUserResponseModel.class);
                     // populate cust id hash in customer and address model.
@@ -110,6 +111,7 @@ public class MarketPlaceOrderUtil {
                     else {
                         // since new customer created therefore update rest of the details.
                         String postData1 = objectMapper.writeValueAsString(userModel2);
+                        logger.debug("Postdata1 for /v1/signup : "+ postData1);
                         String custUpdate = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/signup",new ArrayList<>());
                         generalUserResponseModel = objectMapper.readValue(custUpdate, GeneralUserResponseModel.class);
                         authResponseModel =  generalUserResponseModel.getData();
@@ -172,15 +174,19 @@ public class MarketPlaceOrderUtil {
                 }
             }
             // model didn't return any error and now work on address book.
-            String postData = objectMapper.writeValueAsString(shippingAddress);
-            String addressExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/user/checkaddress",new ArrayList<>());
-            generalShipResponseModel = objectMapper.readValue(addressExist, GeneralShipResponseModel.class);
-            shippingAddress = generalShipResponseModel.getData();
+           shippingAddress.setAid(checkForAddressExactMatch(shippingAddress,validationModel.getUserModel().getId()));
+
+//            String postData = objectMapper.writeValueAsString(shippingAddress);
+//            logger.debug("Postdata : "+ postData);
+//            String addressExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/user/checkaddress",new ArrayList<>());
+//            generalShipResponseModel = objectMapper.readValue(addressExist, GeneralShipResponseModel.class);
+//            shippingAddress = generalShipResponseModel.getData();
 
             if (shippingAddress.getAid() == "" || shippingAddress.getAid() == null) {
                 logger.error("Couldn't get proper address.");
                 // create new address entry.
                 String postData1 = objectMapper.writeValueAsString(shippingAddress);
+                logger.debug("Postdata1 for /v1/user/address : "+ postData1);
                 String createAddress = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/user/address",new ArrayList<>());
                 if(createAddress.contains("error")){
                     throw new Exception("Problem in Delivery Details.");
@@ -820,7 +826,7 @@ public class MarketPlaceOrderUtil {
     }
 
 
-    public ValidationModel checkCorpOrderExists(ValidationModel validationModel){
+    public ValidationModel checkCorpOrderExistsByHttpCall(ValidationModel validationModel){
         CheckCorpOrderModel checkCorpOrderModel = new CheckCorpOrderModel();
         ObjectMapper objectMapper = new ObjectMapper();
         HttpRequestUtil httpRequestUtil = new HttpRequestUtil();
@@ -832,6 +838,7 @@ public class MarketPlaceOrderUtil {
             checkCorpOrderModel.setOrderId(0);
             if(!checkCorpOrderModel.getRelId().isEmpty()||!checkCorpOrderModel.getRelId().equals("0")) {
                 String postData = objectMapper.writeValueAsString(checkCorpOrderModel);
+                logger.debug("Postdata corpcheck: "+ postData);
                 String orderExist = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/corporate/corpordercheck",new ArrayList<>());
                 generalAddressResponseModel = objectMapper.readValue(orderExist, GenerateCheckCorpOrderResponseModel.class);
                 checkCorpOrderModel = generalAddressResponseModel.getData();
@@ -853,6 +860,35 @@ public class MarketPlaceOrderUtil {
         }
         return validationModel;
     }
+    public ValidationModel checkIfCorpOrderExists(ValidationModel validationModel) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            validationModel.setError(false);
+            connection = Database.INSTANCE.getReadWriteConnection();
+            String statement = "SELECT orders_id from orders WHERE rl_req_ID = ? and fk_associate_id = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1, validationModel.getExtraInfoModel().getRelId());
+            preparedStatement.setInt(2, validationModel.getFkAssociateId());
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.first()) {
+                // when order exists
+                logger.debug("ORDER-ID ALREADY EXISTS IN ORDERS TABLE, CAN'T TAKE YOUR REQUEST");
+                throw new Exception("Duplicate Order.");
+            }
+        } catch (Exception exception) {
+            validationModel.setError(true);
+            validationModel.setMessage("Duplicate Order.");
+            logger.error("Exception at check order exists : " + exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return validationModel;
+    }
+
 
     public FileUploadModel uploadTheFile(FormDataMultiPart multiPart, String filePrefix){
         FileUploadModel fileUploadModel = new FileUploadModel();
@@ -939,7 +975,58 @@ public class MarketPlaceOrderUtil {
             }
         }
     }
-
+    public String checkForAddressExactMatch(AddressModel addressModel, String userId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        String addressId="";
+        try {
+            String selectRel = "";
+            if (addressModel.getRelation() != null) {
+                selectRel = "AND a.entry_relation = ?";
+            }
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            String statement = "SELECT * FROM address_book as a LEFT JOIN address_book_to_customers as b ON a.address_book_id = b.address_book_id" +
+                " LEFT JOIN address_book_extra_info as c ON b.address_book_id = c.address_book_id WHERE a.entry_gender = ? AND " +
+                " a.entry_firstname = ? AND a.entry_lastname = ? AND  a.entry_street_address = ? AND  " +
+                "a.entry_postcode = ? AND a.entry_city = ? AND  a.entry_state = ? AND  a.entry_country_id = ?  AND  " +
+                "a.entry_email_address = ? AND a.mobile = ?  AND  a.address_type = ? AND b.customers_id = ? "+selectRel;
+            preparedStatement = connection.prepareStatement(statement);
+            if(addressModel.getTitle().equalsIgnoreCase("Mr."))
+                preparedStatement.setString(1, "m");
+            else if(addressModel.getTitle().equalsIgnoreCase("Ms."))
+                preparedStatement.setString(1, "f");
+            else
+                preparedStatement.setString(1,"");
+            preparedStatement.setString(2, addressModel.getFirstname());
+            preparedStatement.setString(3, addressModel.getLastname());
+            preparedStatement.setString(4, addressModel.getStreetAddress());
+            preparedStatement.setString(5, addressModel.getPostcode());
+            preparedStatement.setString(6, addressModel.getCity());
+            preparedStatement.setString(7, addressModel.getState());
+            preparedStatement.setString(8, addressModel.getCountryId());
+            preparedStatement.setString(9, addressModel.getEmail());
+            preparedStatement.setString(10, addressModel.getMobile());
+            preparedStatement.setInt(11,addressModel.getAddressType());
+            preparedStatement.setString(12,userId);
+            if (selectRel!="") {
+                preparedStatement.setString(13, addressModel.getRelation());
+            }
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.first()) {
+                addressId=resultSet.getString("address_book_id");
+            } else {
+                logger.debug("Address-To-Customer mismatch");
+            }
+        } catch (Exception exception) {
+            logger.error("Error", exception);
+        } finally {
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return addressId;
+    }
 
 
 }
