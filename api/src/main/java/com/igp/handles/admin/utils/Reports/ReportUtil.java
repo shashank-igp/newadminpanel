@@ -5,7 +5,6 @@ import com.igp.admin.mappers.marketPlace.Constants;
 import com.igp.config.Environment;
 import com.igp.config.instance.Database;
 import com.igp.handles.admin.mappers.Reports.ReportMapper;
-import com.igp.handles.admin.mappers.Vendor.VendorMapper;
 import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.admin.models.Vendor.VendorInfoModel;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
@@ -36,8 +35,6 @@ public class ReportUtil {
         List <orderReportObjectModel>  orderReportObjectList= new ArrayList<>();
         String statement;
         List <SummaryModel> summaryModelList=new ArrayList<>();
-        VendorMapper vendorMapper=new VendorMapper();
-        Constants constants=new Constants();
         ResultSet resultSet = null;
         int count=0,amt=0;
 
@@ -129,10 +126,10 @@ public class ReportUtil {
                 orderReportObjectModel.setCity(resultSet.getString("City"));
                 orderReportObjectModel.setPincode(resultSet.getInt("Pincode"));
                 orderReportObjectModel.setDelivery_Date(resultSet.getString("Delivery_Date"));
-                orderReportObjectModel.setDeliveryType(constants.getActualOrderStatus(resultSet.getString("delivery_type")));
+                orderReportObjectModel.setDeliveryType(Constants.getDeliveryType(resultSet.getString("delivery_type")));
                 orderReportObjectModel.setPrice(resultSet.getDouble("Amount"));
                 orderReportObjectModel.setStatus(resultSet.getInt("status"));
-                orderReportObjectModel.setVendorInfoModelList(vendorMapper.getVendorList(orderReportObjectModel.getPincode(),resultSet.getInt("delivery_type")));
+//                orderReportObjectModel.setVendorInfoModelList(vendorMapper.getVendorList(orderReportObjectModel.getPincode(),resultSet.getInt("delivery_type")));
                 orderReportObjectModel.setOrderProductId(resultSet.getString("orderProductId"));
                 String vendorName = resultSet.getString("vendorName");
                 if(vendorName==null || vendorName.equals("")){
