@@ -19,6 +19,9 @@ public class VendorMapper {
         List<VendorInfoModel> vendorInfoModelList=new ArrayList<>();
          VendorUtil vendorUtil=new VendorUtil();
         try {
+            if(shippingType==4){
+                shippingType=1;
+            }
             vendorInfoModelList=vendorUtil.getVendorList(pincode,shippingType);
         }catch (Exception exception){
             logger.error("Exception getting vendor List ",exception);
