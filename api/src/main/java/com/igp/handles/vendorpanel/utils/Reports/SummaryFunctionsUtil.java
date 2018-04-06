@@ -1,7 +1,6 @@
 package com.igp.handles.vendorpanel.utils.Reports;
 
 import com.igp.config.instance.Database;
-import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.vendorpanel.models.Report.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,13 +144,14 @@ public class SummaryFunctionsUtil
     }
 
 
-    public static ProductModelListHavingSummaryModel getVendorDetailsFunction (String fkAssociateId,String startLimit,String endLimit)
+    public static VendorModelListWithSummary getVendorDetailsFunction (String fkAssociateId,String startLimit,String endLimit)
     {
 
         Connection connection = null;
-        ProductModelListHavingSummaryModel productModelListHavingSummaryModel =new ProductModelListHavingSummaryModel();
-        List <ProductTableDataModel>  productTableDataModelList= new ArrayList<>();
+        VendorModelListWithSummary vendorModelListWithSummary=new VendorModelListWithSummary();
+        List <VendorReportObject>  vendorReportObjectList= new ArrayList<>();
         String statement;
+        String whereClause="";
         List <SummaryModel> summaryModelList=new ArrayList<>();
         ResultSet resultSet = null;
         String queryTotal="";
@@ -160,7 +160,7 @@ public class SummaryFunctionsUtil
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement = " select vc.fk_associate_id as fkId,vc.fk_component_id cId,vc.price as price,vc.InStock  as "
-                + " inStock,mc.component_code as cCode,mc.component_name as cName,mc.componentImage as cImage,mc.mod_time as cTimestamp, vc.req_price from AA_vendor_to_components as vc inner "
+                + " inStock,mc.component_code as cCode,mc.component_name as cName,mc.componentImage as cImage,mc.mod_time as cTimestamp from AA_vendor_to_components as vc inner "
                 + " join AA_master_components as mc on vc.fk_component_id=mc.component_id "
                 + " where vc.fk_associate_id='"+fkAssociateId+"' limit "+startLimit+","+endLimit+" ";
             preparedStatement = connection.prepareStatement(statement);
@@ -170,52 +170,24 @@ public class SummaryFunctionsUtil
 
             resultSet = preparedStatement.executeQuery();
             while(resultSet.next()) {
-                ProductTableDataModel productTableDataModel=new ProductTableDataModel();
-                productTableDataModel.setAssociateId("fkId");
-                productTableDataModel.setComponent_Id_Hide(resultSet.getString("cId"));
-                productTableDataModel.setComponentImage(resultSet.getString("cImage")+"?timestamp="+resultSet.getString("cTimestamp"));
-                productTableDataModel.setComponentName(resultSet.getString("cName"));
-
-                int price = resultSet.getInt("price");
-                String reqPrice = resultSet.getString("vc.req_price");
+                VendorReportObject vendorReportObject=new VendorReportObject();
+                vendorReportObject.setAssociateId("fkId");
+                vendorReportObject.setComponent_Id_Hide(resultSet.getString("cId"));
+                vendorReportObject.setComponentImage(resultSet.getString("cImage")+"?timestamp="+resultSet.getString("cTimestamp"));
+                vendorReportObject.setComponentName(resultSet.getString("cName"));
+                vendorReportObject.setPrice(resultSet.getDouble("price"));
                 Integer inStock=resultSet.getInt("inStock");
+                if (inStock==1){vendorReportObject.setInStock("In Stock");}
+                else {vendorReportObject.setInStock("Out Of Stock");}
 
-                TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
-                tableDataActionHandels.setValue(price+"");
-                tableDataActionHandels.setRequestValue("-1");
-
-                TableDataActionHandels tableDataActionHandels1 = new TableDataActionHandels();
-                tableDataActionHandels1.setRequestValue("-1");
-                if (inStock == 1) {
-                    tableDataActionHandels1.setValue("In Stock");
-                } else {
-                    tableDataActionHandels1.setValue("Out of Stock");
-                }
-                if(!reqPrice.equals("-1")){
-                    if(tableDataActionHandels.getValue().equals(reqPrice) && inStock==0){
-                        tableDataActionHandels1.setRequestType("");
-                        tableDataActionHandels1.setRequestValue("In Stock");
-                    }else if(!tableDataActionHandels.getValue().equals(reqPrice)){
-                        tableDataActionHandels.setRequestType("");
-                        tableDataActionHandels.setRequestValue(reqPrice);
-                    }
-                } else if(reqPrice.equals("-1") && inStock==0 ){
-                    tableDataActionHandels1.setRequestType("InStock");
-                    tableDataActionHandels1.setRequestValue("Out of Stock");
-                }
-
-                productTableDataModel.setPrice(tableDataActionHandels);
-
-                productTableDataModel.setInStock(tableDataActionHandels1);
-
-                productTableDataModelList.add(productTableDataModel);
+                vendorReportObjectList.add(vendorReportObject);
             }
-            productModelListHavingSummaryModel.setProductTableDataModelList(productTableDataModelList);
+            vendorModelListWithSummary.setVendorReportObjectList(vendorReportObjectList);
             SummaryModel summaryModelTotalComponents= new SummaryModel();
             summaryModelTotalComponents.setLabel("Total Components");
             summaryModelTotalComponents.setValue(getCount(queryTotal).toString());
             summaryModelList.add(summaryModelTotalComponents);
-            productModelListHavingSummaryModel.setSummaryModelList(summaryModelList);
+            vendorModelListWithSummary.setSummaryModelList(summaryModelList);
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);
         } finally {
@@ -223,7 +195,7 @@ public class SummaryFunctionsUtil
             Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
-        return  productModelListHavingSummaryModel;
+        return  vendorModelListWithSummary;
 
 
     }
@@ -271,108 +243,90 @@ public class SummaryFunctionsUtil
 
 
 
-    public static PincodeModelListHavingSummaryModel getPincodeDetailsFunction (String fkAssociateId, String startLimit, String endLimit)
+    public static PincodeModelListWithSummary getPincodeDetailsFunction (String fkAssociateId,String startLimit,String endLimit)
     {
 
         Connection connection = null;
-        PincodeModelListHavingSummaryModel pincodeModelListHavingSummaryModel =new PincodeModelListHavingSummaryModel();
+        PincodeModelListWithSummary pincodeModelListWithSummary=new PincodeModelListWithSummary();
+        List <PincodeReportModel>  pincodeReportModelList= new ArrayList<>();
         String statement;
+        String whereClause="";
         String totalQuery="";
         List <SummaryModel> summaryModelList=new ArrayList<>();
         ResultSet resultSet = null;
-        Map<Integer,Map<Integer,TableDataActionHandels>> pincodeShipTypeAndShipChargeMap=new HashMap<>();
+        Map<Integer,Map<Integer,Integer>> pincodeShipTypeAndShipChargeMap=new HashMap<>();
 
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = "select pincode, group_concat(ship_type,',',flag_enabled,',',ship_charge,',',req_price SEPARATOR ':' ) as value from AA_vendor_pincode where vendor_id = "+fkAssociateId+" group by pincode limit "+startLimit+","+endLimit+" ";
+            statement = " select * from AA_vendor_pincode where vendor_id="+fkAssociateId+" order by pincode limit "+startLimit+","+endLimit+" ";
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query "+preparedStatement);
-            totalQuery = " select count(distinct pincode) as totalno from AA_vendor_pincode where vendor_id="+fkAssociateId+" ";
+            totalQuery = " select count(distinct pincode) as totalno from AA_vendor_pincode where vendor_id="+fkAssociateId+"";
             resultSet = preparedStatement.executeQuery();
 
             while(resultSet.next()) {
                 VendorPincodeModel vendorPincodeModel = new VendorPincodeModel();
-                List<PincodeTableDataModel> pincodeTableDataModelList = new ArrayList<>();
 
                 vendorPincodeModel.setPincode(resultSet.getInt("pincode"));
+                vendorPincodeModel.setCityId(resultSet.getInt("city_id"));
+                vendorPincodeModel.setFlagEnabled(resultSet.getInt("flag_enabled"));
+                vendorPincodeModel.setReqdPrice(resultSet.getInt("req_price"));
+                vendorPincodeModel.setShipTypeId(resultSet.getInt("ship_type"));
+                vendorPincodeModel.setShipCharge(resultSet.getInt("ship_charge"));
 
-                String[] valueArray = resultSet.getString("value").split(":");
-
-                for(int i=0; i<valueArray.length ; i++){
-                    String[] values = valueArray[i].split(",");
-                    vendorPincodeModel.setShipTypeId(new Integer(values[0]).intValue());
-                    vendorPincodeModel.setFlagEnabled(new Integer(values[1]).intValue());
-                    vendorPincodeModel.setShipCharge(new Integer(values[2]).intValue());
-                    vendorPincodeModel.setReqdPrice(new Integer(values[3]).intValue());
-
-
-                    TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
-                    tableDataActionHandels.setValue(vendorPincodeModel.getShipCharge()+"");
-                    tableDataActionHandels.setRequestValue(vendorPincodeModel.getReqdPrice()+"");
-
-                    if(vendorPincodeModel.getFlagEnabled()==0){
-                        // when the ship type at pincode is disabled so it must be not servicable
-                        if(vendorPincodeModel.getReqdPrice()!=-1 && tableDataActionHandels.getValue().equals(tableDataActionHandels.getRequestValue())){
-                            tableDataActionHandels.setRequestType("");
-                            tableDataActionHandels.setRequestValue("Not Serviceable");
-                        }else if(vendorPincodeModel.getReqdPrice()==-1){
-                            tableDataActionHandels.setRequestType("Enable");
-                            tableDataActionHandels.setRequestValue(vendorPincodeModel.getShipCharge()+"");
-                        }
-                        tableDataActionHandels.setValue("Not Serviceable"); // to mark all the pincodes with flag_enabled =0 as not serviceable
-                    } else{
-                        if(vendorPincodeModel.getReqdPrice()!=-1 && !tableDataActionHandels.getValue().equals(tableDataActionHandels.getRequestValue())){
-                            //  check if price change
-                            tableDataActionHandels.setRequestType("");
-                        } else {
-                            //everthing is good
-                            tableDataActionHandels.setRequestValue("-1");
-                        }
-                    }
-                    if (tableDataActionHandels.getValue()==null){
-                        tableDataActionHandels.setValue("Not Serviceable");
-                    }
-
-                    if(pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode())==null){
-                        Map<Integer,TableDataActionHandels> shipTypeAndTableMap = new HashMap<>();
-
-                        shipTypeAndTableMap.put(vendorPincodeModel.getShipTypeId(), tableDataActionHandels);
-
-                        pincodeShipTypeAndShipChargeMap.put(vendorPincodeModel.getPincode(),shipTypeAndTableMap);
+                if(pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode())==null){
+                    Map<Integer,Integer> shipTypeToChargeMap=new HashMap<>();
+                    if(vendorPincodeModel.getFlagEnabled()==1) {
+                        shipTypeToChargeMap.put(vendorPincodeModel.getShipTypeId(), vendorPincodeModel.getShipCharge());
                     }else {
-                        pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode()).put(vendorPincodeModel.getShipTypeId(),tableDataActionHandels);
+                        shipTypeToChargeMap.put(vendorPincodeModel.getShipTypeId(), null);
+                        // when the ship type at pincode is disabled so it must be not servicable
                     }
-
-                }
-                for(Map.Entry<Integer,Map<Integer,TableDataActionHandels>> entry:pincodeShipTypeAndShipChargeMap.entrySet()){
-                    PincodeTableDataModel pincodeTableDataModel =new PincodeTableDataModel();
-                    int pincode = entry.getKey();
-                    pincodeTableDataModel.setPincode(pincode+"");
-                    Map<Integer,TableDataActionHandels> shipTypeToChargeMap=entry.getValue();
-                    for (Map.Entry<Integer,TableDataActionHandels> entry1:shipTypeToChargeMap.entrySet()){
-                        int shipType=entry1.getKey();
-                        TableDataActionHandels tableDataActionHandels=entry1.getValue();
-                        if(shipType==1 && tableDataActionHandels.getValue()!=null){
-                            pincodeTableDataModel.setStandardDeliveryCharge(tableDataActionHandels);
-                        }else if(shipType==2 && tableDataActionHandels.getValue()!=null){
-                            pincodeTableDataModel.setFixedTimeDeliveryCharge(tableDataActionHandels);
-                        }else if(shipType==3 && tableDataActionHandels.getValue()!=null){
-                            pincodeTableDataModel.setMidnightDeliveryCharge(tableDataActionHandels);
-                        }
+                    pincodeShipTypeAndShipChargeMap.put(vendorPincodeModel.getPincode(),shipTypeToChargeMap);
+                }else {
+                    if(vendorPincodeModel.getFlagEnabled()==1) {
+                        pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode()).put(vendorPincodeModel.getShipTypeId(),vendorPincodeModel.getShipCharge());
+                    }else {
+                        pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode()).put(vendorPincodeModel.getShipTypeId(),null);
                     }
-                    pincodeTableDataModel.setVendorName(""); // ignore it
-                    pincodeTableDataModelList.add(pincodeTableDataModel);
                 }
-                pincodeModelListHavingSummaryModel.setPincodeTableDataModelList(pincodeTableDataModelList);
             }
+            for(Map.Entry<Integer,Map<Integer,Integer>> entry:pincodeShipTypeAndShipChargeMap.entrySet()){
+                PincodeReportModel pincodeReportModel=new PincodeReportModel();
+                int pincode = entry.getKey();
+                pincodeReportModel.setPincode(pincode);
+                Map<Integer,Integer> shipTypeToChargeMap=entry.getValue();
+                for (Map.Entry<Integer,Integer> entry1:shipTypeToChargeMap.entrySet()){
+                    int shipType=entry1.getKey();
+                    Integer shipCharge=entry1.getValue();
+                    if(shipType==1 && shipCharge!=null){
+                        pincodeReportModel.setStandardDeliveryCharge(shipCharge.toString());
+                    }else if(shipType==2 && shipCharge!=null){
+                        pincodeReportModel.setFixedTimeDeliveryCharge(shipCharge.toString());
+                    }else if(shipType==3 && shipCharge!=null){
+                        pincodeReportModel.setMidnightDeliveryCharge(shipCharge.toString());
+                    }
+                }
+                if(pincodeReportModel.getStandardDeliveryCharge()==null){
+                    pincodeReportModel.setStandardDeliveryCharge("Not Serviceable");
+                }
+                if(pincodeReportModel.getFixedTimeDeliveryCharge()==null){
+                    pincodeReportModel.setFixedTimeDeliveryCharge("Not Serviceable");
+                }
+                if(pincodeReportModel.getMidnightDeliveryCharge()==null){
+                    pincodeReportModel.setMidnightDeliveryCharge("Not Serviceable");
+                }
+                pincodeReportModelList.add(pincodeReportModel);
+            }
+            pincodeModelListWithSummary.setPincodeReportModelList(pincodeReportModelList);
 
             SummaryModel summaryModelTotalPincodes= new SummaryModel();
             summaryModelTotalPincodes.setLabel("Total Pincodes");
             summaryModelTotalPincodes.setValue(getCount(totalQuery).toString());
             summaryModelList.add(summaryModelTotalPincodes);
 
-            pincodeModelListHavingSummaryModel.setSummaryModelList(summaryModelList);
+            pincodeModelListWithSummary.setSummaryModelList(summaryModelList);
 
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);
@@ -381,7 +335,7 @@ public class SummaryFunctionsUtil
             Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
-        return  pincodeModelListHavingSummaryModel;
+        return  pincodeModelListWithSummary;
 
 
     }
@@ -567,60 +521,60 @@ public class SummaryFunctionsUtil
 
         return total;
     }
-    //    public static PincodeModelListWithSummary getPincodeDetailsFunction (String fkAssociateId,String startLimit,String endLimit)
-    //    {
-    //
-    //        Connection connection = null;
-    //        PincodeModelListWithSummary pincodeModelListWithSummary=new PincodeModelListWithSummary();
-    //        List <PincodeReportModel>  pincodeReportModelList= new ArrayList<>();
-    //        String statement;
-    //        String whereClause="";
-    //        String totalQuery="";
-    //        List <SummaryModel> summaryModelList=new ArrayList<>();
-    //        ResultSet resultSet = null;
-    //        Map<String,String> shippingTypeMap=new HashMap<>();
-    //        shippingTypeMap.put("1","");
-    //        shippingTypeMap.put("2","");
-    //        shippingTypeMap.put("3","");
-    //        shippingTypeMap.put("4","");
-    //
-    //        PreparedStatement preparedStatement = null;
-    //        try{
-    //
-    //
-    //            connection = Database.INSTANCE.getReadOnlyConnection();
-    //            statement = " select vendor_id as vId,city_id as cId,pincode,ship_type,ship_charge from AA_vendor_pincode where vendor_id="+fkAssociateId+" limit "+startLimit+","+endLimit+" ";
-    //            preparedStatement = connection.prepareStatement(statement);
-    //            totalQuery = " select count(*) as totalno from AA_vendor_pincode where vendor_id="+fkAssociateId+"";
-    //            resultSet = preparedStatement.executeQuery();
-    //            while(resultSet.next()) {
-    //                PincodeReportModel pincodeReportModel=new PincodeReportModel();
-    //                pincodeReportModel.setCityId(resultSet.getString("cId"));
-    //                pincodeReportModel.setPincode(resultSet.getString("pincode"));
-    //                pincodeReportModel.setShipType(resultSet.getString("ship_type"));
-    //                pincodeReportModel.setShipCharge(resultSet.getDouble("ship_charge"));
-    //                pincodeReportModelList.add(pincodeReportModel);
-    //            }
-    //            pincodeModelListWithSummary.setPincodeReportModelList(pincodeReportModelList);
-    //
-    //            SummaryModel summaryModelTotalPincodes= new SummaryModel();
-    //            summaryModelTotalPincodes.setLabel("Total Pincodes");
-    //            summaryModelTotalPincodes.setValue(getCount(totalQuery).toString());
-    //            summaryModelList.add(summaryModelTotalPincodes);
-    //
-    //            pincodeModelListWithSummary.setSummaryModelList(summaryModelList);
-    //
-    //
-    //        } catch (Exception exception) {
-    //            logger.error("Exception in connection", exception);
-    //        } finally {
-    //            Database.INSTANCE.closeStatement(preparedStatement);
-    //            Database.INSTANCE.closeResultSet(resultSet);
-    //            Database.INSTANCE.closeConnection(connection);
-    //        }
-    //        return  pincodeModelListWithSummary;
-    //
-    //
-    //    }
+//    public static PincodeModelListWithSummary getPincodeDetailsFunction (String fkAssociateId,String startLimit,String endLimit)
+//    {
+//
+//        Connection connection = null;
+//        PincodeModelListWithSummary pincodeModelListWithSummary=new PincodeModelListWithSummary();
+//        List <PincodeReportModel>  pincodeReportModelList= new ArrayList<>();
+//        String statement;
+//        String whereClause="";
+//        String totalQuery="";
+//        List <SummaryModel> summaryModelList=new ArrayList<>();
+//        ResultSet resultSet = null;
+//        Map<String,String> shippingTypeMap=new HashMap<>();
+//        shippingTypeMap.put("1","");
+//        shippingTypeMap.put("2","");
+//        shippingTypeMap.put("3","");
+//        shippingTypeMap.put("4","");
+//
+//        PreparedStatement preparedStatement = null;
+//        try{
+//
+//
+//            connection = Database.INSTANCE.getReadOnlyConnection();
+//            statement = " select vendor_id as vId,city_id as cId,pincode,ship_type,ship_charge from AA_vendor_pincode where vendor_id="+fkAssociateId+" limit "+startLimit+","+endLimit+" ";
+//            preparedStatement = connection.prepareStatement(statement);
+//            totalQuery = " select count(*) as totalno from AA_vendor_pincode where vendor_id="+fkAssociateId+"";
+//            resultSet = preparedStatement.executeQuery();
+//            while(resultSet.next()) {
+//                PincodeReportModel pincodeReportModel=new PincodeReportModel();
+//                pincodeReportModel.setCityId(resultSet.getString("cId"));
+//                pincodeReportModel.setPincode(resultSet.getString("pincode"));
+//                pincodeReportModel.setShipType(resultSet.getString("ship_type"));
+//                pincodeReportModel.setShipCharge(resultSet.getDouble("ship_charge"));
+//                pincodeReportModelList.add(pincodeReportModel);
+//            }
+//            pincodeModelListWithSummary.setPincodeReportModelList(pincodeReportModelList);
+//
+//            SummaryModel summaryModelTotalPincodes= new SummaryModel();
+//            summaryModelTotalPincodes.setLabel("Total Pincodes");
+//            summaryModelTotalPincodes.setValue(getCount(totalQuery).toString());
+//            summaryModelList.add(summaryModelTotalPincodes);
+//
+//            pincodeModelListWithSummary.setSummaryModelList(summaryModelList);
+//
+//
+//        } catch (Exception exception) {
+//            logger.error("Exception in connection", exception);
+//        } finally {
+//            Database.INSTANCE.closeStatement(preparedStatement);
+//            Database.INSTANCE.closeResultSet(resultSet);
+//            Database.INSTANCE.closeConnection(connection);
+//        }
+//        return  pincodeModelListWithSummary;
+//
+//
+//    }
 
 }
