@@ -76,11 +76,11 @@ public class OrderMapper {
 
         return orders;
     }
-    public int assignReassignOrder(String action,int orderId,String orderProductIdString,int vendorId,String allOrderProductIdList,
+    public Set<String> assignReassignOrder(String action,int orderId,String orderProductIdString,int vendorId,String allOrderProductIdList,
         List<Order> orderList,HandleServiceResponse handleServiceResponse,String ipAddress,String userAgent){
         int result=0;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
-
+        Set<String> responseMap=new HashSet<>();
         String restOrderProductIdList="",mailerAction;
         boolean orderIsProcessedOrNot=false;
         MailUtil mailUtil=new MailUtil();
@@ -98,12 +98,10 @@ public class OrderMapper {
                     result=orderUtil.assignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order,action,ipAddress,userAgent);
                     if(result!=1){
                         if(restOrderProductIdList.equals("")){
-                            restOrderProductIdList+=orderProductId[i]+",";
+                            restOrderProductIdList+=orderProductId[i];
                         }else {
-                            restOrderProductIdList+=","+orderProductId[i]+",";
+                            restOrderProductIdList+=","+orderProductId[i];
                         }
-                    }else if(result==2||result==3){
-                        result=result;
                     }
                 }else if(action.equalsIgnoreCase("reassign")) {
                     result=orderUtil.reassignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order,action,ipAddress,userAgent);
@@ -116,10 +114,8 @@ public class OrderMapper {
                         if(restOrderProductIdList.equals("")){
                             restOrderProductIdList+=orderProductId[i]+",";
                         }else {
-                            restOrderProductIdList+=","+orderProductId[i]+",";
+                            restOrderProductIdList+=","+orderProductId[i];
                         }
-                    }else if(result==2||result==3){
-                        result=result;
                     }
                 }
             }
@@ -127,10 +123,13 @@ public class OrderMapper {
                 restOrderProductIdList=restOrderProductIdList.substring(0,restOrderProductIdList.length()-1);
             }
             String orderProductIdsWhichAreActuallyAssigned=findIntersectionOfTwoCommaSeparatedStrings(restOrderProductIdList,orderProductIdString);
-
+            if(orderProductIdsWhichAreActuallyAssigned!=null && !orderProductIdsWhichAreActuallyAssigned.equals("")){
+                fillAssignReassignResponseMap(orderId,orderProductIdsWhichAreActuallyAssigned,responseMap,0);
+            }
             if(action.equalsIgnoreCase("assign")){
                 if(!restOrderProductIdList.equals("")){
                     orderList=getOrder(orderId,restOrderProductIdList);
+                    fillAssignReassignResponseMap(orderId,restOrderProductIdList,responseMap,1);
                 }
             }else if(action.equalsIgnoreCase("reassign")) {
                 if(orderIsProcessedOrNot){
@@ -145,21 +144,22 @@ public class OrderMapper {
                 }else {
                     if(!restOrderProductIdList.equals("")){
                         orderList=getOrder(orderId,restOrderProductIdList);
+                        fillAssignReassignResponseMap(orderId,restOrderProductIdList,responseMap,1);
                     }
                 }
             }
             //mailService will be integrated here with orderProductIdsWhichAreActuallyAssigned
-            mailerAction="assignorder&orderid="+orderId+"&orderproductids="+orderProductIdsWhichAreActuallyAssigned+"&associd="+vendorId;
-            if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
-                logger.debug("Mail successfully sent for assign/reassign of orderId "+orderId+" with orderProductId "+orderProductIdsWhichAreActuallyAssigned);
-            }
+//            mailerAction="assignorder&orderid="+orderId+"&orderproductids="+orderProductIdsWhichAreActuallyAssigned+"&associd="+vendorId;
+//            if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
+//                logger.debug("Mail successfully sent for assign/reassign of orderId "+orderId+" with orderProductId "+orderProductIdsWhichAreActuallyAssigned);
+//            }
             handleServiceResponse.setResult(orderList);
 
         }catch (Exception exception){
             logger.error("error while assignReassignOrder",exception);
         }
 
-        return result;
+        return responseMap;
     }
     public boolean orderPriceChanges(int orderId,int orderProductId,int componentId,Double componentPrice,Double shippingCharge,String ipAddress,String userAgent){
         boolean result=false;
@@ -369,5 +369,18 @@ public class OrderMapper {
                 break;
         }
         return catSubCatArray;
+    }
+    public void fillAssignReassignResponseMap(int orderId,String orderProductIdString,Set<String> responseMap,int flag){
+        //flag=0 for Successful Assign and flag=1 for Could not ASSIGN
+        String[] orderProductIdArray=orderProductIdString.split(",");
+        for(int i=0;i<orderProductIdArray.length;i++){
+            if(flag==0){
+                responseMap.add("Order Id "+orderId+" successfully assigned with orderProduct Id "+orderProductIdArray[i]);
+            }else {
+                responseMap.add("Order Id "+orderId+" could not assign with orderProduct Id "+orderProductIdArray[i]);
+            }
+        }
+
+
     }
 }

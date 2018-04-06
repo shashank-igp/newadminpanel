@@ -1,9 +1,11 @@
 package com.igp.handles.admin.utils.Reports;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.igp.admin.mappers.marketPlace.Constants;
 import com.igp.config.Environment;
 import com.igp.config.instance.Database;
 import com.igp.handles.admin.mappers.Reports.ReportMapper;
+import com.igp.handles.admin.mappers.Vendor.VendorMapper;
 import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.admin.models.Vendor.VendorInfoModel;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
@@ -15,7 +17,10 @@ import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.*;
 
 /**
@@ -31,6 +36,8 @@ public class ReportUtil {
         List <orderReportObjectModel>  orderReportObjectList= new ArrayList<>();
         String statement;
         List <SummaryModel> summaryModelList=new ArrayList<>();
+        VendorMapper vendorMapper=new VendorMapper();
+        Constants constants=new Constants();
         ResultSet resultSet = null;
         int count=0,amt=0;
 
@@ -101,9 +108,9 @@ public class ReportUtil {
 
             statement = " select a.associate_name as vendorName,o.date_purchased as datePurchased,o.orders_id as  Order_No,oo.occasion_name as Ocassion , "
                 + " o.delivery_city as City ,o.delivery_postcode as Pincode ,oe.delivery_date  as Delivery_Date , "
-                + " op.orders_product_status as opStatus,op.shipping_type_g as Delivery_Type  , o.delivery_name as "
+                + " op.orders_product_status as opStatus,oe.delivery_type as delivery_type  , o.delivery_name as "
                 + " Recipient_Name , o.delivery_mobile as Phone  , (vap.vendor_price+vap.shipping) as Amount, "
-                + " op.delivery_status as status  from orders_products as op LEFT JOIN vendor_assign_price as  vap "
+                + " op.delivery_status as status,op.orders_products_id as orderProductId  from orders_products as op LEFT JOIN vendor_assign_price as  vap "
                 + " on op.orders_id=vap.orders_id  and  op.products_id=vap.products_id  LEFT JOIN associate as a on vap.fk_associate_id=a.associate_id" +
                 " inner join order_product_extra_info as oe on op.orders_products_id=oe.order_product_id inner  join  orders as o on  vap.orders_id=o.orders_id "
                 + " inner join  orders_occasions  as oo  on o.orders_occasionid=oo.occasion_id where " +
@@ -122,9 +129,11 @@ public class ReportUtil {
                 orderReportObjectModel.setCity(resultSet.getString("City"));
                 orderReportObjectModel.setPincode(resultSet.getInt("Pincode"));
                 orderReportObjectModel.setDelivery_Date(resultSet.getString("Delivery_Date"));
-                orderReportObjectModel.setDeliveryType(resultSet.getString("Delivery_Type"));
+                orderReportObjectModel.setDeliveryType(constants.getActualOrderStatus(resultSet.getString("delivery_type")));
                 orderReportObjectModel.setPrice(resultSet.getDouble("Amount"));
                 orderReportObjectModel.setStatus(resultSet.getInt("status"));
+                orderReportObjectModel.setVendorInfoModelList(vendorMapper.getVendorList(orderReportObjectModel.getPincode(),resultSet.getInt("delivery_type")));
+                orderReportObjectModel.setOrderProductId(resultSet.getString("orderProductId"));
                 String vendorName = resultSet.getString("vendorName");
                 if(vendorName==null || vendorName.equals("")){
                     orderReportObjectModel.setVendorName("");
@@ -140,8 +149,6 @@ public class ReportUtil {
 
                     orderReportObjectModel.setOrderProductStatus("Out For Delivery");
                 }
-
-
                 else {
                     orderReportObjectModel.setOrderProductStatus(resultSet.getString("opStatus"));
                 }

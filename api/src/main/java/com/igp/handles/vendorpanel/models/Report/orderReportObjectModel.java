@@ -3,6 +3,9 @@ package com.igp.handles.vendorpanel.models.Report;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.igp.handles.admin.models.Vendor.VendorInfoModel;
+
+import java.util.List;
 
 /**
  * Created by shal on 22/9/17.
@@ -13,6 +16,9 @@ public class orderReportObjectModel {
 
     @JsonProperty("Order_No")
     private String orderNo;
+
+    @JsonProperty("Order_Product_Id")
+    private String orderProductId;
 
     @JsonProperty("Date")
     private String date;
@@ -52,6 +58,29 @@ public class orderReportObjectModel {
 
     @JsonIgnore
     private Double totalAmountSummary;
+
+    @JsonProperty("Vendor_List")
+    private List<VendorInfoModel> vendorInfoModelList;
+
+    public String getOrderProductId()
+    {
+        return orderProductId;
+    }
+
+    public void setOrderProductId(String orderProductId)
+    {
+        this.orderProductId = orderProductId;
+    }
+
+    public List<VendorInfoModel> getVendorInfoModelList()
+    {
+        return vendorInfoModelList;
+    }
+
+    public void setVendorInfoModelList(List<VendorInfoModel> vendorInfoModelList)
+    {
+        this.vendorInfoModelList = vendorInfoModelList;
+    }
 
     public String getDate() {
         return date;
