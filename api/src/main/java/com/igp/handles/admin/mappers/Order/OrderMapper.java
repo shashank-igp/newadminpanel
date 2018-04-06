@@ -148,11 +148,11 @@ public class OrderMapper {
                     }
                 }
             }
-            //mailService will be integrated here with orderProductIdsWhichAreActuallyAssigned
-//            mailerAction="assignorder&orderid="+orderId+"&orderproductids="+orderProductIdsWhichAreActuallyAssigned+"&associd="+vendorId;
-//            if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
-//                logger.debug("Mail successfully sent for assign/reassign of orderId "+orderId+" with orderProductId "+orderProductIdsWhichAreActuallyAssigned);
-//            }
+//            mailService will be integrated here with orderProductIdsWhichAreActuallyAssigned
+            mailerAction="assignorder&orderid="+orderId+"&orderproductids="+orderProductIdsWhichAreActuallyAssigned+"&associd="+vendorId;
+            if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
+                logger.debug("Mail successfully sent for assign/reassign of orderId "+orderId+" with orderProductId "+orderProductIdsWhichAreActuallyAssigned);
+            }
             handleServiceResponse.setResult(orderList);
 
         }catch (Exception exception){
