@@ -678,11 +678,11 @@ public class HandlesVendorMapper {
             vendorCountDetail.setNewOrderTotalHighAlert(vendorCountDetail.getNewOrderTotalHighAlert()+newOrderTotalHighAlert);
             vendorCountDetail.setConfirmOrderTotalWholeHighAlert(vendorCountDetail.getConfirmOrderTotalWholeHighAlert()+confirmOrderTotalWholeHighAlert);
             vendorCountDetail.setOutOfDeliveryOrderTotalHighAlert(vendorCountDetail.getOutOfDeliveryOrderTotalHighAlert()+outOfDeliveryOrderTotalHighAlert);
-
-            clubOrderProductIds(dateStatusOrderIdAllMap,leftOutOrderToOrderProductIdMap2);
-            clubOrderProductIds(dateStatusOrderIdNoBreachMap,leftOutOrderToOrderProductIdMap2);
-            clubOrderProductIds(dateStatusOrderIdAlertMap,leftOutOrderToOrderProductIdMap2);
-
+            if(leftOutOrderToOrderProductIdMap2!=null){
+                clubOrderProductIds(dateStatusOrderIdAllMap,leftOutOrderToOrderProductIdMap2);
+                clubOrderProductIds(dateStatusOrderIdNoBreachMap,leftOutOrderToOrderProductIdMap2);
+                clubOrderProductIds(dateStatusOrderIdAlertMap,leftOutOrderToOrderProductIdMap2);
+            }
         } catch (Exception exception)
         {
             logger.error("Error in preparing VendorCountDetail", exception);
@@ -842,10 +842,11 @@ public class HandlesVendorMapper {
                     }
                 }
             }
-
-            clubOrderProductIds(dateStatusOrderIdAllMap,leftOutOrderToOrderProductIdMap2);
-            clubOrderProductIds(dateStatusOrderIdNoBreachMap,leftOutOrderToOrderProductIdMap2);
-            clubOrderProductIds(dateStatusOrderIdAlertMap,leftOutOrderToOrderProductIdMap2);
+            if(leftOutOrderToOrderProductIdMap2!=null){
+                clubOrderProductIds(dateStatusOrderIdAllMap,leftOutOrderToOrderProductIdMap2);
+                clubOrderProductIds(dateStatusOrderIdNoBreachMap,leftOutOrderToOrderProductIdMap2);
+                clubOrderProductIds(dateStatusOrderIdAlertMap,leftOutOrderToOrderProductIdMap2);
+            }
         }
         catch (Exception exception)
         {
