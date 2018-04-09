@@ -157,7 +157,7 @@ public class Reports {
     public HandleServiceResponse updatePincodeDetail(@QueryParam("fkAssociateId") String fkAssociateId,
                                                      @QueryParam("pincode") String pincode,
                                                      @QueryParam("shipCharge") Double oldPrice ,
-                                                     @QueryParam("reqPrice")String reqPrice,
+                                                     @QueryParam("reqPrice") Double reqPrice,
                                                      @QueryParam("shipType") String shipType,
                                                      @QueryParam("updateStatus") Integer updateStatus){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
@@ -186,9 +186,9 @@ public class Reports {
             message="Need to update the price of "+shipType+" for pincode "+pincode+" from "+oldPrice+" to "+reqPrice+" for vendor id "+fkAssociateId;
             tableDataActionHandels.setValue(oldPrice+"");
             tableDataActionHandels.setRequestType("");
-            tableDataActionHandels.setRequestValue(reqPrice);
+            tableDataActionHandels.setRequestValue(reqPrice+"");
         }
-        boolean result=updatePincodeMapper(updateflag,fkAssociateId,pincode,shipType,updateStatus,oldPrice);
+        boolean result=updatePincodeMapper(updateflag,fkAssociateId,pincode,shipType,updateStatus,reqPrice);
         if(result == true && updateflag == 3){
             response.put("Price",tableDataActionHandels);
         }
