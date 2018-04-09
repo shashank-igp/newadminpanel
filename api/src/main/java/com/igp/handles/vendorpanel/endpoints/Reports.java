@@ -122,6 +122,8 @@ public class Reports {
         }
         else if(result == true && (updateflag == 1 || updateflag == 2)){
             response.put("InStock",tableDataActionHandels);
+        }else{
+            handleServiceResponse.setError(true);
         }
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
         handleServiceResponse.setResult(response);
