@@ -950,10 +950,12 @@ public class HandlesVendorMapper {
                 String status=entry1.getKey();
                 for (Map<String,String> map:entry1.getValue()){
                     String orderId=map.get("orderId");
-                    if(childMap.get(timeWhen).get(status).containsKey(orderId)){
+                    if(orderId != null && status != null && timeWhen != null && childMap.get(timeWhen).get(status).containsKey(orderId)){
                         String orderProductIds=childMap.get(timeWhen).get(status).get(orderId);
-                        orderProductIds=orderProductIds+","+map.get("orderProductId");
-                        map.put("orderProductId",orderProductIds);
+                        if(orderProductIds!=null){
+                            orderProductIds=orderProductIds+","+map.get("orderProductId");
+                            map.put("orderProductId",orderProductIds);
+                        }
                     }
                 }
             }
