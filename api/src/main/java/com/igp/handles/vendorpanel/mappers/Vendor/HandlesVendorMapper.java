@@ -951,11 +951,17 @@ public class HandlesVendorMapper {
                 String status=entry1.getKey();
                 for (Map<String,String> map:entry1.getValue()){
                     String orderId=map.get("orderId");
-                    if(orderId != null && status != null && timeWhen != null && childMap.get(timeWhen).get(status).containsKey(orderId)){
-                        String orderProductIds=childMap.get(timeWhen).get(status).get(orderId);
-                        if(orderProductIds!=null){
-                            orderProductIds=orderProductIds+","+map.get("orderProductId");
-                            map.put("orderProductId",orderProductIds);
+                    Map<String,Map<String, String>> statusWithOrderIdMap=childMap.get(timeWhen);
+                    if(statusWithOrderIdMap!=null){
+                        Map<String, String> orderIdMap= statusWithOrderIdMap.get(status);
+                        if(orderIdMap!=null ){
+                            if(orderIdMap.containsKey(orderId)){
+                                String orderProductIds=orderIdMap.get(orderId);
+                                if(orderProductIds!=null){
+                                    orderProductIds=orderProductIds+","+map.get("orderProductId");
+                                    map.put("orderProductId",orderProductIds);
+                                }
+                            }
                         }
                     }
                 }
