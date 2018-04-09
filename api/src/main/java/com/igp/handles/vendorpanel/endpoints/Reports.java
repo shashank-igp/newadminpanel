@@ -1,5 +1,8 @@
 package com.igp.handles.vendorpanel.endpoints;
 
+import com.igp.handles.admin.models.Reports.PincodeModelListHavingSummaryModel;
+import com.igp.handles.admin.models.Reports.ProductModelListHavingSummaryModel;
+import com.igp.handles.admin.models.Reports.TableDataActionHandels;
 import com.igp.handles.vendorpanel.mappers.Reports.ReportMapper;
 import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.PincodeModelListWithSummary;
@@ -15,6 +18,7 @@ import org.slf4j.LoggerFactory;
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,10 +71,9 @@ public class Reports {
 
         ReportMapper.fillDataActionComponent(tableDataAction);
         reportResponse.setTableDataAction(tableDataAction);
-        VendorModelListWithSummary vendorModelListWithSummary=null;
-        vendorModelListWithSummary=getVendorSummaryDetails(fkAssociateId,startLimit,endLimit);
-        reportResponse.setSummary(vendorModelListWithSummary.getSummaryModelList());
-        List<Object> objectList = new ArrayList<Object>(vendorModelListWithSummary.getVendorReportObjectList());
+        ProductModelListHavingSummaryModel productModelListHavingSummaryModel = getVendorSummaryDetails(fkAssociateId,startLimit,endLimit);
+        reportResponse.setSummary(productModelListHavingSummaryModel.getSummaryModelList());
+        List<Object> objectList = new ArrayList<Object>(productModelListHavingSummaryModel.getProductTableDataModelList());
         reportResponse.setTableData(objectList);
 
         return reportResponse;
@@ -82,28 +85,46 @@ public class Reports {
     @Path("/v1/handels/handleComponentChange")
     public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") String fkAssociateId,
                                                        @QueryParam("componentId") String componentId,
-                                                       @QueryParam("updatePrice") String updatePrice ,
+                                                       @QueryParam("updatePrice") String oldPrice,
+                                                       @QueryParam("reqPrice") String reqPrice,
                                                        @QueryParam("inStock") Boolean inStock){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         Integer updateflag=0;
         String message="",componentName="";
+        TableDataActionHandels  tableDataActionHandels = new TableDataActionHandels();
+        Map<String,TableDataActionHandels> response = new HashMap<>();
         componentName= SummaryFunctionsUtil.getComponentName(componentId);
         if (inStock!=null){
             if(inStock==true){
                 updateflag=1;
-                message="Need to change status of component "+componentName+" to Instock";
+                message="Need to change status of component "+componentName+" to In stock";
+                tableDataActionHandels.setValue("Out of Stock");
+                tableDataActionHandels.setRequestType("");
+                tableDataActionHandels.setRequestValue("In Stock");
             }else {
                 updateflag=2;
                 message="Need to change status of component "+componentName+" to Out of stock";
+                tableDataActionHandels.setValue("Out of Stock");
+                tableDataActionHandels.setRequestType("InStock");
+                tableDataActionHandels.setRequestValue("Out of Stock");
             }
         }
-        else if (updatePrice!=null){
+        else if(reqPrice!=null){
             updateflag=3;
-            message="Need to change price of component "+componentName+" to "+updatePrice;
+            message="Need to change price of component "+componentName+" to "+oldPrice;
+            tableDataActionHandels.setValue(oldPrice);
+            tableDataActionHandels.setRequestType("");
+            tableDataActionHandels.setRequestValue(reqPrice);
         }
-        boolean result=updateComponentMapper(updateflag,fkAssociateId,componentId,updatePrice);
+        boolean result=updateComponentMapper(updateflag,fkAssociateId,componentId,reqPrice);
+        if(result == true && updateflag == 3){
+            response.put("Price",tableDataActionHandels);
+        }
+        else if(result == true && (updateflag == 1 || updateflag == 2)){
+            response.put("InStock",tableDataActionHandels);
+        }
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
-        handleServiceResponse.setResult(result);
+        handleServiceResponse.setResult(response);
         return handleServiceResponse;
     }
 
@@ -117,10 +138,9 @@ public class Reports {
         reportResponse.setTableHeaders(new String[]{"Pincode","Standard Delivery","Fixed Time Delivery","Midnight Delivery"});
         ReportMapper.fillDataActionpincode(tableDataAction);
         reportResponse.setTableDataAction(tableDataAction);
-        PincodeModelListWithSummary pincodeModelListWithSummary=null;
-        pincodeModelListWithSummary=getPincodeSummaryDetails(fkAssociateId,startLimit,endLimit);
-        reportResponse.setSummary(pincodeModelListWithSummary.getSummaryModelList());
-        List<Object> objectList = new ArrayList<Object>(pincodeModelListWithSummary.getPincodeReportModelList());
+        PincodeModelListHavingSummaryModel pincodeModelListHavingSummaryModel=getPincodeSummaryDetails(fkAssociateId,startLimit,endLimit);
+        reportResponse.setSummary(pincodeModelListHavingSummaryModel.getSummaryModelList());
+        List<Object> objectList = new ArrayList<Object>(pincodeModelListHavingSummaryModel.getPincodeTableDataModelList());
         reportResponse.setTableData(objectList);
 
         return reportResponse;
@@ -131,27 +151,44 @@ public class Reports {
     @Path("/v1/handels/handlePincodeChange")
     public HandleServiceResponse updatePincodeDetail(@QueryParam("fkAssociateId") String fkAssociateId,
                                                      @QueryParam("pincode") String pincode,
-                                                     @QueryParam("shipCharge")Double updatePrice ,
+                                                     @QueryParam("shipCharge")Double oldPrice ,
+                                                     @QueryParam("reqPrice")String reqPrice,
                                                      @QueryParam("shipType") String shipType,
                                                      @QueryParam("updateStatus") Integer updateStatus){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         Integer updateflag=0;
-        boolean result=true;
         String message="";
+        TableDataActionHandels  tableDataActionHandels = new TableDataActionHandels();
+        Map<String,TableDataActionHandels> response = new HashMap<>();
         if (updateStatus!=null){
             if(updateStatus==1){
                 updateflag=1;
                 message="Need to Enable "+shipType+" for pincode "+pincode;
+                tableDataActionHandels.setValue("Not Serviceable");
+                tableDataActionHandels.setRequestType("");
+                tableDataActionHandels.setRequestValue("Not Serviceable");
             }else {
                 updateflag=2;
                 message="Need to Disable "+shipType+" for pincode "+pincode;
+                tableDataActionHandels.setValue("Not Serviceable");
+                tableDataActionHandels.setRequestType("Enable");
+                tableDataActionHandels.setRequestValue(oldPrice+"");
             }
         }
-        else if (updatePrice!=null){
+        else if (reqPrice!=null){
             updateflag=3;
-            message="Need to update the price of "+shipType+" for pincode "+pincode+" to "+updatePrice;
+            message="Need to update the price of "+shipType+" for pincode "+pincode+" to "+oldPrice;
+            tableDataActionHandels.setValue(oldPrice+"");
+            tableDataActionHandels.setRequestType("");
+            tableDataActionHandels.setRequestValue(reqPrice);
         }
-        result=updatePincodeMapper(updateflag,fkAssociateId,pincode,shipType,updateStatus,updatePrice);
+        boolean result=updatePincodeMapper(updateflag,fkAssociateId,pincode,shipType,updateStatus,oldPrice);
+        if(result == true && updateflag == 3){
+            response.put("Price",tableDataActionHandels);
+        }
+        else if(result == true && (updateflag == 1 || updateflag == 2)){
+            response.put(shipType,tableDataActionHandels);
+        }
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
