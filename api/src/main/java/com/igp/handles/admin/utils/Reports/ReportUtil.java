@@ -191,45 +191,48 @@ public class ReportUtil {
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = " select * from AA_vendor_pincode as a " +
-                "JOIN associate_user as au ON a.vendor_id = au.fk_associate_login_id JOIN" +
-                " associate as aso on au.fk_associate_login_id=aso.associate_id " +
-                "where vendor_id="+fkAssociateId+" limit "+startLimit+","+endLimit+" ";
+            statement = "select aso.associate_name vendor,pincode, " +
+                "group_concat(ship_type,',',flag_enabled,',',ship_charge,',',req_price SEPARATOR ':' ) as value " +
+                "from AA_vendor_pincode JOIN associate_user as au ON AA_vendor_pincode.vendor_id = au.fk_associate_login_id " +
+                "JOIN associate as aso on au.fk_associate_login_id=aso.associate_id where vendor_id = "+fkAssociateId+
+                " group by pincode order by pincode limit "+startLimit+","+endLimit+" ";
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query "+preparedStatement);
             totalQuery = " select count(distinct pincode) as totalno from AA_vendor_pincode where vendor_id="+fkAssociateId+"";
             resultSet = preparedStatement.executeQuery();
-            int i = 0;
             while(resultSet.next()) {
-                i++;
-                Map<Integer,TableDataActionHandels> shipTypeAndTableMap = new HashMap<>();
                 VendorPincodeModel vendorPincodeModel = new VendorPincodeModel();
-
                 vendorPincodeModel.setPincode(resultSet.getInt("pincode"));
-                vendorPincodeModel.setCityId(resultSet.getInt("city_id"));
-                vendorPincodeModel.setFlagEnabled(resultSet.getInt("flag_enabled"));
-                vendorPincodeModel.setReqdPrice(resultSet.getInt("req_price"));
-                vendorPincodeModel.setShipTypeId(resultSet.getInt("ship_type"));
-                vendorPincodeModel.setShipCharge(resultSet.getInt("ship_charge"));
 
-                TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
+                String[] valueArray = resultSet.getString("value").split(":");
+
+                for (int i = 0; i < valueArray.length; i++) {
+                    Map<Integer,TableDataActionHandels> shipTypeAndTableMap = new HashMap<>();
+
+                    String[] values = valueArray[i].split(",");
+                    vendorPincodeModel.setShipTypeId(new Integer(values[0]).intValue());
+                    vendorPincodeModel.setFlagEnabled(new Integer(values[1]).intValue());
+                    vendorPincodeModel.setShipCharge(new Integer(values[2]).intValue());
+                    vendorPincodeModel.setReqdPrice(new Integer(values[3]).intValue());
+
+                    TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
                     tableDataActionHandels.setValue(vendorPincodeModel.getShipCharge()+"");
-                tableDataActionHandels.setRequestValue(vendorPincodeModel.getReqdPrice()+"");
-                if(vendorPincodeModel.getReqdPrice()!=-1){
-                    tableDataActionHandels.setRequestType("Approve/Reject");
-                }else if(vendorPincodeModel.getFlagEnabled()==0 && vendorPincodeModel.getReqdPrice()==-1){
-                    tableDataActionHandels.setValue(null);
-                    // when the ship type at pincode is disabled so it must be not servicable
+                    tableDataActionHandels.setRequestValue(vendorPincodeModel.getReqdPrice()+"");
+                    if(vendorPincodeModel.getReqdPrice()!=-1){
+                        tableDataActionHandels.setRequestType("Approve/Reject");
+                    }else if(vendorPincodeModel.getFlagEnabled()==0 && vendorPincodeModel.getReqdPrice()==-1){
+                        tableDataActionHandels.setValue(null);
+                        // when the ship type at pincode is disabled so it must be not servicable
+                    }
+                    shipTypeAndTableMap.put(vendorPincodeModel.getShipTypeId(), tableDataActionHandels);
+                    if (pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode() + "") == null) {
+                        pincodeShipTypeAndShipChargeMap.put(vendorPincodeModel.getPincode() + "", shipTypeAndTableMap);
+                    } else {
+                        pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode() + "").put(vendorPincodeModel.getShipTypeId(), tableDataActionHandels);
+                    }
+                    vendorName = resultSet.getString("vendor");
                 }
-                shipTypeAndTableMap.put(vendorPincodeModel.getShipTypeId(),tableDataActionHandels);
-                if(pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode()+"")==null){
-                    pincodeShipTypeAndShipChargeMap.put(vendorPincodeModel.getPincode()+"",shipTypeAndTableMap);
-                }else {
-                    pincodeShipTypeAndShipChargeMap.get(vendorPincodeModel.getPincode()+"").put(vendorPincodeModel.getShipTypeId(),tableDataActionHandels);
-                }
-                vendorName  = resultSet.getString("aso.associate_name");
             }
-            System.out.print(i);
             for(Map.Entry<String,Map<Integer,TableDataActionHandels>> entry:pincodeShipTypeAndShipChargeMap.entrySet()){
                 PincodeTableDataModel pincodeTableDataModel =new PincodeTableDataModel();
                 String pincode = entry.getKey();
