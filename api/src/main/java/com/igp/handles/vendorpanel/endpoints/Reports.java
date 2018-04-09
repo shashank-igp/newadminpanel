@@ -3,6 +3,7 @@ package com.igp.handles.vendorpanel.endpoints;
 import com.igp.handles.admin.models.Reports.PincodeModelListHavingSummaryModel;
 import com.igp.handles.admin.models.Reports.ProductModelListHavingSummaryModel;
 import com.igp.handles.admin.models.Reports.TableDataActionHandels;
+import com.igp.handles.admin.utils.Reports.ReportUtil;
 import com.igp.handles.vendorpanel.mappers.Reports.ReportMapper;
 import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.PincodeModelListWithSummary;
@@ -85,25 +86,26 @@ public class Reports {
     @Path("/v1/handels/handleComponentChange")
     public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") String fkAssociateId,
                                                        @QueryParam("componentId") String componentId,
-                                                       @QueryParam("updatePrice") String oldPrice,
+                                                       @QueryParam("oldPrice") String oldPrice,
                                                        @QueryParam("reqPrice") String reqPrice,
-                                                       @QueryParam("inStock") Boolean inStock){
+                                                       @QueryParam("inStock") String inStock){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        ReportUtil reportUtil = new ReportUtil();
         Integer updateflag=0;
         String message="",componentName="";
         TableDataActionHandels  tableDataActionHandels = new TableDataActionHandels();
         Map<String,TableDataActionHandels> response = new HashMap<>();
         componentName= SummaryFunctionsUtil.getComponentName(componentId);
         if (inStock!=null){
-            if(inStock==true){
+            if(inStock.equals("1")){
                 updateflag=1;
-                message="Need to change status of component "+componentName+" to In stock";
+                message="Need to change status of component "+componentName+" to In stock for vendor id "+fkAssociateId;
                 tableDataActionHandels.setValue("Out of Stock");
                 tableDataActionHandels.setRequestType("");
                 tableDataActionHandels.setRequestValue("In Stock");
             }else {
                 updateflag=2;
-                message="Need to change status of component "+componentName+" to Out of stock";
+                message="Need to change status of component "+componentName+" to Out of stock for vendor id "+fkAssociateId;
                 tableDataActionHandels.setValue("Out of Stock");
                 tableDataActionHandels.setRequestType("InStock");
                 tableDataActionHandels.setRequestValue("Out of Stock");
@@ -111,7 +113,7 @@ public class Reports {
         }
         else if(reqPrice!=null){
             updateflag=3;
-            message="Need to change price of component "+componentName+" to "+oldPrice;
+            message="Need to change price of component "+componentName+" from "+oldPrice+" to "+oldPrice+" for vendor id "+fkAssociateId;
             tableDataActionHandels.setValue(oldPrice);
             tableDataActionHandels.setRequestType("");
             tableDataActionHandels.setRequestValue(reqPrice);
@@ -125,6 +127,7 @@ public class Reports {
         }else{
             handleServiceResponse.setError(true);
         }
+        reportUtil.setVendorGeneralInstruction(new Integer(fkAssociateId),1,componentId+"",message);
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
         handleServiceResponse.setResult(response);
         return handleServiceResponse;
@@ -153,11 +156,12 @@ public class Reports {
     @Path("/v1/handels/handlePincodeChange")
     public HandleServiceResponse updatePincodeDetail(@QueryParam("fkAssociateId") String fkAssociateId,
                                                      @QueryParam("pincode") String pincode,
-                                                     @QueryParam("shipCharge")Double oldPrice ,
+                                                     @QueryParam("shipCharge") Double oldPrice ,
                                                      @QueryParam("reqPrice")String reqPrice,
                                                      @QueryParam("shipType") String shipType,
                                                      @QueryParam("updateStatus") Integer updateStatus){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        ReportUtil reportUtil = new ReportUtil();
         Integer updateflag=0;
         String message="";
         TableDataActionHandels  tableDataActionHandels = new TableDataActionHandels();
@@ -165,13 +169,13 @@ public class Reports {
         if (updateStatus!=null){
             if(updateStatus==1){
                 updateflag=1;
-                message="Need to Enable "+shipType+" for pincode "+pincode;
+                message="Need to Enable "+shipType+" for pincode "+pincode+" for vendor id "+fkAssociateId;
                 tableDataActionHandels.setValue("Not Serviceable");
                 tableDataActionHandels.setRequestType("");
                 tableDataActionHandels.setRequestValue("Not Serviceable");
             }else {
                 updateflag=2;
-                message="Need to Disable "+shipType+" for pincode "+pincode;
+                message="Need to Disable "+shipType+" for pincode "+pincode+" for vendor id "+fkAssociateId;
                 tableDataActionHandels.setValue("Not Serviceable");
                 tableDataActionHandels.setRequestType("Enable");
                 tableDataActionHandels.setRequestValue(oldPrice+"");
@@ -179,7 +183,7 @@ public class Reports {
         }
         else if (reqPrice!=null){
             updateflag=3;
-            message="Need to update the price of "+shipType+" for pincode "+pincode+" to "+oldPrice;
+            message="Need to update the price of "+shipType+" for pincode "+pincode+" from "+oldPrice+" to "+reqPrice+" for vendor id "+fkAssociateId;
             tableDataActionHandels.setValue(oldPrice+"");
             tableDataActionHandels.setRequestType("");
             tableDataActionHandels.setRequestValue(reqPrice);
@@ -191,6 +195,7 @@ public class Reports {
         else if(result == true && (updateflag == 1 || updateflag == 2)){
             response.put(shipType,tableDataActionHandels);
         }
+        reportUtil.setVendorGeneralInstruction(new Integer(fkAssociateId),0,pincode+"",message);
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
