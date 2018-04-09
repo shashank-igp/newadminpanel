@@ -38,7 +38,7 @@ public class ReportMapper {
         boolean response=false;
         int result = reportUtil.updateVendorPincode(flag,fk_associate_id,pincode,shipType,updatePrice,field);
         if(result==1){
-            response = reportUtil.setVendorGeneralInstruction(fk_associate_id,0,pincode+"",message+"Done");
+            response = reportUtil.setVendorGeneralInstruction(fk_associate_id,0,pincode+"",message);
         }
         return response;
     }
@@ -56,7 +56,7 @@ public class ReportMapper {
         String message="Added new pincode :- "+pincode+" with shipping type :- "+map.get(shipType)+" and shipping charge :- "+shipCharge+" : ";
         result = reportUtil.addNewVendorPincodeUtil(fkAssociateId,pincode,cityId,shipType,shipCharge,1);
         if(result==true){
-            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,0,pincode+"",message+"Done");
+            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,0,pincode+"",message);
         }
         return response;
     }
@@ -67,7 +67,7 @@ public class ReportMapper {
         String message="Added new Component : Name :- "+componentName+" With Price :- "+price+" : ";
         result = reportUtil.addVendorComponent(String.valueOf(fkAssociateId),componentCode,componentName,type,"dummy.jpg",price);
         if(result==true){
-            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message+"Done");
+            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message);
         }
         return response;
     }
@@ -82,7 +82,7 @@ public class ReportMapper {
         boolean response = false;
         boolean result=reportUtil.updateProductComponent(fkAssociateId,componentId,updatePrice,inStock,field);
         if(result==true){
-            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentId,message+"Done");
+            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentId,message);
         }
         return response;
     }

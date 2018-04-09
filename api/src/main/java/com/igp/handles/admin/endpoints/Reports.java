@@ -110,11 +110,14 @@ public class Reports {
         try{
             Boolean result = false;
             String message="";
-            if (flag != null){
-                message = "Enable/Disable "+shipType+" for Pincode "+pincode+" : ";
+            if (flag != null && flag == 1){
+                if(flag == 1)
+                    message = "Enable shipping type "+shipType+" for Pincode "+pincode+" for vendor id "+fkAssociateId;
+                else
+                    message = "Disable shipping type "+shipType+" for Pincode "+pincode+" for vendor id "+fkAssociateId;
             }
             else {
-                message = "Update the price of "+shipType+" for Pincode "+pincode+" to "+updatePrice+" : ";
+                message = "Update the price of shipping type "+shipType+" for Pincode "+pincode+" to "+updatePrice+" for vendor id "+fkAssociateId;
             }
             boolean status = reportMapper.updatePincodeMapper(flag,fkAssociateId,pincode,shipType,updatePrice,message,field);
             if(status == false){
@@ -159,26 +162,27 @@ public class Reports {
     @PUT
     @Path("/v1/admin/handels/handleComponentChange")
     public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") int fkAssociateId,
-        @QueryParam("componentId") String componentId,
-        @DefaultValue("-1") @QueryParam("updatePrice")int updatePrice,
-        @DefaultValue("-1") @QueryParam("inStock") String inStock,
-        @QueryParam("field") String field){
+                                                       @QueryParam("componentId") String componentId,
+                                                       @QueryParam("oldPrice") String oldPrice,
+                                                       @DefaultValue("-1") @QueryParam("reqPrice") String updatePrice,
+                                                       @DefaultValue("-1") @QueryParam("inStock") String inStock,
+                                                       @QueryParam("field") String field){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
+        int newPrice = -1;
         try{
             String message = "",componentName = "";
             componentName= SummaryFunctionsUtil.getComponentName(componentId);
-            if (updatePrice!=-1){
-                message="Change price of component "+componentName+" to "+updatePrice+" : ";
-            }
-            else if(inStock.equals("1")){
-                message="Change status of component "+componentName+" to Instock : ";
-            }
-            else  if(inStock.equals("0")){
-                message="Change status of component "+componentName+" to Out of stock : ";
+            if (!updatePrice.equals("-1")){
+                newPrice = new Integer(updatePrice);
+                message="Change price of component "+componentName+" from "+oldPrice+" to "+updatePrice+" for vendor id "+fkAssociateId;
+            }else if(inStock.equals("1")){
+                message="Change status of component "+componentName+" to Instock for vendor id "+fkAssociateId;
+            }else if(inStock.equals("0")){
+                message="Change status of component "+componentName+" to Out of stock for vendor id "+fkAssociateId;
             }
 
-            boolean result = reportMapper.updateComponentMapper(fkAssociateId,componentId,message,updatePrice,inStock,field);
+            boolean result = reportMapper.updateComponentMapper(fkAssociateId,componentId,message,newPrice,inStock,field);
             if(result == false){
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING COMPONENT INFO");
@@ -452,13 +456,13 @@ public class Reports {
     @GET
     @Path("/v1/admin/handels/getOrderFileUploadReport")
     public ReportResponse getOrderFileUploadReport(@QueryParam("fkAssociateId") String fkAssociateId,
-        @QueryParam("orderDateFrom") String startDate,
-        @QueryParam("orderDateTo")String endDate ,
-        @DefaultValue("0") @QueryParam("startLimit") String startLimit,
-        @DefaultValue("10") @QueryParam("endLimit") String endLimit ,
-        @QueryParam("orderNumber") Integer orderNo,
-        @QueryParam("deliveryDateFrom") String deliveryDateFrom,
-        @QueryParam("deliveryDateTo") String deliveryDateTo){
+                                                   @QueryParam("orderDateFrom") String startDate,
+                                                   @QueryParam("orderDateTo")String endDate ,
+                                                   @DefaultValue("0") @QueryParam("startLimit") String startLimit,
+                                                   @DefaultValue("10") @QueryParam("endLimit") String endLimit ,
+                                                   @QueryParam("orderNumber") Integer orderNo,
+                                                   @QueryParam("deliveryDateFrom") String deliveryDateFrom,
+                                                   @QueryParam("deliveryDateTo") String deliveryDateTo){
 
         ReportResponse reportResponse = new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
