@@ -1,5 +1,7 @@
 package com.igp.handles.vendorpanel.mappers.Vendor;
 
+import com.igp.admin.mappers.marketPlace.Constants;
+import com.igp.handles.admin.utils.Order.SlaCompliant;
 import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerOrderProduct;
 import com.igp.handles.vendorpanel.models.Vendor.VendorCountDetail;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
@@ -28,6 +30,8 @@ public class HandlesVendorMapper {
         Map<String, Map<String, Set<Map<String, String>>>> dateStatusOrderIdAlertMap    = vendorCountDetail.getDateStatusOrderIdAlertMap();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        SlaCompliant slaCompliant=new SlaCompliant();
+        OrderUtil orderUtil=new OrderUtil();
         try{
             Set<String> uniqueCombinations = new HashSet<>();
             Date todayDate = DateUtils.truncate(new Date(), Calendar.DAY_OF_MONTH);
@@ -244,11 +248,14 @@ public class HandlesVendorMapper {
 
                     String status = orderDetailsPerOrderProduct.getOrderProductStatus();
                     String deliveryTime = orderDetailsPerOrderProduct.getDeliveryTime();
-                    String shippingType = orderDetailsPerOrderProduct.getShippingType();
+                    String shippingType = Constants.getDeliveryType(orderDetailsPerOrderProduct.getShippingType());
                     boolean deliverystatus = (boolean) orderDetailsPerOrderProduct.getDeliveryStatus();
+
                     boolean flagForUniqueness=false;
                     Map<String, String> orderIdData = new HashMap<>();
-                    int slaCode= orderDetailsPerOrderProduct.getSlaCode();
+//                    int slaCode= orderDetailsPerOrderProduct.getSlaCode();
+                    int slaCode=slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,0);
+                    orderUtil.saveSlaCodes(orderId.intValue(),orderProductId.intValue(),status,slaCode,deliverystatus);
                     int deliveryAttemptFlag=orderDetailsPerOrderProduct.getDeliveryAttemptFlag();
                     if (status.equals("Processed") && deliverystatus == false)
                     {
@@ -706,7 +713,8 @@ public class HandlesVendorMapper {
         Date deliveredDate = null;
         Date deliveryDate = null;
         VendorUtil handleVendorUtil=new VendorUtil();
-
+        OrderUtil orderUtil=new OrderUtil();
+        SlaCompliant slaCompliant=new SlaCompliant();
         try
         {
             Date specificDate = dateFormat.parse(vendorCountDetail.getFestivalDate());
@@ -782,10 +790,13 @@ public class HandlesVendorMapper {
                     deliveryDate = orderDetailsPerOrderProduct.getDeliveryDate();
                 String status = orderDetailsPerOrderProduct.getOrderProductStatus();
                 String deliveryTime = orderDetailsPerOrderProduct.getDeliveryTime();
-                String shippingType = orderDetailsPerOrderProduct.getShippingType();
+                String shippingType = Constants.getDeliveryType(orderDetailsPerOrderProduct.getShippingType());
                 boolean flagForUniqueness=false;
 
-                int slaCode = orderDetailsPerOrderProduct.getSlaCode();
+                boolean deliverystatus = (boolean) orderDetailsPerOrderProduct.getDeliveryStatus();
+                //                int slaCode = orderDetailsPerOrderProduct.getSlaCode();
+                int slaCode=slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,0);
+                orderUtil.saveSlaCodes(orderId.intValue(),orderProductId.intValue(),status,slaCode,deliverystatus);
                 Map<String, String> orderIdData = new HashMap<>();
                 // boolean deliverystatus = (boolean) orderArray[4];
                 orderIdData.put("orderId", orderId + "");

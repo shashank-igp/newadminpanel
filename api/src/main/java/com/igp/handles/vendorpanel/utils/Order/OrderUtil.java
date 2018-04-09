@@ -695,7 +695,44 @@ public class OrderUtil
         return order;
     }
 
-
+    public boolean saveSlaCodes(int orderId,int orderProductId,String status,int slaCode,boolean deliveryStatus){
+        boolean result=false;
+        Connection connection = null;
+        String statement=null;
+        PreparedStatement preparedStatement = null;
+        try{
+            connection = Database.INSTANCE.getReadWriteConnection();
+            if(status.equals("Processed")){
+                statement = "update orders_products as op set op.sla_code = ? ,op.sla_code1 = ?  where  op.orders_id=? and "
+                    + " op.orders_products_id = ? ";
+            }else if(status.equals("Confirmed")){
+                statement = "update orders_products as op set op.sla_code = ? ,op.sla_code2 = ?  where  op.orders_id=? and "
+                    + " op.orders_products_id = ? ";
+            }else if(status.equalsIgnoreCase("Shipped") && deliveryStatus == false){
+                statement = "update orders_products as op set op.sla_code = ? ,op.sla_code3 = ?  where  op.orders_id=? and "
+                    + " op.orders_products_id = ? ";
+            }
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,slaCode);
+            preparedStatement.setInt(2,slaCode);
+            preparedStatement.setInt(3,orderId);
+            preparedStatement.setInt(4,orderProductId);
+            logger.debug("sql query "+preparedStatement);
+            Integer rowsUpdated = preparedStatement.executeUpdate();
+            if (rowsUpdated>0){
+                result=true;
+            }
+            else {
+                result=false;
+            }
+        } catch (Exception exception) {
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
+    }
 
     public static String getDeliverWhen(String deliverDate) throws ParseException
     {
