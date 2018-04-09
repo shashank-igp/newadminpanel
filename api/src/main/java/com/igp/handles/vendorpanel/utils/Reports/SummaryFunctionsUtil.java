@@ -361,6 +361,18 @@ public class SummaryFunctionsUtil
                             pincodeTableDataModel.setMidnightDeliveryCharge(tableDataActionHandels);
                         }
                     }
+                    TableDataActionHandels tableDataActionHandels = new TableDataActionHandels();
+                    tableDataActionHandels.setValue("Not Serviceable");
+                    tableDataActionHandels.setRequestValue("-1");
+                    if(pincodeTableDataModel.getStandardDeliveryCharge()==null){
+                        pincodeTableDataModel.setStandardDeliveryCharge(tableDataActionHandels);
+                    }
+                    if(pincodeTableDataModel.getFixedTimeDeliveryCharge()==null){
+                        pincodeTableDataModel.setFixedTimeDeliveryCharge(tableDataActionHandels);
+                    }
+                    if(pincodeTableDataModel.getMidnightDeliveryCharge()==null){
+                        pincodeTableDataModel.setMidnightDeliveryCharge(tableDataActionHandels);
+                    }
                     pincodeTableDataModel.setVendorName(""); // ignore it
                     pincodeTableDataModelList.add(pincodeTableDataModel);
                 }
