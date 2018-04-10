@@ -219,7 +219,7 @@ public class ReportUtil {
                     tableDataActionHandels.setValue(vendorPincodeModel.getShipCharge()+"");
                     tableDataActionHandels.setRequestValue(vendorPincodeModel.getReqdPrice()+"");
                     if(vendorPincodeModel.getReqdPrice()!=-1){
-                        tableDataActionHandels.setRequestType("Approve/Reject");
+                        tableDataActionHandels.setRequestType("approve");
                     }else if(vendorPincodeModel.getFlagEnabled()==0 && vendorPincodeModel.getReqdPrice()==-1){
                         tableDataActionHandels.setValue(null);
                         // when the ship type at pincode is disabled so it must be not servicable
@@ -467,7 +467,7 @@ public class ReportUtil {
                 tableDataActionHandels.setValue(price+"");
                 tableDataActionHandels.setRequestValue("-1");
                 if(!reqPrice.equals("-1") && !tableDataActionHandels.getValue().equals(reqPrice)){
-                    tableDataActionHandels.setRequestType("Approve/Reject");
+                    tableDataActionHandels.setRequestType("approve");
                     tableDataActionHandels.setRequestValue(reqPrice);
                 }
                 productTableData.setPrice(tableDataActionHandels);
@@ -481,7 +481,7 @@ public class ReportUtil {
                     tableDataActionHandels1.setValue("Out of Stock");
                 }
                 if(tableDataActionHandels.getValue().equals(reqPrice)) {
-                    tableDataActionHandels1.setRequestType("Approve/Reject");
+                    tableDataActionHandels1.setRequestType("approve");
                     tableDataActionHandels1.setRequestValue("In Stock");
                 }
                 productTableData.setInStock(tableDataActionHandels1);
