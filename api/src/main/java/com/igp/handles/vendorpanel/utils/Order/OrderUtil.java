@@ -718,7 +718,7 @@ public class OrderUtil
                 preparedStatement.setInt(2,slaCode);
                 preparedStatement.setInt(3,orderId);
                 preparedStatement.setInt(4,orderProductId);
-                logger.debug("sql query "+preparedStatement);
+                logger.debug("sql query while saving sla codes "+preparedStatement);
                 Integer rowsUpdated = preparedStatement.executeUpdate();
                 if (rowsUpdated>0){
                     result=true;

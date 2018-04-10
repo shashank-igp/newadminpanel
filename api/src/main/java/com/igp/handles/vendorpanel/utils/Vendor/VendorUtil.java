@@ -40,7 +40,7 @@ public class VendorUtil
                 + "vap.delivery_date ,op.orders_product_status,op.delivery_status  ,vap.delivery_time , vap.shipping_type ,op.sla_code ,"
                 + "( CASE WHEN torder.outForDeliveryDate !='0000-00-00 00:00:00' THEN torder.outForDeliveryDate END ) as  outForDeliveryDate,op.orders_products_id  "
                 + " , op.delivery_attempt,( CASE WHEN vap.assign_time !='0000-00-00 00:00:00' THEN vap.assign_time "
-                + " END ) as  vendor_assign_time,opei.delivery_type,opei.delivery_time from orders_products op join order_product_extra_info opei on "
+                + " END ) as  vendor_assign_time,opei.delivery_type,opei.delivery_time,torder.date_purchased from orders_products op join order_product_extra_info opei on "
                 + " op.orders_products_id = opei.order_product_id join vendor_assign_price vap on vap.orders_id = op.orders_id "
                 + " and vap.products_id = op.products_id left join trackorders torder on op.orders_id = torder.orders_id "
                 + " and op.orders_products_id = torder.orders_products_id where  op.orders_product_status "
@@ -68,6 +68,7 @@ public class VendorUtil
                 orderDetailsPerOrderProduct.setDeliveryAttemptFlag(resultSet.getInt("op.delivery_attempt"));
 
                 orderDetailsPerOrderProduct.setAssignTime(resultSet.getString("vendor_assign_time"));
+                orderDetailsPerOrderProduct.setPurchasedTime(resultSet.getString("torder.date_purchased"));
                 orderDetailsPerOrderProduct.setShippingType(resultSet.getString("opei.delivery_type"));
                 orderDetailsPerOrderProduct.setDeliveryTime(resultSet.getString("opei.delivery_time"));
                 orderDetailsPerOrderProduct.setVendorId(Integer.parseInt(fkAssociateId));
