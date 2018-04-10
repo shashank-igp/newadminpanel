@@ -154,7 +154,10 @@ public class OrderStatusUpdateUtil {
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "update orders_products as op inner join trackorders as tk on op.orders_products_id=tk.orders_products_id and  op.orders_id=tk.orders_id  set tk.releaseDate=now() ,op.orders_product_status= ? where  op.orders_id=? and op.fk_associate_id in(?) and op.orders_products_id in ( "+orderProductIds+" ) ";
+            statement = "update orders_products as op inner join trackorders as tk on op.orders_products_id = "
+                + " tk.orders_products_id and  op.orders_id=tk.orders_id  set tk.releaseDate=now() , "
+                + " op.orders_product_status= ? where  op.orders_id=? and op.fk_associate_id in(?) and "
+                + " op.orders_products_id in ( "+orderProductIds+" ) ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1,status);
             preparedStatement.setInt(2,orderId);
