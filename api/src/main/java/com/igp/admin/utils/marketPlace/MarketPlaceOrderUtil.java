@@ -135,7 +135,9 @@ public class MarketPlaceOrderUtil {
         } catch (Exception e) {
             logger.error("Exception at validating Customer Details.", e);
             validationModel.setError(Boolean.TRUE);
-            validationModel.setMessage(e.getMessage());
+            if(e.getMessage().contains("response code")){
+                validationModel.setMessage("Problem in Creating a New Customer.");
+            }else validationModel.setMessage(e.getMessage());
         }
         logger.debug("Customer Id : " + userModel.getId());
         return validationModel;
@@ -174,7 +176,7 @@ public class MarketPlaceOrderUtil {
                 }
             }
             // model didn't return any error and now work on address book.
-           shippingAddress.setAid(checkForAddressExactMatch(shippingAddress,validationModel.getUserModel().getId()));
+            shippingAddress.setAid(checkForAddressExactMatch(shippingAddress,validationModel.getUserModel().getId()));
 
 //            String postData = objectMapper.writeValueAsString(shippingAddress);
 //            logger.debug("Postdata : "+ postData);
@@ -206,7 +208,9 @@ public class MarketPlaceOrderUtil {
         } catch (Exception e) {
             logger.error("Exception at validating Delivery Details : ", e);
             validationModel.setError(Boolean.TRUE);
-            validationModel.setMessage(e.getMessage());
+            if(e.getMessage().contains("response code")){
+                validationModel.setMessage("Some Problem in Address.");
+            }else validationModel.setMessage(e.getMessage());
         }
         logger.debug("Address id is : "+shippingAddress.getAid());
         return validationModel;
