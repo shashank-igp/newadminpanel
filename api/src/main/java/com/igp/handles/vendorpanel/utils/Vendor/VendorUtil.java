@@ -39,34 +39,40 @@ public class VendorUtil
             statement = "select torder.orders_id, ( CASE WHEN torder.deliveredDate!='0000-00-00 00:00:00' THEN torder.deliveredDate END ) as deliveredDate,"
                 + "vap.delivery_date ,op.orders_product_status,op.delivery_status  ,vap.delivery_time , vap.shipping_type ,op.sla_code ,"
                 + "( CASE WHEN torder.outForDeliveryDate !='0000-00-00 00:00:00' THEN torder.outForDeliveryDate END ) as  outForDeliveryDate,op.orders_products_id  "
-                + " , op.delivery_attempt from vendor_assign_price vap join orders_products op on vap.orders_id = op.orders_id and vap.products_id = op.products_id  "
-                + " left join trackorders torder on op.orders_id = torder.orders_id and op.orders_products_id = torder.orders_products_id  "
-                + " where  op.orders_product_status in ('Processed','Confirmed'" +pStatus + ") and  vap.fk_associate_id = ?  and "
-                + "DATE_FORMAT(vap.delivery_date,'%Y-%m-%d') "+dateComapareSymbol+" ? and vap.shipping_type !='Any time'  and  vap.shipping_type !='' ";
+                + " , op.delivery_attempt,( CASE WHEN vap.assign_time !='0000-00-00 00:00:00' THEN vap.assign_time "
+                + " END ) as  vendor_assign_time from orders_products op join order_product_extra_info opei on "
+                + " op.orders_products_id = opei.order_product_id join vendor_assign_price vap on vap.orders_id = op.orders_id "
+                + " and vap.products_id = op.products_id left join trackorders torder on op.orders_id = torder.orders_id "
+                + " and op.orders_products_id = torder.orders_products_id where  op.orders_product_status "
+                + " in ('Processed','Confirmed'" +pStatus + ") and  vap.fk_associate_id = ?  and "
+                + " vap.delivery_date "+dateComapareSymbol+" ? and vap.shipping_type !='Any time'  and  vap.shipping_type !='' ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, fkAssociateId);
             preparedStatement.setString(2,new SimpleDateFormat("yyyy-MM-dd").format(date));
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                Date deliveryDate=resultSet.getString("deliveredDate")== null ? null : DateUtils.truncate(dateFormat.parse(resultSet.getString("deliveredDate")), Calendar.DAY_OF_MONTH);
+                Date deliveredDate=resultSet.getString("deliveredDate")== null ? null : DateUtils.truncate(dateFormat.parse(resultSet.getString("deliveredDate")), Calendar.DAY_OF_MONTH);
                 Date outOfDeliryDate=resultSet.getString("outForDeliveryDate")== null ? null : DateUtils.truncate(dateFormat.parse(resultSet.getString("outForDeliveryDate")), Calendar.DAY_OF_MONTH);
-
                 OrderDetailsPerOrderProduct orderDetailsPerOrderProduct =new OrderDetailsPerOrderProduct();
                 orderDetailsPerOrderProduct.setOrdersId(resultSet.getLong("torder.orders_id"));
-                orderDetailsPerOrderProduct.setDeliveredDate(deliveryDate);
+                orderDetailsPerOrderProduct.setDeliveredDate(deliveredDate);
                 orderDetailsPerOrderProduct.setDeliveryDate(DateUtils.truncate(dateFormat.parse(resultSet.getString("vap.delivery_date")), Calendar.DAY_OF_MONTH));
                 orderDetailsPerOrderProduct.setOutForDeliveryDate(outOfDeliryDate);
                 orderDetailsPerOrderProduct.setOrderProductStatus(resultSet.getString("op.orders_product_status"));
                 orderDetailsPerOrderProduct.setDeliveryStatus(resultSet.getBoolean("op.delivery_status"));
-                orderDetailsPerOrderProduct.setDeliveryTime(resultSet.getString("vap.delivery_time"));
-                orderDetailsPerOrderProduct.setShippingType(resultSet.getString("vap.shipping_type"));
+//                orderDetailsPerOrderProduct.setDeliveryTime(resultSet.getString("vap.delivery_time"));
+//                orderDetailsPerOrderProduct.setShippingType(resultSet.getString("vap.shipping_type"));
                 orderDetailsPerOrderProduct.setSlaCode(resultSet.getInt("op.sla_code"));
                 orderDetailsPerOrderProduct.setOrdersProductsId(resultSet.getLong("op.orders_products_id"));
                 orderDetailsPerOrderProduct.setDeliveryAttemptFlag(resultSet.getInt("op.delivery_attempt"));
+
+                orderDetailsPerOrderProduct.setAssignTime(resultSet.getString("vendor_assign_time"));
+                orderDetailsPerOrderProduct.setShippingType(resultSet.getString("opei.delivery_type"));
+                orderDetailsPerOrderProduct.setDeliveryTime(resultSet.getString("opei.delivery_time"));
+                orderDetailsPerOrderProduct.setVendorId(resultSet.getInt("op.fk_associate_id"));
                 listOfOrderIdAsPerVendor.add(orderDetailsPerOrderProduct);
             }
-
         } catch (Exception exception) {
             logger.error("Exception in connection", exception);
         } finally {
