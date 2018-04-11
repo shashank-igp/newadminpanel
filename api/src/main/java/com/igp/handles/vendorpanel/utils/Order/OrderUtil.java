@@ -37,6 +37,8 @@ public class OrderUtil
         VendorUtil vendorUtil=new VendorUtil();
         List<OrdersProducts> listOfOrderProducts=new ArrayList<>();
         String vendorIdClaus="";
+        OrderMapper orderMapper=new OrderMapper();
+        SlaCompliant slaCompliant=new SlaCompliant();
         try{
 
             if(forAdminPanelOrNot == false){
@@ -70,7 +72,7 @@ public class OrderUtil
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-
+                int slaCode=-99;
                 OrdersProducts ordersProducts = new OrdersProducts.Builder()
                     .orderProductId(resultSet.getInt("op.orders_Products_Id"))
                     .orderId(resultSet.getInt("op.orders_id"))
