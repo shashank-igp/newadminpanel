@@ -1,7 +1,6 @@
 package com.igp.handles.admin.endpoints;
 
 import com.igp.handles.admin.mappers.Order.OrderMapper;
-import com.igp.handles.admin.models.Order.BulkOrderAssignListModel;
 import com.igp.handles.admin.models.Order.OrderLogModel;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import org.apache.commons.lang3.time.DateUtils;
@@ -263,22 +262,14 @@ public class Order {
     }
     @POST
     @Path("/v1/admin/handels/bulkassign")
-    public HandleServiceResponse bulkAssign(@Context HttpServletRequest request,BulkOrderAssignListModel bulkOrderAssignListModel){
+    public HandleServiceResponse bulkAssign(@Context HttpServletRequest request,Map<String,Map<String,String>> bulkAssignOrderIdMap){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         String ipAddress=request.getRemoteAddr();
         String userAgent = request.getHeader("User-Agent");
         OrderMapper orderMapper=new OrderMapper();
-        Set<String> responseMap=new HashSet<>();
+        Set<String> responseMap=null;
         try{
-            for(int i=0;i<bulkOrderAssignListModel.getBulkOrderAssignModelList().size();i++){
-                for(Map.Entry<Integer,String> entry:bulkOrderAssignListModel.getBulkOrderAssignModelList().get(i).getOrderIdToProductIdMap().entrySet()){
-                    int orderId=entry.getKey().intValue();
-                    String orderProductIdString=entry.getValue();
-                    List<com.igp.handles.vendorpanel.models.Order.Order> orderList=new ArrayList<>();
-                    responseMap=orderMapper.assignReassignOrder("assign",orderId,orderProductIdString,bulkOrderAssignListModel.getBulkOrderAssignModelList().get(i).getVendorId()
-                        ,orderProductIdString,orderList,handleServiceResponse,ipAddress,userAgent);
-                }
-            }
+            responseMap=orderMapper.bulkAssign(bulkAssignOrderIdMap,ipAddress,userAgent,handleServiceResponse);
             logger.debug("responseMap after bulk assign "+responseMap.toString());
             handleServiceResponse.setResult(true);
         }catch (Exception exception){
