@@ -256,16 +256,11 @@ public class OrderMapper
                         order.setDeliverWhen(OrderUtil
                             .getDeliverWhen(orderProductDeliveryDateMap.get(orderProducts.getOrderProductId())));
                     }
-                    // order.addOrderProducts(entry.getValue());
                     if (order != null) {
                         order.setVendorDeliveryCharge(orderShippingChargeMap.get(order.getOrderId()));
                     }
-                    // order.setVendorOrderTotal(order.getVendorOrderTotal() +
-                    // entry.getValue().getVendorPrice());
                     originalOrderMap.put(key, order);
                 }
-                // order.setDeliverWhen(OrderUtil
-                // .getDeliverWhen(orderProductDeliveryDateMap.get(entry.getValue().getOrderProductId())));
             } catch (NumberFormatException e) {
                 logger.error("Error Key " + key, e);
             }

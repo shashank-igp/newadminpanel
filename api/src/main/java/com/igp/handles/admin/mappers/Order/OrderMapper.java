@@ -149,10 +149,10 @@ public class OrderMapper {
                 }
             }
 //            mailService will be integrated here with orderProductIdsWhichAreActuallyAssigned
-            mailerAction="assignorder&orderid="+orderId+"&orderproductids="+orderProductIdsWhichAreActuallyAssigned+"&associd="+vendorId;
-            if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
-                logger.debug("Mail successfully sent for assign/reassign of orderId "+orderId+" with orderProductId "+orderProductIdsWhichAreActuallyAssigned);
-            }
+//            mailerAction="assignorder&orderid="+orderId+"&orderproductids="+orderProductIdsWhichAreActuallyAssigned+"&associd="+vendorId;
+//            if(mailUtil.sendGenericMail(mailerAction,"","","",false)){
+//                logger.debug("Mail successfully sent for assign/reassign of orderId "+orderId+" with orderProductId "+orderProductIdsWhichAreActuallyAssigned);
+//            }
             handleServiceResponse.setResult(orderList);
 
         }catch (Exception exception){
@@ -308,6 +308,51 @@ public class OrderMapper {
             logger.error("error while adding VendorInstruction ",exception);
         }
         return result;
+    }
+
+    public Set<String> bulkAssign(Map<String,Map<String,String>> bulkAssignOrderIdMap,String ipAddress,String userAgent,HandleServiceResponse handleServiceResponse){
+        Integer orderId=null;
+        Integer vendorId=null;
+        String orderProductId=null,commaSeparatedOrderProductId=null;
+        Map<Integer,Map<Integer,String>> vendorIdToOrderIdToOrderProductIdMap=new HashMap<>();
+        Set<String> responseMap=new HashSet<>();
+        try{
+            for(Map.Entry<String,Map<String,String>> entry:bulkAssignOrderIdMap.entrySet()){
+                orderId=Integer.parseInt(entry.getKey());
+                Map<String,String> orderProdIdToVendorIdMap=entry.getValue();
+                for(Map.Entry<String,String> entry1:orderProdIdToVendorIdMap.entrySet()){
+                    vendorId=Integer.parseInt(entry1.getValue());
+                    orderProductId=entry1.getKey();
+
+                    if(!vendorIdToOrderIdToOrderProductIdMap.containsKey(vendorId)){
+                        Map<Integer,String> orderIdToOrderProductIdMap=new HashMap<>();
+                        orderIdToOrderProductIdMap.put(orderId,orderProductId);
+                        vendorIdToOrderIdToOrderProductIdMap.put(vendorId,orderIdToOrderProductIdMap);
+                    }else{
+                        if(!vendorIdToOrderIdToOrderProductIdMap.get(vendorId).containsKey(orderId)){
+                            vendorIdToOrderIdToOrderProductIdMap.get(vendorId).put(orderId,orderProductId);
+                        }else{
+                            commaSeparatedOrderProductId=vendorIdToOrderIdToOrderProductIdMap.get(vendorId).get(orderId)+","+orderProductId;
+                            vendorIdToOrderIdToOrderProductIdMap.get(vendorId).put(orderId,commaSeparatedOrderProductId);
+                        }
+                    }
+                }
+            }
+
+            for(Map.Entry<Integer,Map<Integer,String>> entry:vendorIdToOrderIdToOrderProductIdMap.entrySet()){
+                vendorId=entry.getKey();
+                for(Map.Entry<Integer,String> entry1:entry.getValue().entrySet()){
+                    orderId=entry1.getKey();
+                    commaSeparatedOrderProductId=entry1.getValue();
+                    List<com.igp.handles.vendorpanel.models.Order.Order> orderList=new ArrayList<>();
+                    responseMap=assignReassignOrder("assign",orderId,commaSeparatedOrderProductId,vendorId
+                        ,commaSeparatedOrderProductId,orderList,handleServiceResponse,ipAddress,userAgent);
+                }
+            }
+        }catch (Exception exception){
+            logger.error("error while bulkAssign ",exception);
+        }
+        return responseMap;
     }
 
     public String findIntersectionOfTwoCommaSeparatedStrings(String one,String two){
