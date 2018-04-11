@@ -120,7 +120,7 @@ public class OrderUtil
                 orderDetailsPerOrderProduct.setShippingType(String.valueOf(orderProductExtraInfo.getDeliveryType()));
                 orderDetailsPerOrderProduct.setDeliveryStatus(ordersProducts.getDeliveryStatus()==1 ? true:false);
                 orderDetailsPerOrderProduct.setOrderProductStatus(ordersProducts.getOrdersProductStatus());
-                orderDetailsPerOrderProduct.setDeliveryTime(ordersProducts.getOrderProductExtraInfo().getDeliveryTime());
+                orderDetailsPerOrderProduct.setDeliveryTime(orderProductExtraInfo.getDeliveryTime());
                 orderDetailsPerOrderProduct.setOrdersId(new Long(ordersProducts.getOrderId()));
                 orderDetailsPerOrderProduct.setOrdersProductsId(new Long(ordersProducts.getOrderProductId()));
                 orderDetailsPerOrderProduct.setVendorId(Integer.parseInt(ordersProducts.getFkAssociateId()));
@@ -424,7 +424,7 @@ public class OrderUtil
                 orderDetailsPerOrderProduct.setShippingType(String.valueOf(orderProductExtraInfo.getDeliveryType()));
                 orderDetailsPerOrderProduct.setDeliveryStatus(ordersProducts.getDeliveryStatus()==1 ? true:false);
                 orderDetailsPerOrderProduct.setOrderProductStatus(ordersProducts.getOrdersProductStatus());
-                orderDetailsPerOrderProduct.setDeliveryTime(ordersProducts.getOrderProductExtraInfo().getDeliveryTime());
+                orderDetailsPerOrderProduct.setDeliveryTime(orderProductExtraInfo.getDeliveryTime());
                 orderDetailsPerOrderProduct.setOrdersId(new Long(ordersProducts.getOrderId()));
                 orderDetailsPerOrderProduct.setOrdersProductsId(new Long(ordersProducts.getOrderProductId()));
                 orderDetailsPerOrderProduct.setVendorId(Integer.parseInt(ordersProducts.getFkAssociateId()));
