@@ -302,9 +302,9 @@ public class OrderMapper
                 sortedOrderMap.put(Long.valueOf(deliveryTime+orderId.longValue()), order);
 
                 // doing this only for admin/Handel panel
-                if(forAdminPanelOrNot){
-                    fillSlaFlagsOnOrderProducts(order,forAdminPanelOrNot);
-                }
+//                if(forAdminPanelOrNot){
+//                    fillSlaFlagsOnOrderProducts(order,forAdminPanelOrNot);
+//                }
             } catch (Exception e) {
                 logger.error("Error in the order :" + entry.getKey(), e);
             }

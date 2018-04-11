@@ -406,6 +406,11 @@ public class OrdersProducts implements Serializable{
         this.componentList = componentList;
     }
 
+    public void setSlaCode(int slaCode)
+    {
+        this.slaCode = slaCode;
+    }
+
     private OrdersProducts(Builder builder)
     {
         orderProductId = builder.orderProductId;
