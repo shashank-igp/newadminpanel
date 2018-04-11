@@ -1,11 +1,14 @@
 package com.igp.handles.vendorpanel.utils.Order;
 
 import com.igp.config.instance.Database;
+import com.igp.handles.admin.mappers.Order.OrderMapper;
+import com.igp.handles.admin.utils.Order.SlaCompliant;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import com.igp.handles.vendorpanel.models.Order.Order;
 import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
 import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
+import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerOrderProduct;
 import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,14 +45,20 @@ public class OrderUtil
 
             connection = Database.INSTANCE.getReadOnlyConnection();
             if(orderProductIds.equalsIgnoreCase("0")){
-                statement = "select op.*,opei.*,npei.m_img , p.update_date_time, p.products_name_for_url,npei.flag_personalize from"
-                    + " orders_products as op join  order_product_extra_info as opei on op.orders_products_id "
+                statement = "select op.*,opei.*,npei.m_img , p.update_date_time, p.products_name_for_url, "
+                    + " npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased from"
+                    + " orders_products as op left join vendor_assign_price vap on op.orders_id = vap.orders_id and "
+                    + " vap.products_id = op.products_id inner join trackorders as track on op.orders_products_id = "
+                    + " track.orders_products_id join  order_product_extra_info as opei on op.orders_products_id "
                     + " = opei.order_product_id  join products as p on op.products_id=p.products_id join "
                     + "newigp_product_extra_info as  npei on npei.products_id=p.products_id where "+vendorIdClaus+" op.orders_id=? ";
 
             }else {
-                statement = "select op.*,opei.*,npei.m_img , p.update_date_time, p.products_name_for_url,npei.flag_personalize from"
-                    + " orders_products as op join  order_product_extra_info as opei on op.orders_products_id "
+                statement = "select op.*,opei.*,npei.m_img , p.update_date_time, p.products_name_for_url, "
+                    + " npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased from"
+                    + " orders_products as op left join vendor_assign_price vap on op.orders_id = vap.orders_id and "
+                    + " vap.products_id = op.products_id inner join trackorders as track on op.orders_products_id = "
+                    + " track.orders_products_id join  order_product_extra_info as opei on op.orders_products_id "
                     + " = opei.order_product_id  join products as p on op.products_id=p.products_id join "
                     + "newigp_product_extra_info as  npei on npei.products_id=p.products_id where  op.orders_id=? AND "
                     + vendorIdClaus + " op.orders_products_id IN ( "+orderProductIds+" )";
@@ -100,6 +109,37 @@ public class OrderUtil
                     .productCostPrice(resultSet.getInt("opei.product_cost_price"))
                     .build();
 
+                OrderDetailsPerOrderProduct orderDetailsPerOrderProduct = new OrderDetailsPerOrderProduct();
+                orderDetailsPerOrderProduct.setAssignTime(resultSet.getString("assignTime"));
+                orderDetailsPerOrderProduct.setPurchasedTime(resultSet.getString("datePurchased"));
+                orderDetailsPerOrderProduct.setDeliveryDate(orderProductExtraInfo.getDeliveryDate());
+                orderDetailsPerOrderProduct.setShippingType(String.valueOf(orderProductExtraInfo.getDeliveryType()));
+                orderDetailsPerOrderProduct.setDeliveryStatus(ordersProducts.getDeliveryStatus()==1 ? true:false);
+                orderDetailsPerOrderProduct.setOrderProductStatus(ordersProducts.getOrdersProductStatus());
+                orderDetailsPerOrderProduct.setDeliveryTime(ordersProducts.getOrderProductExtraInfo().getDeliveryTime());
+                orderDetailsPerOrderProduct.setOrdersId(new Long(ordersProducts.getOrderId()));
+                orderDetailsPerOrderProduct.setOrdersProductsId(new Long(ordersProducts.getOrderProductId()));
+                orderDetailsPerOrderProduct.setVendorId(Integer.parseInt(ordersProducts.getFkAssociateId()));
+                slaCode = slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,forAdminPanelOrNot==true ? 1 : 0);
+                if(slaCode>0){
+                    ordersProducts.setSlaCode(slaCode);
+                    ordersProducts.setSlaFlag(OrderUtil.isSLASatisfied(slaCode));
+                    ordersProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(slaCode));
+                    if(forAdminPanelOrNot){
+                        String[] catSubCatArray=orderMapper.findCategoryAndSubCategory(ordersProducts.getOrdersProductStatus(),Integer.parseInt(ordersProducts.getFkAssociateId()),ordersProducts.getDeliveryStatus(),slaCode);
+                        ordersProducts.setOrderProductCategory(catSubCatArray[0]);
+                        ordersProducts.setGetOrderProductSubCategory(catSubCatArray[1]);
+                    }
+                }else{// this is just a fallback if on the fly sla didnt work then it will take from db
+                    ordersProducts.setSlaFlag(OrderUtil.isSLASatisfied(ordersProducts.getSlaCode()));
+                    ordersProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(ordersProducts.getSlaCode()));
+                    if(forAdminPanelOrNot){
+                        String[] catSubCatArray=orderMapper.findCategoryAndSubCategory(ordersProducts.getOrdersProductStatus(),Integer.parseInt(ordersProducts.getFkAssociateId()),ordersProducts.getDeliveryStatus(),ordersProducts.getSlaCode());
+                        ordersProducts.setOrderProductCategory(catSubCatArray[0]);
+                        ordersProducts.setGetOrderProductSubCategory(catSubCatArray[1]);
+                    }
+                }
+
                 if(ordersProducts.getOrdersProductStatus().equals("Shipped")){
                     if(ordersProducts.getDeliveryStatus()==0){
                         ordersProducts.setOrdersProductStatus("OutForDelivery");
@@ -148,6 +188,8 @@ public class OrderUtil
         VendorUtil vendorUtil=new VendorUtil();
         List<OrdersProducts> listOfOrderProducts=new ArrayList<>();
         SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        SlaCompliant slaCompliant=new SlaCompliant();
+        OrderMapper orderMapper=new OrderMapper();
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             String operator = isfuture ? " >= " : " = ";
@@ -172,17 +214,20 @@ public class OrderUtil
                     if (section.equals("past"))
                     {
                         Date todayDate = new Date();
-                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op  "
-                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
-                            + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                            + " where opei.product_id = op.products_id and " + fkAssociateIdWhereClause +  "  opei.delivery_date "
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url, "
+                            + " npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased from orders_products op left join vendor_assign_price vap on "
+                            + " op.orders_id = vap.orders_id and vap.products_id = op.products_id inner join trackorders "
+                            + " as track on op.orders_products_id = track.orders_products_id join order_product_extra_info "
+                            + " as opei on op.orders_products_id=opei.order_product_id join products as p on "
+                            + " op.products_id=p.products_id join newigp_product_extra_info as  npei on "
+                            + " npei.products_id=p.products_id where opei.product_id = op.products_id and " + fkAssociateIdWhereClause +  "  opei.delivery_date "
                             + " >= ? and  opei.delivery_date < '" + new SimpleDateFormat("yyyy-MM-dd").format(todayDate)
                             + "' and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc ";
                     }
                     else
                     {
-                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op  "
-                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize ,vap.assign_time assignTime,track.date_purchased datePurchased  from orders_products op left join vendor_assign_price vap on op.orders_id = vap.orders_id and vap.products_id = op.products_id "
+                            + " inner join trackorders as track on op.orders_products_id = track.orders_products_id join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
                             + " where opei.product_id = op.products_id and " + fkAssociateIdWhereClause +  " opei.delivery_date "
                             + operator + " ? and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc";
@@ -193,8 +238,8 @@ public class OrderUtil
                     if (section.equals("past"))
                     {
                         Date todayDate = new Date();
-                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op "
-                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased  from orders_products op left join vendor_assign_price vap on op.orders_id = vap.orders_id and vap.products_id = op.products_id "
+                            + " inner join trackorders as track on op.orders_products_id = track.orders_products_id join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
                             + " where  " + fkAssociateIdWhereClause +  " opei.delivery_date "
                             + " >= ? and  opei.delivery_date < '" + new SimpleDateFormat("yyyy-MM-dd").format(todayDate)
@@ -202,8 +247,8 @@ public class OrderUtil
                     }
                     else
                     {
-                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op "
-                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased  from orders_products op left join vendor_assign_price vap on op.orders_id = vap.orders_id and vap.products_id = op.products_id "
+                            + " inner join trackorders as track on op.orders_products_id = track.orders_products_id join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
                             + " where " + fkAssociateIdWhereClause +  " opei.delivery_date "
                             + operator + " ? and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc";
@@ -214,15 +259,15 @@ public class OrderUtil
                     Date todayDate = new Date();
                     if (section.equals("past"))
                     {
-                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
-                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
-                            + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
+                            + " inner join trackorders as track on op.orders_products_id = track.orders_products_id join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                            + " newigp_product_extra_info as  npei on npei.products_id=p.products_id "
                             + " where vap.products_id = op.products_id and " + fkAssociateIdWhereClause +  " opei.delivery_date "
                             + " >= ? and  opei.delivery_date < '" + new SimpleDateFormat("yyyy-MM-dd").format(todayDate)
                             + "' and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc ";
                     }else if(section.equals("tillToday")){
-                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
-                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
+                            + " inner join trackorders as track on op.orders_products_id = track.orders_products_id join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
                             + " where vap.products_id = op.products_id and " + fkAssociateIdWhereClause +  " opei.delivery_date "
                             + " >= ? and  opei.delivery_date <= '" + new SimpleDateFormat("yyyy-MM-dd").format(todayDate)
@@ -230,8 +275,8 @@ public class OrderUtil
                     }
                     else
                     {
-                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
-                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
+                            + " inner join trackorders as track on op.orders_products_id = track.orders_products_id join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
                             + " where vap.products_id = op.products_id and " + fkAssociateIdWhereClause +  " opei.delivery_date "
                             + operator + " ? and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc";
@@ -241,10 +286,11 @@ public class OrderUtil
                 case "OutForDelivery":
                 {
                     Date pastDate = DateUtils.addDays(date, -7); // get past 7
-                    statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products as op inner join trackorders as track on op.orders_id = track.orders_id "
-                        + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
-                        + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                        + " where op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 0 and  "
+                    statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased  from orders_products as op inner join vendor_assign_price vap on op.orders_id = vap.orders_id"
+                        + " inner join trackorders as track on op.orders_id = track.orders_id join order_product_extra_info as opei "
+                        + " on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                        + " newigp_product_extra_info as  npei on npei.products_id=p.products_id "
+                        + " where vap.products_id = op.products_id and op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 0 and  "
                         + " DATE_FORMAT(track.outForDeliveryDate,'%Y-%m-%d') <= ? and DATE_FORMAT(track.outForDeliveryDate,'%Y-%m-%d') >='"
                         + new SimpleDateFormat("yyyy-MM-dd").format(pastDate)
                         + "' and DATE_FORMAT(track.date_of_delivery,'%Y-%m-%d') >='"
@@ -256,23 +302,25 @@ public class OrderUtil
                 case "Shipped":
                     if(deliveryAttemptFlag==1){
                         Date pastDate = DateUtils.addDays(date, -7); // get past 7
-                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize   from orders_products as op inner join trackorders as track on op.orders_id = track.orders_id "
-                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
-                            + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                            + " where op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 1 and  "
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased   from orders_products as op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
+                            + " inner join trackorders as track on op.orders_id = track.orders_id join order_product_extra_info as opei on "
+                            + " op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                            + " newigp_product_extra_info as  npei on npei.products_id=p.products_id "
+                            + " where vap.products_id = op.products_id and op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 1 and  "
                             +  " opei.delivery_date >= '"+ new SimpleDateFormat("yyyy-MM-dd").format(pastDate) + "' and  opei.delivery_date <= ? "
                             + " and op.orders_product_status='Shipped' "+ deliveryAttemptClause +" order by track.deliveryDate asc ";
                     }else {
-                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize   from orders_products as op inner join trackorders as track on op.orders_id = track.orders_id "
-                            + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
-                            + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                            + " where op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 1 and  "
+                        statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased   from orders_products as op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
+                            + " inner join trackorders as track on op.orders_id = track.orders_id join order_product_extra_info as opei on "
+                            + " op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                            + " newigp_product_extra_info as  npei on npei.products_id=p.products_id "
+                            + " where vap.products_id = op.products_id and op.products_id = track.products_id and " + fkAssociateIdWhereClause +  " op.delivery_status = 1 and  "
                             + " DATE_FORMAT(track.deliveredDate,'%Y-%m-%d') = ? and op.orders_product_status='Shipped' "+ deliveryAttemptClause +" order by track.deliveryDate asc ";
                     }
                     break;
                 case "all":
-                    statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
-                        + " join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
+                    statement = "select op.*,opei.*,npei.m_img, p.update_date_time, p.products_name_for_url,npei.flag_personalize,vap.assign_time assignTime,track.date_purchased datePurchased  from orders_products op inner join vendor_assign_price vap on op.orders_id = vap.orders_id "
+                        + " inner join trackorders as track on op.orders_products_id = track.orders_products_id join order_product_extra_info as opei on op.orders_products_id=opei.order_product_id join products as p on op.products_id=p.products_id join "
                         + "newigp_product_extra_info as  npei on npei.products_id=p.products_id "
                         + " where vap.products_id = op.products_id and " + fkAssociateIdWhereClause +  " opei.delivery_date "
                         + operator + " ? and op.orders_product_status in ('Processed','Confirmed','Shipped') order by opei.delivery_date asc";
@@ -281,13 +329,11 @@ public class OrderUtil
                     break;
             }
             preparedStatement = connection.prepareStatement(statement);
-            //preparedStatement.setString(1,String.valueOf(fkAssociateId));
             preparedStatement.setString(1,new SimpleDateFormat("yyyy-MM-dd").format(date));
-
             logger.debug("sql query "+preparedStatement);
-
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()){
+                int slaCode=-99;
                 OrdersProducts ordersProducts = new OrdersProducts.Builder()
                     .orderProductId(resultSet.getInt("op.orders_Products_Id"))
                     .orderId(resultSet.getInt("op.orders_id"))
@@ -312,8 +358,6 @@ public class OrderUtil
                     .build();
 
                 ordersProducts.setVendorName(vendorUtil.getVendorInfo(Integer.parseInt(ordersProducts.getFkAssociateId())).getAssociateName());
-
-
                 OrderProductExtraInfo orderProductExtraInfo=new OrderProductExtraInfo.Builder()
                     .orderProductId(resultSet.getInt("opei.order_product_id"))
                     .orderId(resultSet.getInt("opei.order_id"))
@@ -326,6 +370,37 @@ public class OrderUtil
                     .deliveryTime(resultSet.getString("opei.delivery_time"))
                     .productCostPrice(resultSet.getInt("opei.product_cost_price"))
                     .build();
+
+                OrderDetailsPerOrderProduct orderDetailsPerOrderProduct = new OrderDetailsPerOrderProduct();
+                orderDetailsPerOrderProduct.setAssignTime(resultSet.getString("assignTime"));
+                orderDetailsPerOrderProduct.setPurchasedTime(resultSet.getString("datePurchased"));
+                orderDetailsPerOrderProduct.setDeliveryDate(orderProductExtraInfo.getDeliveryDate());
+                orderDetailsPerOrderProduct.setShippingType(String.valueOf(orderProductExtraInfo.getDeliveryType()));
+                orderDetailsPerOrderProduct.setDeliveryStatus(ordersProducts.getDeliveryStatus()==1 ? true:false);
+                orderDetailsPerOrderProduct.setOrderProductStatus(ordersProducts.getOrdersProductStatus());
+                orderDetailsPerOrderProduct.setDeliveryTime(ordersProducts.getOrderProductExtraInfo().getDeliveryTime());
+                orderDetailsPerOrderProduct.setOrdersId(new Long(ordersProducts.getOrderId()));
+                orderDetailsPerOrderProduct.setOrdersProductsId(new Long(ordersProducts.getOrderProductId()));
+                orderDetailsPerOrderProduct.setVendorId(Integer.parseInt(ordersProducts.getFkAssociateId()));
+                slaCode = slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,forAdminPanelOrNot==true ? 1 : 0);
+                if(slaCode>0){
+                    ordersProducts.setSlaCode(slaCode);
+                    ordersProducts.setSlaFlag(OrderUtil.isSLASatisfied(slaCode));
+                    ordersProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(slaCode));
+                    if(forAdminPanelOrNot){
+                        String[] catSubCatArray=orderMapper.findCategoryAndSubCategory(ordersProducts.getOrdersProductStatus(),Integer.parseInt(ordersProducts.getFkAssociateId()),ordersProducts.getDeliveryStatus(),slaCode);
+                        ordersProducts.setOrderProductCategory(catSubCatArray[0]);
+                        ordersProducts.setGetOrderProductSubCategory(catSubCatArray[1]);
+                    }
+                }else{// this is just a fallback if on the fly sla didnt work then it will take from db
+                    ordersProducts.setSlaFlag(OrderUtil.isSLASatisfied(ordersProducts.getSlaCode()));
+                    ordersProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(ordersProducts.getSlaCode()));
+                    if(forAdminPanelOrNot){
+                        String[] catSubCatArray=orderMapper.findCategoryAndSubCategory(ordersProducts.getOrdersProductStatus(),Integer.parseInt(ordersProducts.getFkAssociateId()),ordersProducts.getDeliveryStatus(),ordersProducts.getSlaCode());
+                        ordersProducts.setOrderProductCategory(catSubCatArray[0]);
+                        ordersProducts.setGetOrderProductSubCategory(catSubCatArray[1]);
+                    }
+                }
 
                 if(ordersProducts.getOrdersProductStatus().equals("Shipped")){
                     if(ordersProducts.getDeliveryStatus()==0){
