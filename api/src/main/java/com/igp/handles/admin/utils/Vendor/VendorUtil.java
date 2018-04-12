@@ -99,7 +99,7 @@ public class VendorUtil
             preparedStatement.setDouble(20,vendorAssignModel.getShipping());
             preparedStatement.setDouble(21,vendorAssignModel.getVendorPrice());
             preparedStatement.setString(22,vendorAssignModel.getAssignByUser());
-
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
             Integer status = preparedStatement.executeUpdate();
 
             logger.debug("step-4 assignReassignOrder after insert into vendor_assign_price with insert status = "+status);
