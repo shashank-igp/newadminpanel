@@ -7,7 +7,6 @@ import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.ReportOrderWithSummaryModel;
 import com.igp.handles.vendorpanel.utils.Reports.PayoutAndTaxesReport;
-import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -217,6 +216,17 @@ public class ReportMapper {
             logger.error("Error occured when getOrderFileUploadReport ",exception);
         }
         return orderProductUploadFileReportWithSummary;
+    }
+
+    public SlaReportWithSummary getSlaReport(String fkAssociateId, String assignStartDate, String assignEndDate, String startLimit, String endLimit, Integer orderNo, String deliveryDateFrom, String deliveryDateTo){
+        SlaReportWithSummary slaReportWithSummary=null;
+        ReportUtil reportUtil=new ReportUtil();
+        try{
+            slaReportWithSummary=reportUtil.getSlaReport(fkAssociateId,assignStartDate,assignEndDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo);
+        }catch (Exception exception){
+            logger.error("Error occured when getting slaReport ",exception);
+        }
+        return slaReportWithSummary;
     }
 
     public void fillDataActionPincode(List<Map.Entry<String,List<String>>> tableDataAction){
