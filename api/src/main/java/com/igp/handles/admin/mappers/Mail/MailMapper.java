@@ -11,14 +11,16 @@ import org.slf4j.LoggerFactory;
  */
 public class MailMapper {
     private static final Logger logger = LoggerFactory.getLogger(MailMapper.class);
-    public boolean sendMailToVendor(String mailBody,int vendorId){
+    public boolean sendMailToVendor(String mailBody,int vendorId, String subject){
         boolean result=false;
         MailUtil mailUtil=new MailUtil();
-        String subject="Action Required - IGP";
         VendorUtil vendorUtil=new VendorUtil();
         try{
             VendorInfoModel vendorInfoModel=vendorUtil.getVendorInfo(vendorId);
-            result=mailUtil.sendGenericMail("",subject,mailBody,vendorInfoModel.getEmail(),true);
+            String[] emailId = vendorInfoModel.getEmail().split(",");
+            for(int i=0;i<emailId.length;i++) {
+                result = mailUtil.sendGenericMail("", subject, mailBody, emailId[i], true);
+            }
         }catch (Exception exception){
             logger.error("error occured while sending mail to vendor ",exception);
         }

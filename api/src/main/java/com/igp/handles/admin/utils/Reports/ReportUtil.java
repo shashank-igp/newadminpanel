@@ -715,10 +715,10 @@ public class ReportUtil {
         }
         return result;
     }
-    public boolean approveAndRejectUtil(String object, String reportName, String columnName, int fkAssociateId,boolean approveReject){
+    public String approveAndRejectUtil(String object, String reportName, String columnName, int fkAssociateId,boolean approveReject){
         ObjectMapper objectMapper = new ObjectMapper();
         TableDataActionHandels actionHandels = new TableDataActionHandels();
-        String message;
+        String message = "";
         boolean result = false;
         ReportMapper reportMapper = new ReportMapper();
         try{
@@ -743,24 +743,24 @@ public class ReportUtil {
                 if(actionHandels.getValue().equals(actionHandels.getRequestValue())){
                     if(approveReject==true){
                         // request is to enable.
-                        message="Enable/Disable "+shipType+" for Pincode "+pincodeTableDataModel.getPincode()+" : Request Accepted";
+                        message="Enable "+columnName+" for Pincode "+pincodeTableDataModel.getPincode()+" : Request Accepted.";
                         result = reportMapper.updatePincodeMapper(1,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,Integer.parseInt(actionHandels.getRequestValue()),message,"");
                     }
                     else {
                         // request to enable rejected.
-                        message="Enable/Disable "+shipType+" for Pincode "+pincodeTableDataModel.getPincode()+" : Request Rejected";
+                        message="Enable "+columnName+" for Pincode "+pincodeTableDataModel.getPincode()+" : Request Rejected.";
                         result = reportMapper.updatePincodeMapper(1,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,-1,message,"reqPrice");
                     }
                 }
                 else {
                     if(approveReject==true) {
                         // request is to update the price.
-                        message = "Update the price of " + shipType + " for Pincode " + pincodeTableDataModel.getPincode() + " to " + actionHandels.getRequestValue() + " : Request Accepted";
+                        message = "Update the price of " + columnName + " for Pincode " + pincodeTableDataModel.getPincode() + " to " + actionHandels.getRequestValue() + " : Request Accepted.";
                         result = reportMapper.updatePincodeMapper(null, fkAssociateId, Integer.parseInt(pincodeTableDataModel.getPincode()), shipType, Integer.parseInt(actionHandels.getRequestValue()), message, "");
 
                     } else {
                         // request to update the price rejected.
-                        message = "Update the price of " + shipType + " for Pincode " + pincodeTableDataModel.getPincode() + " to " + actionHandels.getRequestValue() + " : Request Rejected";
+                        message = "Update the price of " + columnName + " for Pincode " + pincodeTableDataModel.getPincode() + " to " + actionHandels.getRequestValue() + " : Request Rejected.";
                         reportMapper.updatePincodeMapper(null,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,-1,message,"reqPrice");
                     }
                 }
@@ -774,12 +774,12 @@ public class ReportUtil {
 
                         if(approveReject==true){
                             // request is to enable.
-                            message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Approved";
+                            message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Approved.";
                             result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,"1","");
                         }
                         else {
                             // request to enable rejected.
-                            message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Rejected";
+                            message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Rejected.";
                             result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,"0","");
                         }
                     }
@@ -795,12 +795,12 @@ public class ReportUtil {
                         //  i.e. price change
                         if (approveReject == true) {
                             // request is to update the price.
-                            message = "Change price of component " + productTableDataModel.getComponentName() + " to " + actionHandels.getRequestValue() + " : Accepted";
+                            message = "Change price of component " + productTableDataModel.getComponentName() + " to " + actionHandels.getRequestValue() + " : Accepted.";
                             result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, Integer.parseInt(actionHandels.getRequestValue()), "1", "");
 
                         } else {
                             // request to update the price rejected.
-                            message = "Change price of component " + productTableDataModel.getComponentName() + " to " + actionHandels.getRequestValue() + " : ";
+                            message = "Change price of component " + productTableDataModel.getComponentName() + " to " + actionHandels.getRequestValue() + " : Rejected.";
                             result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, -1, "1", "reqPrice");
                         }
                     }
@@ -812,7 +812,9 @@ public class ReportUtil {
         }catch (Exception exception){
             logger.error("Error at approveAndRejectUtil in ReportUtil : ",exception);
         }
-        return result;
+        if(result==false) message="";
+
+        return message;
     }
     public BarcodeToComponentListHavingSummary getBarcodeToComponentsUtil(String productCode, int startLimit, int endLimit){
 
