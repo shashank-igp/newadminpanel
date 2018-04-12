@@ -110,7 +110,7 @@ public class ReportUtil {
                 + " op.orders_product_status as opStatus,oe.delivery_type as delivery_type  , o.delivery_name as "
                 + " Recipient_Name , o.delivery_mobile as Phone  , (vap.vendor_price+vap.shipping) as Amount, "
                 + " op.delivery_status as status,op.orders_products_id as orderProductId  from orders_products as op LEFT JOIN vendor_assign_price as  vap "
-                + " on op.orders_id=vap.orders_id  and  op.products_id=vap.products_id  LEFT JOIN associate as a on vap.fk_associate_id=a.associate_id" +
+                + " on op.orders_id=vap.orders_id  and  op.products_id=vap.products_id  LEFT JOIN associate as a on op.fk_associate_id=a.associate_id" +
                 " inner join order_product_extra_info as oe on op.orders_products_id=oe.order_product_id inner  join  orders as o on  op.orders_id=o.orders_id "
                 + " inner join  orders_occasions  as oo  on o.orders_occasionid=oo.occasion_id where " +
                 "(op.fk_associate_id=72 OR op.fk_associate_id=vap.fk_associate_id) "
