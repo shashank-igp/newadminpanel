@@ -30,7 +30,7 @@ public class SlaCompliant {
         purchasedTime=orderDetailsPerOrderProduct.getPurchasedTime();
         deliveryStatus=orderDetailsPerOrderProduct.getDeliveryStatus()==true ? 1 : 0;
 
-//        logger.debug(" orderDetailsPerOrderProduct with "+orderDetailsPerOrderProduct.toString());
+        //        logger.debug(" orderDetailsPerOrderProduct with "+orderDetailsPerOrderProduct.toString());
 
 
         int slaCode=-2;
@@ -441,5 +441,144 @@ public class SlaCompliant {
         }
         // just fall back i.e to just remove compile time error so no use
         return slaCode;
+    }
+/*
+   New to Confirmed -
+   Orders received before 8PM - 45mins from order time - 1 , 101
+   Orders received after 8PM - By 9AM next day -  2 , 102
+   Confirmed to Out for Delivery -
+   Fixed Date Orders with delivery date as today -  Orders received before 8PM yesterday - 2PM today   - 21  , 201
+   Orders received after 8PM yesterday - By 7PM today  - 22,202
+   Fixed Time Orders with delivery date as today -By slot beginning time + 1 hour  - 23 , 203
+   Mid Night Delivery with delivery date as yesterday -By 9AM today - 24 , 204
+   Out for Delivery to Delivered
+   Fixed Date Orders with delivery date as today -Orders received before 8PM yesterday - 2:45PM today   - 41 , 401
+   Orders received after 8PM yesterday - By 7:45PM today  - 42 , 402
+   Fixed Time Orders with delivery date as today -By slot beginning time + 2 hour   - 43 , 403
+   Mid Night Delivery with delivery date as yesterday -By 9AM today - 44 , 404
+    */
+
+    public String getSlaTime(String assignTime,int slaCode,String actionTime,String purchaseTime,String deliveryDate
+                            ,String deliveryTime){
+
+        String result=null;
+        SimpleDateFormat formatter=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        formatter.setTimeZone(TimeZone.getTimeZone("IST"));
+        SimpleDateFormat formatterNoTimeStamp=new SimpleDateFormat("yyyy-MM-dd");
+        formatterNoTimeStamp.setTimeZone(TimeZone.getTimeZone("IST"));
+        Date timeAssigned=null;
+        Date assignTimeNoTimeStamp=null;
+        Date actionTimeTimeStamp=null;
+        Date assign30Min=null;
+        Date assign45Min=null;
+        Date datePurchased=null,datePurchasedNoTimeStamp=null;
+        Date deliveryDateNoTimeStamp=null;
+        Calendar cal = Calendar.getInstance();
+        try{
+            timeAssigned=formatter.parse(assignTime);
+            assignTimeNoTimeStamp=formatterNoTimeStamp.parse(assignTime);
+            actionTimeTimeStamp=formatter.parse(actionTime);
+            cal.setTime(timeAssigned);
+            cal.add(Calendar.MINUTE,30);
+            assign30Min = cal.getTime();
+            cal.add(Calendar.MINUTE,15);
+            assign45Min = cal.getTime();
+            datePurchased=formatter.parse(purchaseTime);
+            datePurchasedNoTimeStamp=formatterNoTimeStamp.parse(purchaseTime);
+            deliveryDateNoTimeStamp=formatterNoTimeStamp.parse(deliveryDate);
+
+            if(slaCode==1||slaCode==101){
+                result=getDateDifference(actionTimeTimeStamp,assign45Min);
+            }else if(slaCode==2||slaCode==102){
+                cal.setTime(datePurchasedNoTimeStamp);
+                cal.add(Calendar.DATE,1);
+                cal.add(Calendar.HOUR_OF_DAY,9);
+                Date purchaseTimeToNextDay9Am=cal.getTime();
+                result=getDateDifference(actionTimeTimeStamp,purchaseTimeToNextDay9Am);
+            }else if(slaCode==21||slaCode==201){
+                cal.setTime(deliveryDateNoTimeStamp);
+                cal.add(Calendar.HOUR_OF_DAY,14);
+                Date deliveryDate2Pm=cal.getTime();
+                result=getDateDifference(actionTimeTimeStamp,deliveryDate2Pm);
+            }else if(slaCode==22||slaCode==202){
+                cal.setTime(datePurchasedNoTimeStamp);
+                Calendar tempCal= Calendar.getInstance();
+                tempCal.setTime(datePurchased);
+                if(tempCal.get(Calendar.HOUR_OF_DAY)>=8 && tempCal.get(Calendar.HOUR_OF_DAY) <=23 ){
+                    cal.add(Calendar.DATE,1);
+                }
+                cal.add(Calendar.HOUR_OF_DAY,19);
+                Date purchaseTimeToNextDay7Pm=cal.getTime();
+                result=getDateDifference(actionTimeTimeStamp,purchaseTimeToNextDay7Pm);
+            }else if(slaCode==23||slaCode==203){
+                String slotBiginningTime=deliveryTime.split(":")[0];
+                int slotBiginningTimeInt=Integer.parseInt(slotBiginningTime);
+                cal.setTime(deliveryDateNoTimeStamp);
+                cal.add(Calendar.HOUR_OF_DAY,slotBiginningTimeInt+1);
+                Date deliveryDatePlusSlotBigninningPuls1=cal.getTime();
+                result=getDateDifference(actionTimeTimeStamp,deliveryDatePlusSlotBigninningPuls1);
+            }else if(slaCode==24||slaCode==204){
+                cal.setTime(deliveryDateNoTimeStamp);
+                cal.add(Calendar.DATE,1);
+                cal.add(Calendar.HOUR_OF_DAY,9);
+                Date deliveryDateToNextDay9Am=cal.getTime();
+                result=getDateDifference(actionTimeTimeStamp,deliveryDateToNextDay9Am);
+            }else if(slaCode==41||slaCode==401){
+                cal.setTime(deliveryDateNoTimeStamp);
+                cal.add(Calendar.HOUR_OF_DAY,14);
+                cal.add(Calendar.MINUTE,45);
+                Date deliveryDate245Pm=cal.getTime();
+                result=getDateDifference(actionTimeTimeStamp,deliveryDate245Pm);
+            }else if(slaCode==42|| slaCode==402){
+                cal.setTime(datePurchasedNoTimeStamp);
+                Calendar tempCal= Calendar.getInstance();
+                tempCal.setTime(datePurchased);
+                if(tempCal.get(Calendar.HOUR_OF_DAY)>=8 && tempCal.get(Calendar.HOUR_OF_DAY) <=23 ){
+                    cal.add(Calendar.DATE,1); // can add one depends upon when the order came i.e yesterday or today
+                }
+                cal.add(Calendar.HOUR_OF_DAY,19);
+                cal.add(Calendar.MINUTE,45);
+                Date purchaseTimeToNextDay745Pm=cal.getTime();
+                result=getDateDifference(actionTimeTimeStamp,purchaseTimeToNextDay745Pm);
+            }else if(slaCode==43||slaCode==403){
+                String slotBiginningTime=deliveryTime.split(":")[0];
+                int slotBiginningTimeInt=Integer.parseInt(slotBiginningTime);
+                cal.setTime(deliveryDateNoTimeStamp);
+                cal.add(Calendar.HOUR_OF_DAY,slotBiginningTimeInt+2);
+                Date deliveryDatePlusSlotBigninningPuls2=cal.getTime();
+                result=getDateDifference(actionTimeTimeStamp,deliveryDatePlusSlotBigninningPuls2);
+            }else if(slaCode==44||slaCode==404){
+                cal.setTime(deliveryDateNoTimeStamp);
+                cal.add(Calendar.DATE,1);
+                cal.add(Calendar.HOUR_OF_DAY,9);
+                Date deliveryDateToNextDay9Am=cal.getTime();
+                result=getDateDifference(actionTimeTimeStamp,deliveryDateToNextDay9Am);
+            }
+        }catch (Exception exception) {
+            logger.error("Error occured while checking sla time ",exception);
+        }
+        return result;
+    }
+    public String getDateDifference(Date date1,Date date2){
+        //in milliseconds
+        String result="00:00:00";
+        try {
+            long diff = date1.getTime() - date2.getTime();
+
+            long diffSeconds = diff / 1000 % 60;
+            long diffMinutes = diff / (60 * 1000) % 60;
+            long diffHours = diff / (60 * 60 * 1000);
+            long diffDays = diff / (24 * 60 * 60 * 1000);
+            if(diffDays<0||diffHours<0||diffMinutes<0||diffSeconds<0){
+                result="-";
+                result+=Math.abs(diffHours)+":"+Math.abs(diffMinutes)+":"+Math.abs(diffSeconds);
+            }else {
+                result="+";
+                result+=Math.abs(diffHours)+":"+Math.abs(diffMinutes)+":"+Math.abs(diffSeconds);
+            }
+        }catch (Exception exception){
+            logger.error("Error occured while calculating difference in dates for sla ",exception);
+        }
+        return result;
     }
 }

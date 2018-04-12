@@ -496,4 +496,40 @@ public class Reports {
         return reportResponse;
     }
 
+    @GET
+    @Path("/v1/admin/handels/getSlaReport")
+    public ReportResponse getSlaReport(@QueryParam("fkAssociateId") String fkAssociateId,
+                                            @QueryParam("assignDateFrom") String assignStartDate,
+                                            @QueryParam("assignDateTo")String assignEndDate ,
+                                            @DefaultValue("0") @QueryParam("startLimit") String startLimit,
+                                            @DefaultValue("10") @QueryParam("endLimit") String endLimit ,
+                                            @QueryParam("orderNumber") Integer orderNo,
+                                            @QueryParam("deliveryDateFrom") String deliveryDateFrom,
+                                            @QueryParam("deliveryDateTo") String deliveryDateTo){
+        ReportResponse reportResponse = new ReportResponse();
+        ReportMapper reportMapper = new ReportMapper();
+        SlaReportWithSummary slaReportWithSummary=null;
+        try{
+            assignStartDate=getTimestampString(assignStartDate,0);
+            deliveryDateFrom=getTimestampString(deliveryDateFrom,0);
+            deliveryDateTo=getTimestampString(deliveryDateTo,0);
+            if(assignStartDate!=null&&assignEndDate!=null){
+                assignEndDate=getTimestampString(assignEndDate,1);
+            }else {
+                assignEndDate=getTimestampString(assignEndDate,0);
+            }
+            reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Status","Assign_Date","Delivery_Date"
+                ,"Delivery_Type","Confirm_Time","Sla1","OFD_Time","Sla2","Delivered_Time","Sla3"});
+            slaReportWithSummary=reportMapper.getSlaReport(fkAssociateId,assignStartDate,assignEndDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo);
+            reportResponse.setSummary(slaReportWithSummary.getSummaryModelList());
+            List<Object> objectList = new ArrayList<Object>(slaReportWithSummary.getSlaReportModelList());
+            reportResponse.setTableData(objectList);
+
+        }catch (Exception exception){
+            logger.error("Error occured at getSlaReport ",exception);
+        }
+
+        return reportResponse;
+    }
+
 }

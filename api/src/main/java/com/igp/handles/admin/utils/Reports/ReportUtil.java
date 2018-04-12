@@ -8,6 +8,7 @@ import com.igp.handles.admin.mappers.Reports.ReportMapper;
 import com.igp.handles.admin.mappers.Vendor.VendorMapper;
 import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.admin.models.Vendor.VendorInfoModel;
+import com.igp.handles.admin.utils.Order.SlaCompliant;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
 import com.igp.handles.vendorpanel.models.Report.ReportOrderWithSummaryModel;
 import com.igp.handles.vendorpanel.models.Report.SummaryModel;
@@ -1078,5 +1079,144 @@ public class ReportUtil {
             Database.INSTANCE.closeResultSet(resultSet);
         }
         return orderProductUploadFileReportWithSummary;
+    }
+    public SlaReportWithSummary getSlaReport(String fkAssociateId, String assignStartDate, String assignEndDate, String startLimit, String endLimit, Integer orderNo, String deliveryDateFrom, String deliveryDateTo){
+        List<SlaReportModel> slaReportModelList=new ArrayList<>();
+        SlaReportWithSummary slaReportWithSummary=new SlaReportWithSummary();
+        Connection connection = null;
+        ResultSet resultSet=null;
+        String statement=null,queryForCount=null;
+        PreparedStatement preparedStatement = null;
+        SlaCompliant slaCompliant=new SlaCompliant();
+        List<SummaryModel> summaryModelList=new ArrayList<>();
+        int count=0;
+        try{
+            StringBuilder sb=new StringBuilder("");
+
+            if (assignStartDate!=null && !assignStartDate.isEmpty() ){
+                sb.append("and vap.assign_time >= '"+assignStartDate+"' ");
+            }
+
+            if (assignEndDate!=null && !assignEndDate.isEmpty()){
+                sb.append("and o.assign_time <= '"+assignEndDate+"' ");
+            }
+
+            if(deliveryDateFrom!=null && !deliveryDateFrom.isEmpty() ){
+                sb.append(" and vap.delivery_date >= '"+deliveryDateFrom+"' ");
+            }
+
+            if (deliveryDateTo!=null && !deliveryDateTo.isEmpty()){
+                sb.append("  and vap.delivery_date <= '"+deliveryDateTo+"' ");
+            }
+
+            if (fkAssociateId!=null && !fkAssociateId.isEmpty()){
+                sb.append("  and op.fk_associate_id ='"+fkAssociateId+"' ");
+            }
+
+            if (orderNo!=null )
+            {
+                sb.append("and op.orders_id = "+orderNo+" ");
+            }
+
+            queryForCount="select count(*) as totalNo from orders_products op join "
+                + " vendor_assign_price vap on op.orders_id = vap.orders_id join trackorders track on "
+                + " track.orders_products_id = op.orders_products_id left join associate a on op.fk_associate_id "
+                + " = a.associate_id where op.products_id = vap.products_id "+sb.toString();
+            count=SummaryFunctionsUtil.getCount(queryForCount);
+
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement="select op.orders_id,a.associate_name,( CASE WHEN vap.assign_time !='0000-00-00 00:00:00' THEN "
+                + " vap.assign_time END ) as assignTime,vap.delivery_date,vap.shipping_type,vap.delivery_time, "
+                + " ( CASE WHEN track.releaseDate !='0000-00-00 00:00:00' THEN track.releaseDate END ) as releaseDate, "
+                + " ( CASE WHEN track.outForDeliveryDate !='0000-00-00 00:00:00' THEN "
+                + " track.outForDeliveryDate END ) as outForDeliveryDate,( CASE WHEN track.deliveredDate "
+                + " !='0000-00-00 00:00:00' THEN track.deliveredDate END ) as deliveredDate ,op.sla_code1, "
+                + " op.sla_code2,op.sla_code3,track.date_purchased,op.orders_product_status from orders_products op join "
+                + " vendor_assign_price vap on op.orders_id = vap.orders_id join trackorders track on "
+                + " track.orders_products_id = op.orders_products_id left join associate a on op.fk_associate_id "
+                + " = a.associate_id where op.products_id = vap.products_id "+sb.toString()+" limit "+startLimit+","+endLimit+" ";
+
+            preparedStatement = connection.prepareStatement(statement);
+            logger.debug("sql query in while slaReport  "+preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                SlaReportModel slaReportModel=new SlaReportModel();
+                String deliveryTime=resultSet.getString("vap.delivery_time");
+                String datePurchased=resultSet.getString("track.date_purchased");
+                String status=resultSet.getString("op.orders_product_status");
+                int sla1=resultSet.getInt("op.sla_code1");
+                int sla2=resultSet.getInt("op.sla_code2");
+                int sla3=resultSet.getInt("op.sla_code3");
+                String releaseDate=resultSet.getString("releaseDate");
+                String outForDeliveryDate=resultSet.getString("outForDeliveryDate");
+                String deliveredDate=resultSet.getString("deliveredDate");
+
+                slaReportModel.setOrderNo(resultSet.getString("op.orders_id"));
+                slaReportModel.setVendorName(resultSet.getString("a.associate_name"));
+                slaReportModel.setAssignDate(resultSet.getString("assignTime"));
+                slaReportModel.setDeliveryDate(resultSet.getString("vap.delivery_date"));
+                slaReportModel.setDeliveryType(resultSet.getString("vap.shipping_type"));
+                if(releaseDate!=null){
+                    slaReportModel.setConfirmTime(releaseDate);
+                }else{
+                    slaReportModel.setConfirmTime("NA");
+                }
+                if(outForDeliveryDate!=null){
+                    slaReportModel.setOutForDeliveryTime(outForDeliveryDate);
+                }else{
+                    slaReportModel.setOutForDeliveryTime("NA");
+                }
+                if(deliveredDate!=null){
+                    slaReportModel.setDeliveredTime(deliveredDate);
+                }else{
+                    slaReportModel.setDeliveredTime("NA");
+                }
+                if(sla1>0){
+                    if(releaseDate!=null){
+                        slaReportModel.setSla1(slaCompliant.getSlaTime(slaReportModel.getAssignDate(),sla1,releaseDate,
+                            datePurchased,slaReportModel.getDeliveryDate(),deliveryTime));
+                    }else{
+                        slaReportModel.setSla1("NA");
+                    }
+                }else{
+                    slaReportModel.setSla1("0");
+                }
+                if(sla2>0){
+                    if(outForDeliveryDate!=null){
+                        slaReportModel.setSla2(slaCompliant.getSlaTime(slaReportModel.getAssignDate(),sla2,outForDeliveryDate,
+                            datePurchased,slaReportModel.getDeliveryDate(),deliveryTime));
+                    }else{
+                        slaReportModel.setSla2("NA");
+                    }
+                }else{
+                    slaReportModel.setSla2("0");
+                }
+                if(sla3>0){
+                    if(deliveredDate!=null){
+                        slaReportModel.setSla3(slaCompliant.getSlaTime(slaReportModel.getAssignDate(),sla3,deliveredDate,
+                            datePurchased,slaReportModel.getDeliveryDate(),deliveryTime));
+                    }else{
+                        slaReportModel.setSla3("NA");
+                    }
+                }else{
+                    slaReportModel.setSla3("0");
+                }
+                slaReportModelList.add(slaReportModel);
+            }
+            SummaryModel summaryModelTotalOrders= new SummaryModel();
+            summaryModelTotalOrders.setLabel("Total orders");
+            summaryModelTotalOrders.setValue(String.valueOf(count));
+            summaryModelList.add(summaryModelTotalOrders);
+            slaReportWithSummary.setSlaReportModelList(slaReportModelList);
+            slaReportWithSummary.setSummaryModelList(summaryModelList);
+
+        }catch (Exception exception) {
+            logger.error("Exception in connection : ", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return slaReportWithSummary;
     }
 }
