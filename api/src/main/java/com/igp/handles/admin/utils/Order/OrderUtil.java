@@ -75,7 +75,7 @@ public class OrderUtil {
             preparedStatement.setInt(3,0);
             preparedStatement.setInt(4,0);
             preparedStatement.setInt(5,orderProductId);
-
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
             Integer status = preparedStatement.executeUpdate();
 
             logger.debug("step-5 assignReassignOrder after update in orders_products with update status = "+status);
@@ -102,7 +102,7 @@ public class OrderUtil {
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,vendorId); // orderID
             preparedStatement.setInt(2,orderProductId);
-
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
             Integer status = preparedStatement.executeUpdate();
 
             logger.debug("step-6 assignReassignOrder after update in trackorders with update status = "+status);
@@ -132,7 +132,7 @@ public class OrderUtil {
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,orderId); // orderID
             preparedStatement.setInt(2,productId);
-
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Failed to delete from vendor_assign_price ");
