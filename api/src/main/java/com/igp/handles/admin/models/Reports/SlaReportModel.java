@@ -21,6 +21,9 @@ public class SlaReportModel {
     @JsonProperty("Delivery_Type")
     private String deliveryType;
 
+    @JsonProperty("Status")
+    private String status;
+
     @JsonProperty("Confirm_Time")
     private String confirmTime;
 
@@ -87,6 +90,16 @@ public class SlaReportModel {
     public void setDeliveryType(String deliveryType)
     {
         this.deliveryType = deliveryType;
+    }
+
+    public String getStatus()
+    {
+        return status;
+    }
+
+    public void setStatus(String status)
+    {
+        this.status = status;
     }
 
     public String getConfirmTime()

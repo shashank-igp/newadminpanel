@@ -1156,6 +1156,7 @@ public class ReportUtil {
                 slaReportModel.setAssignDate(resultSet.getString("assignTime"));
                 slaReportModel.setDeliveryDate(resultSet.getString("vap.delivery_date"));
                 slaReportModel.setDeliveryType(resultSet.getString("vap.shipping_type"));
+                slaReportModel.setStatus(resultSet.getString("op.orders_product_status"));
                 if(releaseDate!=null){
                     slaReportModel.setConfirmTime(releaseDate);
                 }else{
