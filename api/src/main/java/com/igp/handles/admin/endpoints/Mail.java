@@ -23,7 +23,7 @@ public class Mail {
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         MailMapper mailMapper=new MailMapper();
         try{
-            handleServiceResponse.setResult(mailMapper.sendMailToVendor(mailBody,vendorId));
+            handleServiceResponse.setResult(mailMapper.sendMailToVendor(mailBody,vendorId,"Action Required - IGP"));
         }catch (Exception exception){
             logger.error("error occured while sending mail to vendor ",exception);
         }

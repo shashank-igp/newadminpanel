@@ -1,5 +1,6 @@
 package com.igp.handles.admin.endpoints;
 
+import com.igp.handles.admin.mappers.Mail.MailMapper;
 import com.igp.handles.admin.mappers.Reports.ReportMapper;
 import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
@@ -107,9 +108,10 @@ public class Reports {
                                                      @QueryParam("updateStatus") Integer flag){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
+        MailMapper mailMapper = new MailMapper();
         try{
             Boolean result = false;
-            String message="";
+            String message = "";
             if (flag != null && flag == 1){
                 if(flag == 1)
                     message = "Enable shipping type "+shipType+" for Pincode "+pincode+" for vendor id "+fkAssociateId;
@@ -126,6 +128,7 @@ public class Reports {
             }
             else {
                 result = true;
+                mailMapper.sendMailToVendor(message,fkAssociateId,"Pincode details modified - IGP");
             }
             handleServiceResponse.setResult(result);
         }catch (Exception exception){
@@ -169,6 +172,7 @@ public class Reports {
                                                        @QueryParam("field") String field){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
+        MailMapper mailMapper = new MailMapper();
         int newPrice = -1;
         try{
             String message = "",componentName = "";
@@ -186,6 +190,8 @@ public class Reports {
             if(result == false){
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING COMPONENT INFO");
+            }else {
+                mailMapper.sendMailToVendor(message,fkAssociateId,"Component details modified - IGP");
             }
             handleServiceResponse.setResult(result);
         }catch (Exception exception){

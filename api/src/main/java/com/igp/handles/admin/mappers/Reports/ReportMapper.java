@@ -1,5 +1,6 @@
 package com.igp.handles.admin.mappers.Reports;
 
+import com.igp.handles.admin.mappers.Mail.MailMapper;
 import com.igp.handles.admin.models.Reports.*;
 import com.igp.handles.admin.utils.Reports.ReportUtil;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
@@ -45,6 +46,7 @@ public class ReportMapper {
 
     public boolean addNewVendorPincodeMapper(int fkAssociateId,int pincode,int cityId,int shipType,int shipCharge){
         Map<Integer,String> map= new HashMap<>();
+        MailMapper mailMapper = new MailMapper();
         ReportUtil reportUtil = new ReportUtil();
         if(shipType==4){
             shipType = 1;
@@ -56,6 +58,7 @@ public class ReportMapper {
         String message="Added new pincode :- "+pincode+" with shipping type :- "+map.get(shipType)+" and shipping charge :- "+shipCharge+" : ";
         result = reportUtil.addNewVendorPincodeUtil(fkAssociateId,pincode,cityId,shipType,shipCharge,1);
         if(result==true){
+            mailMapper.sendMailToVendor(message,fkAssociateId,"New Pincode Added - IGP");
             response = reportUtil.setVendorGeneralInstruction(fkAssociateId,0,pincode+"",message);
         }
         return response;
@@ -64,9 +67,11 @@ public class ReportMapper {
     public boolean addNewComponentMapper(int fkAssociateId,String componentCode,String componentName,int type,int price){
         boolean result,response=false;
         ReportUtil reportUtil =  new ReportUtil();
+        MailMapper mailMapper = new MailMapper();
         String message="Added new Component : Name :- "+componentName+" With Price :- "+price+" : ";
         result = reportUtil.addVendorComponent(String.valueOf(fkAssociateId),componentCode,componentName,type,"dummy.jpg",price);
         if(result==true){
+            mailMapper.sendMailToVendor(message,fkAssociateId,"New Component Added - IGP");
             response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message);
         }
         return response;
@@ -145,14 +150,26 @@ public class ReportMapper {
     }
     public boolean approveAndRejectMapper(String object, String reportName, String columnName, int fkAssociateId, String approveAndReject){
         ReportUtil reportUtil = new ReportUtil();
+        MailMapper mailMapper = new MailMapper();
+        String subject = "Request for change of ";
+        String message = "";
         boolean response = false;
         try{
             boolean approveReject = false;
+            if(reportName.equals("getPincodeReport")) subject+=" pincode : ";
+            else subject+=" component : ";
+
             if(approveAndReject.equals("1")){
                 approveReject = true;
-            }
-            response =  reportUtil.approveAndRejectUtil(object,reportName,columnName,fkAssociateId,approveReject);
+                subject+="Accepted - IGP";
+            }else subject+="Rejected - IGP";
 
+            message =  reportUtil.approveAndRejectUtil(object,reportName,columnName,fkAssociateId,approveReject);
+
+            if(!message.equals("")){
+                response= true;
+                mailMapper.sendMailToVendor(message,fkAssociateId,subject);
+            }
         }catch (Exception exception){
             logger.error("Error at modifyVendorDetails in ReportMapper ",exception);
         }
@@ -190,8 +207,8 @@ public class ReportMapper {
     }
 
     public OrderProductUploadFileReportWithSummary getOrderFileUploadReport(String fkAssociateId, String startDate,
-        String endDate, String startLimit, String endLimit, Integer orderNo, String deliveryDateFrom,
-        String deliveryDateTo){
+                                                                            String endDate, String startLimit, String endLimit, Integer orderNo, String deliveryDateFrom,
+                                                                            String deliveryDateTo){
         ReportUtil reportUtil=new ReportUtil();
         OrderProductUploadFileReportWithSummary orderProductUploadFileReportWithSummary=null;
         try {
