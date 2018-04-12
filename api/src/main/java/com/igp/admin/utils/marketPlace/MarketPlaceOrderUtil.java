@@ -23,6 +23,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by suditi on 15/1/18.
@@ -1032,5 +1034,31 @@ public class MarketPlaceOrderUtil {
         return addressId;
     }
 
+    public String replaceSpecialChars(String match) {
+        String correctStr = match;
+        String pattern1 = "^[!-} ]*$";
+        if (!match.matches(pattern1)) {
+            logger.debug("Address has some unmatched special char.Let's replace it with a space.");
+            Pattern pattern = Pattern.compile("^[!-} ]*$");
+            // pattern allows a set of special chars,apha-numeric and space
+            int count = 0;
+            int length = correctStr.length();
+            int i = 0;
+            while (i < length) {
+                Matcher m = pattern.matcher(match.charAt(i)+"");
+                if (!m.matches()) {
+                    logger.debug("Unmatched character is : "+match.charAt(i)+" at index : "+i);
+                    int index = i + 1 ;
+                    count++;
+                    correctStr = correctStr.substring(0, i) + " " + correctStr.substring(index);
+                    // replace the un matched char by a space.
+                    logger.debug("Replaced "+i+" with a space.");
+                }
+                i++;
+            }
+            logger.debug("Finally the returned string from special char match is : "+correctStr);
+        }
+        return correctStr;
+    }
 
 }

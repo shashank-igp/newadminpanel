@@ -226,8 +226,11 @@ public class MarketPlaceMapper {
                         }
 
 
-                        String address = column.get("AddressLine1").trim().replace("\n"," ");
-                        String address2 = column.get("AddressLine2").trim().replace("\n"," ");
+                        String address = column.get("AddressLine1").trim();
+                        String address2 = column.get("AddressLine2").trim();
+
+                        address = marketPlaceOrderUtil.replaceSpecialChars(address);
+                        address2 = marketPlaceOrderUtil.replaceSpecialChars(address2);
 
                         userModel = new UserModel.UserBuilder()
                             .id(null)
@@ -375,7 +378,9 @@ public class MarketPlaceMapper {
                             }
                         }
 
-                        String address = column.get("Address").trim().replace("\n"," ").replace("–"," ");
+                        String address = column.get("Address").trim();
+                        address = marketPlaceOrderUtil.replaceSpecialChars(address);
+
                         userModel = new UserModel.UserBuilder()
                             .id(null)
                             .firstname(fname)
@@ -527,7 +532,9 @@ public class MarketPlaceMapper {
                             zipCode = zipCode.split("\\.")[0];
                         }
 
-                        String address = column.get("Address").trim().replace("\n"," ").replace("–"," ");
+                        String address = column.get("Address").trim();
+                        address = marketPlaceOrderUtil.replaceSpecialChars(address);
+
                         String phone = column.get("Sender Mobile").trim();
 
                         if (!phone.isEmpty()) {
