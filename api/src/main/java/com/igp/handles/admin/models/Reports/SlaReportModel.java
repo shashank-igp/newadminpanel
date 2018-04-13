@@ -9,7 +9,7 @@ public class SlaReportModel {
     @JsonProperty("Order_No")
     private String orderNo;
 
-    @JsonProperty("Assign_Date")
+    @JsonProperty("Assign_Time")
     private String assignDate;
 
     @JsonProperty("Vendor_Name")
