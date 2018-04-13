@@ -25,13 +25,13 @@ public class Order {
     @GET
     @Path("/v1/admin/handels/getOrderByStatusDate")
     public HandleServiceResponse getOrderByStatusDate (@Context HttpServletResponse response,@Context HttpServletRequest request,
-                                                        @DefaultValue("1") @QueryParam("scopeId") String scopeId,
-                                                        @QueryParam("category") String category,
-                                                        @QueryParam("subcategory") String subCategory,@DefaultValue("today")
-                                                        @QueryParam("section") String section,@DefaultValue("all")
-                                                        @QueryParam("orderAction") String orderAction,
-                                                        @QueryParam("isfuture") boolean isfuture,
-                                                        @QueryParam("date") String date) throws ParseException{
+        @DefaultValue("1") @QueryParam("scopeId") String scopeId,
+        @QueryParam("category") String category,
+        @QueryParam("subcategory") String subCategory,@DefaultValue("today")
+    @QueryParam("section") String section,@DefaultValue("all")
+    @QueryParam("orderAction") String orderAction,
+        @QueryParam("isfuture") boolean isfuture,
+        @QueryParam("date") String date) throws ParseException{
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
 
@@ -59,7 +59,7 @@ public class Order {
                 break;
         }
         if(category.equals("notShipped")){
-           section="tillToday";
+            section="tillToday";
             date1 = DateUtils.addDays(date1, -7);
         }
 
@@ -74,7 +74,7 @@ public class Order {
     @Path("/v1/admin/handels/assignReassignOrder")
     public HandleServiceResponse assignReassignOrder(@Context HttpServletRequest request,@QueryParam("action")String action , @QueryParam("orderId") int orderId,
         @QueryParam("fkAssociateId") int vendorId,@QueryParam("orderProductId") String orderProductIdString
-                                                ,@DefaultValue("0")@QueryParam("orderProductIds") String allOrderProductIdList){
+        ,@DefaultValue("0")@QueryParam("orderProductIds") String allOrderProductIdList){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         String ipAddress=request.getRemoteAddr();
@@ -85,27 +85,7 @@ public class Order {
         try{
             //orderProductIdString == comma separated orderProductIds which we have to assign to a vendor
             logger.debug("step-1 assignReassignOrder with "+action);
-
-             orderMapper.assignReassignOrder(action,orderId,orderProductIdString,vendorId,allOrderProductIdList,orderList,handleServiceResponse,ipAddress,userAgent);
-
-             //no need to send such  redundant info ... since we have to send which product been assign or not with reason
-
-//            if(result==1){
-//               handleServiceResponse.setResult(orderList);
-//            }else if(result==2){
-//                handleServiceResponse.setError(true);
-//                handleServiceResponse.setResult(false);
-//                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because all required components are not available !!");
-//            }else if(result==3){
-//                handleServiceResponse.setError(true);
-//                handleServiceResponse.setResult(false);
-//                handleServiceResponse.setErrorMessage("could not assign the order to this vendor because already assigned to this vendor !!");
-//            }
-//            else{
-//                handleServiceResponse.setError(true);
-//                handleServiceResponse.setResult(false);
-//                handleServiceResponse.setErrorMessage("could not assign the order to this vendor please try again !!");
-//            }
+            orderMapper.assignReassignOrder(action,orderId,orderProductIdString,vendorId,allOrderProductIdList,orderList,handleServiceResponse,ipAddress,userAgent);
         }catch (Exception exception){
             logger.error("error while assignReassignOrder",exception);
         }
@@ -116,7 +96,7 @@ public class Order {
     @POST
     @Path("/v1/admin/handels/orderPriceChanges")
     public HandleServiceResponse orderPriceChanges(@Context HttpServletRequest request,@QueryParam("orderId")int orderId,@QueryParam("orderProductId")
-        int orderProductId,@QueryParam("componentId") int componentId,@QueryParam("componentPrice") Double componentPrice,
+        int orderProductId,@QueryParam("componentId") Integer componentId,@QueryParam("componentPrice") Double componentPrice,
         @QueryParam("shippingCharge") Double shippingCharge,
         @DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
 
@@ -145,7 +125,7 @@ public class Order {
     @POST
     @Path("/v1/admin/handels/deliveryDetailChanges")
     public HandleServiceResponse deliveryDetailChanges(@Context HttpServletRequest request,@QueryParam("orderId")int orderId,@QueryParam("orderProductId") int orderProductId
-    ,@QueryParam("deliveryDate") String deliveryDate,@QueryParam("deliveryTime")String deliveryTime,@QueryParam("deliveryType") int deliveryType ,
+        ,@QueryParam("deliveryDate") String deliveryDate,@QueryParam("deliveryTime")String deliveryTime,@QueryParam("deliveryType") int deliveryType ,
         @DefaultValue("0")@QueryParam("orderProductIds") String orderProductIdList){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
@@ -160,7 +140,7 @@ public class Order {
                 handleServiceResponse.setResult(false);
                 handleServiceResponse.setErrorMessage("some technical error occured while updating deliveryDetails try again !!");
             }else {
-//                handleServiceResponse.setResult(result);
+                //                handleServiceResponse.setResult(result);
             }
 
         }catch (Exception exception){
@@ -189,13 +169,13 @@ public class Order {
     @GET
     @Path("/v1/admin/handels/getOrder")
     public HandleServiceResponse getOrder(@Context HttpServletResponse response,@Context HttpServletRequest request,
-                                                @QueryParam("orderId") int orderId,
-                                                @DefaultValue("0") @QueryParam("orderProductIs") String orderProductIdList) {
+        @QueryParam("orderId") int orderId,
+        @DefaultValue("0") @QueryParam("orderProductIs") String orderProductIdList) {
 
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         OrderMapper orderMapper=new OrderMapper();
         try{
-           handleServiceResponse.setResult(orderMapper.getOrder(orderId,orderProductIdList));
+            handleServiceResponse.setResult(orderMapper.getOrder(orderId,orderProductIdList));
         }catch (Exception exception){
             logger.error("error while getting OrderLog",exception);
         }
@@ -213,7 +193,7 @@ public class Order {
         try{
             result=orderMapper.cancelOrder(orderId,orderProductIdString,comment,handleServiceResponse,orderProductIdList,ipAddress,userAgent);
             if(result){
-//                handleServiceResponse.setResult(result);
+                //                handleServiceResponse.setResult(result);
             }else{
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setResult(false);
