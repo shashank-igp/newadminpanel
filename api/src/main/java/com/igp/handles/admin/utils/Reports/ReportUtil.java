@@ -1084,7 +1084,7 @@ public class ReportUtil {
         }
         return orderProductUploadFileReportWithSummary;
     }
-    public SlaReportWithSummary getSlaReport(String fkAssociateId, String assignStartDate, String assignEndDate, String startLimit, String endLimit, Integer orderNo, String deliveryDateFrom, String deliveryDateTo){
+    public SlaReportWithSummary getSlaReport(String fkAssociateId, String assignStartDate, String assignEndDate, String startLimit, String endLimit, Integer orderNo, String deliveryDateFrom, String deliveryDateTo,String status){
         List<SlaReportModel> slaReportModelList=new ArrayList<>();
         SlaReportWithSummary slaReportWithSummary=new SlaReportWithSummary();
         Connection connection = null;
@@ -1122,6 +1122,27 @@ public class ReportUtil {
                 sb.append("and op.orders_id = "+orderNo+" ");
             }
 
+            if (status !=null && !status.isEmpty() ){
+                String[] statusArray=status.split(",");
+                String statusWhereClause="";
+                for(int i=0;i<statusArray.length;i++){
+                    if(statusArray[i].equals("OutForDelivery")||statusArray[i].equals("Delivered")){
+                        statusWhereClause+="'Shipped',";
+                    }
+                    else
+                    {
+                        statusWhereClause+="'"+statusArray[i]+"',";
+                    }
+                }
+                statusWhereClause=statusWhereClause.substring(0,statusWhereClause.length()-1);
+                if(status.contains("Delivered")){
+                    sb.append(" and op.orders_product_status in ( "+statusWhereClause+" ) and op.delivery_status = 1 ");
+                }else {
+                    sb.append(" and op.orders_product_status in ( "+statusWhereClause+" ) and op.delivery_status = 0 ");
+                }
+            }
+
+
             queryForCount="select count(*) as totalNo from orders_products op join "
                 + " vendor_assign_price vap on op.orders_id = vap.orders_id join trackorders track on "
                 + " track.orders_products_id = op.orders_products_id left join associate a on op.fk_associate_id "
@@ -1135,9 +1156,11 @@ public class ReportUtil {
                 + " ( CASE WHEN track.outForDeliveryDate !='0000-00-00 00:00:00' THEN "
                 + " track.outForDeliveryDate END ) as outForDeliveryDate,( CASE WHEN track.deliveredDate "
                 + " !='0000-00-00 00:00:00' THEN track.deliveredDate END ) as deliveredDate ,op.sla_code1, "
-                + " op.sla_code2,op.sla_code3,track.date_purchased,op.orders_product_status from orders_products op join "
+                + " op.sla_code2,op.sla_code3,track.date_purchased,op.orders_product_status,op.delivery_status, "
+                + " opei.delivery_time from orders_products op join "
                 + " vendor_assign_price vap on op.orders_id = vap.orders_id join trackorders track on "
-                + " track.orders_products_id = op.orders_products_id left join associate a on op.fk_associate_id "
+                + " track.orders_products_id = op.orders_products_id join order_product_extra_info opei on "
+                + " op.orders_products_id = opei.order_product_id left join associate a on op.fk_associate_id "
                 + " = a.associate_id where op.products_id = vap.products_id "+sb.toString()+" limit "+startLimit+","+endLimit+" ";
 
             preparedStatement = connection.prepareStatement(statement);
@@ -1147,7 +1170,6 @@ public class ReportUtil {
                 SlaReportModel slaReportModel=new SlaReportModel();
                 String deliveryTime=resultSet.getString("vap.delivery_time");
                 String datePurchased=resultSet.getString("track.date_purchased");
-                String status=resultSet.getString("op.orders_product_status");
                 int sla1=resultSet.getInt("op.sla_code1");
                 int sla2=resultSet.getInt("op.sla_code2");
                 int sla3=resultSet.getInt("op.sla_code3");
@@ -1158,9 +1180,21 @@ public class ReportUtil {
                 slaReportModel.setOrderNo(resultSet.getString("op.orders_id"));
                 slaReportModel.setVendorName(resultSet.getString("a.associate_name"));
                 slaReportModel.setAssignDate(resultSet.getString("assignTime"));
-                slaReportModel.setDeliveryDate(resultSet.getString("vap.delivery_date"));
+                slaReportModel.setDeliveryDate(resultSet.getString("vap.delivery_date")+resultSet.getString("opei.delivery_time"));
                 slaReportModel.setDeliveryType(resultSet.getString("vap.shipping_type"));
-                slaReportModel.setStatus(resultSet.getString("op.orders_product_status"));
+
+                if (resultSet.getString("op.orders_product_status").equals("Shipped") && resultSet.getInt("op.delivery_status" )==1){
+
+                    slaReportModel.setStatus("Delivered");
+                }
+                else if (resultSet.getString("opStatus").equals("Shipped") && resultSet.getInt("op.delivery_status" )==0 ){
+
+                    slaReportModel.setStatus("Out For Delivery");
+                }
+                else {
+                    slaReportModel.setStatus(resultSet.getString("op.orders_product_status"));
+                }
+
                 if(releaseDate!=null){
                     slaReportModel.setConfirmTime(releaseDate);
                 }else{

@@ -504,6 +504,7 @@ public class Reports {
                                             @DefaultValue("0") @QueryParam("startLimit") String startLimit,
                                             @DefaultValue("10") @QueryParam("endLimit") String endLimit ,
                                             @QueryParam("orderNumber") Integer orderNo,
+                                            @QueryParam("status")  String status,
                                             @QueryParam("deliveryDateFrom") String deliveryDateFrom,
                                             @QueryParam("deliveryDateTo") String deliveryDateTo){
         ReportResponse reportResponse = new ReportResponse();
@@ -519,8 +520,8 @@ public class Reports {
                 assignEndDate=getTimestampString(assignEndDate,0);
             }
             reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Status","Assign_Date","Delivery_Date"
-                ,"Delivery_Type","Confirm_Time","Sla1","OFD_Time","Sla2","Delivered_Time","Sla3"});
-            slaReportWithSummary=reportMapper.getSlaReport(fkAssociateId,assignStartDate,assignEndDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo);
+                ,"Delivery_Type","Confirm_Time","Sla1","OFD_Time","Sla2","Delivery_Time","Sla3"});
+            slaReportWithSummary=reportMapper.getSlaReport(fkAssociateId,assignStartDate,assignEndDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo,status);
             reportResponse.setSummary(slaReportWithSummary.getSummaryModelList());
             List<Object> objectList = new ArrayList<Object>(slaReportWithSummary.getSlaReportModelList());
             reportResponse.setTableData(objectList);

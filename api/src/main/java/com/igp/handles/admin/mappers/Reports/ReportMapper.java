@@ -218,11 +218,11 @@ public class ReportMapper {
         return orderProductUploadFileReportWithSummary;
     }
 
-    public SlaReportWithSummary getSlaReport(String fkAssociateId, String assignStartDate, String assignEndDate, String startLimit, String endLimit, Integer orderNo, String deliveryDateFrom, String deliveryDateTo){
+    public SlaReportWithSummary getSlaReport(String fkAssociateId, String assignStartDate, String assignEndDate, String startLimit, String endLimit, Integer orderNo, String deliveryDateFrom, String deliveryDateTo,String status){
         SlaReportWithSummary slaReportWithSummary=null;
         ReportUtil reportUtil=new ReportUtil();
         try{
-            slaReportWithSummary=reportUtil.getSlaReport(fkAssociateId,assignStartDate,assignEndDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo);
+            slaReportWithSummary=reportUtil.getSlaReport(fkAssociateId,assignStartDate,assignEndDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo,status);
         }catch (Exception exception){
             logger.error("Error occured when getting slaReport ",exception);
         }
