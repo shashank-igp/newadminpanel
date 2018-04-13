@@ -1180,7 +1180,7 @@ public class ReportUtil {
                 slaReportModel.setOrderNo(resultSet.getString("op.orders_id"));
                 slaReportModel.setVendorName(resultSet.getString("a.associate_name"));
                 slaReportModel.setAssignDate(resultSet.getString("assignTime"));
-                slaReportModel.setDeliveryDate(resultSet.getString("vap.delivery_date")+resultSet.getString("opei.delivery_time"));
+                slaReportModel.setDeliveryDate(resultSet.getString("vap.delivery_date")+" "+resultSet.getString("opei.delivery_time"));
                 slaReportModel.setDeliveryType(resultSet.getString("vap.shipping_type"));
 
                 if (resultSet.getString("op.orders_product_status").equals("Shipped") && resultSet.getInt("op.delivery_status" )==1){
