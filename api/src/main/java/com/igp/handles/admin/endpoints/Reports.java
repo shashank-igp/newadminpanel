@@ -519,8 +519,8 @@ public class Reports {
             }else {
                 assignEndDate=getTimestampString(assignEndDate,0);
             }
-            reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Status","Assign_Time","Delivery_Date"
-                ,"Delivery_Type","Confirm_Time","Sla1","OFD_Time","Sla2","Delivery_Time","Sla3"});
+            reportResponse.setTableHeaders(new String[]{"Order_No","Vendor_Name","Status","Assign_Time  ","Delivery_Date"
+                ,"Delivery_Slot","Delivery_Type","Confirm_Time","Sla1","OFD_Time","Sla2","Delivery_Time","Sla3"});
             slaReportWithSummary=reportMapper.getSlaReport(fkAssociateId,assignStartDate,assignEndDate,startLimit,endLimit,orderNo,deliveryDateFrom,deliveryDateTo,status);
             reportResponse.setSummary(slaReportWithSummary.getSummaryModelList());
             List<Object> objectList = new ArrayList<Object>(slaReportWithSummary.getSlaReportModelList());
