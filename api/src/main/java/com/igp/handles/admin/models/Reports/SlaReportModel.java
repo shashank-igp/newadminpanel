@@ -36,7 +36,7 @@ public class SlaReportModel {
     @JsonProperty("Sla2")
     private String sla2;
 
-    @JsonProperty("Delivered_Time")
+    @JsonProperty("Delivery_Time")
     private String deliveredTime;
 
     @JsonProperty("Sla3")

@@ -100,7 +100,8 @@ public class OrderUtil {
         boolean result=false;
         try{
             statement="UPDATE trackorders set fk_associate_id = ?, processedDate = now() , outForDeliveryDate = "
-                + " '0000-00-00 00:00:00' , deliveredDate = '0000-00-00 00:00:00' where orders_products_id = ? ";
+                + " '0000-00-00 00:00:00' , deliveredDate = '0000-00-00 00:00:00', releaseDate ='0000-00-00 00:00:00' "
+                + " where orders_products_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,vendorId); // orderID
             preparedStatement.setInt(2,orderProductId);
