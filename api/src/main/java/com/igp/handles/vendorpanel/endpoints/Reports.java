@@ -194,6 +194,8 @@ public class Reports {
         }
         else if(result == true && (updateflag == 1 || updateflag == 2)){
             response.put(shipType,tableDataActionHandels);
+        }else {
+            handleServiceResponse.setError(true);
         }
         reportUtil.setVendorGeneralInstruction(new Integer(fkAssociateId),0,pincode+"",message);
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);

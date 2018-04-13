@@ -38,7 +38,7 @@ public class ReportMapper {
         ReportUtil reportUtil = new ReportUtil();
         boolean response=false;
         int result = reportUtil.updateVendorPincode(flag,fk_associate_id,pincode,shipType,updatePrice,field);
-        if(result==1){
+        if(result!=0){
             response = reportUtil.setVendorGeneralInstruction(fk_associate_id,0,pincode+"",message);
         }
         return response;
