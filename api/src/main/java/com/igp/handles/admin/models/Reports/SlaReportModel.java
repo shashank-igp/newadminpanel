@@ -18,6 +18,9 @@ public class SlaReportModel {
     @JsonProperty("Delivery_Date")
     private String deliveryDate;
 
+    @JsonProperty("Delivery_Slot")
+    private String deliverySlot;
+
     @JsonProperty("Delivery_Type")
     private String deliveryType;
 
@@ -160,5 +163,15 @@ public class SlaReportModel {
     public void setSla3(String sla3)
     {
         this.sla3 = sla3;
+    }
+
+    public String getDeliverySlot()
+    {
+        return deliverySlot;
+    }
+
+    public void setDeliverySlot(String deliverySlot)
+    {
+        this.deliverySlot = deliverySlot;
     }
 }
