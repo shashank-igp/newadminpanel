@@ -1187,7 +1187,7 @@ public class ReportUtil {
 
                     slaReportModel.setStatus("Delivered");
                 }
-                else if (resultSet.getString("opStatus").equals("Shipped") && resultSet.getInt("op.delivery_status" )==0 ){
+                else if (resultSet.getString("op.orders_product_status").equals("Shipped") && resultSet.getInt("op.delivery_status" )==0 ){
 
                     slaReportModel.setStatus("Out For Delivery");
                 }
