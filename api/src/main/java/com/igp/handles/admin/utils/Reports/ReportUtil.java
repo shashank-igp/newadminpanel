@@ -288,7 +288,8 @@ public class ReportUtil {
     public int updateVendorPincode(Integer flag,int fk_associate_id,int pincode,int shipType,int updatePrice, String field) {
         Connection connection = null;
         String statement;
-        String updateClause="";
+        String updateClause = "";
+        String whereClause = " ";
         int result = 0;
         PreparedStatement preparedStatement = null;
         try {
@@ -307,8 +308,9 @@ public class ReportUtil {
                     updateClause = "flag_enabled=" + flag +",req_price = -1 ";
                 } else {
                     updateClause = "ship_charge=" + updatePrice +",req_price = -1 ";
+                    whereClause = " and flag_enabled = 1 ";
                 }
-                statement = "update AA_vendor_pincode set " + updateClause + " where vendor_id=" + fk_associate_id + " and pincode=" + pincode + " and  ship_type=" + shipType + " ";
+                statement = "update AA_vendor_pincode set " + updateClause + " where vendor_id=" + fk_associate_id + " and pincode=" + pincode + " and  ship_type=" + shipType + whereClause;
                 preparedStatement = connection.prepareStatement(statement);
                 logger.debug("sql query in updateVendorPincode " + preparedStatement);
                 result = preparedStatement.executeUpdate();
@@ -511,6 +513,7 @@ public class ReportUtil {
         int status = 0;
         boolean result = false;
         String column;
+        String whereClause = " ";
         PreparedStatement preparedStatement = null;
         try {
             if(field!=null && field.equals("reqPrice")){
@@ -518,12 +521,13 @@ public class ReportUtil {
             }
             else if (updatePrice!=-1){
                 column="price="+updatePrice+",req_price = -1 ";
+                whereClause = " and InStock = 1 ";
             }
             else {
                 column="InStock="+inStock+",req_price = -1 ";
             }
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "update AA_vendor_to_components set "+column+" where fk_associate_id="+fkAssociateId+" and fk_component_id="+componentId+" ";
+            statement = "update AA_vendor_to_components set "+column+" where fk_associate_id="+fkAssociateId+" and fk_component_id="+componentId+whereClause;
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in updateVendorComponent "+preparedStatement);
             status = preparedStatement.executeUpdate();

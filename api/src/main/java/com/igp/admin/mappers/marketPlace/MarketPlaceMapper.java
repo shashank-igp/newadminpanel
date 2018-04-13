@@ -100,6 +100,15 @@ public class MarketPlaceMapper {
                         if (currentCell == null) {
                             a.put(list.get(currCol), "");
                             count++;
+                        } else if(currentCell.getCellType() == Cell.CELL_TYPE_FORMULA) {
+                            switch(currentCell.getCachedFormulaResultType()) {
+                                case Cell.CELL_TYPE_NUMERIC:
+                                    a.put(list.get(currCol), currentCell.getNumericCellValue()+"");
+                                    break;
+                                case Cell.CELL_TYPE_STRING:
+                                    a.put(list.get(currCol), currentCell.getRichStringCellValue() + "\"");
+                                    break;
+                            }
                         } else if (currentCell.getCellType() == Cell.CELL_TYPE_NUMERIC) {
                             a.put(list.get(currCol), currentCell.getNumericCellValue() + "");
                             if (HSSFDateUtil.isCellDateFormatted(currentCell)) {

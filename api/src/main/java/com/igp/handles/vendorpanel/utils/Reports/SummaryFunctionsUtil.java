@@ -230,8 +230,6 @@ public class SummaryFunctionsUtil
 
     public static boolean updateVendorComponent(Integer flag,String fk_associate_id,String  componentId, String price) {
         boolean result = false;
-
-
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
@@ -247,14 +245,14 @@ public class SummaryFunctionsUtil
             }
             else {
                 // flag = 3 i.e. change the price.
-                statement = "update AA_vendor_to_components set req_price = "+price+" where fk_associate_id=" + fk_associate_id + " and fk_component_id=" + componentId + " ";
+                statement = "update AA_vendor_to_components set req_price = "+price+" where fk_associate_id=" + fk_associate_id + " and fk_component_id=" + componentId + " and InStock = 1 ";
                 // copy the requested price in req_price
             }
             connection = Database.INSTANCE.getReadWriteConnection();
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in updateVendorComponet " + preparedStatement);
-            Integer nums = preparedStatement.executeUpdate();
-            if (nums != null) {
+            int nums = preparedStatement.executeUpdate();
+            if (nums != 0) {
                 result = true;
             }
 
@@ -264,7 +262,6 @@ public class SummaryFunctionsUtil
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
         }
-
         return result;
 
     }
@@ -417,14 +414,14 @@ public class SummaryFunctionsUtil
             }
             else {
                 // flag = 3 i.e. change the price.
-                statement = "update AA_vendor_pincode set req_price = "+price+" where vendor_id="+fk_associate_id+" and pincode="+pincode+" and  ship_type="+shipType+" ";
+                statement = "update AA_vendor_pincode set req_price = "+price+" where vendor_id="+fk_associate_id+" and pincode="+pincode+" and  ship_type="+shipType+" and flag_enabled = 1 ";
                 // copy the requested price in req_price
             }
             connection = Database.INSTANCE.getReadWriteConnection();
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("sql query in updateVendorPincode "+preparedStatement);
-            Integer nums = preparedStatement.executeUpdate();
-            if (nums!=null){
+            int nums = preparedStatement.executeUpdate();
+            if (nums!=0){
                 result = true;
             }
         } catch (Exception exception) {
