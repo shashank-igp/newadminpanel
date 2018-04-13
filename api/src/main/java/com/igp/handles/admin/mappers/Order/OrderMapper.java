@@ -161,7 +161,7 @@ public class OrderMapper {
 
         return responseMap;
     }
-    public boolean orderPriceChanges(int orderId,int orderProductId,int componentId,Double componentPrice,Double shippingCharge,String ipAddress,String userAgent){
+    public boolean orderPriceChanges(int orderId,int orderProductId,Integer componentId,Double componentPrice,Double shippingCharge,String ipAddress,String userAgent){
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         Double vendorPrice=null;
@@ -171,11 +171,12 @@ public class OrderMapper {
         try {
             List<OrdersProducts> ordersProducts=orderUtil.getOrderProductList(String.valueOf(orderProductId));
             productId=ordersProducts.get(0).getProductId();
-            OrderComponent orderComponent=orderUtil.getOrderComponent(orderId,productId,componentId);
-
-            if(componentPrice!=null && orderComponent != null){
-                orderUtil.updateComponentPriceOrderLevel(orderId,productId,componentId,componentPrice);
-                vendorPrice = Double.valueOf(orderComponent.getQuantity())*componentPrice ;
+            if(componentId!=null){
+                OrderComponent orderComponent=orderUtil.getOrderComponent(orderId,productId,componentId.intValue());
+                if(componentPrice!=null && orderComponent != null){
+                    orderUtil.updateComponentPriceOrderLevel(orderId,productId,componentId.intValue(),componentPrice);
+                    vendorPrice = Double.valueOf(orderComponent.getQuantity())*componentPrice ;
+                }
             }
             result=orderUtil.updateVendorAssignPrice(orderId,productId,vendorPrice,shippingCharge,orderProductId,Integer.parseInt(ordersProducts.get(0).getFkAssociateId()),ipAddress,userAgent);
 

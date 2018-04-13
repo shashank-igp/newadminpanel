@@ -6,6 +6,7 @@ import com.igp.handles.admin.mappers.Dashboard.DashboardMapper;
 import com.igp.handles.admin.models.Order.OrderLogModel;
 import com.igp.handles.admin.models.Vendor.VendorAssignModel;
 import com.igp.handles.admin.utils.Vendor.VendorUtil;
+import com.igp.handles.vendorpanel.mappers.Vendor.HandlesVendorMapper;
 import com.igp.handles.vendorpanel.models.Order.Order;
 import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
@@ -16,6 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -258,15 +260,17 @@ public class OrderUtil {
             componentTotal=orderUtil.getProductComponents(ordersProducts.getProductId(),vendorId,
                 ordersProducts.getProducts_code(),componentList,orderProductExtraInfo,false);
             vendorPrice=componentTotal*ordersProducts.getProductQuantity();
-            if(orderProductExtraInfo.getDeliveryType()==4){
-                shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
-                    1);
-            }else {
-                shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
-                    orderProductExtraInfo.getDeliveryType());
+            if(shippingChargeCheckWhileClubbingOrderProducts(orderId,vendorId,orderProductExtraInfo.getDeliveryType(),
+                                                            orderProductExtraInfo.getDeliveryDate(),
+                                                            orderProductExtraInfo.getDeliveryTime())){
+                if(orderProductExtraInfo.getDeliveryType()==4){
+                    shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
+                        1);
+                }else {
+                    shippingCharge=vendorUtil.getShippingChnargeForVendorOnPincode(vendorId,order.getDeliveryPostcode(),
+                        orderProductExtraInfo.getDeliveryType());
+                }
             }
-
-
 
             if(checkIfVendorHasAllProductComponent(vendorId,ordersProducts.getProducts_code())==false){
                 return 2; // that means vendor could not process this order since vendor does not have all components needed
@@ -900,5 +904,49 @@ public class OrderUtil {
         }
         return result;
     }
+    public boolean shippingChargeCheckWhileClubbingOrderProducts(int orderId,int vendorId,int deliveryType
+        ,Date deliveryDate,String deliveryTime){
 
+        Map<String,Set<String>> uniqueUnitsMap=new HashMap<>();
+        HandlesVendorMapper handlesVendorMapper=new HandlesVendorMapper();
+        SimpleDateFormat formatterNoTimeStamp=new SimpleDateFormat("yyyy-MM-dd");
+        Connection connection = null;
+        ResultSet resultSet = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        String shippingType=null;
+        boolean result=true;
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement="select * from vendor_assign_price vap where vap.orders_id = ? ";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,orderId);
+
+            logger.debug("STATEMENT CHECK: for charging shipping according to the clubbing rule " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            while(resultSet.next()){
+                Date deliveryDatePerProduct=resultSet.getDate("vap.delivery_date");
+                String shippingTypePerProduct=resultSet.getString("vap.shipping_type");
+                String deliveryTimePerProduct=resultSet.getString("vap.delivery_time");
+                int vendorIdPerProduct=resultSet.getInt("vap.fk_associate_id");
+                handlesVendorMapper.checkUniqueUnit(new Long(orderId),deliveryDatePerProduct,shippingTypePerProduct,
+                    deliveryTimePerProduct,uniqueUnitsMap,vendorIdPerProduct,"");
+            }
+            shippingType=Constants.getDeliveryType(String.valueOf(deliveryType));
+            deliveryTime=deliveryTime.split(" - ")[0];
+            if(handlesVendorMapper.checkUniqueUnit(new Long(orderId),deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,
+                vendorId,"")){
+                result=true;
+            }else{
+                result=false;
+            }
+        }catch (Exception exception){
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
+    }
 }
