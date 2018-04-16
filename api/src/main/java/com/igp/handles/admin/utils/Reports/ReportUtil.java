@@ -59,7 +59,7 @@ public class ReportUtil {
         }
 
         if (fkAssociateId!=null && !fkAssociateId.isEmpty()){
-            sb.append("  and vap.fk_associate_id ='"+fkAssociateId+"' ");
+            sb.append("  and op.fk_associate_id ='"+fkAssociateId+"' ");
         }
 
         if (orderNo!=null )
