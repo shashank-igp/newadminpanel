@@ -41,6 +41,9 @@ public class orderReportObjectModel {
     @JsonProperty("Delivery_Type")
     private String deliveryType;
 
+    @JsonProperty("Order_From")
+    private String orderFrom;
+
     @JsonProperty("Recipient_Name")
     private String recipienName;
 
@@ -137,6 +140,10 @@ public class orderReportObjectModel {
     public void setDeliveryType(String deliveryType) {
         this.deliveryType = deliveryType;
     }
+
+    public String getOrderFrom() { return orderFrom;}
+
+    public void setOrderFrom(String orderFrom) { this.orderFrom = orderFrom; }
 
     public String getRecipienName() {
         return recipienName;
