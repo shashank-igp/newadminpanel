@@ -748,7 +748,7 @@ public class MarketPlaceMapper {
                     if (validationModel.getError() == false) {
                         // order doesn't exist, so create a new order.
 
-                        // validate customer details.
+                        // first step : validate customer details.
                         validationModel = marketPlaceOrderUtil.validateCustomerDetails(validationModel);
                         if (validationModel.getError() == Boolean.TRUE) {
                             // validationModel.setMessage("Error is Customer Details.");
@@ -756,16 +756,13 @@ public class MarketPlaceMapper {
                             // no error in getting customer model.
                             addressModel.setId(validationModel.getUserModel().getIdHash());
                             validationModel.setAddressModel(addressModel);
-                            // validate address details.
-
-                            //  addressModel.setAid("1614158");
-                            //   validationModel.setAddressModel(addressModel);
+                            // second step : validate address details.
 
                             validationModel = marketPlaceOrderUtil.validateSelectedAddress(validationModel);
                             if (validationModel.getError() == Boolean.TRUE) {
                                 // validationModel.setMessage("Error is Address Validation.");
                             } else {
-                                // check product details.
+                                // third step : check product details.
                                 String prodCode = productModel.getProductCode();
                                 Integer prodQty = productModel.getQuantity();
                                 if (prodCode == "" || prodCode == null || prodQty <= 0) {
@@ -785,15 +782,15 @@ public class MarketPlaceMapper {
                                         validationModel.setError(Boolean.TRUE);
                                         validationModel.setMessage("Product Can't be found.");
                                     } else {
-                                        // finally validate extra info values and add in the model
+                                        // fourth step : validate extra info values and add in the model
                                         if (extraInfoModel.getGstNo() != null || extraInfoModel.getGstNo() != "" ||
                                             extraInfoModel.getMarketData() != null || extraInfoModel.getMarketData() != "" ||
                                             extraInfoModel.getMarketName() != null || extraInfoModel.getMarketName() != "" ||
                                             extraInfoModel.getRelId() != "") {
-                                            // all info is good so create temp model and create temp order.
+                                            // fifth step : all info is good so create temp model and create temp order.
                                             marketPlaceTempOrderModel = fillTempModelAndCreateTempOrder(validationModel);
                                             if (marketPlaceTempOrderModel.getTempOrderId() != 0) {
-                                                // create order by hitting api
+                                                // last step : create order by hitting api
                                                 logger.debug("Temp Order Created successfully : " + marketPlaceTempOrderModel.getTempOrderId());
                                                 validationModel = marketPlaceOrderUtil.checkIfCorpOrderExists(validationModel);
                                                 if(validationModel.getError()==false){
@@ -873,8 +870,10 @@ public class MarketPlaceMapper {
             // Everything went well,fill the tempmodel.
             marketPlaceTempOrderModel.setAddressBookId(new Integer(addressModel.getAid()));
             logger.debug("TEMP-ORDER DEBUGGING : " + "setAddressBookId " +addressModel.getAid());
+
             marketPlaceTempOrderModel.setCustomerId(new Integer(userModel.getId()));
             logger.debug("TEMP-ORDER DEBUGGING : " + "setCustomerId "+userModel.getId());
+
             marketPlaceTempOrderModel.setAssociateId(validationModel.getFkAssociateId());
             logger.debug("TEMP-ORDER DEBUGGING : " + "setAssociateId "+validationModel.getFkAssociateId());
 
