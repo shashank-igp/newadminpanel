@@ -207,7 +207,9 @@ public class MarketPlaceMapper {
                             quantity = (int) d;
                         }
 
-                        String name = " "+column.get("MemberName")+" ";
+                        String name = column.get("MemberName");
+
+                        name = " "+marketPlaceOrderUtil.replaceSpecialChars(name)+" ";
                         name=name.replaceAll("\\sNA\\s"," ").replaceAll("\\sna\\s"," ").replaceAll("\\sNa\\s"," ").trim();
                         String fname = "";
                         String lname = "";
@@ -241,6 +243,14 @@ public class MarketPlaceMapper {
                         address = marketPlaceOrderUtil.replaceSpecialChars(address);
                         address2 = marketPlaceOrderUtil.replaceSpecialChars(address2);
 
+                        String email = column.get("Email").trim();
+
+                        if(email.isEmpty()){
+                            email = "asif@tokenz.com";
+                        }else {
+                            email = marketPlaceOrderUtil.replaceSpecialChars(email);
+                        }
+
                         userModel = new UserModel.UserBuilder()
                             .id(null)
                             .firstname(fname)
@@ -249,7 +259,7 @@ public class MarketPlaceMapper {
                             .state(column.get("State"))
                             .city(column.get("City"))
                             .postcode(zipCode)
-                            .email(column.get("Email").trim().isEmpty()?"asif@tokenz.com":column.get("Email").trim())
+                            .email(email)
                             .mobile(phone.split("\\.")[0])
                             .mobilePrefix(mprefix)
                             .password(millis + "")

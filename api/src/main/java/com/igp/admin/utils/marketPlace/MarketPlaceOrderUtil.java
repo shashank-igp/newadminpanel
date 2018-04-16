@@ -1058,6 +1058,7 @@ public class MarketPlaceOrderUtil {
             }
             logger.debug("Finally the returned string from special char match is : "+correctStr);
         }
+        correctStr = correctStr.trim();
         return correctStr;
     }
 
