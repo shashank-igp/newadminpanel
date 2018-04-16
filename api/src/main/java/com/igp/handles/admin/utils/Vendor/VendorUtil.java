@@ -26,6 +26,7 @@ public class VendorUtil
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         String shippingTypeClause=null,pincodeClause=null;
+        VendorInfoModel defaultVendorInfoModel=new VendorInfoModel();
         try {
             if(shippingType!=0){
                 shippingTypeClause=" and avp.ship_type = "+shippingType;
@@ -37,6 +38,13 @@ public class VendorUtil
             }else {
                 pincodeClause="";
             }
+
+            if(pincode==0&&shippingType==0){
+                defaultVendorInfoModel.setVendorId(72);
+                defaultVendorInfoModel.setAssociateName("Intermesh Shopping Network Pvt. Ltd. (Handels)");
+                vendorInfoModelList.add(defaultVendorInfoModel);
+            }
+
             connection = Database.INSTANCE.getReadOnlyConnection();
             String statement = "select * from associate a join vendor_extra_info v on a.associate_id=v.associate_id join "
                 + " AA_vendor_pincode  avp on avp.vendor_id = a.associate_id where a.associate_status =1 and v.type = 2 and "
