@@ -33,8 +33,8 @@ public class DashboardUtil {
             statement = "select o.*,op.*,opei.*,p.*,( CASE WHEN vap.assign_time !='0000-00-00 00:00:00' THEN vap.assign_time "
                 + " END ) as  vendor_assign_time from orders o join orders_products op on o.orders_id = op.orders_id join "
                 + " order_product_extra_info opei on opei.order_product_id=op.orders_products_id join products p on p.products_id = op.products_id "
-                + " left join vendor_assign_price vap on vap.orders_id = op.orders_id "
-                + " where vap.products_id = op.products_id and  opei.delivery_date "+dateComapareSymbol+" ? and p.fk_associate_id = ? ";
+                + " left join vendor_assign_price vap on vap.orders_id = op.orders_id and vap.products_id = op.products_id "
+                + " where opei.delivery_date "+dateComapareSymbol+" ? and p.fk_associate_id = ? ";
             preparedStatement = connection.prepareStatement(statement);
 
             preparedStatement.setString(1,new SimpleDateFormat("yyyy-MM-dd").format(date));
