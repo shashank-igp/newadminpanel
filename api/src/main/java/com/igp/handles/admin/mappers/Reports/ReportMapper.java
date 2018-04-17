@@ -117,12 +117,12 @@ public class ReportMapper {
         return vendorDetailsHavingSummaryModel;
     }
     public boolean modifyVendorDetails(int fkAssociateId,String vendorName,String contactPerson,String email,
-                                       String address,String phone,String userId, String password,int status){
+                                       String address,String phone,String userId, String password,int status, int rating, int dailyCap){
         boolean result = false;
         int response;
         ReportUtil reportUtil = new ReportUtil();
         try{
-            response = reportUtil.modifyVendorDetails(fkAssociateId,vendorName,contactPerson,email,address,phone,userId,password,status);
+            response = reportUtil.modifyVendorDetails(fkAssociateId,vendorName,contactPerson,email,address,phone,userId,password,status,rating,dailyCap);
             if (response==1){
                 result=true;
             }
@@ -255,6 +255,10 @@ public class ReportMapper {
         tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("User_Id",new ArrayList<String>(
             Arrays.asList("Edit"))));
         tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Password",new ArrayList<String>(
+            Arrays.asList("Edit"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Rating",new ArrayList<String>(
+            Arrays.asList("Edit"))));
+        tableDataAction.add(new AbstractMap.SimpleEntry<String, List<String>>("Daily_Cap",new ArrayList<String>(
             Arrays.asList("Edit"))));
     }
     public void fillDataActionBarcode(List<Map.Entry<String,List<String>>> tableDataAction){
