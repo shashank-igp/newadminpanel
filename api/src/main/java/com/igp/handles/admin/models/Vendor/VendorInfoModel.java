@@ -35,6 +35,12 @@ public class VendorInfoModel {
     @JsonProperty("Status")
     private int status;
 
+    @JsonProperty("Rating")
+    private int rating;
+
+    @JsonProperty("Daily_Cap")
+    private int dailyCap;
+
     public int getVendorId()
     {
         return vendorId;
@@ -110,4 +116,12 @@ public class VendorInfoModel {
     public void setStatus(int status) {
         this.status = status;
     }
+
+    public int getRating() {        return rating;    }
+
+    public void setRating(int rating) {        this.rating = rating;    }
+
+    public int getDailyCap() {        return dailyCap;    }
+
+    public void setDailyCap(int dailyCap) {        this.dailyCap = dailyCap;    }
 }

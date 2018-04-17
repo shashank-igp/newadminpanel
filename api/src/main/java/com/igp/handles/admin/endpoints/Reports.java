@@ -297,7 +297,7 @@ public class Reports {
             reportMapper.fillDataActionVendor(tableDataAction);
             reportResponse.setTableDataAction(tableDataAction);
             reportResponse.setTableHeaders(new String[]{"Vendor_Id","Vendor_Name","Contact_Person","Email",
-                "Address","Phone","User_Id","Password","Status"});
+                "Address","Phone","User_Id","Password","Status","Rating","Daily_Cap"});
 
             vendorDetailsHavingSummaryModel = reportMapper.getVendorDetails(fkAssociateId,startLimit,endLimit);
             reportResponse.setSummary(vendorDetailsHavingSummaryModel.getSummaryModelList());
@@ -318,12 +318,14 @@ public class Reports {
                                                      @DefaultValue("") @QueryParam("Phone") String phone,
                                                      @DefaultValue("") @QueryParam("User_Id") String userId,
                                                      @DefaultValue("") @QueryParam("Password") String password,
-                                                     @DefaultValue("-1") @QueryParam("Status") int status){
+                                                     @DefaultValue("-1") @QueryParam("Status") int status,
+                                                     @DefaultValue("-1") @QueryParam("Rating") int rating,
+                                                     @DefaultValue("-1") @QueryParam("Daily_Cap") int dailyCap){
         HandleServiceResponse handleServiceResponse = new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
         boolean result = false;
         try{
-            result = reportMapper.modifyVendorDetails(fkAssociateId,vendorName,contactPerson,email,address,phone,userId,password,status);
+            result = reportMapper.modifyVendorDetails(fkAssociateId,vendorName,contactPerson,email,address,phone,userId,password,status,rating,dailyCap);
         }catch (Exception exception){
             logger.error("Error occured at modifyVendorDetails ",exception);
         }
@@ -499,14 +501,14 @@ public class Reports {
     @GET
     @Path("/v1/admin/handels/getSlaReport")
     public ReportResponse getSlaReport(@QueryParam("fkAssociateId") String fkAssociateId,
-                                            @QueryParam("assignDateFrom") String assignStartDate,
-                                            @QueryParam("assignDateTo")String assignEndDate ,
-                                            @DefaultValue("0") @QueryParam("startLimit") String startLimit,
-                                            @DefaultValue("10") @QueryParam("endLimit") String endLimit ,
-                                            @QueryParam("orderNumber") Integer orderNo,
-                                            @QueryParam("status")  String status,
-                                            @QueryParam("deliveryDateFrom") String deliveryDateFrom,
-                                            @QueryParam("deliveryDateTo") String deliveryDateTo){
+                                       @QueryParam("assignDateFrom") String assignStartDate,
+                                       @QueryParam("assignDateTo")String assignEndDate ,
+                                       @DefaultValue("0") @QueryParam("startLimit") String startLimit,
+                                       @DefaultValue("10") @QueryParam("endLimit") String endLimit ,
+                                       @QueryParam("orderNumber") Integer orderNo,
+                                       @QueryParam("status")  String status,
+                                       @QueryParam("deliveryDateFrom") String deliveryDateFrom,
+                                       @QueryParam("deliveryDateTo") String deliveryDateTo){
         ReportResponse reportResponse = new ReportResponse();
         ReportMapper reportMapper = new ReportMapper();
         SlaReportWithSummary slaReportWithSummary=null;

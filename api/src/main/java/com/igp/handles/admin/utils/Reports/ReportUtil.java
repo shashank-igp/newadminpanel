@@ -585,6 +585,8 @@ public class ReportUtil {
                     vendorInfoModel.setContactPerson(resultSet.getString("a.associate_contact_person"));
                     vendorInfoModel.setEmail(resultSet.getString("a.associate_email"));
                     vendorInfoModel.setPassword(resultSet.getString("au.associate_user_pass"));
+                    vendorInfoModel.setRating(resultSet.getInt("v.rating"));
+                    vendorInfoModel.setDailyCap(resultSet.getInt("v.daily_cap"));
 
                     vendorInfoModelList.add(vendorInfoModel);
                 }
@@ -608,7 +610,7 @@ public class ReportUtil {
     }
 
     public int modifyVendorDetails(int fkAssociateId,String vendorName,String contactPerson,String email,
-                                   String address,String phone,String userId,String password,int status){
+                                   String address,String phone,String userId,String password,int status, int rating, int dailyCap){
         Connection connection = null;
         int response=0;
         String statement;
@@ -617,19 +619,19 @@ public class ReportUtil {
         PreparedStatement preparedStatement = null;
         try{
             if(!vendorName.equals("")){
-                column="associate_name="+vendorName;
+                column="associate_name='"+vendorName+"'";
             }
             else if(!contactPerson.equals("")){
-                column="associate_contact_person="+contactPerson;
+                column="associate_contact_person='"+contactPerson+"'";
             }
             else if(!email.equals("")){
-                column="associate_email="+email;
+                column="associate_email='"+email+"'";
             }
             else if(!address.equals("")){
-                column="associate_address="+address;
+                column="associate_address='"+address+"'";
             }
             else if(!phone.equals("")){
-                column="associate_phone="+phone;
+                column="associate_phone='"+phone+"'";
             }
             else if(status!=-1){
                 column="associate_status="+flag;
@@ -643,16 +645,30 @@ public class ReportUtil {
                 response = preparedStatement.executeUpdate();
             }else{
                 if(!userId.equals("")){
-                    column="associate_user_name="+userId;
+                    column="associate_user_name='"+userId+"'";
                 }
                 else if(!password.equals("")){
-                    column="associate_user_pass="+password;
+                    column="associate_user_pass='"+password+"'";
                 }
-                String statement1 = "UPDATE associate_user set " +column+" WHERE fk_associate_login_id = ?";
-                preparedStatement = connection.prepareStatement(statement1);
-                preparedStatement.setInt(1, fkAssociateId);
-                logger.debug("sql query in addNewVendorUtil " + preparedStatement);
-                response = preparedStatement.executeUpdate();
+                if(!column.equals("")) {
+                    String statement1 = "UPDATE associate_user set " + column + " WHERE fk_associate_login_id = ?";
+                    preparedStatement = connection.prepareStatement(statement1);
+                    preparedStatement.setInt(1, fkAssociateId);
+                    logger.debug("sql query in addNewVendorUtil " + preparedStatement);
+                    response = preparedStatement.executeUpdate();
+                }else{
+                    if(rating!=-1){
+                        column="rating="+rating;
+                    }
+                    else if(dailyCap!=-1){
+                        column="daily_cap="+dailyCap;
+                    }
+                    String statement1 = "UPDATE vendor_extra_info set " + column + " WHERE associate_id = ?";
+                    preparedStatement = connection.prepareStatement(statement1);
+                    preparedStatement.setInt(1, fkAssociateId);
+                    logger.debug("sql query in addNewVendorUtil " + preparedStatement);
+                    response = preparedStatement.executeUpdate();
+                }
             }
         } catch (Exception exception) {
             logger.error("Exception in connection : ", exception);
@@ -668,7 +684,6 @@ public class ReportUtil {
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement=null;
-        // PreparedStatement preparedStatement1=null;
         int result = 0;
         int fkAssociateId = 0;
         try {
@@ -695,7 +710,7 @@ public class ReportUtil {
             logger.debug("sql query in addNewVendorUtil "+preparedStatement);
             result = preparedStatement.executeUpdate();
             if (result == 0) {
-                logger.error("Failed to create new vendor.");
+                logger.error("Failed to create new vendor : 1");
             } else {
                 ResultSet resultSet = preparedStatement.getGeneratedKeys();
                 resultSet.first();
@@ -710,6 +725,19 @@ public class ReportUtil {
                 preparedStatement.setInt(3,1);
                 preparedStatement.setString(4,password);
                 preparedStatement.setString(5,null);
+
+                logger.debug("sql query in addNewVendorUtil "+preparedStatement);
+                result = preparedStatement.executeUpdate();
+            }
+            if (result == 0) {
+                logger.error("Failed to create new vendor : 2");
+            } else {
+                String statement1 = "INSERT INTO vendor_extra_info " +
+                    "(associate_id, type, priority,rating,near_del_charges,far_del_charges "+
+                    ",midnight_charges, fixtime_charges, del_type, extra,daily_cap,sms_enabled)" +
+                    " VALUES (?,2,1,1,75,100,300,200,1,0,10,0)";
+                preparedStatement = connection.prepareStatement(statement1);
+                preparedStatement.setInt(1,fkAssociateId);
 
                 logger.debug("sql query in addNewVendorUtil "+preparedStatement);
                 result = preparedStatement.executeUpdate();
@@ -985,7 +1013,7 @@ public class ReportUtil {
     }
 
     public OrderProductUploadFileReportWithSummary uploadPicReport(String fkAssociateId, String startDate, String endDate, String startLimit,
-        String endLimit, Integer orderNo, String deliveryDateFrom, String deliveryDateTo){
+                                                                   String endLimit, Integer orderNo, String deliveryDateFrom, String deliveryDateTo){
         Connection connection=null;
         ResultSet resultSet=null;
         String statement;
