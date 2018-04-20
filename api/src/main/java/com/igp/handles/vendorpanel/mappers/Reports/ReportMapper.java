@@ -50,10 +50,16 @@ public class ReportMapper {
         boolean result=updateVendorPincode(flag,fk_associate_id,pincode,shipType,updateStatus,updatePrice);
         return result;
     }
-    public boolean addVendorComponent(String fkAssociateId,String componentCode,String componentName,int type,int price){
+    public boolean addVendorComponent(String fkAssociateId,String componentCode,String componentName,int type,int price,String ipAddress,String userAgent){
+        boolean result = false;
+        ReportUtil reportUtil =  new ReportUtil();
         SummaryFunctionsUtil summaryFunctionsUtil = new SummaryFunctionsUtil();
         String message="Need to add new component name :- "+componentCode+" with price :- "+price;
-        boolean result=summaryFunctionsUtil.addVendorComponent(fkAssociateId,componentCode,price);
+        int compId=summaryFunctionsUtil.addVendorComponent(fkAssociateId,componentCode,price);
+        if(compId!=0){
+            reportUtil.setVendorGeneralInstruction(new Integer(fkAssociateId),1,compId+"",message,ipAddress,userAgent);
+            result = true;
+        }
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
         return result;
     }
@@ -85,7 +91,7 @@ public class ReportMapper {
         return vendorInvoiceModel;
     }
 
-    public boolean addVendorPincode(String fkAssociateId,int pincode,int cityId,int shipType,int shipCharge){
+    public boolean addVendorPincode(String fkAssociateId,int pincode,int cityId,int shipType,int shipCharge,String ipAddress,String userAgent){
         ReportUtil reportUtil = new ReportUtil();
         if(shipType==4){
             shipType=1; // all fixed date are standard
@@ -95,7 +101,7 @@ public class ReportMapper {
         map.put(2,"Fixed Time Delivery");
         map.put(3,"Mid Night Delivery");
         String message="Need to add new pincode :- "+pincode+" with shipping type :- "+map.get(shipType)+" and shipping charge :- "+shipCharge;
-        boolean result = reportUtil.addNewVendorPincodeUtil(new Integer(fkAssociateId).intValue(),pincode,cityId,shipType,shipCharge,0);
+        boolean result = reportUtil.addNewVendorPincodeUtil(new Integer(fkAssociateId).intValue(),pincode,cityId,shipType,shipCharge,0,message,ipAddress,userAgent);
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
         return result;
     }
