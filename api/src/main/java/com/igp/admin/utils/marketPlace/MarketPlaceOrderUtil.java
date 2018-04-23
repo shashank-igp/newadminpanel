@@ -23,6 +23,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -705,6 +706,15 @@ public class MarketPlaceOrderUtil {
 
             String hash = encryptPayment(hashStringSequence + SecretProperties.getPaymentKey());
             marketPlaceOrderModel.setHash(hash);
+
+            TimeUnit.SECONDS.sleep(1);
+
+            // sleep for a second.
+
+           if(checkIfCorpOrderExistsAlready(extraInfoModel.getRelId(),orderTempModel.getAssociateId())){
+               // before creating new order check it must not exist.
+               throw new Exception("Duplicate Order.");
+            }
             // hit api and receive the order response.
             HeaderKeyValueModel headerKeyValueModel = new HeaderKeyValueModel();
             List<HeaderKeyValueModel> headerKeyValueModelList = new ArrayList<>();
@@ -899,6 +909,32 @@ public class MarketPlaceOrderUtil {
             Database.INSTANCE.closeConnection(connection);
         }
         return validationModel;
+    }
+    public boolean checkIfCorpOrderExistsAlready(String rlId, int fkAsId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        boolean result = false;
+        try {
+            connection = Database.INSTANCE.getReadWriteConnection();
+            String statement = "SELECT orders_id from orders WHERE rl_req_ID = ? and fk_associate_id = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1, rlId);
+            preparedStatement.setInt(2,fkAsId);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.first()) {
+                // when order exists
+                result = true;
+                logger.debug("ORDER-ID ALREADY EXISTS IN ORDERS TABLE, CAN'T TAKE YOUR REQUEST");
+            }
+        } catch (Exception exception) {
+            logger.error("Exception at check order exists : " + exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
     }
 
 
