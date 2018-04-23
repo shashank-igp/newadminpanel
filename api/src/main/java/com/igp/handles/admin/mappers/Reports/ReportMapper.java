@@ -33,17 +33,17 @@ public class ReportMapper {
         return pincodeModelListHavingSummaryModel;
     }
 
-    public boolean updatePincodeMapper(Integer flag,int fk_associate_id,int pincode,int shipType,int updatePrice, String message, String field){
+    public boolean updatePincodeMapper(Integer flag,int fk_associate_id,int pincode,int shipType,int updatePrice, String message, String field,String ipAddress,String userAgent){
         ReportUtil reportUtil = new ReportUtil();
         boolean response=false;
         int result = reportUtil.updateVendorPincode(flag,fk_associate_id,pincode,shipType,updatePrice,field);
         if(result!=0){
-            response = reportUtil.setVendorGeneralInstruction(fk_associate_id,0,pincode+"",message);
+            response = reportUtil.setVendorGeneralInstruction(fk_associate_id,0,pincode+"",message,ipAddress,userAgent);
         }
         return response;
     }
 
-    public boolean addNewVendorPincodeMapper(int fkAssociateId,int pincode,int cityId,int shipType,int shipCharge){
+    public boolean addNewVendorPincodeMapper(int fkAssociateId,int pincode,int cityId,int shipType,int shipCharge,String ipAddress,String userAgent){
         Map<Integer,String> map= new HashMap<>();
         MailMapper mailMapper = new MailMapper();
         ReportUtil reportUtil = new ReportUtil();
@@ -53,17 +53,16 @@ public class ReportMapper {
         map.put(1,"Standard Delivery");
         map.put(2,"Fixed Time Delivery");
         map.put(3,"Mid Night Delivery");
-        boolean result,response=false;
+        boolean result=false;
         String message="Added new pincode :- "+pincode+" with shipping type :- "+map.get(shipType)+" and shipping charge :- "+shipCharge+" : ";
-        result = reportUtil.addNewVendorPincodeUtil(fkAssociateId,pincode,cityId,shipType,shipCharge,1);
+        result = reportUtil.addNewVendorPincodeUtil(fkAssociateId,pincode,cityId,shipType,shipCharge,1,message,ipAddress,userAgent);
         if(result==true){
-            mailMapper.sendMailToVendor(message,fkAssociateId,"New Pincode Added - IGP");
-            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,0,pincode+"",message);
+          result = mailMapper.sendMailToVendor(message,fkAssociateId,"New Pincode Added - IGP");
         }
-        return response;
+        return result;
     }
 
-    public boolean addNewComponentMapper(int fkAssociateId,String componentCode,String componentName,int type,int price){
+    public boolean addNewComponentMapper(int fkAssociateId,String componentCode,String componentName,int type,int price,String ipAddress,String userAgent){
         boolean result,response=false;
         ReportUtil reportUtil =  new ReportUtil();
         MailMapper mailMapper = new MailMapper();
@@ -71,7 +70,7 @@ public class ReportMapper {
         result = reportUtil.addVendorComponent(String.valueOf(fkAssociateId),componentCode,componentName,type,"dummy.jpg",price);
         if(result==true){
             mailMapper.sendMailToVendor(message,fkAssociateId,"New Component Added - IGP");
-            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message);
+            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentCode,message,ipAddress,userAgent);
         }
         return response;
     }
@@ -81,12 +80,12 @@ public class ReportMapper {
         return productModelListHavingSummaryModel;
     }
 
-    public boolean updateComponentMapper(int fkAssociateId,String componentId, String message, int updatePrice,String inStock, String field){
+    public boolean updateComponentMapper(int fkAssociateId,String componentId, String message, int updatePrice,String inStock, String field,String ipAddress,String userAgent){
         ReportUtil reportUtil = new ReportUtil();
         boolean response = false;
         boolean result=reportUtil.updateProductComponent(fkAssociateId,componentId,updatePrice,inStock,field);
         if(result==true){
-            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentId,message);
+            response = reportUtil.setVendorGeneralInstruction(fkAssociateId,1,componentId,message,ipAddress,userAgent);
         }
         return response;
     }
@@ -147,7 +146,7 @@ public class ReportMapper {
         }
         return result;
     }
-    public boolean approveAndRejectMapper(String object, String reportName, String columnName, int fkAssociateId, String approveAndReject){
+    public boolean approveAndRejectMapper(String object, String reportName, String columnName, int fkAssociateId, String approveAndReject,String ipAddress,String userAgent){
         ReportUtil reportUtil = new ReportUtil();
         MailMapper mailMapper = new MailMapper();
         String subject = "Request for change of ";
@@ -163,7 +162,7 @@ public class ReportMapper {
                 subject+="Accepted - IGP";
             }else subject+="Rejected - IGP";
 
-            message =  reportUtil.approveAndRejectUtil(object,reportName,columnName,fkAssociateId,approveReject);
+            message =  reportUtil.approveAndRejectUtil(object,reportName,columnName,fkAssociateId,approveReject,ipAddress,userAgent);
 
             if(!message.equals("")){
                 response= true;

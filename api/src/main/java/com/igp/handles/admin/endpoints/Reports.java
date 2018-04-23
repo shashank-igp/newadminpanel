@@ -11,7 +11,9 @@ import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -100,7 +102,8 @@ public class Reports {
 
     @PUT
     @Path("/v1/admin/handels/handlePincodeChange")
-    public HandleServiceResponse updatePincodeDetail(@QueryParam("fkAssociateId") int fkAssociateId,
+    public HandleServiceResponse updatePincodeDetail(@Context HttpServletRequest request,
+                                                     @QueryParam("fkAssociateId") int fkAssociateId,
                                                      @QueryParam("pincode") int pincode,
                                                      @QueryParam("shipCharge")int updatePrice,
                                                      @QueryParam("field") String field,
@@ -121,7 +124,9 @@ public class Reports {
             else {
                 message = "Update the price of shipping type "+shipType+" for Pincode "+pincode+" to "+updatePrice+" for vendor id "+fkAssociateId;
             }
-            boolean status = reportMapper.updatePincodeMapper(flag,fkAssociateId,pincode,shipType,updatePrice,message,field);
+            String ipAddress=request.getRemoteAddr();
+            String userAgent = request.getHeader("User-Agent");
+            boolean status = reportMapper.updatePincodeMapper(flag,fkAssociateId,pincode,shipType,updatePrice,message,field,ipAddress,userAgent);
             if(status == false){
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setErrorCode("ERROR OCCURRED HANDELING PINCODE");
@@ -139,7 +144,8 @@ public class Reports {
 
     @POST
     @Path("/v1/admin/handels/addVendorComponent")
-    public HandleServiceResponse addVendorComponent(@QueryParam("fkAssociateId") int fkAssociateId,
+    public HandleServiceResponse addVendorComponent(@Context HttpServletRequest request,
+                                                    @QueryParam("fkAssociateId") int fkAssociateId,
                                                     @QueryParam("componentCode") String componentCode,
                                                     @QueryParam("componentName") String componentName,
                                                     @DefaultValue("0")@QueryParam("type") int type,
@@ -150,7 +156,9 @@ public class Reports {
         ReportMapper reportMapper = new ReportMapper();
         try{
             boolean result;
-            result = reportMapper.addNewComponentMapper(fkAssociateId,componentCode,componentName,type, price);
+            String ipAddress=request.getRemoteAddr();
+            String userAgent = request.getHeader("User-Agent");
+            result = reportMapper.addNewComponentMapper(fkAssociateId,componentCode,componentName,type, price,ipAddress,userAgent);
             if(result == false){
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING COMPONENT");
@@ -164,7 +172,8 @@ public class Reports {
 
     @PUT
     @Path("/v1/admin/handels/handleComponentChange")
-    public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") int fkAssociateId,
+    public HandleServiceResponse updateComponentDetail(@Context HttpServletRequest request,
+                                                       @QueryParam("fkAssociateId") int fkAssociateId,
                                                        @QueryParam("componentId") String componentId,
                                                        @QueryParam("oldPrice") String oldPrice,
                                                        @DefaultValue("-1") @QueryParam("reqPrice") String updatePrice,
@@ -185,8 +194,10 @@ public class Reports {
             }else if(inStock.equals("0")){
                 message="Change status of component "+componentName+" to Out of stock for vendor id "+fkAssociateId;
             }
+            String ipAddress=request.getRemoteAddr();
+            String userAgent = request.getHeader("User-Agent");
 
-            boolean result = reportMapper.updateComponentMapper(fkAssociateId,componentId,message,newPrice,inStock,field);
+            boolean result = reportMapper.updateComponentMapper(fkAssociateId,componentId,message,newPrice,inStock,field,ipAddress,userAgent);
             if(result == false){
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setErrorCode("ERROR OCCURRED CHANGING COMPONENT INFO");
@@ -202,7 +213,8 @@ public class Reports {
 
     @POST
     @Path("/v1/admin/handels/addVendorPincode")
-    public HandleServiceResponse addVendorPincode(@QueryParam("fkAssociateId") int fkAssociateId,
+    public HandleServiceResponse addVendorPincode(@Context HttpServletRequest request,
+        @QueryParam("fkAssociateId") int fkAssociateId,
                                                   @QueryParam("pincode") int pincode,
                                                   @DefaultValue("0") @QueryParam("cityId") int cityId,
                                                   @QueryParam("shipType") int shipType,
@@ -211,7 +223,9 @@ public class Reports {
         ReportMapper reportMapper = new ReportMapper();
         try{
             boolean result;
-            result = reportMapper.addNewVendorPincodeMapper(fkAssociateId,pincode,cityId,shipType,shipCharge);
+            String ipAddress=request.getRemoteAddr();
+            String userAgent = request.getHeader("User-Agent");
+            result = reportMapper.addNewVendorPincodeMapper(fkAssociateId,pincode,cityId,shipType,shipCharge,ipAddress,userAgent);
             if(result == false){
                 handleServiceResponse.setError(true);
                 handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING PINCODE");
@@ -365,7 +379,8 @@ public class Reports {
     }
     @POST
     @Path("/v1/admin/handels/approveAndReject")
-    public HandleServiceResponse approveAndReject(@QueryParam("approveReject") String approveReject, // 1 : approve, 0 : reject
+    public HandleServiceResponse approveAndReject(@Context HttpServletRequest request,
+                                                  @QueryParam("approveReject") String approveReject, // 1 : approve, 0 : reject
                                                   @QueryParam("reportType") String reportType,
                                                   @QueryParam("colName") String columnName,
                                                   @QueryParam("fkAssociateId") int fkAssociateId,
@@ -374,7 +389,9 @@ public class Reports {
         ReportMapper reportMapper = new ReportMapper();
         boolean response = false;
         try{
-            response =  reportMapper.approveAndRejectMapper(object,reportType,columnName,fkAssociateId,approveReject);
+            String ipAddress=request.getRemoteAddr();
+            String userAgent = request.getHeader("User-Agent");
+            response =  reportMapper.approveAndRejectMapper(object,reportType,columnName,fkAssociateId,approveReject,ipAddress,userAgent);
         }catch (Exception exception){
             logger.error("Error occured at add acceptAndReject ",exception);
         }

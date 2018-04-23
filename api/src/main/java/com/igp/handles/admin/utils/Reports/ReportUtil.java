@@ -325,7 +325,7 @@ public class ReportUtil {
         }
         return result;
     }
-    public boolean addNewVendorPincodeUtil(int fkAssociateId,int pincode,int cityId,int shipType,int shipCharge,int adminFlag){
+    public boolean addNewVendorPincodeUtil(int fkAssociateId,int pincode,int cityId,int shipType,int shipCharge,int adminFlag,String message,String ipAddress,String userAgent){
         Connection connection = null;
         String statement;
         boolean result = false;
@@ -349,7 +349,7 @@ public class ReportUtil {
                 logger.error("Pincode could not be added, plz check sql query");
             }
             else {
-                result=true;
+                result = setVendorGeneralInstruction(fkAssociateId,0,pincode+"",message,ipAddress,userAgent);
             }
         } catch (Exception exception) {
             logger.error("Exception in connection at addNewVendorPincodeUtil : ", exception);
@@ -359,7 +359,7 @@ public class ReportUtil {
         }
         return result;
     }
-    public boolean setVendorGeneralInstruction(int fkAssociateId,int pinOrComp, String value, String message){
+    public boolean setVendorGeneralInstruction(int fkAssociateId,int pinOrComp, String value, String message,String ipAddress,String userAgent){
         Connection connection = null;
         boolean response = false;
         String statement;
@@ -373,8 +373,13 @@ public class ReportUtil {
                 column="fk_component_id";
             }
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement = "INSERT INTO vendor_general_instructions (associate_id,"+column+",instruction_msg) VALUES ("+fkAssociateId+","+value+","+"'"+message+"'"+")";
+            statement = "INSERT INTO vendor_general_instructions (associate_id,"+column+",instruction_msg,ip,user_agent) VALUES (?,?,?,?,?)";
             preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,fkAssociateId);
+            preparedStatement.setString(2,value);
+            preparedStatement.setString(3,message);
+            preparedStatement.setString(4,ipAddress);
+            preparedStatement.setString(5,userAgent);
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             int result = preparedStatement.executeUpdate();
             if(result!=0){
@@ -750,7 +755,7 @@ public class ReportUtil {
         }
         return result;
     }
-    public String approveAndRejectUtil(String object, String reportName, String columnName, int fkAssociateId,boolean approveReject){
+    public String approveAndRejectUtil(String object, String reportName, String columnName, int fkAssociateId,boolean approveReject,String ipAddress,String userAgent){
         ObjectMapper objectMapper = new ObjectMapper();
         TableDataActionHandels actionHandels = new TableDataActionHandels();
         String message = "";
@@ -779,24 +784,24 @@ public class ReportUtil {
                     if(approveReject==true){
                         // request is to enable.
                         message="Enable "+columnName+" for Pincode "+pincodeTableDataModel.getPincode()+" : Request Accepted.";
-                        result = reportMapper.updatePincodeMapper(1,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,Integer.parseInt(actionHandels.getRequestValue()),message,"");
+                        result = reportMapper.updatePincodeMapper(1,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,Integer.parseInt(actionHandels.getRequestValue()),message,"",ipAddress,userAgent);
                     }
                     else {
                         // request to enable rejected.
                         message="Enable "+columnName+" for Pincode "+pincodeTableDataModel.getPincode()+" : Request Rejected.";
-                        result = reportMapper.updatePincodeMapper(1,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,-1,message,"reqPrice");
+                        result = reportMapper.updatePincodeMapper(1,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,-1,message,"reqPrice",ipAddress,userAgent);
                     }
                 }
                 else {
                     if(approveReject==true) {
                         // request is to update the price.
                         message = "Update the price of " + columnName + " for Pincode " + pincodeTableDataModel.getPincode() + " to " + actionHandels.getRequestValue() + " : Request Accepted.";
-                        result = reportMapper.updatePincodeMapper(null, fkAssociateId, Integer.parseInt(pincodeTableDataModel.getPincode()), shipType, Integer.parseInt(actionHandels.getRequestValue()), message, "");
+                        result = reportMapper.updatePincodeMapper(null, fkAssociateId, Integer.parseInt(pincodeTableDataModel.getPincode()), shipType, Integer.parseInt(actionHandels.getRequestValue()), message, "",ipAddress,userAgent);
 
                     } else {
                         // request to update the price rejected.
                         message = "Update the price of " + columnName + " for Pincode " + pincodeTableDataModel.getPincode() + " to " + actionHandels.getRequestValue() + " : Request Rejected.";
-                        reportMapper.updatePincodeMapper(null,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,-1,message,"reqPrice");
+                        reportMapper.updatePincodeMapper(null,fkAssociateId,Integer.parseInt(pincodeTableDataModel.getPincode()),shipType,-1,message,"reqPrice",ipAddress,userAgent);
                     }
                 }
             }else if(reportName.equals("getVendorReport")){
@@ -810,12 +815,12 @@ public class ReportUtil {
                         if(approveReject==true){
                             // request is to enable.
                             message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Approved.";
-                            result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,"1","");
+                            result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,"1","",ipAddress,userAgent);
                         }
                         else {
                             // request to enable rejected.
                             message="Change status of component "+productTableDataModel.getComponentName()+" to Instock : Rejected.";
-                            result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,"0","");
+                            result = reportMapper.updateComponentMapper(fkAssociateId,productTableDataModel.getComponent_Id_Hide(),message,-1,"0","",ipAddress,userAgent);
                         }
                     }
                 }
@@ -831,12 +836,12 @@ public class ReportUtil {
                         if (approveReject == true) {
                             // request is to update the price.
                             message = "Change price of component " + productTableDataModel.getComponentName() + " to " + actionHandels.getRequestValue() + " : Accepted.";
-                            result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, Integer.parseInt(actionHandels.getRequestValue()), "1", "");
+                            result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, Integer.parseInt(actionHandels.getRequestValue()), "1", "",ipAddress,userAgent);
 
                         } else {
                             // request to update the price rejected.
                             message = "Change price of component " + productTableDataModel.getComponentName() + " to " + actionHandels.getRequestValue() + " : Rejected.";
-                            result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, -1, "1", "reqPrice");
+                            result = reportMapper.updateComponentMapper(fkAssociateId, productTableDataModel.getComponent_Id_Hide(), message, -1, "1", "reqPrice",ipAddress,userAgent);
                         }
                     }
                 }

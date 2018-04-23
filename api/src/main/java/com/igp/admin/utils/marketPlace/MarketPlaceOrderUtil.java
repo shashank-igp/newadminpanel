@@ -85,6 +85,7 @@ public class MarketPlaceOrderUtil {
                 UserModel userModel1 = isUser(userModel);
                 Integer custId = (new Integer(userModel1.getId()));
                 if (custId != 0) {
+                    logger.debug("now updating customer : "+custId);
                     userModel.setId(custId.toString());
                     userModel.setIdHash(userModel1.getIdHash());
                     // for existing customer blindly update all the fields.
@@ -107,6 +108,7 @@ public class MarketPlaceOrderUtil {
                     authResponseModel = generalUserResponseModel.getData();
                     UserModel userModel2 = authResponseModel.getUser();
                     validationModel.setError(!authResponseModel.getLogin());
+                    logger.debug("Sign up 1 response : " + authResponseModel.toString());
                     if(validationModel.getError()==true){
                         throw new Exception("New Customer couldn't be Created.");
                     }
@@ -118,6 +120,7 @@ public class MarketPlaceOrderUtil {
                         generalUserResponseModel = objectMapper.readValue(custUpdate, GeneralUserResponseModel.class);
                         authResponseModel =  generalUserResponseModel.getData();
                         // storing idHash and id in proper fields.
+                        logger.debug("Sign up 2 response : " + authResponseModel.toString());
                         userModel2 = authResponseModel.getUser();
                         userModel.setIdHash(userModel2.getId());
                         validationModel.setUserModel(userModel);
@@ -192,8 +195,10 @@ public class MarketPlaceOrderUtil {
                 String postData1 = objectMapper.writeValueAsString(shippingAddress);
                 logger.debug("Postdata1 for /v1/user/address : "+ postData1);
                 String createAddress = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/user/address",new ArrayList<>());
+                logger.debug("Create address response : " + createAddress.toString());
                 if(createAddress.contains("error")){
-                    throw new Exception("Problem in Delivery Details.");
+                    throw new Exception();
+                //    throw new Exception("Problem in Delivery Details.");
 
                 }else {
                     generalCustomerAddressMapResponseModel = objectMapper.readValue(createAddress, GeneralCustomerAddressMapResponseModel.class);
@@ -657,6 +662,7 @@ public class MarketPlaceOrderUtil {
             else {
                 preparedStatement.setInt(11, custId);
             }
+            logger.debug("updating user profile , prepared statement : "+preparedStatement);
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Failed while updating user profile.");

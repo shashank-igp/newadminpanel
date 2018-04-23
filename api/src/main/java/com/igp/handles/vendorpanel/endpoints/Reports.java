@@ -6,9 +6,7 @@ import com.igp.handles.admin.models.Reports.TableDataActionHandels;
 import com.igp.handles.admin.utils.Reports.ReportUtil;
 import com.igp.handles.vendorpanel.mappers.Reports.ReportMapper;
 import com.igp.handles.vendorpanel.models.Report.PayoutAndTaxReportSummaryModel;
-import com.igp.handles.vendorpanel.models.Report.PincodeModelListWithSummary;
 import com.igp.handles.vendorpanel.models.Report.ReportOrderWithSummaryModel;
-import com.igp.handles.vendorpanel.models.Report.VendorModelListWithSummary;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
 import com.igp.handles.vendorpanel.response.ReportResponse;
 import com.igp.handles.vendorpanel.utils.Order.OrderStatusUpdateUtil;
@@ -16,7 +14,9 @@ import com.igp.handles.vendorpanel.utils.Reports.SummaryFunctionsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -84,7 +84,8 @@ public class Reports {
 
     @PUT
     @Path("/v1/handels/handleComponentChange")
-    public HandleServiceResponse updateComponentDetail(@QueryParam("fkAssociateId") String fkAssociateId,
+    public HandleServiceResponse updateComponentDetail(@Context HttpServletRequest request,
+                                                       @QueryParam("fkAssociateId") String fkAssociateId,
                                                        @QueryParam("componentId") String componentId,
                                                        @QueryParam("oldPrice") String oldPrice,
                                                        @QueryParam("reqPrice") String reqPrice,
@@ -127,7 +128,9 @@ public class Reports {
         }else{
             handleServiceResponse.setError(true);
         }
-        reportUtil.setVendorGeneralInstruction(new Integer(fkAssociateId),1,componentId+"",message);
+        String ipAddress = request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+        reportUtil.setVendorGeneralInstruction(new Integer(fkAssociateId),1,componentId+"",message,ipAddress,userAgent);
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
         handleServiceResponse.setResult(response);
         return handleServiceResponse;
@@ -154,7 +157,8 @@ public class Reports {
 
     @PUT
     @Path("/v1/handels/handlePincodeChange")
-    public HandleServiceResponse updatePincodeDetail(@QueryParam("fkAssociateId") String fkAssociateId,
+    public HandleServiceResponse updatePincodeDetail(@Context HttpServletRequest request,
+                                                     @QueryParam("fkAssociateId") String fkAssociateId,
                                                      @QueryParam("pincode") String pincode,
                                                      @QueryParam("shipCharge") Double oldPrice ,
                                                      @QueryParam("reqPrice") Double reqPrice,
@@ -197,7 +201,9 @@ public class Reports {
         }else {
             handleServiceResponse.setError(true);
         }
-        reportUtil.setVendorGeneralInstruction(new Integer(fkAssociateId),0,pincode+"",message);
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+        reportUtil.setVendorGeneralInstruction(new Integer(fkAssociateId),0,pincode+"",message,ipAddress,userAgent);
         OrderStatusUpdateUtil.sendEmailToHandelsTeamToTakeAction(0,fkAssociateId,"",message);
         handleServiceResponse.setResult(result);
         return handleServiceResponse;
@@ -205,14 +211,17 @@ public class Reports {
 
     @POST
     @Path("/v1/handels/addVendorComponent")
-    public HandleServiceResponse addVendorComponent(@QueryParam("fkAssociateId") String fkAssociateId,
+    public HandleServiceResponse addVendorComponent(@Context HttpServletRequest request,
+                                                    @QueryParam("fkAssociateId") String fkAssociateId,
                                                     @QueryParam("componentCode") String componentCode,
                                                     @QueryParam("componentName") String componentName,
                                                     @DefaultValue("0")@QueryParam("type") int type,
                                                     @DefaultValue("0")@QueryParam("price") int price){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
-        boolean result=reportMapper.addVendorComponent(fkAssociateId,componentCode,componentName,type, price);
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+        boolean result=reportMapper.addVendorComponent(fkAssociateId,componentCode,componentName,type, price,ipAddress,userAgent);
         if(result == false){
             handleServiceResponse.setError(true);
             handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING COMPONENT");
@@ -222,14 +231,17 @@ public class Reports {
     }
     @POST
     @Path("/v1/handels/addVendorPincode")
-    public HandleServiceResponse addVendorPincode(@QueryParam("fkAssociateId") String fkAssociateId,
+    public HandleServiceResponse addVendorPincode(@Context HttpServletRequest request,
+                                                  @QueryParam("fkAssociateId") String fkAssociateId,
                                                   @QueryParam("pincode") int pincode,
                                                   @DefaultValue("0")@QueryParam("cityId") int cityId,
                                                   @QueryParam("shipType") int shipType,
                                                   @QueryParam("shipCharge")int shipCharge){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         ReportMapper reportMapper = new ReportMapper();
-        boolean result = reportMapper.addVendorPincode(fkAssociateId,pincode,cityId,shipType,shipCharge);
+        String ipAddress=request.getRemoteAddr();
+        String userAgent = request.getHeader("User-Agent");
+        boolean result = reportMapper.addVendorPincode(fkAssociateId,pincode,cityId,shipType,shipCharge,ipAddress,userAgent);
         if(result == false){
             handleServiceResponse.setError(true);
             handleServiceResponse.setErrorCode("ERROR OCCURRED ADDING PINCODE");
