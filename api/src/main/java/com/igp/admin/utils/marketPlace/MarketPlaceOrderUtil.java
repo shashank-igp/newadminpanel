@@ -707,7 +707,7 @@ public class MarketPlaceOrderUtil {
             String hash = encryptPayment(hashStringSequence + SecretProperties.getPaymentKey());
             marketPlaceOrderModel.setHash(hash);
 
-            TimeUnit.MILLISECONDS.sleep(500);
+            TimeUnit.SECONDS.sleep(1);
 
             // sleep for a second.
 
