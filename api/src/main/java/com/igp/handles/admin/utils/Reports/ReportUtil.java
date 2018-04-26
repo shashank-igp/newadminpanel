@@ -1186,7 +1186,7 @@ public class ReportUtil {
 
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement="select op.orders_id,a.associate_name,( CASE WHEN vap.assign_time !='0000-00-00 00:00:00' THEN "
-                + " vap.assign_time END ) as assignTime,vap.delivery_date,vap.shipping_type,vap.delivery_time, "
+                + " vap.assign_time END ) as assignTime,opei.delivery_date,vap.shipping_type,vap.delivery_time, "
                 + " ( CASE WHEN track.releaseDate !='0000-00-00 00:00:00' THEN track.releaseDate END ) as releaseDate, "
                 + " ( CASE WHEN track.outForDeliveryDate !='0000-00-00 00:00:00' THEN "
                 + " track.outForDeliveryDate END ) as outForDeliveryDate,( CASE WHEN track.deliveredDate "
