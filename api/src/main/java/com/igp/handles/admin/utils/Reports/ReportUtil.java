@@ -1180,7 +1180,8 @@ public class ReportUtil {
 
             queryForCount="select count(*) as totalNo from orders_products op join "
                 + " vendor_assign_price vap on op.orders_id = vap.orders_id join trackorders track on "
-                + " track.orders_products_id = op.orders_products_id left join associate a on op.fk_associate_id "
+                + " track.orders_products_id = op.orders_products_id join order_product_extra_info opei on "
+                + " op.orders_products_id = opei.order_product_id left join associate a on op.fk_associate_id "
                 + " = a.associate_id where op.products_id = vap.products_id "+sb.toString();
             count=SummaryFunctionsUtil.getCount(queryForCount);
 
