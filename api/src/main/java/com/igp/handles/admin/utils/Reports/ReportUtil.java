@@ -1141,11 +1141,11 @@ public class ReportUtil {
             }
 
             if(deliveryDateFrom!=null && !deliveryDateFrom.isEmpty() ){
-                sb.append(" and vap.delivery_date >= '"+deliveryDateFrom+"' ");
+                sb.append(" and opei.delivery_date >= '"+deliveryDateFrom+"' ");
             }
 
             if (deliveryDateTo!=null && !deliveryDateTo.isEmpty()){
-                sb.append("  and vap.delivery_date <= '"+deliveryDateTo+"' ");
+                sb.append("  and opei.delivery_date <= '"+deliveryDateTo+"' ");
             }
 
             if (fkAssociateId!=null && !fkAssociateId.isEmpty()){
@@ -1215,7 +1215,7 @@ public class ReportUtil {
                 slaReportModel.setOrderNo(resultSet.getString("op.orders_id"));
                 slaReportModel.setVendorName(resultSet.getString("a.associate_name"));
                 slaReportModel.setAssignDate(resultSet.getString("assignTime"));
-                slaReportModel.setDeliveryDate(resultSet.getString("vap.delivery_date"));
+                slaReportModel.setDeliveryDate(resultSet.getString("opei.delivery_date"));
                 slaReportModel.setDeliverySlot(resultSet.getString("opei.delivery_time"));
                 slaReportModel.setDeliveryType(resultSet.getString("vap.shipping_type"));
 
