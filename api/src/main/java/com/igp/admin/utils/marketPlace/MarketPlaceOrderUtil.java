@@ -5,6 +5,7 @@ import com.igp.admin.mappers.marketPlace.Constants;
 import com.igp.admin.models.marketPlace.*;
 import com.igp.admin.utils.httpRequest.HttpRequestUtil;
 import com.igp.config.SecretProperties;
+import com.igp.config.ServerProperties;
 import com.igp.config.instance.Database;
 import org.apache.commons.io.FileUtils;
 import org.glassfish.jersey.media.multipart.BodyPartEntity;
@@ -102,7 +103,7 @@ public class MarketPlaceOrderUtil {
                     // customer doesn't exist therefore create a new customer.
                     String postData = objectMapper.writeValueAsString(userModel);
                     logger.debug("Postdata for /v1/signup : "+ postData);
-                    String custResponse = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/signup",new ArrayList<>());
+                    String custResponse = httpRequestUtil.sendCurlRequest(postData, ServerProperties.getPropertyValue("SIGN_UP_URL"),new ArrayList<>());
                     generalUserResponseModel = objectMapper.readValue(custResponse, GeneralUserResponseModel.class);
                     // populate cust id hash in customer and address model.
                     authResponseModel = generalUserResponseModel.getData();
@@ -116,7 +117,7 @@ public class MarketPlaceOrderUtil {
                         // since new customer created therefore update rest of the details.
                         String postData1 = objectMapper.writeValueAsString(userModel2);
                         logger.debug("Postdata1 for /v1/signup : "+ postData1);
-                        String custUpdate = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/signup",new ArrayList<>());
+                        String custUpdate = httpRequestUtil.sendCurlRequest(postData1, ServerProperties.getPropertyValue("SIGN_UP_URL"),new ArrayList<>());
                         generalUserResponseModel = objectMapper.readValue(custUpdate, GeneralUserResponseModel.class);
                         authResponseModel =  generalUserResponseModel.getData();
                         // storing idHash and id in proper fields.
@@ -194,7 +195,7 @@ public class MarketPlaceOrderUtil {
                 // create new address entry.
                 String postData1 = objectMapper.writeValueAsString(shippingAddress);
                 logger.debug("Postdata1 for /v1/user/address : "+ postData1);
-                String createAddress = httpRequestUtil.sendCurlRequest(postData1, "http://api.igp.com/v1/user/address",new ArrayList<>());
+                String createAddress = httpRequestUtil.sendCurlRequest(postData1, ServerProperties.getPropertyValue("ADD_ADDRESS_URL"),new ArrayList<>());
                 logger.debug("Create address response : " + createAddress.toString());
                 if(createAddress.contains("error")){
                     throw new Exception();
@@ -723,7 +724,7 @@ public class MarketPlaceOrderUtil {
             headerKeyValueModel.setValue("BO-Panel");
             headerKeyValueModelList.add(headerKeyValueModel);
             String postData = objectMapper.writeValueAsString(marketPlaceOrderModel);
-            String orderRequest = httpRequestUtil.sendCurlRequest(postData, "http://api.igp.com/v1/checkout/order",headerKeyValueModelList);
+            String orderRequest = httpRequestUtil.sendCurlRequest(postData, ServerProperties.getPropertyValue("CREATE_ORDER_URL"),headerKeyValueModelList);
             generalOrderResponseModel = objectMapper.readValue(orderRequest, GeneralOrderResponseModel.class);
             Map<String, APIOrderResponseModel> orderResponse = generalOrderResponseModel.getData();
             APIOrderResponseModel apiOrderResponseModel = orderResponse.get("payment");
@@ -898,7 +899,8 @@ public class MarketPlaceOrderUtil {
             if (resultSet.first()) {
                 // when order exists
                 logger.debug("ORDER-ID ALREADY EXISTS IN ORDERS TABLE, CAN'T TAKE YOUR REQUEST");
-                throw new Exception("Duplicate Order.");
+                validationModel.setError(true);
+                validationModel.setMessage("Duplicate Order.");
             }
         } catch (Exception exception) {
             validationModel.setError(true);
