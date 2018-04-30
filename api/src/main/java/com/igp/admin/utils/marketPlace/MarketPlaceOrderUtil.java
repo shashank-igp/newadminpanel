@@ -34,7 +34,6 @@ public class MarketPlaceOrderUtil {
     private static final Logger logger = LoggerFactory.getLogger(MarketPlaceOrderUtil.class);
 
     public boolean checkIfAffliate(int fkAssociateId) {
-        Map<String, String> data = new HashMap<>();
         Connection connection = null;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
@@ -500,6 +499,7 @@ public class MarketPlaceOrderUtil {
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
 
         try {
             connection = Database.INSTANCE.getReadWriteConnection();
@@ -524,7 +524,7 @@ public class MarketPlaceOrderUtil {
             if (status == 0) {
                 logger.error("Failed to create tempOrder");
             } else {
-                ResultSet resultSet = preparedStatement.getGeneratedKeys();
+                resultSet = preparedStatement.getGeneratedKeys();
                 resultSet.first();
                 tempOrderBasketId = resultSet.getInt(1);
                 logger.debug("ORDER-TEMP-BASKET CREATED SUCCESSFULLY: " + tempOrderBasketId);
@@ -534,6 +534,7 @@ public class MarketPlaceOrderUtil {
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
         }
         return tempOrderBasketId;
     }
