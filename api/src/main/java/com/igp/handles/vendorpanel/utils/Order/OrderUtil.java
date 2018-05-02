@@ -55,7 +55,7 @@ public class OrderUtil
                     + " track.orders_products_id join  order_product_extra_info as opei on op.orders_products_id "
                     + " = opei.order_product_id  join products as p on op.products_id=p.products_id join "
                     + "newigp_product_extra_info as  npei on npei.products_id=p.products_id LEFT JOIN associate as a on "
-                    + " op.fk_associate_id=a.associate_id where "+vendorIdClaus+" op.orders_id=? ";
+                    + " op.fk_associate_id=a.associate_id where "+vendorIdClaus+" op.orders_id=? AND p.fk_associate_id = 72 ";
 
             }else {
                 statement = "select op.*,opei.*,npei.m_img , p.update_date_time, p.products_name_for_url, "
@@ -66,7 +66,7 @@ public class OrderUtil
                     + " track.orders_products_id join  order_product_extra_info as opei on op.orders_products_id "
                     + " = opei.order_product_id  join products as p on op.products_id=p.products_id join "
                     + "newigp_product_extra_info as  npei on npei.products_id=p.products_id LEFT JOIN associate as a on "
-                    + " op.fk_associate_id=a.associate_id where  op.orders_id=? AND "
+                    + " op.fk_associate_id=a.associate_id where  op.orders_id=? AND p.fk_associate_id = 72 AND "
                     + vendorIdClaus + " op.orders_products_id IN ( "+orderProductIds+" )";
 
             }
@@ -227,7 +227,7 @@ public class OrderUtil
                             + " as track on op.orders_products_id = track.orders_products_id join order_product_extra_info "
                             + " as opei on op.orders_products_id=opei.order_product_id join products as p on "
                             + " op.products_id=p.products_id join newigp_product_extra_info as  npei on npei.products_id=p.products_id "
-                            + " LEFT JOIN associate as a on op.fk_associate_id=a.associate_id where opei.product_id = op.products_id and " + fkAssociateIdWhereClause +  "  opei.delivery_date "
+                            + " LEFT JOIN associate as a on op.fk_associate_id=a.associate_id where opei.product_id = op.products_id and p.fk_associate_id = 72  and " + fkAssociateIdWhereClause +  "  opei.delivery_date "
                             + " >= ? and  opei.delivery_date < '" + new SimpleDateFormat("yyyy-MM-dd").format(todayDate)
                             + "' and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc ";
                     }
@@ -241,7 +241,7 @@ public class OrderUtil
                             + " track.orders_products_id join order_product_extra_info as opei on op.orders_products_id "
                             + " =opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id LEFT JOIN associate as a on op.fk_associate_id=a.associate_id "
-                            + " where opei.product_id = op.products_id and " + fkAssociateIdWhereClause +  " opei.delivery_date "
+                            + " where opei.product_id = op.products_id and p.fk_associate_id = 72 and " + fkAssociateIdWhereClause +  " opei.delivery_date "
                             + operator + " ? and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc";
 
                     }
@@ -259,7 +259,7 @@ public class OrderUtil
                             + " =opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id LEFT JOIN associate as a on op.fk_associate_id=a.associate_id "
                             + " where  " + fkAssociateIdWhereClause +  " opei.delivery_date "
-                            + " >= ? and  opei.delivery_date < '" + new SimpleDateFormat("yyyy-MM-dd").format(todayDate)
+                            + " >= ? and p.fk_associate_id = 72 and  opei.delivery_date < '" + new SimpleDateFormat("yyyy-MM-dd").format(todayDate)
                             + "' and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc ";
                     }
                     else
@@ -273,7 +273,7 @@ public class OrderUtil
                             + " = opei.order_product_id join products as p on op.products_id=p.products_id join "
                             + "newigp_product_extra_info as  npei on npei.products_id=p.products_id LEFT JOIN associate as a on op.fk_associate_id=a.associate_id "
                             + " where " + fkAssociateIdWhereClause +  " opei.delivery_date "
-                            + operator + " ? and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc";
+                            + operator + " ? and p.fk_associate_id = 72 and op.orders_product_status= '" + status + "' "+ slaClause +" order by opei.delivery_date asc";
 
                     }
                     break;
