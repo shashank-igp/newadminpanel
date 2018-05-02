@@ -89,32 +89,34 @@ public class OrderMapper {
             restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(orderProductIdString,allOrderProductIdList);
 
             for(int i=0;i<orderProductId.length;i++){
-                Order order=orderUtil.getOrderRelatedInfo(orderId,Integer.parseInt(orderProductId[i]));
-                OrdersProducts ordersProducts=order.getOrderProducts().get(0);
+                if(orderProductId[i]!=null && !orderProductId[i].equals("")){
+                    Order order=orderUtil.getOrderRelatedInfo(orderId,Integer.parseInt(orderProductId[i]));
+                    OrdersProducts ordersProducts=order.getOrderProducts().get(0);
 
-                logger.debug("step-2 assignReassignOrder with orderProductId "+orderProductId+" and restOrderProductIdList "+restOrderProductIdList);
+                    logger.debug("step-2 assignReassignOrder with orderProductId "+orderProductId+" and restOrderProductIdList "+restOrderProductIdList);
 
-                if(action.equalsIgnoreCase("assign")){
-                    result=orderUtil.assignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order,action,ipAddress,userAgent);
-                    if(result!=1){
-                        if(restOrderProductIdList.equals("")){
-                            restOrderProductIdList+=orderProductId[i];
-                        }else {
-                            restOrderProductIdList+=","+orderProductId[i];
+                    if(action.equalsIgnoreCase("assign")){
+                        result=orderUtil.assignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order,action,ipAddress,userAgent);
+                        if(result!=1){
+                            if(restOrderProductIdList.equals("")){
+                                restOrderProductIdList+=orderProductId[i];
+                            }else {
+                                restOrderProductIdList+=","+orderProductId[i];
+                            }
                         }
-                    }
-                }else if(action.equalsIgnoreCase("reassign")) {
-                    result=orderUtil.reassignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order,action,ipAddress,userAgent);
+                    }else if(action.equalsIgnoreCase("reassign")) {
+                        result=orderUtil.reassignOrderToVendor(orderId,Integer.parseInt(orderProductId[i]),vendorId,order,action,ipAddress,userAgent);
 
-                    if(ordersProducts.getOrdersProductStatus().equals("Processed")
-                        &&!ordersProducts.getFkAssociateId().equals("72")){
-                        orderIsProcessedOrNot=true;
-                    }
-                    if(result!=1){
-                        if(restOrderProductIdList.equals("")){
-                            restOrderProductIdList+=orderProductId[i]+",";
-                        }else {
-                            restOrderProductIdList+=","+orderProductId[i];
+                        if(ordersProducts.getOrdersProductStatus().equals("Processed")
+                            &&!ordersProducts.getFkAssociateId().equals("72")){
+                            orderIsProcessedOrNot=true;
+                        }
+                        if(result!=1){
+                            if(restOrderProductIdList.equals("")){
+                                restOrderProductIdList+=orderProductId[i]+",";
+                            }else {
+                                restOrderProductIdList+=","+orderProductId[i];
+                            }
                         }
                     }
                 }
@@ -171,6 +173,7 @@ public class OrderMapper {
         try {
             List<OrdersProducts> ordersProducts=orderUtil.getOrderProductList(String.valueOf(orderProductId));
             productId=ordersProducts.get(0).getProductId();
+            String fkAssociateId=ordersProducts.get(0).getFkAssociateId();
             if(componentId!=null){
                 OrderComponent orderComponent=orderUtil.getOrderComponent(orderId,productId,componentId.intValue());
                 if(componentPrice!=null && orderComponent != null){
@@ -178,7 +181,9 @@ public class OrderMapper {
                     vendorPrice = Double.valueOf(orderComponent.getQuantity())*componentPrice ;
                 }
             }
-            result=orderUtil.updateVendorAssignPrice(orderId,productId,vendorPrice,shippingCharge,orderProductId,Integer.parseInt(ordersProducts.get(0).getFkAssociateId()),ipAddress,userAgent);
+            if(fkAssociateId!=null && !fkAssociateId.equals("")){
+                result=orderUtil.updateVendorAssignPrice(orderId,productId,vendorPrice,shippingCharge,orderProductId,Integer.parseInt(fkAssociateId),ipAddress,userAgent);
+            }
 
             if(result){
                 mailerAction="orderpricechange&orderid="+orderId+"&orderproductids="+orderProductId+"&associd="+ordersProducts.get(0).getFkAssociateId();
@@ -205,7 +210,10 @@ public class OrderMapper {
             restOrderProductIdList=findIntersectionOfTwoCommaSeparatedStrings(String.valueOf(orderProductId),orderProductIdList);
             List<OrdersProducts> ordersProducts=orderUtil.getOrderProductList(String.valueOf(orderProductId));
             productId=ordersProducts.get(0).getProductId();
-            result=orderUtil.updateDeliveryDetails(orderId,orderProductId,productId,deliveryDate,deliveryTime,deliveryType,Integer.parseInt(ordersProducts.get(0).getFkAssociateId()),ipAddress,userAgent);
+            String fkAssociateId=ordersProducts.get(0).getFkAssociateId();
+            if(fkAssociateId!=null && !fkAssociateId.equals("")){
+                result=orderUtil.updateDeliveryDetails(orderId,orderProductId,productId,deliveryDate,deliveryTime,deliveryType,Integer.parseInt(fkAssociateId),ipAddress,userAgent);
+            }
             if(result){
                 if(deliveryDate!=null){
                     if(!restOrderProductIdList.equals("")){
@@ -303,7 +311,9 @@ public class OrderMapper {
             String productIds=OrderStatusUpdateUtil.getProductsIds(orderProductIdString);
             String[] productIdArray=productIds.split(",");
             for(int i=0;i<productIdArray.length;i++){
-                result=orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),fkAssociateId,instruction,ipAddress,userAgent,"instruction","from_igp");
+                if(productIdArray[i]!=null && !productIdArray[i].equals("")){
+                    result=orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),fkAssociateId,instruction,ipAddress,userAgent,"instruction","from_igp");
+                }
             }
         }catch(Exception exception){
             logger.error("error while adding VendorInstruction ",exception);

@@ -338,8 +338,6 @@ public class OrderMapper
                 orderDetailsPerOrderProduct.setVendorId(Integer.parseInt(ordersProducts.getFkAssociateId()));
                 slaCode = slaCompliant.generateSlacodeForAll(orderDetailsPerOrderProduct,flagForAdminPanel);
 
-                logger.debug("slacode  in prepare orders  "+slaCode+" with orderId "+ordersProducts.getOrderId()+" and orderProductId "+ordersProducts.getOrderProductId());
-
                 ordersProducts.setSlaFlag(OrderUtil.isSLASatisfied(slaCode));
                 ordersProducts.setAlertFlag(OrderUtil.isHighAlertActionRequired(slaCode));
                 String[] catSubCatArray=orderMapper.findCategoryAndSubCategory(ordersProducts.getOrdersProductStatus(),Integer.parseInt(ordersProducts.getFkAssociateId()),ordersProducts.getDeliveryStatus(),slaCode);

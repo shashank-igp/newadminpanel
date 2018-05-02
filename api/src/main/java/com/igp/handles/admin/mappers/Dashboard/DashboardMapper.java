@@ -188,8 +188,6 @@ public class DashboardMapper {
                     int deliveryAttemptFlag=orderDetailsPerOrderProduct.getDeliveryAttemptFlag();
                     flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId,status);
 
-                    logger.debug("slacode  in handels panel Dashboard  "+slaCode+" with orderId "+orderDetailsPerOrderProduct.getOrdersId()+" and orderProductId "+orderDetailsPerOrderProduct.getOrdersProductsId());
-
                     if (flagForUniqueness){
 
                         if(status.equals("Processed") && vendorId==72){ // unassigned -> not alloted
