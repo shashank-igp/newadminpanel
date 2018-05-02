@@ -1,6 +1,6 @@
 package com.igp.handles.vendorpanel.mappers.Vendor;
 
-import com.igp.admin.mappers.marketPlace.Constants;
+import com.igp.admin.marketplace.mappers.Constants;
 import com.igp.handles.admin.utils.Order.SlaCompliant;
 import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerOrderProduct;
 import com.igp.handles.vendorpanel.models.Vendor.VendorCountDetail;

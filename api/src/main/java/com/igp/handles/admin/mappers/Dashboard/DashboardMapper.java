@@ -1,6 +1,6 @@
 package com.igp.handles.admin.mappers.Dashboard;
 
-import com.igp.admin.mappers.marketPlace.Constants;
+import com.igp.admin.marketplace.mappers.Constants;
 import com.igp.handles.admin.models.Dashboard.DashboardDetail;
 import com.igp.handles.admin.utils.Dashboard.DashboardUtil;
 import com.igp.handles.admin.utils.Order.SlaCompliant;

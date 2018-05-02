@@ -1,7 +1,7 @@
 package com.igp.handles.admin.utils.Reports;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.igp.admin.mappers.marketPlace.Constants;
+import com.igp.admin.marketplace.mappers.Constants;
 import com.igp.config.Environment;
 import com.igp.config.instance.Database;
 import com.igp.handles.admin.mappers.Reports.ReportMapper;
