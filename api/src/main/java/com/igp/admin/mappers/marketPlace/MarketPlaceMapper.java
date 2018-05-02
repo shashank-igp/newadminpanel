@@ -703,13 +703,13 @@ public class MarketPlaceMapper {
                     validationModel.setExtraInfoModel(extraInfoModel);
                     validationModel.setDeliveryMessageModel(deliveryMessageModel);
 
-                    logger.debug("validation model : " + rowNum);
+                    logger.debug("validation model : " + rowNumValue);
                     logger.debug("values : ", validationModel);
 
                     validationModelList.add(validationModel);
 
                 } catch (Exception e) {
-                    logger.debug("exception at row : " + rowNum);
+                    logger.debug("exception at row : " + rowNumValue);
                     ValidationModel validationModel = new ValidationModel();
                     validationModel.setError(true);
                     validationModel.setMessage("Details Inappropriate.");

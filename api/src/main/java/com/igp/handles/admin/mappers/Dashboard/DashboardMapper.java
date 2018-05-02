@@ -188,6 +188,9 @@ public class DashboardMapper {
                     int deliveryAttemptFlag=orderDetailsPerOrderProduct.getDeliveryAttemptFlag();
                     flagForUniqueness=hp.checkUniqueUnit(orderId,deliveryDate,shippingType,deliveryTime,uniqueUnitsMap,vendorId,status);
 
+                    //    logger.debug("slacode  in handels panel Dashboard  "+slaCode+" with orderId "+orderDetailsPerOrderProduct.getOrdersId()+" and orderProductId "+orderDetailsPerOrderProduct.getOrdersProductsId());
+
+
                     if (flagForUniqueness){
 
                         if(status.equals("Processed") && vendorId==72){ // unassigned -> not alloted
@@ -295,7 +298,7 @@ public class DashboardMapper {
                                 int count=Integer.parseInt(statusCountMap2.get("unAssigned").get("processing").get("count"));
                                 count++;
                                 statusCountMap2.get("unAssigned").get("processing").put("count", String.valueOf(count));
-                                
+
                                 if (OrderUtil.isSLASatisfied(slaCode)){
                                     if(!statusCountMap2.get("unAssigned").get("processing").get("alert").equals("true")){
                                         statusCountMap2.get("unAssigned").get("processing").put("sla",String.valueOf(true));
@@ -576,7 +579,7 @@ public class DashboardMapper {
                                 statusCountMap0.get("unAssigned").get("notAlloted").put("sla",String.valueOf(true));
 
                             }else if (OrderUtil.isHighAlertActionRequired(slaCode)) {
-                                
+
                                 statusCountMap0.get("unAssigned").get("notAlloted").put("alert",String.valueOf(true));
 
                             }
