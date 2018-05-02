@@ -1,6 +1,6 @@
 package com.igp.handles.admin.utils.Order;
 
-import com.igp.admin.mappers.marketPlace.Constants;
+import com.igp.admin.marketplace.mappers.Constants;
 import com.igp.config.instance.Database;
 import com.igp.handles.admin.mappers.Dashboard.DashboardMapper;
 import com.igp.handles.admin.models.Order.OrderLogModel;
