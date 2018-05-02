@@ -71,7 +71,9 @@ public class VendorUtil
                 orderDetailsPerOrderProduct.setPurchasedTime(resultSet.getString("torder.date_purchased"));
                 orderDetailsPerOrderProduct.setShippingType(resultSet.getString("opei.delivery_type"));
                 orderDetailsPerOrderProduct.setDeliveryTime(resultSet.getString("opei.delivery_time"));
-                orderDetailsPerOrderProduct.setVendorId(Integer.parseInt(fkAssociateId));
+                if(fkAssociateId!=null && !fkAssociateId.equals("")){
+                    orderDetailsPerOrderProduct.setVendorId(Integer.parseInt(fkAssociateId));
+                }
                 listOfOrderIdAsPerVendor.add(orderDetailsPerOrderProduct);
             }
         } catch (Exception exception) {
