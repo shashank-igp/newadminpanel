@@ -77,7 +77,8 @@ public class MarketPlaceOrderUtil {
                 userModel.getCountryId() == null || userModel.getCountryId() == 0) {
 
                 logger.error("Customer Details can't be empty.");
-                throw new Exception("Customer Details can't be empty.");
+                validationModel.setError(Boolean.TRUE);
+                validationModel.setMessage("Customer Details can't be empty.");
             } else {
                 // other checks
 
@@ -109,9 +110,9 @@ public class MarketPlaceOrderUtil {
                     authResponseModel = generalUserResponseModel.getData();
                     UserModel userModel2 = authResponseModel.getUser();
                     validationModel.setError(!authResponseModel.getLogin());
-                    logger.debug("Sign up 1 response : " + authResponseModel.toString());
+                    logger.debug("sign up 1 response : "+ custResponse);
                     if(validationModel.getError()==true){
-                        throw new Exception("New Customer couldn't be Created.");
+                        validationModel.setMessage("New Customer couldn't be Created.");
                     }
                     else {
                         // since new customer created therefore update rest of the details.
@@ -120,19 +121,26 @@ public class MarketPlaceOrderUtil {
                         String custUpdate = httpRequestUtil.sendCurlRequest(postData1, ServerProperties.getPropertyValue("SIGN_UP_URL"),new ArrayList<>());
                         generalUserResponseModel = objectMapper.readValue(custUpdate, GeneralUserResponseModel.class);
                         authResponseModel =  generalUserResponseModel.getData();
+                        logger.debug("sign up 2 response : "+ custUpdate);
                         // storing idHash and id in proper fields.
-                        logger.debug("Sign up 2 response : " + authResponseModel.toString());
                         userModel2 = authResponseModel.getUser();
                         userModel.setIdHash(userModel2.getId());
                         validationModel.setUserModel(userModel);
                         validationModel.setError(!authResponseModel.getLogin());
                         if(validationModel.getError()==true){
-                            throw new Exception("Customer details were not updated.");
+                            validationModel.setMessage("Customer details were not updated.");
                         }
                         else {
                             // fill all the details.
                             userModel = isUser(userModel);
-                            updateDetails(userModel);
+                            if(!userModel.getId().equals("0")){
+                                updateDetails(userModel);
+                                logger.debug("update successful for Customer Id : " + userModel.getId());
+
+                            }else {
+                                validationModel.setError(true);
+                                validationModel.setMessage("Customer Id not found.");
+                            }
                             validationModel.setUserModel(userModel);
                         }
                     }
@@ -145,7 +153,6 @@ public class MarketPlaceOrderUtil {
                 validationModel.setMessage("Problem in Creating a New Customer.");
             }else validationModel.setMessage(e.getMessage());
         }
-        logger.debug("Customer Id : " + userModel.getId());
         return validationModel;
     }
 
@@ -167,7 +174,8 @@ public class MarketPlaceOrderUtil {
                 ){
 
                 logger.error("Delivery Details can't be empty.");
-                throw new Exception("Delivery Details can't be empty.");
+                validationModel.setError(Boolean.TRUE);
+                validationModel.setMessage("Delivery Details can't be empty.");
 
             } else if (Objects.equals(shippingAddress.getCountryId(), "99")) {
                 Map<String, String> data = getStateAndCityByPin(shippingAddress.getPostcode());
@@ -178,7 +186,10 @@ public class MarketPlaceOrderUtil {
                 } else {
                     //pincode entered was not found in the database.
                     logger.debug("Pincode not found in our database.");
-                    throw new Exception("We do not serve this Pincode.");
+                    validationModel.setError(Boolean.TRUE);
+                    validationModel.setMessage("We do not serve this Pincode.");
+
+                 //   throw new Exception("We do not serve this Pincode.");
                 }
             }
             // model didn't return any error and now work on address book.
@@ -198,8 +209,9 @@ public class MarketPlaceOrderUtil {
                 String createAddress = httpRequestUtil.sendCurlRequest(postData1, ServerProperties.getPropertyValue("ADD_ADDRESS_URL"),new ArrayList<>());
                 logger.debug("Create address response : " + createAddress.toString());
                 if(createAddress.contains("error")){
-                    throw new Exception();
-                //    throw new Exception("Problem in Delivery Details.");
+                    validationModel.setError(Boolean.TRUE);
+                    validationModel.setMessage("Some Problem in Address.");
+                    //    throw new Exception("Problem in Delivery Details.");
 
                 }else {
                     generalCustomerAddressMapResponseModel = objectMapper.readValue(createAddress, GeneralCustomerAddressMapResponseModel.class);
@@ -209,7 +221,8 @@ public class MarketPlaceOrderUtil {
                     logger.debug("Address id is : "+shippingAddress.getAid());
                 }
                 if (shippingAddress.getAid() == "" || shippingAddress.getAid() == null) {
-                    throw new Exception("Couldn't get this Address from database.");
+                    validationModel.setError(Boolean.TRUE);
+                    validationModel.setMessage("Couldn't get this Address from database.");
                 }
             }
             validationModel.setAddressModel(shippingAddress);
@@ -584,13 +597,15 @@ public class MarketPlaceOrderUtil {
         ResultSet resultSet = null;
         user.setId(0 + "");
         try {
+            logger.debug("USER DEBUGGING : " + "email id is "+user.getEmail());
             connection = Database.INSTANCE.getReadOnlyConnection();
             String statement = "SELECT * FROM customers c INNER JOIN n_user n ON n.id = c.customers_id where c.customers_email_address = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, user.getEmail());
+            logger.debug("USER DEBUGGING : PreparedStatement "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
+
             if (resultSet.first()) {
-                logger.debug("USER DEBUGGING : " + "PreparedStatement "+preparedStatement);
                 logger.debug("USER DEBUGGING : " + "setUser_id "+resultSet.getString("c.customers_id"));
                 user.setId(resultSet.getString("c.customers_id"));
                 logger.debug("USER DEBUGGING : " + "setUserHash "+resultSet.getString("n.id_hash"));
@@ -713,9 +728,9 @@ public class MarketPlaceOrderUtil {
 
             // sleep for a second.
 
-           if(checkIfCorpOrderExistsAlready(extraInfoModel.getRelId(),orderTempModel.getAssociateId())){
-               // before creating new order check it must not exist.
-               throw new Exception("Duplicate Order.");
+            if(checkIfCorpOrderExistsAlready(extraInfoModel.getRelId(),orderTempModel.getAssociateId())){
+                // before creating new order check it must not exist.
+                throw new Exception("Duplicate Order.");
             }
             // hit api and receive the order response.
             HeaderKeyValueModel headerKeyValueModel = new HeaderKeyValueModel();
