@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
+import java.util.List;
+
 /**
  * Created by suditi on 2/5/18.
  */
@@ -14,11 +16,17 @@ public class BlogMainModel {
     @JsonProperty("id")
     private int id;
 
+    @JsonProperty("categoryid")
+    private List<Integer> categoryId;
+
     @JsonProperty("title")
     private String title;
 
     @JsonProperty("user")
     private String user;
+
+    @JsonProperty("description")
+    private String description;
 
     @JsonProperty("content")
     private String content;
@@ -35,14 +43,8 @@ public class BlogMainModel {
     @JsonProperty("subcategory")
     private String subCategory;
 
-    @JsonProperty("tags")
-    private String tags;
-
-    @JsonProperty("prevpost")
-    private String prevPost;
-
-    @JsonProperty("nextpost")
-    private String nextPost;
+    @JsonProperty("imageurl")
+    private String imageUrl;
 
     @JsonProperty("seo")
     private SeoBlogModel seoModel;
@@ -53,12 +55,26 @@ public class BlogMainModel {
     @JsonProperty("status")
     private int status;
 
+    @JsonProperty("sortorder")
+    private int sortOrder;
+
+    @JsonProperty("flagfeatured")
+    private int flagFeatured;
+
     public int getId() {
         return id;
     }
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    public List<Integer> getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(List<Integer> categoryId) {
+        this.categoryId = categoryId;
     }
 
     public String getTitle() {
@@ -75,6 +91,14 @@ public class BlogMainModel {
 
     public void setUser(String user) {
         this.user = user;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public String getContent() {
@@ -117,30 +141,6 @@ public class BlogMainModel {
         this.subCategory = subCategory;
     }
 
-    public String getTags() {
-        return tags;
-    }
-
-    public void setTags(String tags) {
-        this.tags = tags;
-    }
-
-    public String getPrevPost() {
-        return prevPost;
-    }
-
-    public void setPrevPost(String prevPost) {
-        this.prevPost = prevPost;
-    }
-
-    public String getNextPost() {
-        return nextPost;
-    }
-
-    public void setNextPost(String nextPost) {
-        this.nextPost = nextPost;
-    }
-
     public SeoBlogModel getSeoModel() {
         return seoModel;
     }
@@ -163,6 +163,30 @@ public class BlogMainModel {
 
     public void setStatus(int status) {
         this.status = status;
+    }
+
+    public int getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(int sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public int getFlagFeatured() {
+        return flagFeatured;
+    }
+
+    public void setFlagFeatured(int flagFeatured) {
+        this.flagFeatured = flagFeatured;
     }
 }
 

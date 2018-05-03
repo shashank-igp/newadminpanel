@@ -7,7 +7,9 @@ import com.igp.admin.response.EntityNotFoundResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.ws.rs.DELETE;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
@@ -18,18 +20,18 @@ import java.util.Map;
  */
 public class Blogs {
     private static final Logger logger = LoggerFactory.getLogger(Blogs.class);
-    
+
     @POST
     @Path("/v1/createblog")
     public Response createBlog(BlogMainModel blogMainModel) {
         Response response=null;
         BlogsMapper blogsMapper = new  BlogsMapper();
-        Integer blogId=null;
+        String url = "";
         try{
-            blogId=blogsMapper.createBlog(blogMainModel);
-            if(blogId!=null){
+            url=blogsMapper.createBlog(blogMainModel);
+            if(!url.isEmpty()){
                 Map<String,String> createBlogResponse=new HashMap<>();
-                createBlogResponse.put("data","blog created with Id "+blogId);
+                createBlogResponse.put("data","blog created with url "+url);
                 response= EntityFoundResponse.entityFoundResponseBuilder(createBlogResponse);
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
@@ -41,5 +43,48 @@ public class Blogs {
         }
         return response;
     }
-
+    @PUT
+    @Path("/v1/updateblog")
+    public Response updateBlog(BlogMainModel blogMainModel) {
+        Response response=null;
+        BlogsMapper blogsMapper = new  BlogsMapper();
+        boolean result = false;
+        try{
+            result = blogsMapper.updateBlog(blogMainModel);
+            if(result==true){
+                Map<String,String> updateBlogResponse=new HashMap<>();
+                updateBlogResponse.put("data","blog updated succesfully.");
+                response= EntityFoundResponse.entityFoundResponseBuilder(updateBlogResponse);
+            }else{
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error","Could not able to update blog");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while updating blog post ",exception);
+        }
+        return response;
+    }
+    @DELETE
+    @Path("/v1/deleteblog")
+    public Response deleteBlog(BlogMainModel blogMainModel) {
+        Response response=null;
+        BlogsMapper blogsMapper = new  BlogsMapper();
+        boolean result = false;
+        try{
+            result = blogsMapper.deleteBlog(blogMainModel);
+            if(result==true){
+                Map<String,String> updateBlogResponse=new HashMap<>();
+                updateBlogResponse.put("data","blog deleted succesfully.");
+                response= EntityFoundResponse.entityFoundResponseBuilder(updateBlogResponse);
+            }else{
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error","Could not able to delete blog");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while deleting blog post ",exception);
+        }
+        return response;
+    }
 }

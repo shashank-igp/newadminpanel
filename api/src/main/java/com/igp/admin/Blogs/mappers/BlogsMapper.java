@@ -10,14 +10,39 @@ import org.slf4j.LoggerFactory;
  */
 public class BlogsMapper {
     private static final Logger logger = LoggerFactory.getLogger(BlogsMapper.class);
-    public Integer createBlog(BlogMainModel blogMainModel){
-        Integer blogId=null;
-        BlogsUtil blogUtil=new BlogsUtil();
+    public String createBlog(BlogMainModel blogMainModel){
+
+        String url = "";
+        BlogsUtil blogUtil = new BlogsUtil();
         try{
-            blogId=blogUtil.createBlog(blogMainModel);
+            url = blogUtil.createBlog(blogMainModel);
         }catch (Exception exception){
             logger.debug("error occured while creating blog post ",exception);
         }
-        return blogId;
+        return url;
+    }
+
+    public boolean updateBlog(BlogMainModel blogMainModel){
+
+        boolean result = false;
+        BlogsUtil blogUtil=new BlogsUtil();
+        try{
+            result = blogUtil.updateBlog(blogMainModel);
+        }catch (Exception exception){
+            logger.debug("error occured while updating blog post ",exception);
+        }
+        return result;
+    }
+
+    public boolean deleteBlog(BlogMainModel blogMainModel){
+
+        boolean result = false;
+        BlogsUtil blogUtil=new BlogsUtil();
+        try{
+            result = blogUtil.deleteBlog(blogMainModel);
+        }catch (Exception exception){
+            logger.debug("error occured while deleting blog post ",exception);
+        }
+        return result;
     }
 }
