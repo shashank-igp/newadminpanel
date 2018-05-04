@@ -41,7 +41,7 @@ public class MarketPlaceOrder {
             int fkAssociateId = marketPlaceMapper.findVendor(userValue);
             if(fkAssociateId!=0 && loginId == 1 ) {
                 // parse the excel file.
-                data = marketPlaceMapper.parseExcelForMarketPlace(multiPart, user + fkAssociateId);
+                data = marketPlaceMapper.parseExcelForMarketPlace(multiPart, user + fkAssociateId, fkAssociateId);
                 if(!data.isEmpty()) {
                     // fill the models.
                     List<ValidationModel> validationModelList = marketPlaceMapper.refineDataAndPopulateModels(data, userValue, fkAssociateId);

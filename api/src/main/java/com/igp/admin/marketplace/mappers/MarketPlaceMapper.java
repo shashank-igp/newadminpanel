@@ -61,9 +61,12 @@ public class MarketPlaceMapper {
         return fkAssociateId;
     }
 
-    public  Map<Integer, Map<String, String>> parseExcelForMarketPlace(FormDataMultiPart multiPart, String filePrefix) {
+    public  Map<Integer, Map<String, String>> parseExcelForMarketPlace(FormDataMultiPart multiPart, String filePrefix, int fkAsId) {
         Map<Integer, Map<String, String>> data= new HashMap<>();
         int NUM_COLUMNS = 20;
+        if(fkAsId==433){
+            NUM_COLUMNS = 25;
+        }
         MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
         try {
             FileUploadModel fileUploadModel = marketPlaceOrderUtil.uploadTheFile(multiPart, filePrefix);
@@ -82,7 +85,7 @@ public class MarketPlaceMapper {
                 Row header_row = datatypeSheet.getRow(0);
                 // Assuming 4 columns
                 List<String> list = new ArrayList<>();
-                for (int j = 0; j < 20; j++) {
+                for (int j = 0; j < NUM_COLUMNS; j++) {
                     Cell header_cell = header_row.getCell(j);
                     list.add(header_cell.getStringCellValue().trim());
                     // filled list with column names.
@@ -351,8 +354,21 @@ public class MarketPlaceMapper {
                             userModel.getPostcode() + "(#)" +
                             column.get("Item Code") + "(#)" +
                             quantity + "(#)" +
+                            column.get("MRP")+ "(#)" +
+                            column.get("POAmount")+ "(#)" +
                             sellingPrice + "(#)" +
-                            column.get("ProductName");
+                            column.get("ProductName")+ "(#)" +
+                            column.get("ProgramName")+ "(#)" +
+                            column.get("Vendor")+ "(#)" +
+                            column.get("Open/Requested(DD/MM/YYYY)")+ "(#)" +
+                            column.get("POStatus")+ "(#)" +
+                            column.get("PODate")+ "(#)" +
+                            column.get("TrackingInfo")+ "(#)" +
+                            column.get("Courier")+ "(#)" +
+                            column.get("DispatchDate(DD/MM/YYYY)")+ "(#)" +
+                            column.get("DeliveryDate(DD/MM/YYYY)")+ "(#)" +
+                            column.get("CancellationComments");
+
 
                         extraInfoModel = new ExtraInfoModel.Builder()
                             .gstNo("")
@@ -501,6 +517,10 @@ public class MarketPlaceMapper {
                         }
 
                         String detail = relId + "(#)" +
+                            column.get("Order Date") + "(#)" +
+                            column.get("Delivery Date") + "(#)" +
+                            column.get("Product") + "(#)" +
+                            column.get("Qty") + "(#)" +
                             column.get("Sender Name") + "(#)" +
                             userModel.getMobile() + "(#)" +
                             userModel.getEmail() + "(#)" +
@@ -508,7 +528,13 @@ public class MarketPlaceMapper {
                             userModel.getPostcode() + "(#)" +
                             productModel.getProductCode() + "(#)" +
                             quantity + "(#)" +
-                            sellingPrice;
+                            sellingPrice + "(#)" +
+                            column.get("GST") + "(#)" +
+                            column.get("Country") + "(#)" +
+                            column.get("Deliver To") + "(#)" +
+                            addressModel.getMobile() + "(#)" +
+                            column.get("Gift Msg") + "(#)" +
+                            column.get("Addons Detail");
 
                         extraInfoModel = new ExtraInfoModel.Builder()
                             .gstNo("")
@@ -673,6 +699,10 @@ public class MarketPlaceMapper {
 
 
                         String detail = column.get("Order No").split("\\.")[0] + "(#)" +
+                            column.get("Order Date") + "(#)" +
+                            column.get("Delivery Date") + "(#)" +
+                            column.get("Product") + "(#)" +
+                            column.get("Qty") + "(#)" +
                             column.get("Sender Name") + "(#)" +
                             phone + "(#)" +
                             userModel.getEmail() + "(#)" +
@@ -680,7 +710,13 @@ public class MarketPlaceMapper {
                             userModel.getPostcode() + "(#)" +
                             productModel.getProductCode() + "(#)" +
                             quantity + "(#)" +
-                            sellingPrice;
+                            sellingPrice + "(#)" +
+                            column.get("GST") + "(#)" +
+                            column.get("Country") + "(#)" +
+                            column.get("Deliver To") + "(#)" +
+                            addressModel.getMobile() + "(#)" +
+                            column.get("Gift Msg") + "(#)" +
+                            column.get("Addons Detail");
 
                         extraInfoModel = new ExtraInfoModel.Builder()
                             .gstNo(column.get("GST").split("\\.")[0])
