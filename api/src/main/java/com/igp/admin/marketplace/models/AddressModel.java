@@ -201,4 +201,26 @@ public class AddressModel {
         this.addressType = addressType;
     }
 
-   }
+    @Override
+    public String toString() {
+        return "AddressModel{" +
+            "id='" + id + '\'' +
+            ", aid='" + aid + '\'' +
+            ", title='" + title + '\'' +
+            ", firstname='" + firstname + '\'' +
+            ", lastname='" + lastname + '\'' +
+            ", streetAddress='" + streetAddress + '\'' +
+            ", streetAddress2='" + streetAddress2 + '\'' +
+            ", postcode='" + postcode + '\'' +
+            ", city='" + city + '\'' +
+            ", state='" + state + '\'' +
+            ", countryId='" + countryId + '\'' +
+            ", relation='" + relation + '\'' +
+            ", email='" + email + '\'' +
+            ", landline='" + landline + '\'' +
+            ", mobile='" + mobile + '\'' +
+            ", mobilePrefix='" + mobilePrefix + '\'' +
+            ", addressType=" + addressType +
+            '}';
+    }
+}

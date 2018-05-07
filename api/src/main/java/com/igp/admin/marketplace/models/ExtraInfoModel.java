@@ -93,4 +93,14 @@ public class ExtraInfoModel {
             return new ExtraInfoModel(this);
         }
     }
+
+    @Override
+    public String toString() {
+        return "ExtraInfoModel{" +
+            "relId='" + relId + '\'' +
+            ", marketData='" + marketData + '\'' +
+            ", marketName='" + marketName + '\'' +
+            ", gstNo='" + gstNo + '\'' +
+            '}';
+    }
 }

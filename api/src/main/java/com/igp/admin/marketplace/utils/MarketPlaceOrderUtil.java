@@ -772,7 +772,7 @@ public class MarketPlaceOrderUtil {
                     logger.error("Failed while updating orders table");
                     throw new Exception("Failed while updating orders table");
                 } else {
-                    logger.debug("Orders & orders_extra_info updation successful");
+                    logger.debug("Orders & orders_extra_info updation successful" + orderId);
                 }
             }
         }
