@@ -742,4 +742,50 @@ public class ProductModel {
             return new ProductModel(this);
         }
     }
+
+    @Override
+    public String toString() {
+        return "ProductModel{" +
+            "id=" + id +
+            ", name='" + name + '\'' +
+            ", mrp=" + mrp +
+            ", sellingPrice=" + sellingPrice +
+            ", displayPrice=" + displayPrice +
+            ", image='" + image + '\'' +
+            ", lbh='" + lbh + '\'' +
+            ", shortDescription='" + shortDescription + '\'' +
+            ", volumeWeight=" + volumeWeight +
+            ", productCode='" + productCode + '\'' +
+            ", baseCurrency=" + baseCurrency +
+            ", prodType='" + prodType + '\'' +
+            ", subTotal=" + subTotal +
+            ", subTotalUSD=" + subTotalUSD +
+            ", quantity=" + quantity +
+            ", giftBox=" + giftBox +
+            ", giftBoxPrice=" + giftBoxPrice +
+            ", giftBoxPriceUsd=" + giftBoxPriceUsd +
+            ", discountApplied=" + discountApplied +
+            ", perProductDiscount=" + perProductDiscount +
+            ", serviceType='" + serviceType + '\'' +
+            ", serviceTypeId='" + serviceTypeId + '\'' +
+            ", serviceCharge=" + serviceCharge +
+            ", peripheral=" + peripheral +
+            ", peripheralUsd=" + peripheralUsd +
+            ", pprice=" + pprice +
+            ", ppriceUsd=" + ppriceUsd +
+            ", ppriceUsdQuant=" + ppriceUsdQuant +
+            ", serviceChargeUSD=" + serviceChargeUSD +
+            ", serviceDate='" + serviceDate + '\'' +
+            ", serviceTime='" + serviceTime + '\'' +
+            ", serviceCity='" + serviceCity + '\'' +
+            ", displayAttrList=" + displayAttrList +
+            ", relProdId='" + relProdId + '\'' +
+            ", product=" + product +
+            ", error=" + error +
+            ", errorType=" + errorType +
+            ", fkId=" + fkId +
+            ", voucher='" + voucher + '\'' +
+            ", cartValue=" + cartValue +
+            '}';
+    }
 }

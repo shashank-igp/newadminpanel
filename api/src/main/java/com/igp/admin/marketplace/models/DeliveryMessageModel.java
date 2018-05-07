@@ -31,4 +31,13 @@ public class DeliveryMessageModel {
     public void setMessage(String message) {
         this.message = message;
     }
+
+    @Override
+    public String toString() {
+        return "DeliveryMessageModel{" +
+            "to='" + to + '\'' +
+            ", from='" + from + '\'' +
+            ", message='" + message + '\'' +
+            '}';
+    }
 }

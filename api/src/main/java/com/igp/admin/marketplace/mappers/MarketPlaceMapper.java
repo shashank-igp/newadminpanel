@@ -740,7 +740,7 @@ public class MarketPlaceMapper {
                     validationModel.setDeliveryMessageModel(deliveryMessageModel);
 
                     logger.debug("validation model : " + rowNumValue);
-                    logger.debug("values : ", validationModel);
+                    logger.debug("values : ", validationModel.toString());
 
                     validationModelList.add(validationModel);
 
@@ -770,18 +770,18 @@ public class MarketPlaceMapper {
         MarketPlaceTempOrderModel marketPlaceTempOrderModel = new MarketPlaceTempOrderModel();
         ExtraInfoModel extraInfoModel;
         ProductModel productModel = null;
-        int i = 0, fail = 0, correct = 0;
+        int fail = 0, correct = 0;
         int listSize = validationModelList.size();
         logger.debug("listSize : "+listSize);
 
-        while (listSize!=0) {
+        for(int i=0; i<listSize; i++){
 
             ErrorModel errorModel = new ErrorModel();
             CountModel countModel = new CountModel();
             ValidationModel validationModel = new ValidationModel();
             try {
                 validationModel = validationModelList1.get(i);
-                i++;
+
                 logger.debug("row number : "+ validationModel.getRowNum());
                 logger.debug("row values : "+ validationModel.toString());
 
@@ -895,11 +895,10 @@ public class MarketPlaceMapper {
                 countModel.setFail(++fail);
                 errorModelList.add(errorModel);
             }
-            listSize--;
-            validationModelList1.add(validationModel);
+            //   validationModelList1.add(validationModel);
             marketPlaceFinalOrderResponseModel.setError(errorModelList);
             marketPlaceFinalOrderResponseModel.setCount(countModel);
-            marketPlaceFinalOrderResponseModelList.add(marketPlaceFinalOrderResponseModel);
+            //   marketPlaceFinalOrderResponseModelList.add(marketPlaceFinalOrderResponseModel);
         }
 
         return marketPlaceFinalOrderResponseModel;
