@@ -194,16 +194,19 @@ public class VendorUtil
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = "SELECT orders_id,instruction_msg from vendor_instructions "
-                + " where associate_id = ? and insertTime >= date_add(now(),interval -2 day)";
+            statement = "SELECT * from handel_order_history hoh join vendor_assign_price vap on "
+                + " hoh.orders_id = vap.orders_id where  hoh.action = 'instruction' and "
+                + " hoh.insert_time >= date_add(now(),interval -2 day) and  hoh.sub_action = 'from_igp' "
+                + " and vap.fk_associate_id = ? group by hoh.handel_order_history_id order by "
+                + " hoh.handel_order_history_id desc ";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,Integer.parseInt(fkAssociateId));
             logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 VendorInstruction vendorInstruction=new VendorInstruction();
-                vendorInstruction.setOrderId(resultSet.getString("orders_id"));
-                vendorInstruction.setInstruction(resultSet.getString("instruction_msg"));
+                vendorInstruction.setOrderId(resultSet.getString("hoh.orders_id"));
+                vendorInstruction.setInstruction(resultSet.getString("hoh.message"));
                 vendorOrderInstruction.add(vendorInstruction);
             }
         } catch (Exception exception) {
