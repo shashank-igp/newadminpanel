@@ -134,20 +134,27 @@ public class CategoryUtil {
         }
         return result;
     }
-    public boolean validateCategory(int fkAssociateId, boolean isCategory, String categoryName, String subCategoryName){
+    public boolean validateCategory(int fkAssociateId, String categoryName, String subCategoryName){
         Connection connection = null;
         String statement="";
         ResultSet resultSet =  null;
         PreparedStatement preparedStatement = null;
         boolean  result = false;
         try{
-            statement = "";
+            statement = "select bct.categories_id as p_cat, bct2.categories_id as ch_cat, bct.fk_associate_id, bct.categories_name as p_cat_name, bct2.categories_name as ch_cat_name "
+                +" from blog_categories bct,blog_categories bct2"
+                +" where bct.fk_associate_id = bct2.fk_associate_id AND bct.categories_id = bct2.parent_id AND bct.status=1 AND bct2.status=1"
+                +" AND bct2.categories_name_for_url = ? AND bct.categories_name_for_url = ? AND bct.fk_associate_id = ?";
             connection = Database.INSTANCE.getReadOnlyConnection();
             preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1, subCategoryName);
+            preparedStatement.setString(2, categoryName);
+            preparedStatement.setInt(3, fkAssociateId);
             logger.debug("preparedstatement of finding valid category and subcategory : "+preparedStatement);
 
             resultSet = preparedStatement.executeQuery();
             if (resultSet.first()) {
+                result = true;
             }
 
         }catch (Exception exception){
