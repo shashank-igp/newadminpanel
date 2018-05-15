@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
+
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
@@ -108,6 +109,31 @@ public class Categories {
             }
         }catch (Exception exception){
             logger.debug("error occured getting list of Categories."+exception);
+        }
+        return response;
+    }
+
+    @GET
+    @Path("/v1/validatecategory")
+    public Response validateCategory(@QueryParam("fkAssociateId") @DefaultValue("5") int fkAssociateId, String categoryName, String subCategoryName) {
+        System.out.println("333  inside validateCategory" );
+        Response response=null;
+        CategoryMapper categoryMapper =  new CategoryMapper();
+        boolean result = false;
+        try{
+            System.out.println("333 " +fkAssociateId+" "+ categoryName + " "+ subCategoryName);
+            result = categoryMapper.validateCategory(fkAssociateId, categoryName, subCategoryName);
+            if(result==true){
+                Map<String,String> validateCategoryResponse=new HashMap<>();
+                validateCategoryResponse.put("data","Category validated succesfully.");
+                response = EntityFoundResponse.entityFoundResponseBuilder(validateCategoryResponse);
+            }else{
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error","Category validation unsuccessful");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while updating Category post ",exception);
         }
         return response;
     }

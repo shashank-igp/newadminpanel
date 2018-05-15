@@ -50,15 +50,27 @@ public class CategoryMapper {
         return result;
     }
 
-    public List<CategorySubCategoryList> getCategoryList(int fkAssociateId, int startLimit, int endLimit){
+    public List<CategorySubCategoryList> getCategoryList(int fkAssociateId, int startLimit, int endLimit) {
 
         CategoryUtil categoryUtil = new CategoryUtil();
         List<CategorySubCategoryList> categorySubCategoryLists = new ArrayList<>();
-        try{
-            categorySubCategoryLists = categoryUtil.getCategoryList(fkAssociateId,startLimit,endLimit);
-        }catch (Exception exception){
-            logger.debug("error occured while getting list of Categories."+exception);
+        try {
+            categorySubCategoryLists = categoryUtil.getCategoryList(fkAssociateId, startLimit, endLimit);
+        } catch (Exception exception) {
+            logger.debug("error occured while getting list of Categories." + exception);
         }
         return categorySubCategoryLists;
+    }
+
+    public boolean validateCategory(int fkAssociateId, String categoryName, String subCategoryName){
+
+        boolean result = false;
+        CategoryUtil categoryUtil = new CategoryUtil();
+        try{
+            result = categoryUtil.validateCategory(fkAssociateId, categoryName, subCategoryName);
+        }catch (Exception exception){
+            logger.debug("error occured while validating category ",exception);
+        }
+        return result;
     }
 }
