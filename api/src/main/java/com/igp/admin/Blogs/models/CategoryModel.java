@@ -1,5 +1,6 @@
 package com.igp.admin.Blogs.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -10,8 +11,8 @@ public class CategoryModel {
     @JsonProperty("id")
     private int id;
 
-    @JsonProperty("name")
-    private String name;
+    @JsonProperty("title")
+    private String title;
 
     @JsonProperty("namealt")
     private String nameAlt;
@@ -25,13 +26,13 @@ public class CategoryModel {
     @JsonProperty("seo")
     private SeoBlogModel seoModel;
 
-    @JsonProperty("parentid")
+    @JsonIgnore
     private int parentId;
 
-    @JsonProperty("sortorder")
+    @JsonIgnore
     private int sortOrder;
 
-    @JsonProperty("status")
+    @JsonIgnore
     private int status;
 
     @JsonProperty("introtext")
@@ -48,12 +49,12 @@ public class CategoryModel {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getTitle() {
+        return title;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setTitle(String title) {
+        this.title = title;
     }
 
     public String getNameAlt() {

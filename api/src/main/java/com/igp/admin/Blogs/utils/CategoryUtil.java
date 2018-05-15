@@ -1,6 +1,7 @@
 package com.igp.admin.Blogs.utils;
 
 import com.igp.admin.Blogs.models.CategoryModel;
+import com.igp.admin.Blogs.models.CategorySubCategoryList;
 import com.igp.config.instance.Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,6 +10,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by suditi on 3/5/18.
@@ -24,13 +27,13 @@ public class CategoryUtil {
         ResultSet resultSet =  null;
         BlogsUtil blogsUtil = new BlogsUtil();
         try{
-            tempUrl = blogsUtil.createUrlUsingTitle(categoryModel.getName());
+            tempUrl = blogsUtil.createUrlUsingTitle(categoryModel.getTitle());
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="INSERT INTO blog_categories (categories_name,categories_name_alt,parent_id,sort_order,categories_description,categories_name_for_url," +
                 "categories_meta_title,categories_meta_keywords,categories_meta_description,categories_introduction_text,categories_introduction_down_text,categories_status) "
                 + " VALUES (? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?)";
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, categoryModel.getName());
+            preparedStatement.setString(1, categoryModel.getTitle());
             preparedStatement.setString(2, categoryModel.getNameAlt());
             preparedStatement.setInt(3, categoryModel.getParentId());
             preparedStatement.setInt(4, categoryModel.getSortOrder());
@@ -75,7 +78,7 @@ public class CategoryUtil {
                 "categories_meta_title=?,categories_meta_keywords=?,categories_meta_description=?,categories_introduction_text=?,categories_introduction_down_text=?,categories_status=? WHERE categories_id = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, categoryModel.getName());
+            preparedStatement.setString(1, categoryModel.getTitle());
             preparedStatement.setString(2, categoryModel.getNameAlt());
             preparedStatement.setInt(3, categoryModel.getParentId());
             preparedStatement.setInt(4, categoryModel.getSortOrder());
@@ -156,5 +159,63 @@ public class CategoryUtil {
         }
         return result;
     }
+    public List<CategorySubCategoryList> getCategoryList(int fkAssociateId, int startLimit, int endLimit){
+        Connection connection = null;
+        String statement="";
+        ResultSet resultSet =  null;
+        PreparedStatement preparedStatement = null;
+        List<CategorySubCategoryList> categorySubCategoryLists = new ArrayList<>();
+        try{
+                statement="SELECT bct.categories_id AS cat_id, bct.categories_name AS cat_name," +
+                    "bct.categories_name_for_url AS cat_url, group_concat(bct2.categories_id,','," +
+                    " bct2.categories_name,',',bct2.categories_name_for_url separator ':') AS subcat" +
+                    " FROM blog_categories bct LEFT JOIN blog_categories bct2 on bct.categories_id = " +
+                    "bct2.parent_id AND bct.status=1 AND bct2.status=1 and bct.fk_associate_id = " +
+                    "bct2.fk_associate_id WHERE bct.fk_associate_id = ? AND bct.parent_id = 0 GROUP BY " +
+                    "bct.categories_id ORDER BY bct.sort_order limit ?,?";
 
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1, fkAssociateId);
+            preparedStatement.setInt(2, startLimit);
+            preparedStatement.setInt(3, endLimit);
+
+            logger.debug("preparedstatement of finding category list : "+preparedStatement);
+
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                CategorySubCategoryList categorySubCategoryList = new CategorySubCategoryList();
+                String categoryStrArray[] = null;
+                CategoryModel categoryModel = new CategoryModel();
+                categoryModel.setUrl(resultSet.getString("cat_url"));
+                categoryModel.setTitle(resultSet.getString("cat_name"));
+                categoryModel.setId(resultSet.getInt("cat_id"));
+                categorySubCategoryList.setCategoryModel(categoryModel);
+
+
+                String subcat = resultSet.getString("subcat");
+                if(subcat!=null){
+                    List<CategoryModel> subcategoryList = new ArrayList<>();
+                    categoryStrArray = subcat.split(":");
+                    for(int i = 0; i< categoryStrArray.length ; i++){
+                        CategoryModel subcategory = new CategoryModel();
+                        subcategory.setId(new Integer(categoryStrArray[i].split(",")[0]));
+                        subcategory.setTitle(categoryStrArray[i].split(",")[1]);
+                        subcategory.setUrl(categoryStrArray[i].split(",")[2]);
+                        subcategoryList.add(subcategory);
+                    }
+                    categorySubCategoryList.setSubCategoryModelList(subcategoryList);
+                }
+                categorySubCategoryLists.add(categorySubCategoryList);
+            }
+
+        }catch (Exception exception){
+            logger.debug("error occured while getting category ",exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return categorySubCategoryLists;
+    }
 }

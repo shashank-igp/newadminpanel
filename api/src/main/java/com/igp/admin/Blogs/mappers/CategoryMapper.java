@@ -1,9 +1,13 @@
 package com.igp.admin.Blogs.mappers;
 
 import com.igp.admin.Blogs.models.CategoryModel;
+import com.igp.admin.Blogs.models.CategorySubCategoryList;
 import com.igp.admin.Blogs.utils.CategoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by suditi on 3/5/18.
@@ -44,5 +48,17 @@ public class CategoryMapper {
             logger.debug("error occured while deleting Category post ",exception);
         }
         return result;
+    }
+
+    public List<CategorySubCategoryList> getCategoryList(int fkAssociateId, int startLimit, int endLimit){
+
+        CategoryUtil categoryUtil = new CategoryUtil();
+        List<CategorySubCategoryList> categorySubCategoryLists = new ArrayList<>();
+        try{
+            categorySubCategoryLists = categoryUtil.getCategoryList(fkAssociateId,startLimit,endLimit);
+        }catch (Exception exception){
+            logger.debug("error occured while getting list of Categories."+exception);
+        }
+        return categorySubCategoryLists;
     }
 }
