@@ -7,10 +7,8 @@ import com.igp.admin.response.EntityNotFoundResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.DELETE;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
+import javax.ws.rs.*;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +16,9 @@ import java.util.Map;
 /**
  * Created by suditi on 2/5/18.
  */
+@Path("/")
+@Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 public class Blogs {
     private static final Logger logger = LoggerFactory.getLogger(Blogs.class);
 
