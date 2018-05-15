@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
-
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.List;
@@ -115,7 +114,7 @@ public class Categories {
 
     @GET
     @Path("/v1/validatecategory")
-    public Response validateCategory(@QueryParam("fkAssociateId") @DefaultValue("5") int fkAssociateId, String categoryName, String subCategoryName) {
+    public Response validateCategory(@QueryParam("fkAssociateId") @DefaultValue("5") int fkAssociateId, @QueryParam("categoryName") String categoryName, @QueryParam("subCategoryName") String subCategoryName) {
         System.out.println("333  inside validateCategory" );
         Response response=null;
         CategoryMapper categoryMapper =  new CategoryMapper();
