@@ -45,6 +45,8 @@ public class BlogsUtil {
             preparedStatement.setInt(11, blogMainModel.getFlagFeatured());
             preparedStatement.setInt(12, blogMainModel.getSortOrder());
 
+            logger.debug("preparedstatement of insert blog_post : "+preparedStatement);
+
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Failed to create blog post");
@@ -57,6 +59,9 @@ public class BlogsUtil {
                 preparedStatement = connection.prepareStatement(statement);
                 preparedStatement.setInt(1, blogMainModel.getId());
                 preparedStatement.setString(2, blogMainModel.getImageUrl());
+
+                logger.debug("preparedstatement of insert blog_post_image : "+preparedStatement);
+
                 status = preparedStatement.executeUpdate();
                 if (status == 0) {
                     logger.error("Failed to create blog blog_post_image");
@@ -67,6 +72,7 @@ public class BlogsUtil {
                         preparedStatement = connection.prepareStatement(statement);
                         preparedStatement.setInt(1, blogMainModel.getId());
                         preparedStatement.setInt(2, iterator.next());
+                        logger.debug("preparedstatement of insert blog_cat_map : "+preparedStatement);
                         status = preparedStatement.executeUpdate();
                         if (status == 0) {
                             logger.error("Failed to create blog blog_cat_map");
@@ -110,6 +116,7 @@ public class BlogsUtil {
             preparedStatement.setInt(12, blogMainModel.getSortOrder());
             preparedStatement.setString(13, blogMainModel.getPublishDate());
             preparedStatement.setInt(14, blogMainModel.getId());
+            logger.debug("preparedstatement of update blog_post : "+preparedStatement);
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
@@ -174,7 +181,7 @@ public class BlogsUtil {
         try{
             String pattern1 = "^[0-9A-Za-z]*$";
             if (!title.matches(pattern1)) {
-                logger.debug("Address has some unmatched special char.Let's replace it with a space.");
+                logger.debug("url has some unmatched special char.Let's replace it with a hiphen.");
                 Pattern pattern = Pattern.compile("^[0-9A-Za-z]*$");
                 // pattern allows a set of special chars,apha-numeric replace it with hyphen
                 int count = 0;
