@@ -1,8 +1,8 @@
 package com.igp.admin.Blogs.utils;
 
 import com.igp.admin.Blogs.models.BlogMainModel;
-import com.igp.admin.Blogs.models.CategorySubCategoryModel;
 import com.igp.admin.Blogs.models.BlogResultModel;
+
 import com.igp.config.instance.Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +28,7 @@ public class BlogsUtil {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet =  null;
         try{
-        //    tempUrl = createUrlUsingTitle(blogMainModel.getTitle());
+                tempUrl = createUrlUsingTitle(blogMainModel.getTitle());
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="INSERT INTO blog_post (title,created_by,description,content,url,published_date," +
                 "fk_associate_id,status,blog_meta_title,blog_meta_keywords,blog_meta_description,flag_featured,sort_order) "
@@ -38,7 +38,7 @@ public class BlogsUtil {
             preparedStatement.setString(2, blogMainModel.getUser());
             preparedStatement.setString(3, blogMainModel.getShortDescription());
             preparedStatement.setString(4, blogMainModel.getDescription());
-            preparedStatement.setString(5, blogMainModel.getUrl());
+            preparedStatement.setString(5, url);
             preparedStatement.setInt(6, blogMainModel.getFkAssociateId());
             preparedStatement.setInt(7, blogMainModel.getStatus()); // by default keeping status as 1
             preparedStatement.setString(8, blogMainModel.getSeoModel().getSeoTitle());
@@ -186,7 +186,7 @@ public class BlogsUtil {
 
 
     public String createUrlUsingTitle(String title){
-        String url = "";
+        String url = title;
         String correctStr = title.trim();
         try{
             String pattern1 = "^[0-9A-Za-z]*$";
