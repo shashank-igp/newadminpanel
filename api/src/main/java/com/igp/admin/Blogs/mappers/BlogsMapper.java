@@ -1,6 +1,7 @@
 package com.igp.admin.Blogs.mappers;
 
 import com.igp.admin.Blogs.models.BlogMainModel;
+import com.igp.admin.Blogs.models.BlogResultModel;
 import com.igp.admin.Blogs.utils.BlogsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,6 +43,19 @@ public class BlogsMapper {
             result = blogUtil.deleteBlog(blogMainModel);
         }catch (Exception exception){
             logger.debug("error occured while deleting blog post ",exception);
+        }
+        return result;
+    }
+
+    public BlogResultModel validateBlogUrl(int fkAssociateId, String url){
+        BlogResultModel result = new BlogResultModel();
+        BlogsUtil blogsUtil = new BlogsUtil();
+        try{
+            result = blogsUtil.validateBlogUrl(fkAssociateId, url);
+        }catch (Exception e){
+            logger.debug("error occured while validating blog post url",e);
+            result.setError(true);
+            result.setMessage(e.getMessage());
         }
         return result;
     }
