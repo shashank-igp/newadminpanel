@@ -23,7 +23,7 @@ public class Blogs {
     private static final Logger logger = LoggerFactory.getLogger(Blogs.class);
 
     @POST
-    @Path("/v1/createblog")
+    @Path("/v1/blogs/createblog")
     public Response createBlog(BlogMainModel blogMainModel) {
         Response response=null;
         BlogsMapper blogsMapper = new  BlogsMapper();
@@ -32,7 +32,7 @@ public class Blogs {
             url=blogsMapper.createBlog(blogMainModel);
             if(!url.isEmpty()){
                 Map<String,String> createBlogResponse=new HashMap<>();
-                createBlogResponse.put("data","blog created with url "+url);
+                createBlogResponse.put("data","url : "+url);
                 response= EntityFoundResponse.entityFoundResponseBuilder(createBlogResponse);
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
@@ -45,7 +45,7 @@ public class Blogs {
         return response;
     }
     @PUT
-    @Path("/v1/updateblog")
+    @Path("/v1/blogs/updateblog")
     public Response updateBlog(BlogMainModel blogMainModel) {
         Response response=null;
         BlogsMapper blogsMapper = new  BlogsMapper();
@@ -67,7 +67,7 @@ public class Blogs {
         return response;
     }
     @DELETE
-    @Path("/v1/deleteblog")
+    @Path("/v1/blogs/deleteblog")
     public Response deleteBlog(BlogMainModel blogMainModel) {
         Response response=null;
         BlogsMapper blogsMapper = new  BlogsMapper();

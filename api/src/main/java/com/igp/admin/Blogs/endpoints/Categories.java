@@ -2,7 +2,7 @@ package com.igp.admin.Blogs.endpoints;
 
 import com.igp.admin.Blogs.models.CategoryModel;
 import com.igp.admin.Blogs.mappers.*;
-import com.igp.admin.Blogs.models.CategorySubCategoryList;
+import com.igp.admin.Blogs.models.CategorySubCategoryModel;
 import com.igp.admin.response.EntityFoundResponse;
 import com.igp.admin.response.EntityNotFoundResponse;
 import org.slf4j.Logger;
@@ -98,7 +98,7 @@ public class Categories {
         Response response=null;
         CategoryMapper categoryMapper =  new CategoryMapper();
         try{
-            List<CategorySubCategoryList> categorySubCategoryLists = categoryMapper.getCategoryList(fkAssociateId,startLimit,endLimit);
+            List<CategorySubCategoryModel> categorySubCategoryLists = categoryMapper.getCategoryList(fkAssociateId,startLimit,endLimit);
             if(categorySubCategoryLists!= null && !categorySubCategoryLists.isEmpty()){
                response= EntityFoundResponse.entityFoundResponseBuilder(categorySubCategoryLists);
             }else{
