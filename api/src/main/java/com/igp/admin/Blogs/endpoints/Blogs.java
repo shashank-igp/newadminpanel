@@ -28,16 +28,14 @@ public class Blogs {
     public Response createBlog(BlogMainModel blogMainModel) {
         Response response=null;
         BlogsMapper blogsMapper = new  BlogsMapper();
-        String url = "";
+        BlogResultModel blogResultModel = new BlogResultModel();
         try{
-            url=blogsMapper.createBlog(blogMainModel);
-            if(!url.isEmpty()){
-                Map<String,String> createBlogResponse=new HashMap<>();
-                createBlogResponse.put("data","url : "+url);
-                response= EntityFoundResponse.entityFoundResponseBuilder(createBlogResponse);
+            blogResultModel = blogsMapper.createBlog(blogMainModel);
+            if(blogResultModel.isError()==false){
+                response= EntityFoundResponse.entityFoundResponseBuilder("url : "+blogResultModel.getObject());
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error","Could not able to create blog");
+                errorResponse.put("error",blogResultModel.getMessage());
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
         }catch (Exception exception){

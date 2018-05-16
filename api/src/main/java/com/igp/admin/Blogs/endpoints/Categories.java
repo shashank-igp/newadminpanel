@@ -1,5 +1,6 @@
 package com.igp.admin.Blogs.endpoints;
 
+import com.igp.admin.Blogs.models.BlogResultModel;
 import com.igp.admin.Blogs.models.CategoryModel;
 import com.igp.admin.Blogs.mappers.*;
 import com.igp.admin.Blogs.models.CategorySubCategoryModel;
@@ -29,16 +30,15 @@ public class Categories {
     public Response createCategory(CategoryModel categoryModel) {
         Response response=null;
         CategoryMapper categoryMapper = new  CategoryMapper();
-        int id = 0;
+        BlogResultModel blogResultModel = new BlogResultModel();
+
         try{
-            id=categoryMapper.createCategory(categoryModel);
-            if(id!=0){
-                Map<String,String> createCategoryResponse=new HashMap<>();
-                createCategoryResponse.put("data","Category created with id "+id);
-                response= EntityFoundResponse.entityFoundResponseBuilder(createCategoryResponse);
+            blogResultModel = categoryMapper.createCategory(categoryModel);
+            if(blogResultModel.isError()==false){
+                response= EntityFoundResponse.entityFoundResponseBuilder(blogResultModel.getObject());
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error","Could not able to create Category");
+                errorResponse.put("error",blogResultModel.getMessage());
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
         }catch (Exception exception){

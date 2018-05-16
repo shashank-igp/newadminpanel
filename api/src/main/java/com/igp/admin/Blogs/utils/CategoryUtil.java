@@ -1,5 +1,6 @@
 package com.igp.admin.Blogs.utils;
 
+import com.igp.admin.Blogs.models.BlogResultModel;
 import com.igp.admin.Blogs.models.CategoryModel;
 import com.igp.admin.Blogs.models.CategorySubCategoryModel;
 import com.igp.config.instance.Database;
@@ -19,16 +20,20 @@ import java.util.List;
 public class CategoryUtil {
     private static final Logger logger = LoggerFactory.getLogger(CategoryUtil.class);
 
-    public int createCategory(CategoryModel categoryModel){
-        String url = "", tempUrl = "";
+    public BlogResultModel createCategory(CategoryModel categoryModel){
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet =  null;
         BlogsUtil blogsUtil = new BlogsUtil();
+        BlogResultModel blogResultModel = new BlogResultModel();
         try{
-            tempUrl = blogsUtil.createUrlUsingTitle(categoryModel.getTitle());
-            connection = Database.INSTANCE.getReadWriteConnection();
+            boolean validUrl = blogsUtil.checkUrlWithNoSpecialChar(categoryModel.getUrl());
+            if(validUrl==false){
+                blogResultModel.setError(true);
+                blogResultModel.setMessage("Invalid URL");
+                return blogResultModel;
+            }            connection = Database.INSTANCE.getReadWriteConnection();
             statement="INSERT INTO blog_categories (categories_name,categories_name_alt,parent_id,sort_order,categories_description,categories_name_for_url," +
                 "categories_meta_title,categories_meta_keywords,categories_meta_description,categories_introduction_text,categories_introduction_down_text,categories_status) "
                 + " VALUES (? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?)";
@@ -38,7 +43,7 @@ public class CategoryUtil {
             preparedStatement.setInt(3, categoryModel.getParentId());
             preparedStatement.setInt(4, categoryModel.getSortOrder());
             preparedStatement.setString(5, categoryModel.getDescription());
-            preparedStatement.setString(6, tempUrl);
+            preparedStatement.setString(6, categoryModel.getUrl());
             preparedStatement.setString(7, categoryModel.getSeoModel().getSeoTitle());
             preparedStatement.setString(8, categoryModel.getSeoModel().getSeoKeywords());
             preparedStatement.setString(9, categoryModel.getSeoModel().getSeoDescription());
@@ -55,17 +60,19 @@ public class CategoryUtil {
                 resultSet = preparedStatement.getGeneratedKeys();
                 resultSet.first();
                 categoryModel.setId(resultSet.getInt(1));
-                url = tempUrl;
-                logger.debug("New Category created with url : "+url+" id : "+categoryModel.getId());
+                blogResultModel.setObject(categoryModel.getId());
+                logger.debug("New Category created with url : "+categoryModel.getUrl()+" id : "+categoryModel.getId());
             }
         }catch (Exception exception){
             logger.debug("error occured while creating Category : ",exception);
+            blogResultModel.setError(true);
+            blogResultModel.setMessage("error in insertion.");
         }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
             Database.INSTANCE.closeResultSet(resultSet);
         }
-        return categoryModel.getId();
+        return blogResultModel;
     }
     public boolean updateCategory(CategoryModel categoryModel){
         boolean result = false;
