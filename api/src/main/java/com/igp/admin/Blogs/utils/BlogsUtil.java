@@ -39,12 +39,12 @@ public class BlogsUtil {
             preparedStatement.setString(4, blogMainModel.getDescription());
             preparedStatement.setString(5, blogMainModel.getUrl());
             preparedStatement.setInt(6, blogMainModel.getFkAssociateId());
-            preparedStatement.setInt(7, blogMainModel.getStatus());
+            preparedStatement.setInt(7, blogMainModel.getStatus()); // by default keeping status as 1
             preparedStatement.setString(8, blogMainModel.getSeoModel().getSeoTitle());
             preparedStatement.setString(9, blogMainModel.getSeoModel().getSeoKeywords());
             preparedStatement.setString(10, blogMainModel.getSeoModel().getSeoDescription());
-            preparedStatement.setInt(11, 0); // by default keeping flag_featured as 0
-            preparedStatement.setInt(12, blogMainModel.getSortOrder());
+            preparedStatement.setInt(11, blogMainModel.getFlagFeatured()); // by default keeping flag_featured as 0
+            preparedStatement.setInt(12, blogMainModel.getSortOrder()); // by default keeping sort order as 1
 
             logger.debug("preparedstatement of insert blog_post : "+preparedStatement);
 
@@ -78,7 +78,7 @@ public class BlogsUtil {
                             statement = "INSERT INTO blog_cat_map (blog_id,categories_id) VALUES (? ,?)";
                             preparedStatement = connection.prepareStatement(statement);
                             preparedStatement.setInt(1, blogMainModel.getId());
-                            //   preparedStatement.setInt(2, iterator.next());
+                            preparedStatement.setInt(2, list.get(size-1));
                             logger.debug("preparedstatement of insert blog_cat_map : " + preparedStatement);
                             status = preparedStatement.executeUpdate();
                             if (status == 0) {
@@ -88,7 +88,7 @@ public class BlogsUtil {
                         }
                     }
                 }
-                url = tempUrl;
+                url = blogMainModel.getUrl();
                 logger.debug("New blog post created with url : "+url+" id : "+blogMainModel.getId());
             }
         }catch (Exception exception){

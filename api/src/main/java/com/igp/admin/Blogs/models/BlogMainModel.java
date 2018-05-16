@@ -176,6 +176,9 @@ public class BlogMainModel {
     }
 
     public Integer getStatus() {
+        if(status==null){
+            status=1;
+        }
         return status;
     }
 
@@ -192,6 +195,9 @@ public class BlogMainModel {
     }
 
     public Integer getSortOrder() {
+        if(sortOrder==null){
+            sortOrder=1;
+        }
         return sortOrder;
     }
 
@@ -200,6 +206,9 @@ public class BlogMainModel {
     }
 
     public Integer getFlagFeatured() {
+        if(flagFeatured==null){
+            flagFeatured=0;
+        }
         return flagFeatured;
     }
 
