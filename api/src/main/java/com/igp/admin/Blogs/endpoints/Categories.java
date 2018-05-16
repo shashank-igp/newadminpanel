@@ -113,14 +113,12 @@ public class Categories {
     }
 
     @GET
-    @Path("/v1/validatecategory")
+    @Path("/v1/categories/validatecategory")
     public Response validateCategory(@QueryParam("fkAssociateId") @DefaultValue("5") int fkAssociateId, @QueryParam("categoryName") String categoryName, @QueryParam("subCategoryName") String subCategoryName) {
-        System.out.println("333  inside validateCategory" );
         Response response=null;
         CategoryMapper categoryMapper =  new CategoryMapper();
         boolean result = false;
         try{
-            System.out.println("333 " +fkAssociateId+" "+ categoryName + " "+ subCategoryName);
             result = categoryMapper.validateCategory(fkAssociateId, categoryName, subCategoryName);
             if(result==true){
                 Map<String,String> validateCategoryResponse=new HashMap<>();

@@ -2,6 +2,7 @@ package com.igp.admin.Blogs.utils;
 
 import com.igp.admin.Blogs.models.BlogMainModel;
 import com.igp.admin.Blogs.models.CategorySubCategoryModel;
+import com.igp.admin.Blogs.models.BlogResultModel;
 import com.igp.config.instance.Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -214,5 +215,39 @@ public class BlogsUtil {
             logger.debug("error occured while creating url ",e);
         }
         return url;
+    }
+
+    //this method will return true if passed (fkAssociateId, url) combination already exist
+    public BlogResultModel validateBlogUrl(int fkAssociateId, String url){
+        Connection connection = null;
+        String statement = "";
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        BlogResultModel result = new BlogResultModel();
+
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement = "select * from blog_post where fk_associate_id = ? AND url= ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1, fkAssociateId);
+            preparedStatement.setString(2, url);
+            logger.debug("preparedStatement for validating blog url -> ", preparedStatement);
+
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.first()){
+                result.setError(false);
+                result.setMessage("urlexist");
+            }
+
+        }catch (Exception e){
+            logger.debug("error occured while validating url for blog.", e);
+            result.setError(true);
+            result.setMessage(e.getMessage());
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return result;
     }
 }
