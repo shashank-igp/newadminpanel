@@ -12,8 +12,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Created by suditi on 2/5/18.
@@ -21,14 +19,19 @@ import java.util.regex.Pattern;
 public class BlogsUtil {
     private static final Logger logger = LoggerFactory.getLogger(BlogsUtil.class);
 
-    public String createBlog(BlogMainModel blogMainModel){
-        String url = "", tempUrl = "";
+    public BlogResultModel createBlog(BlogMainModel blogMainModel){
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet =  null;
+        BlogResultModel blogResultModel = new BlogResultModel();
         try{
-                tempUrl = createUrlUsingTitle(blogMainModel.getTitle());
+            boolean validUrl = checkUrlWithNoSpecialChar(blogMainModel.getUrl());
+            if(validUrl==false){
+                blogResultModel.setError(true);
+                blogResultModel.setMessage("Invalid URL");
+                return blogResultModel;
+            }
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="INSERT INTO blog_post (title,created_by,description,content,url,published_date," +
                 "fk_associate_id,status,blog_meta_title,blog_meta_keywords,blog_meta_description,flag_featured,sort_order) "
@@ -38,7 +41,7 @@ public class BlogsUtil {
             preparedStatement.setString(2, blogMainModel.getUser());
             preparedStatement.setString(3, blogMainModel.getShortDescription());
             preparedStatement.setString(4, blogMainModel.getDescription());
-            preparedStatement.setString(5, url);
+            preparedStatement.setString(5, blogMainModel.getUrl());
             preparedStatement.setInt(6, blogMainModel.getFkAssociateId());
             preparedStatement.setInt(7, blogMainModel.getStatus()); // by default keeping status as 1
             preparedStatement.setString(8, blogMainModel.getSeoModel().getSeoTitle());
@@ -89,17 +92,19 @@ public class BlogsUtil {
                         }
                     }
                 }
-                url = blogMainModel.getUrl();
-                logger.debug("New blog post created with url : "+url+" id : "+blogMainModel.getId());
+                logger.debug("New blog post created with url : "+blogMainModel.getUrl()+" id : "+blogMainModel.getId());
             }
+            blogResultModel.setObject(blogMainModel.getUrl());
         }catch (Exception exception){
             logger.debug("error occured while creating blog post ",exception);
+            blogResultModel.setError(true);
+            blogResultModel.setMessage("error in insertion.");
         }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
             Database.INSTANCE.closeResultSet(resultSet);
         }
-        return url;
+        return blogResultModel;
     }
     public boolean updateBlog(BlogMainModel blogMainModel){
         boolean result = false;
@@ -185,36 +190,20 @@ public class BlogsUtil {
     }
 
 
-    public String createUrlUsingTitle(String title){
-        String url = title;
-        String correctStr = title.trim();
+    public boolean checkUrlWithNoSpecialChar(String url){
+        boolean result = false;
         try{
-            String pattern1 = "^[0-9A-Za-z]*$";
-            if (!title.matches(pattern1)) {
-                logger.debug("url has some unmatched special char.Let's replace it with a hiphen.");
-                Pattern pattern = Pattern.compile("^[0-9A-Za-z]*$");
-                // pattern allows a set of special chars,apha-numeric replace it with hyphen
-                int count = 0;
-                int length = correctStr.length();
-                int i = 0;
-                while (i < length) {
-                    Matcher m = pattern.matcher(title.charAt(i)+"");
-                    if (!m.matches()) {
-                        //  logger.debug("Unmatched character is : "+title.charAt(i)+" at index : "+i);
-                        int index = i + 1 ;
-                        count++;
-                        correctStr = correctStr.substring(0, i) + "-" + correctStr.substring(index);
-                        // replace the un matched char by a space.
-                    }
-                    i++;
-                }
-                url = correctStr;
-                logger.debug("Finally the returned string from special char match is : "+url);
+            String pattern1 = "^[0-9A-Za-z-]*$";
+            if (url==null || url.isEmpty() || !url.matches(pattern1)) {
+                logger.debug("url is empty OR has some special characters.");
+            }else {
+                result = true;
             }
+
         }catch (Exception e){
-            logger.debug("error occured while creating url ",e);
+            logger.debug("error occured while checking url has special chars "+e);
         }
-        return url;
+        return result;
     }
 
     //this method will return true if passed (fkAssociateId, url) combination already exist

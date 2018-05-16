@@ -11,16 +11,15 @@ import org.slf4j.LoggerFactory;
  */
 public class BlogsMapper {
     private static final Logger logger = LoggerFactory.getLogger(BlogsMapper.class);
-    public String createBlog(BlogMainModel blogMainModel){
-
-        String url = "";
+    public BlogResultModel createBlog(BlogMainModel blogMainModel){
+        BlogResultModel blogResultModel = new BlogResultModel();
         BlogsUtil blogUtil = new BlogsUtil();
         try{
-            url = blogUtil.createBlog(blogMainModel);
+            blogResultModel = blogUtil.createBlog(blogMainModel);
         }catch (Exception exception){
             logger.debug("error occured while creating blog post ",exception);
         }
-        return url;
+        return blogResultModel;
     }
 
     public boolean updateBlog(BlogMainModel blogMainModel){

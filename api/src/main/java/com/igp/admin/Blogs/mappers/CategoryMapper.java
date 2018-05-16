@@ -1,5 +1,6 @@
 package com.igp.admin.Blogs.mappers;
 
+import com.igp.admin.Blogs.models.BlogResultModel;
 import com.igp.admin.Blogs.models.CategoryModel;
 import com.igp.admin.Blogs.models.CategorySubCategoryModel;
 import com.igp.admin.Blogs.utils.CategoryUtil;
@@ -14,16 +15,16 @@ import java.util.List;
  */
 public class CategoryMapper {
     private static final Logger logger = LoggerFactory.getLogger(CategoryMapper.class);
-    public int createCategory(CategoryModel categoryModel){
 
-        int id = 0;
+    public BlogResultModel createCategory(CategoryModel categoryModel){
+        BlogResultModel blogResultModel = new BlogResultModel();
         CategoryUtil categoryUtil = new CategoryUtil();
         try{
-            id = categoryUtil.createCategory(categoryModel);
+            blogResultModel = categoryUtil.createCategory(categoryModel);
         }catch (Exception exception){
             logger.debug("error occured while creating Category ",exception);
         }
-        return id;
+        return blogResultModel;
     }
 
     public boolean updateCategory(CategoryModel categoryModel){
