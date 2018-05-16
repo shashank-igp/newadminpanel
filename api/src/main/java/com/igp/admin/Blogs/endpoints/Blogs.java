@@ -1,6 +1,7 @@
 package com.igp.admin.Blogs.endpoints;
 import com.igp.admin.Blogs.mappers.*;
 
+import com.igp.admin.Blogs.models.BlogListResponseModel;
 import com.igp.admin.Blogs.models.BlogMainModel;
 import com.igp.admin.Blogs.models.BlogResultModel;
 import com.igp.admin.response.EntityFoundResponse;
@@ -109,15 +110,18 @@ public class Blogs {
                         //result is true, it means (fkAssociateId, url) combination already exist.
                         //return error as url must be different
                         validateBlogUrlResult.put("error", "Please choose different url");
+                        validateBlogUrlResult.put("unique", "false");
                         response = EntityNotFoundResponse.entityNotFoundResponseBuilder(validateBlogUrlResult);
                     } else {
                         //url is valid
                         validateBlogUrlResult.put("data", "Selected url is valid");
+                        validateBlogUrlResult.put("unique", "true");
                         response = EntityFoundResponse.entityFoundResponseBuilder(validateBlogUrlResult);
                     }
                 } else {
                     //status is not success - some error occured
                     validateBlogUrlResult.put("error", result.getMessage());
+                    validateBlogUrlResult.put("unique", "false");
                     response = EntityNotFoundResponse.entityNotFoundResponseBuilder(validateBlogUrlResult);
                 }
             }
@@ -126,6 +130,31 @@ public class Blogs {
             logger.debug("error occured while validating blog url ",e);
             validateBlogUrlResult.put("error", e.getMessage());
             response = EntityNotFoundResponse.entityNotFoundResponseBuilder(validateBlogUrlResult);
+        }
+        return response;
+    }
+    @GET
+    @Path("/v1/blogs/getbloglist")
+    public Response getbloglist(@DefaultValue("5") @QueryParam("fkAssociateId") int fkAssociateId,
+                                @DefaultValue("false") @QueryParam("isCategory") boolean isCategory,
+                                @DefaultValue("") @QueryParam("categoryName") String categoryName,
+                                @DefaultValue("") @QueryParam("subCategoryName") String subCategoryName,
+                                @DefaultValue("0") @QueryParam("startLimit") int startLimit,
+                                @DefaultValue("10") @QueryParam("endLimit") int endLimit) {
+        Response response=null;
+        BlogsMapper blogMapper=new BlogsMapper();
+
+        try{
+            BlogListResponseModel blogListResponseModel = blogMapper.getBlogList(fkAssociateId,isCategory,categoryName,subCategoryName,startLimit,endLimit);
+            if(blogListResponseModel.getCount()!=0 && !blogListResponseModel.getBlogList().isEmpty()){
+                response= EntityFoundResponse.entityFoundResponseBuilder(blogListResponseModel);
+            }else{
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error","Not able to get list of blogs");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while get list of blogs ",exception);
         }
         return response;
     }
