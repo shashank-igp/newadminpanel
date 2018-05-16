@@ -1,6 +1,7 @@
 package com.igp.admin.Blogs.utils;
 
 import com.igp.admin.Blogs.models.BlogMainModel;
+import com.igp.admin.Blogs.models.CategorySubCategoryModel;
 import com.igp.config.instance.Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.Iterator;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,7 +27,7 @@ public class BlogsUtil {
         PreparedStatement preparedStatement = null;
         ResultSet resultSet =  null;
         try{
-            tempUrl = createUrlUsingTitle(blogMainModel.getTitle());
+        //    tempUrl = createUrlUsingTitle(blogMainModel.getTitle());
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="INSERT INTO blog_post (title,created_by,description,content,url,published_date," +
                 "fk_associate_id,status,blog_meta_title,blog_meta_keywords,blog_meta_description,flag_featured,sort_order) "
@@ -34,15 +35,15 @@ public class BlogsUtil {
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, blogMainModel.getTitle());
             preparedStatement.setString(2, blogMainModel.getUser());
-            preparedStatement.setString(3, blogMainModel.getDescription());
-            preparedStatement.setString(4, blogMainModel.getContent());
-            preparedStatement.setString(5, tempUrl);
+            preparedStatement.setString(3, blogMainModel.getShortDescription());
+            preparedStatement.setString(4, blogMainModel.getDescription());
+            preparedStatement.setString(5, blogMainModel.getUrl());
             preparedStatement.setInt(6, blogMainModel.getFkAssociateId());
             preparedStatement.setInt(7, blogMainModel.getStatus());
             preparedStatement.setString(8, blogMainModel.getSeoModel().getSeoTitle());
             preparedStatement.setString(9, blogMainModel.getSeoModel().getSeoKeywords());
             preparedStatement.setString(10, blogMainModel.getSeoModel().getSeoDescription());
-            preparedStatement.setInt(11, blogMainModel.getFlagFeatured());
+            preparedStatement.setInt(11, 0); // by default keeping flag_featured as 0
             preparedStatement.setInt(12, blogMainModel.getSortOrder());
 
             logger.debug("preparedstatement of insert blog_post : "+preparedStatement);
@@ -55,7 +56,7 @@ public class BlogsUtil {
                 resultSet = preparedStatement.getGeneratedKeys();
                 resultSet.first();
                 blogMainModel.setId(resultSet.getInt(1));
-                statement="INSERT INTO blog_post_image (blog_id,image_url,date_created) VALUES (? ,? ,now())";
+                statement="INSERT INTO blog_post_image (blog_id,image_url,date_created,flag_featured) VALUES (? ,? ,now(),1)";
                 preparedStatement = connection.prepareStatement(statement);
                 preparedStatement.setInt(1, blogMainModel.getId());
                 preparedStatement.setString(2, blogMainModel.getImageUrl());
@@ -66,16 +67,24 @@ public class BlogsUtil {
                 if (status == 0) {
                     logger.error("Failed to create blog blog_post_image");
                 }else {
-                    Iterator<Integer> iterator = blogMainModel.getCategoryId().iterator();
-                    while (iterator.hasNext()) {
-                        statement="INSERT INTO blog_cat_map (blog_id,categories_id) VALUES (? ,?)";
-                        preparedStatement = connection.prepareStatement(statement);
-                        preparedStatement.setInt(1, blogMainModel.getId());
-                        preparedStatement.setInt(2, iterator.next());
-                        logger.debug("preparedstatement of insert blog_cat_map : "+preparedStatement);
-                        status = preparedStatement.executeUpdate();
-                        if (status == 0) {
-                            logger.error("Failed to create blog blog_cat_map");
+                    List<Integer> list = new ArrayList<>();
+                    for (Map.Entry<Integer, List<Integer>> entry : blogMainModel.getCategories().entrySet())
+                    {
+                        int i = entry.getKey();
+                        list = entry.getValue();
+                        list.add(i);
+                        int size = list.size();
+                        while (size>0) {
+                            statement = "INSERT INTO blog_cat_map (blog_id,categories_id) VALUES (? ,?)";
+                            preparedStatement = connection.prepareStatement(statement);
+                            preparedStatement.setInt(1, blogMainModel.getId());
+                            //   preparedStatement.setInt(2, iterator.next());
+                            logger.debug("preparedstatement of insert blog_cat_map : " + preparedStatement);
+                            status = preparedStatement.executeUpdate();
+                            if (status == 0) {
+                                logger.error("Failed to insert blog blog_cat_map");
+                            }
+                            size--;
                         }
                     }
                 }
@@ -104,8 +113,8 @@ public class BlogsUtil {
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, blogMainModel.getTitle());
             preparedStatement.setString(2, blogMainModel.getUser());
-            preparedStatement.setString(3, blogMainModel.getDescription());
-            preparedStatement.setString(4, blogMainModel.getContent());
+            preparedStatement.setString(3, blogMainModel.getShortDescription());
+            preparedStatement.setString(4, blogMainModel.getDescription());
             preparedStatement.setString(5, blogMainModel.getUrl());
             preparedStatement.setInt(6, blogMainModel.getFkAssociateId());
             preparedStatement.setInt(7, blogMainModel.getStatus());

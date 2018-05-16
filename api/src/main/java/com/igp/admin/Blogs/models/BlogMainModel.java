@@ -1,23 +1,24 @@
 package com.igp.admin.Blogs.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by suditi on 2/5/18.
  */
 @JsonDeserialize
 @JsonSerialize
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class BlogMainModel {
 
-    @JsonProperty("id")
+    @JsonIgnore
     private int id;
-
-    @JsonProperty("categoryid")
-    private List<Integer> categoryId;
 
     @JsonProperty("title")
     private String title;
@@ -28,38 +29,47 @@ public class BlogMainModel {
     @JsonProperty("description")
     private String description;
 
-    @JsonProperty("content")
-    private String content;
+    @JsonProperty("shortdescription")
+    private String shortDescription;
 
     @JsonProperty("url")
     private String url;
+
+    @JsonProperty("imageurl")
+    private String imageUrl;
 
     @JsonProperty("publishdate")
     private String publishDate;
 
     @JsonProperty("parentcategory")
-    private String parentCategory;
+    private CategoryModel parentCategory;
 
     @JsonProperty("subcategory")
-    private String subCategory;
+    private CategoryModel subCategory;
 
-    @JsonProperty("imageurl")
-    private String imageUrl;
+    @JsonProperty("prevpost")
+    private BlogMainModel prevPost;
+
+    @JsonProperty("nextpost")
+    private BlogMainModel nextPost;
 
     @JsonProperty("seo")
     private SeoBlogModel seoModel;
 
     @JsonProperty("fkasid")
-    private int fkAssociateId;
+    private Integer fkAssociateId;
 
     @JsonProperty("status")
-    private int status;
+    private Integer status;
 
     @JsonProperty("sortorder")
-    private int sortOrder;
+    private Integer sortOrder;
 
     @JsonProperty("flagfeatured")
-    private int flagFeatured;
+    private Integer flagFeatured;
+
+    @JsonProperty("categories")
+    private Map<Integer,List<Integer>> categories;
 
     public int getId() {
         return id;
@@ -67,14 +77,6 @@ public class BlogMainModel {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public List<Integer> getCategoryId() {
-        return categoryId;
-    }
-
-    public void setCategoryId(List<Integer> categoryId) {
-        this.categoryId = categoryId;
     }
 
     public String getTitle() {
@@ -101,12 +103,12 @@ public class BlogMainModel {
         this.description = description;
     }
 
-    public String getContent() {
-        return content;
+    public String getShortDescription() {
+        return shortDescription;
     }
 
-    public void setContent(String content) {
-        this.content = content;
+    public void setShortDescription(String shortDescription) {
+        this.shortDescription = shortDescription;
     }
 
     public String getUrl() {
@@ -125,20 +127,36 @@ public class BlogMainModel {
         this.publishDate = publishDate;
     }
 
-    public String getParentCategory() {
+    public CategoryModel getParentCategory() {
         return parentCategory;
     }
 
-    public void setParentCategory(String parentCategory) {
+    public void setParentCategory(CategoryModel parentCategory) {
         this.parentCategory = parentCategory;
     }
 
-    public String getSubCategory() {
+    public CategoryModel getSubCategory() {
         return subCategory;
     }
 
-    public void setSubCategory(String subCategory) {
+    public void setSubCategory(CategoryModel subCategory) {
         this.subCategory = subCategory;
+    }
+
+    public BlogMainModel getPrevPost() {
+        return prevPost;
+    }
+
+    public void setPrevPost(BlogMainModel prevPost) {
+        this.prevPost = prevPost;
+    }
+
+    public BlogMainModel getNextPost() {
+        return nextPost;
+    }
+
+    public void setNextPost(BlogMainModel nextPost) {
+        this.nextPost = nextPost;
     }
 
     public SeoBlogModel getSeoModel() {
@@ -149,28 +167,20 @@ public class BlogMainModel {
         this.seoModel = seoModel;
     }
 
-    public int getFkAssociateId() {
+    public Integer getFkAssociateId() {
         return fkAssociateId;
     }
 
-    public void setFkAssociateId(int fkAssociateId) {
+    public void setFkAssociateId(Integer fkAssociateId) {
         this.fkAssociateId = fkAssociateId;
     }
 
-    public int getStatus() {
+    public Integer getStatus() {
         return status;
     }
 
-    public void setStatus(int status) {
+    public void setStatus(Integer status) {
         this.status = status;
-    }
-
-    public int getSortOrder() {
-        return sortOrder;
-    }
-
-    public void setSortOrder(int sortOrder) {
-        this.sortOrder = sortOrder;
     }
 
     public String getImageUrl() {
@@ -181,12 +191,28 @@ public class BlogMainModel {
         this.imageUrl = imageUrl;
     }
 
-    public int getFlagFeatured() {
+    public Integer getSortOrder() {
+        return sortOrder;
+    }
+
+    public void setSortOrder(Integer sortOrder) {
+        this.sortOrder = sortOrder;
+    }
+
+    public Integer getFlagFeatured() {
         return flagFeatured;
     }
 
-    public void setFlagFeatured(int flagFeatured) {
+    public void setFlagFeatured(Integer flagFeatured) {
         this.flagFeatured = flagFeatured;
+    }
+
+    public Map<Integer,List<Integer>> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Map<Integer,List<Integer>> categories) {
+        this.categories = categories;
     }
 }
 

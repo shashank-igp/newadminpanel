@@ -9,21 +9,42 @@ import java.util.List;
  * Created by suditi on 15/5/18.
  */
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class CategorySubCategoryList {
+public class CategorySubCategoryModel {
 
-    @JsonProperty("category")
-    private CategoryModel categoryModel;
+    @JsonProperty("id")
+    private int id;
 
+    @JsonProperty("title")
+    private String title;
+
+    @JsonProperty("url")
+    private String url;
 
     @JsonProperty("subcategory")
     private List<CategoryModel> subCategoryModelList;
 
-    public CategoryModel getCategoryModel() {
-        return categoryModel;
+    public int getId() {
+        return id;
     }
 
-    public void setCategoryModel(CategoryModel categoryModel) {
-        this.categoryModel = categoryModel;
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
     }
 
     public List<CategoryModel> getSubCategoryModelList() {

@@ -1,7 +1,7 @@
 package com.igp.admin.Blogs.mappers;
 
 import com.igp.admin.Blogs.models.CategoryModel;
-import com.igp.admin.Blogs.models.CategorySubCategoryList;
+import com.igp.admin.Blogs.models.CategorySubCategoryModel;
 import com.igp.admin.Blogs.utils.CategoryUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,10 +50,10 @@ public class CategoryMapper {
         return result;
     }
 
-    public List<CategorySubCategoryList> getCategoryList(int fkAssociateId, int startLimit, int endLimit) {
+    public List<CategorySubCategoryModel> getCategoryList(int fkAssociateId, int startLimit, int endLimit) {
 
         CategoryUtil categoryUtil = new CategoryUtil();
-        List<CategorySubCategoryList> categorySubCategoryLists = new ArrayList<>();
+        List<CategorySubCategoryModel> categorySubCategoryLists = new ArrayList<>();
         try {
             categorySubCategoryLists = categoryUtil.getCategoryList(fkAssociateId, startLimit, endLimit);
         } catch (Exception exception) {

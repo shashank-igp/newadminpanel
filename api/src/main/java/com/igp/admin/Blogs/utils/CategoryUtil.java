@@ -1,7 +1,7 @@
 package com.igp.admin.Blogs.utils;
 
 import com.igp.admin.Blogs.models.CategoryModel;
-import com.igp.admin.Blogs.models.CategorySubCategoryList;
+import com.igp.admin.Blogs.models.CategorySubCategoryModel;
 import com.igp.config.instance.Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -166,12 +166,12 @@ public class CategoryUtil {
         }
         return result;
     }
-    public List<CategorySubCategoryList> getCategoryList(int fkAssociateId, int startLimit, int endLimit){
+    public List<CategorySubCategoryModel> getCategoryList(int fkAssociateId, int startLimit, int endLimit){
         Connection connection = null;
         String statement="";
         ResultSet resultSet =  null;
         PreparedStatement preparedStatement = null;
-        List<CategorySubCategoryList> categorySubCategoryLists = new ArrayList<>();
+        List<CategorySubCategoryModel> categorySubCategoryLists = new ArrayList<>();
         try{
                 statement="SELECT bct.categories_id AS cat_id, bct.categories_name AS cat_name," +
                     "bct.categories_name_for_url AS cat_url, group_concat(bct2.categories_id,','," +
@@ -191,14 +191,11 @@ public class CategoryUtil {
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                CategorySubCategoryList categorySubCategoryList = new CategorySubCategoryList();
+                CategorySubCategoryModel categorySubCategoryModel = new CategorySubCategoryModel();
                 String categoryStrArray[] = null;
-                CategoryModel categoryModel = new CategoryModel();
-                categoryModel.setUrl(resultSet.getString("cat_url"));
-                categoryModel.setTitle(resultSet.getString("cat_name"));
-                categoryModel.setId(resultSet.getInt("cat_id"));
-                categorySubCategoryList.setCategoryModel(categoryModel);
-
+                categorySubCategoryModel.setUrl(resultSet.getString("cat_url"));
+                categorySubCategoryModel.setTitle(resultSet.getString("cat_name"));
+                categorySubCategoryModel.setId(resultSet.getInt("cat_id"));
 
                 String subcat = resultSet.getString("subcat");
                 if(subcat!=null){
@@ -211,9 +208,9 @@ public class CategoryUtil {
                         subcategory.setUrl(categoryStrArray[i].split(",")[2]);
                         subcategoryList.add(subcategory);
                     }
-                    categorySubCategoryList.setSubCategoryModelList(subcategoryList);
+                    categorySubCategoryModel.setSubCategoryModelList(subcategoryList);
                 }
-                categorySubCategoryLists.add(categorySubCategoryList);
+                categorySubCategoryLists.add(categorySubCategoryModel);
             }
 
         }catch (Exception exception){
