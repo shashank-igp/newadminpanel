@@ -74,12 +74,12 @@ public class Blogs {
         try{
             result = blogsMapper.deleteBlog(blogMainModel);
             if(result==true){
-                Map<String,String> updateBlogResponse=new HashMap<>();
-                updateBlogResponse.put("data","blog deleted succesfully.");
-                response= EntityFoundResponse.entityFoundResponseBuilder(updateBlogResponse);
+                Map<String,String> deleteBlogResponse=new HashMap<>();
+                deleteBlogResponse.put("data","Blog deleted succesfully.");
+                response= EntityFoundResponse.entityFoundResponseBuilder(deleteBlogResponse);
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error","Could not able to delete blog");
+                errorResponse.put("error","Could not delete blog");
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
         }catch (Exception exception){

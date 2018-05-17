@@ -154,31 +154,34 @@ public class BlogsUtil {
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement="DELETE FROM blog_post WHERE id = ?";
+            statement="DELETE FROM blog_post WHERE blog_id = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1, blogMainModel.getId());
+            logger.debug("preparedstatement of delete blog_post : "+preparedStatement);
 
             Integer status = preparedStatement.executeUpdate();
-            if (status == 0) {
-                logger.error("Failed to delete blog post");
-            } else {
-                result = true;
+            if (status != 0){
+
+                statement="DELETE FROM blog_post_image WHERE blog_id = ?";
+                preparedStatement = connection.prepareStatement(statement);
+                preparedStatement.setInt(1, blogMainModel.getId());
+                logger.debug("preparedstatement of delete blog_post_image : "+preparedStatement);
+                status = preparedStatement.executeUpdate();
+
                 statement="DELETE FROM blog_cat_map WHERE blog_id = ?";
                 preparedStatement = connection.prepareStatement(statement);
                 preparedStatement.setInt(1, blogMainModel.getId());
+                logger.debug("preparedstatement of delete blog_cat_map : "+preparedStatement);
                 status = preparedStatement.executeUpdate();
+
                 if (status == 0) {
                     logger.error("Failed to delete blog post");
                 } else {
                     result = true;
-                    statement="DELETE FROM blog_post_image WHERE blog_id = ?";
-                    preparedStatement = connection.prepareStatement(statement);
-                    preparedStatement.setInt(1, blogMainModel.getId());
-
-                    logger.debug("Blog post deleted from blog_post_imagewith id : "+blogMainModel.getId());
+                    logger.debug("Blog post deleted from blog_post_image with id : "+blogMainModel.getId());
                 }
-                logger.debug("Blog post deleted with id : "+blogMainModel.getId());
             }
+
         }catch (Exception exception){
             logger.debug("error occured while deleting blog post ",exception);
         }finally {
