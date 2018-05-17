@@ -23,16 +23,16 @@ public class BlogsMapper {
         return blogResultModel;
     }
 
-    public boolean updateBlog(BlogMainModel blogMainModel){
+    public BlogResultModel updateBlog(BlogMainModel blogMainModel){
 
-        boolean result = false;
+        BlogResultModel blogResultModel = new BlogResultModel();
         BlogsUtil blogUtil=new BlogsUtil();
         try{
-            result = blogUtil.updateBlog(blogMainModel);
+            blogResultModel = blogUtil.updateBlog(blogMainModel);
         }catch (Exception exception){
             logger.debug("error occured while updating blog post ",exception);
         }
-        return result;
+        return blogResultModel;
     }
 
     public boolean deleteBlog(BlogMainModel blogMainModel){
