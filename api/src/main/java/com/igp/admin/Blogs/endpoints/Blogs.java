@@ -28,9 +28,8 @@ public class Blogs {
     public Response createBlog(BlogMainModel blogMainModel) {
         Response response=null;
         BlogsMapper blogsMapper = new  BlogsMapper();
-        BlogResultModel blogResultModel = new BlogResultModel();
         try{
-            blogResultModel = blogsMapper.createBlog(blogMainModel);
+            BlogResultModel blogResultModel = blogsMapper.createBlog(blogMainModel);
             if(blogResultModel.isError()==false){
                 response= EntityFoundResponse.entityFoundResponseBuilder("url : "+blogResultModel.getObject());
             }else{
@@ -48,16 +47,16 @@ public class Blogs {
     public Response updateBlog(BlogMainModel blogMainModel) {
         Response response=null;
         BlogsMapper blogsMapper = new  BlogsMapper();
-        boolean result = false;
+        BlogResultModel blogResultModel = new BlogResultModel();
         try{
-            result = blogsMapper.updateBlog(blogMainModel);
-            if(result==true){
+            blogResultModel = blogsMapper.updateBlog(blogMainModel);
+            if(blogResultModel.isError()==false){
                 Map<String,String> updateBlogResponse=new HashMap<>();
                 updateBlogResponse.put("data","blog updated succesfully.");
                 response= EntityFoundResponse.entityFoundResponseBuilder(updateBlogResponse);
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error","Could not able to update blog");
+                errorResponse.put("error",blogResultModel.getMessage());
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
         }catch (Exception exception){

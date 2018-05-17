@@ -17,7 +17,7 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BlogMainModel {
 
-    @JsonIgnore
+    @JsonProperty("id")
     private int id;
 
     @JsonProperty("title")
@@ -37,6 +37,9 @@ public class BlogMainModel {
 
     @JsonProperty("imageurl")
     private String imageUrl;
+
+    @JsonProperty("imageflagfeatured")
+    private Integer imageFlagFeatured;
 
     @JsonProperty("publishdate")
     private String publishDate;
@@ -192,6 +195,17 @@ public class BlogMainModel {
 
     public void setImageUrl(String imageUrl) {
         this.imageUrl = imageUrl;
+    }
+
+    public Integer getImageFlagFeatured() {
+        if(imageFlagFeatured==null){
+            imageFlagFeatured=0;
+        }
+        return imageFlagFeatured;
+    }
+
+    public void setImageFlagFeatured(Integer imageFlagFeatured) {
+        this.imageFlagFeatured = imageFlagFeatured;
     }
 
     public Integer getSortOrder() {
