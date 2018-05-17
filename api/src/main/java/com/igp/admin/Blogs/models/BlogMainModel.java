@@ -17,6 +17,7 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BlogMainModel {
 
+
     @JsonProperty("id")
     private int id;
 
@@ -62,6 +63,9 @@ public class BlogMainModel {
     @JsonProperty("fkasid")
     private Integer fkAssociateId;
 
+    @JsonProperty("fkasidname")
+    private String fkAssociateName;
+
     @JsonProperty("status")
     private Integer status;
 
@@ -73,6 +77,9 @@ public class BlogMainModel {
 
     @JsonProperty("categories")
     private Map<Integer,List<Integer>> categories;
+
+    @JsonProperty("category")
+    private List<CategorySubCategoryModel> categoryList;
 
     public int getId() {
         return id;
@@ -178,10 +185,15 @@ public class BlogMainModel {
         this.fkAssociateId = fkAssociateId;
     }
 
+    public List<CategorySubCategoryModel> getCategoryList() {
+        return categoryList;
+    }
+
+    public void setCategoryList(List<CategorySubCategoryModel> categoryList) {
+        this.categoryList = categoryList;
+    }
+
     public Integer getStatus() {
-        if(status==null){
-            status=1;
-        }
         return status;
     }
 
@@ -209,9 +221,6 @@ public class BlogMainModel {
     }
 
     public Integer getSortOrder() {
-        if(sortOrder==null){
-            sortOrder=1;
-        }
         return sortOrder;
     }
 
@@ -220,9 +229,6 @@ public class BlogMainModel {
     }
 
     public Integer getFlagFeatured() {
-        if(flagFeatured==null){
-            flagFeatured=0;
-        }
         return flagFeatured;
     }
 
@@ -236,6 +242,14 @@ public class BlogMainModel {
 
     public void setCategories(Map<Integer,List<Integer>> categories) {
         this.categories = categories;
+    }
+
+    public String getFkAssociateName() {
+        return fkAssociateName;
+    }
+
+    public void setFkAssociateName(String fkAssociateName) {
+        this.fkAssociateName = fkAssociateName;
     }
 }
 
