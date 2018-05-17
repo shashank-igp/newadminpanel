@@ -1,5 +1,6 @@
 package com.igp.admin.Blogs.mappers;
 
+import com.igp.admin.Blogs.models.BlogListResponseModel;
 import com.igp.admin.Blogs.models.BlogMainModel;
 import com.igp.admin.Blogs.models.BlogResultModel;
 import com.igp.admin.Blogs.utils.BlogsUtil;
@@ -57,5 +58,15 @@ public class BlogsMapper {
             result.setMessage(e.getMessage());
         }
         return result;
+    }
+    public BlogListResponseModel getBlogList(int fkAssociateId, boolean isCategory, String categoryName, String subCategoryName, int start, int end){
+        BlogsUtil blogUtil=new BlogsUtil();
+        BlogListResponseModel blogListResponseModel = new BlogListResponseModel();
+        try{
+            blogListResponseModel = blogUtil.getListBlog(fkAssociateId,isCategory,categoryName,subCategoryName,start,end);
+        }catch (Exception exception){
+            logger.debug("error occured while getBlogList. ",exception);
+        }
+        return blogListResponseModel;
     }
 }
