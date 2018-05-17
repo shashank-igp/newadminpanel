@@ -423,5 +423,102 @@ public class BlogsUtil {
         }
         return blogListResponseModel;
     }
+    public BlogMainModel getBlog(int fkAssociateId, int id, boolean isCategory, String categoryName, String subCategoryName){
+        Connection connection = null;
+        String statement;
+        ResultSet resultSet =  null;
+        PreparedStatement preparedStatement = null;
+        BlogMainModel blogMainModel = new BlogMainModel();
+        SeoBlogModel seoBlogModel = new SeoBlogModel();
+        CategoryModel categoryModel = new CategoryModel();
+        String extra = "";
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            if(isCategory==true) {
+                // came through category and sub category
+             //   categoryModel = getCategoryDetails(fkAssociateId, isCategory, categoryName, subCategoryName);
+                statement="SELECT b.blog_id,b.title,b.content,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date," +
+                    "b.url,b.status, b.blog_meta_title,b.blog_meta_keywords,b.blog_meta_description FROM blog_post b JOIN " +
+                    "blog_cat_map bcm ON b.blog_id = bcm.blog_id JOIN blog_categories bc ON bcm.categories_id = bc.categories_id " +
+                    "and b.fk_associate_id=bc.fk_associate_id AND bc.categories_id = "+categoryModel.getId()+" WHERE b.url = ? " +
+                    "AND b.fk_associate_id = ? ";
+                if(categoryModel.getParentId()!=0) {
+                    // while finding prev and next post, keep it in account.
+                    extra = " and bc.parent_id !=0 ";
+                }
+            }else {
+                // direct landing on blog page
+                statement = "SELECT b.blog_id,b.title,b.content,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date,b.url,b.status,b.blog_meta_title," +
+                    "b.blog_meta_keywords,b.blog_meta_description,bc.categories_id,bc.categories_name,bc.categories_name_for_url " +
+                    "FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id JOIN blog_categories  bc on" +
+                    " bcm.categories_id=bc.categories_id and bc.fk_associate_id = "+fkAssociateId+" and bc.status = 1 and parent_id = 0 " +
+                    "WHERE b.url = ? AND b.fk_associate_id = ? order by bc.sort_order limit 1";
+            }
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1, id);
+            preparedStatement.setInt(2, fkAssociateId);
+            logger.debug("preparedstatement of blog : "+preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.first()) {
+                blogMainModel.setFkAssociateId(fkAssociateId);
+                blogMainModel.setId(resultSet.getInt("b.blog_id"));
+                blogMainModel.setTitle(resultSet.getString("b.title"));
+                blogMainModel.setDescription(resultSet.getString("b.content"));
+                blogMainModel.setPublishDate(resultSet.getString("pub_date"));
+                blogMainModel.setUrl(resultSet.getString("b.url"));
+                blogMainModel.setStatus(resultSet.getInt("b.status"));
+                if(isCategory==false){
+                    categoryModel.setTitle(resultSet.getString("bc.categories_name"));
+                    categoryModel.setUrl(resultSet.getString("bc.categories_name_for_url"));
+                    categoryModel.setParentId(0);
+                    categoryModel.setId(resultSet.getInt("bc.categories_id"));
+
+                }
+                seoBlogModel.setSeoTitle(resultSet.getString("b.blog_meta_title"));
+                seoBlogModel.setSeoKeywords(resultSet.getString("b.blog_meta_keywords"));
+                seoBlogModel.setSeoDescription(resultSet.getString("b.blog_meta_description"));
+                blogMainModel.setSeoModel(seoBlogModel);
+            }
+            if(blogMainModel.getId()!=0){
+                statement = "SELECT b.blog_id, b.url,b.title FROM blog_post b JOIN blog_cat_map bcm ON " +
+                    "b.blog_id = bcm.blog_id WHERE bcm.categories_id in (select bc.categories_id from " +
+                    "blog_categories bc join blog_cat_map bcm on bc.categories_id = bcm.categories_id " +
+                    "and bc.status=1 "+extra+" JOIN blog_post b on b.blog_id= bcm.blog_id where b.blog_id = ? " +
+                    "order by bc.sort_order) and b.fk_associate_id=? and b.status = 1 group by b.blog_id " +
+                    "ORDER BY b.published_date desc";
+                preparedStatement = connection.prepareStatement(statement);
+                preparedStatement.setInt(1, blogMainModel.getId());
+                preparedStatement.setInt(2, fkAssociateId);
+                logger.debug("preparedstatement of blog prev-next : "+preparedStatement);
+                resultSet = preparedStatement.executeQuery();
+                while (resultSet.next()){
+                    BlogMainModel blogMainModel1 = new BlogMainModel();
+                    // find that blog and use before and next values.
+                    if(resultSet.getInt("b.blog_id")==blogMainModel.getId()){
+                        if(resultSet.previous()){
+                            blogMainModel1.setTitle(resultSet.getString("b.title"));
+                            blogMainModel1.setUrl(resultSet.getString("b.url"));
+                        }
+                        if(resultSet.next()){
+                            if(resultSet.next()){
+                                BlogMainModel blogMainModel2 = new BlogMainModel();
+                                blogMainModel2.setTitle(resultSet.getString("b.title"));
+                                blogMainModel2.setUrl(resultSet.getString("b.url"));
+                            }
+                        }
+                        break;
+                    }
+                }
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while getting blog post ",exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return blogMainModel;
+    }
+
 
 }

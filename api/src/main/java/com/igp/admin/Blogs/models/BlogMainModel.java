@@ -45,18 +45,6 @@ public class BlogMainModel {
     @JsonProperty("publishdate")
     private String publishDate;
 
-    @JsonProperty("parentcategory")
-    private CategoryModel parentCategory;
-
-    @JsonProperty("subcategory")
-    private CategoryModel subCategory;
-
-    @JsonProperty("prevpost")
-    private BlogMainModel prevPost;
-
-    @JsonProperty("nextpost")
-    private BlogMainModel nextPost;
-
     @JsonProperty("seo")
     private SeoBlogModel seoModel;
 
@@ -135,38 +123,6 @@ public class BlogMainModel {
 
     public void setPublishDate(String publishDate) {
         this.publishDate = publishDate;
-    }
-
-    public CategoryModel getParentCategory() {
-        return parentCategory;
-    }
-
-    public void setParentCategory(CategoryModel parentCategory) {
-        this.parentCategory = parentCategory;
-    }
-
-    public CategoryModel getSubCategory() {
-        return subCategory;
-    }
-
-    public void setSubCategory(CategoryModel subCategory) {
-        this.subCategory = subCategory;
-    }
-
-    public BlogMainModel getPrevPost() {
-        return prevPost;
-    }
-
-    public void setPrevPost(BlogMainModel prevPost) {
-        this.prevPost = prevPost;
-    }
-
-    public BlogMainModel getNextPost() {
-        return nextPost;
-    }
-
-    public void setNextPost(BlogMainModel nextPost) {
-        this.nextPost = nextPost;
     }
 
     public SeoBlogModel getSeoModel() {

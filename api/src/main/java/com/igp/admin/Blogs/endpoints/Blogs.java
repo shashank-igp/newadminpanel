@@ -157,4 +157,29 @@ public class Blogs {
         }
         return response;
     }
+
+    @GET
+    @Path("/v1/getblog")
+    public Response getBlog(@DefaultValue("5") @QueryParam("fkAssociateId") int fkAssociateId,
+                            @QueryParam("id") Integer id,
+                            @DefaultValue("false") @QueryParam("isCategory") boolean isCategory,
+                            @DefaultValue("") @QueryParam("categoryName") String categoryName,
+                            @DefaultValue("") @QueryParam("subCategoryName") String subCategoryName) {
+        Response response=null;
+        BlogsMapper blogMapper=new BlogsMapper();
+        try{
+            BlogMainModel blogMainModel = blogMapper.getBlog(fkAssociateId,id,isCategory,categoryName,subCategoryName);
+            if(blogMainModel.getId()!=0){
+                response= EntityFoundResponse.entityFoundResponseBuilder(blogMainModel);
+            }else{
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error","Not able to get blog post");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while getting blog post ",exception);
+        }
+        return response;
+    }
+
 }
