@@ -69,4 +69,15 @@ public class BlogsMapper {
         }
         return blogListResponseModel;
     }
+    public BlogMainModel getBlog(int fkAssociateId, int id, boolean isCategory, String categoryName, String subCategoryName){
+        BlogsUtil blogUtil=new BlogsUtil();
+        BlogMainModel blogMainModel = new BlogMainModel();
+
+        try{
+            blogMainModel = blogUtil.getBlog(fkAssociateId,id, isCategory, categoryName, subCategoryName);
+        }catch (Exception exception){
+            logger.debug("error occured while getting blog post ",exception);
+        }
+        return blogMainModel;
+    }
 }
