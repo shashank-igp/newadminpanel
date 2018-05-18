@@ -448,4 +448,36 @@ public class BlogsUtil {
         }
         return blogListResponseModel;
     }
+
+    public BlogResultModel updateBlogStatus(int id, int status){
+        String statement;
+        PreparedStatement preparedStatement = null;
+        Connection connection = null;
+        BlogResultModel blogResultModel = new BlogResultModel();
+
+        try{
+            statement = "update blog_post set status = "+ status +" where blog_id = "+id;
+
+            connection = Database.INSTANCE.getReadWriteConnection();
+            preparedStatement = connection.prepareStatement(statement);
+
+            int rowUpdated = preparedStatement.executeUpdate();
+
+            if(rowUpdated == 0 ){
+                blogResultModel.setError(true);
+                blogResultModel.setMessage("No blog found.");
+            }else{
+                blogResultModel.setError(false);
+            }
+        }catch(Exception e){
+            blogResultModel.setError(true);
+            blogResultModel.setMessage("Could not update blog status.");
+            logger.debug("error occured while updating blog post ",e);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+
+    return blogResultModel;
+    }
 }
