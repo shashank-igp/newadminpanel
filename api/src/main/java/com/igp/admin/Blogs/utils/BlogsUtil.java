@@ -302,7 +302,7 @@ public class BlogsUtil {
         return result;
     }
 
-    public BlogListResponseModel getListBlog(int fkAssociateId, boolean isCategory, String categoryName, String subCategoryName, int start, int end){
+    public BlogListResponseModel getListBlog(int fkAssociateId, int id, int start, int end){
         Connection connection = null;
         String statement, statementCategories="";
         ResultSet resultSet =  null, resultSetCategories = null;
@@ -311,20 +311,25 @@ public class BlogsUtil {
         String column = "";
         BlogListResponseModel blogListResponseModel = new BlogListResponseModel();
         SeoBlogModel seoBlogModel = new SeoBlogModel();
-        CategoryModel categoryModel = new CategoryModel();
-        try{
-            if(isCategory){
-                statement="select b.blog_id,b.title,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date,b.description,b.url,b.status," +
-                    " bpm.image_url,bmh.home_meta_title,bmh.home_meta_keywords,bmh.home_meta_description FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id" +
-                    " and bcm.categories_id = "+categoryModel.getId()+" LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id AND bpm.flag_featured = 1  AND bpm.status = 1 " +
-                    "JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id WHERE b.fk_associate_id = "+fkAssociateId+" AND b.status = 1" +
-                    " ORDER BY published_date DESC limit "+start+","+end;
 
-                column = " AND bcm.categories_id = "+categoryModel.getId();
+        try{
+            if(id != -1){
+                ///id is passed, return data for blog id = 'id'
+                statement= "select b.blog_id,b.title,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date,bc.categories_id,bc.parent_id,bc.categories_name,bc.categories_name_for_url,b.description,b.url,b.status,"
+                    + " b.content, bpm.image_url,bpm.status,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id "
+                    + " JOIN (select * from blog_categories where fk_associate_id = 5 and status = 1 order by"
+                    + " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id AND bpm.flag_featured = 1"
+                    + " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id"
+                    + " WHERE b.fk_associate_id = "+fkAssociateId+" AND b.status = 1 AND b.blog_id= "+ id +" GROUP BY b.blog_id ORDER BY published_date DESC";
+
+                statementCategories = "select pst.blog_id, bct.categories_id, bct.categories_name, bct.categories_name_for_url ,bct2.categories_id as p_cat_id, bct2.categories_name as p_cat_name, bct2.categories_name_for_url as p_cat_name_for_url from "
+                    +"blog_post pst join blog_cat_map bcm on pst.blog_id = bcm.blog_id join blog_categories bct on bcm.categories_id = bct.categories_id "
+                    +"left join blog_categories bct2 on bct.parent_id = bct2.categories_id where pst.status = 1 AND bct.status = 1  AND pst.blog_id = "+id+" order by pst.blog_id, bct.parent_id DESC";
+
             }else {
-                // homepage
+                // homepage, return all blogs
                 statement="select b.blog_id,b.title,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date,bc.categories_id,bc.parent_id,bc.categories_name,bc.categories_name_for_url,b.description,b.url,b.status," +
-                    " bpm.image_url,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
+                    " bpm.image_url,bpm.status,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
                     "JOIN (select * from blog_categories where fk_associate_id = "+fkAssociateId+" and status = 1 order by" +
                     " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id AND bpm.flag_featured = 1 " +
                     " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id" +
@@ -339,12 +344,10 @@ public class BlogsUtil {
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("preparedstatement of blog list : "+preparedStatement);
 
-            if(!isCategory){
-                preparedStatement1 = connection.prepareStatement(statementCategories, ResultSet.TYPE_SCROLL_INSENSITIVE);
-                logger.debug("preparedstatement of categories list : "+preparedStatement1);
+            preparedStatement1 = connection.prepareStatement(statementCategories, ResultSet.TYPE_SCROLL_INSENSITIVE);
+            logger.debug("preparedstatement of categories list : "+preparedStatement1);
 
-                resultSetCategories =  preparedStatement1.executeQuery();
-            }
+            resultSetCategories =  preparedStatement1.executeQuery();
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -360,70 +363,76 @@ public class BlogsUtil {
                 blogMainModel.setPublishDate(resultSet.getString("pub_date"));
                 blogMainModel.setUrl(resultSet.getString("b.url"));
                 blogMainModel.setImageUrl(resultSet.getString("bpm.image_url"));
-
-                if(!isCategory){
-                    //set blog category List object here
-                    List<CategorySubCategoryModel> categoryList = new ArrayList<>();
-                    CategorySubCategoryModel categorySubCategoryModel ;
-                    while (resultSetCategories.next()){
-
-                        if(resultSetCategories.getInt("blog_id") == blogMainModel.getId()){
-                            categorySubCategoryModel= new CategorySubCategoryModel();
-                            if(resultSetCategories.getInt("p_cat_id") == 0){
-                                //current category not having parent cat
-                                categorySubCategoryModel.setId(resultSetCategories.getInt("categories_id"));
-                                categorySubCategoryModel.setTitle(resultSetCategories.getString("categories_name"));
-                                categorySubCategoryModel.setUrl(resultSetCategories.getString("categories_name_for_url"));
-
-                            }else{
-                                //current category having parent cat, collect all subcategories under current parent category
-                                categorySubCategoryModel.setId(resultSetCategories.getInt("p_cat_id"));
-                                categorySubCategoryModel.setTitle(resultSetCategories.getString("p_cat_name"));
-                                categorySubCategoryModel.setUrl(resultSetCategories.getString("p_cat_name_for_url"));
-                                //now set sub category list
-                                List<CategoryModel> subCategoryModelList = new ArrayList<>();
-                                CategoryModel categoryModel2 = new CategoryModel();
-                                categoryModel2.setId(resultSetCategories.getInt("categories_id"));
-                                categoryModel2.setTitle(resultSetCategories.getString("categories_name"));
-                                categoryModel2.setUrl(resultSetCategories.getString("categories_name_for_url"));
-                                subCategoryModelList.add(categoryModel2);
-
-                                while (resultSetCategories.next()) {
-                                    if (resultSetCategories.getInt("p_cat_id") == categorySubCategoryModel.getId()) {
-                                        //next category also has same parent, so add it to sub category list
-                                        categoryModel2 = new CategoryModel();
-                                        categoryModel2.setId(resultSetCategories.getInt("categories_id"));
-                                        categoryModel2.setTitle(resultSetCategories.getString("categories_name"));
-                                        categoryModel2.setUrl(resultSetCategories.getString("categories_name_for_url"));
-                                        subCategoryModelList.add(categoryModel2);
-                                    } else {
-                                        //next category have different or no parent, so set resultSet to previous & break the loop
-                                        resultSetCategories.previous();
-                                        break;
-                                    }
-                                }
-                                categorySubCategoryModel.setSubCategoryModelList(subCategoryModelList);
-                            }
-                            categoryList.add(categorySubCategoryModel);
-                        }
-                    }
-                    blogMainModel.setCategoryList(categoryList);
-                    resultSetCategories.beforeFirst();
+                blogMainModel.setImageStatus(resultSet.getInt("bpm.status"));
+                if(id != -1){
+                    blogMainModel.setDescription(resultSet.getString("b.content"));
+                    blogMainModel.setShortDescription(resultSet.getString("b.description"));
                 }
-                blogMainModel.setImageUrl(resultSet.getString("bpm.image_url"));
+
+                //set blog category List(bloglist) object here
+                List<CategorySubCategoryModel> categoryList = new ArrayList<>();
+                CategorySubCategoryModel categorySubCategoryModel ;
+                while (resultSetCategories.next()){
+
+                    if(resultSetCategories.getInt("blog_id") == blogMainModel.getId()){
+                        categorySubCategoryModel= new CategorySubCategoryModel();
+                        if(resultSetCategories.getInt("p_cat_id") == 0){
+                            //current category not having parent category
+                            categorySubCategoryModel.setId(resultSetCategories.getInt("categories_id"));
+                            categorySubCategoryModel.setTitle(resultSetCategories.getString("categories_name"));
+                            categorySubCategoryModel.setUrl(resultSetCategories.getString("categories_name_for_url"));
+
+                        }else{
+                            //current category having parent category, collect all subcategories under current parent category
+                            categorySubCategoryModel.setId(resultSetCategories.getInt("p_cat_id"));
+                            categorySubCategoryModel.setTitle(resultSetCategories.getString("p_cat_name"));
+                            categorySubCategoryModel.setUrl(resultSetCategories.getString("p_cat_name_for_url"));
+                            //now set sub category list
+                            List<CategoryModel> subCategoryModelList = new ArrayList<>();
+                            CategoryModel categoryModel2 = new CategoryModel();
+                            categoryModel2.setId(resultSetCategories.getInt("categories_id"));
+                            categoryModel2.setTitle(resultSetCategories.getString("categories_name"));
+                            categoryModel2.setUrl(resultSetCategories.getString("categories_name_for_url"));
+                            subCategoryModelList.add(categoryModel2);
+
+                            while (resultSetCategories.next()) {//check whether next category has same parent
+                                if (resultSetCategories.getInt("p_cat_id") == categorySubCategoryModel.getId()) {
+                                    //next category also has same parent, so add it to sub category list
+                                    categoryModel2 = new CategoryModel();
+                                    categoryModel2.setId(resultSetCategories.getInt("categories_id"));
+                                    categoryModel2.setTitle(resultSetCategories.getString("categories_name"));
+                                    categoryModel2.setUrl(resultSetCategories.getString("categories_name_for_url"));
+                                    subCategoryModelList.add(categoryModel2);
+                                } else {
+                                    //next category have different or no parent, so set resultSet to previous row & break the loop
+                                    resultSetCategories.previous();
+                                    break;
+                                }
+                            }
+                            categorySubCategoryModel.setSubCategoryModelList(subCategoryModelList);
+                        }
+                        categoryList.add(categorySubCategoryModel);
+                    }
+                }
+                blogMainModel.setCategoryList(categoryList);
+                resultSetCategories.beforeFirst();
 
                 blogMainModelList.add(blogMainModel);
             }
-            statement="SELECT count(DISTINCT b.blog_id) total FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
-                "JOIN blog_categories bc ON bcm.categories_id = bc.categories_id  AND b.fk_associate_id=bc.fk_associate_id WHERE b.fk_associate_id = "+fkAssociateId +
-                " AND b.status = 1 "+ column;
-            preparedStatement = connection.prepareStatement(statement);
-            logger.debug("preparedstatement of blog list count : "+preparedStatement);
+           if(id == -1){
+               statement="SELECT count(DISTINCT b.blog_id) total FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
+                   "JOIN blog_categories bc ON bcm.categories_id = bc.categories_id  AND b.fk_associate_id=bc.fk_associate_id WHERE b.fk_associate_id = "+fkAssociateId +
+                   " AND b.status = 1 "+ column;
+               preparedStatement = connection.prepareStatement(statement);
+               logger.debug("preparedstatement of blog list count : "+preparedStatement);
 
-            resultSet = preparedStatement.executeQuery();
-            if(resultSet.first()){
-                blogListResponseModel.setCount(resultSet.getInt("total"));
-            }
+               resultSet = preparedStatement.executeQuery();
+               if(resultSet.first()){
+                   blogListResponseModel.setCount(resultSet.getInt("total"));
+               }
+           }else{
+               blogListResponseModel.setCount(1);//as returning only one blog
+           }
 
             blogListResponseModel.setBlogList(blogMainModelList);
             blogListResponseModel.setSeoModel(seoBlogModel);
@@ -436,102 +445,4 @@ public class BlogsUtil {
         }
         return blogListResponseModel;
     }
-    public BlogMainModel getBlog(int fkAssociateId, int id, boolean isCategory, String categoryName, String subCategoryName){
-        Connection connection = null;
-        String statement;
-        ResultSet resultSet =  null;
-        PreparedStatement preparedStatement = null;
-        BlogMainModel blogMainModel = new BlogMainModel();
-        SeoBlogModel seoBlogModel = new SeoBlogModel();
-        CategoryModel categoryModel = new CategoryModel();
-        String extra = "";
-        try{
-            connection = Database.INSTANCE.getReadOnlyConnection();
-            if(isCategory==true) {
-                // came through category and sub category
-                //   categoryModel = getCategoryDetails(fkAssociateId, isCategory, categoryName, subCategoryName);
-                statement="SELECT b.blog_id,b.title,b.content,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date," +
-                    "b.url,b.status, b.blog_meta_title,b.blog_meta_keywords,b.blog_meta_description FROM blog_post b JOIN " +
-                    "blog_cat_map bcm ON b.blog_id = bcm.blog_id JOIN blog_categories bc ON bcm.categories_id = bc.categories_id " +
-                    "and b.fk_associate_id=bc.fk_associate_id AND bc.categories_id = "+categoryModel.getId()+" WHERE b.url = ? " +
-                    "AND b.fk_associate_id = ? ";
-                if(categoryModel.getParentId()!=0) {
-                    // while finding prev and next post, keep it in account.
-                    extra = " and bc.parent_id !=0 ";
-                }
-            }else {
-                // direct landing on blog page
-                statement = "SELECT b.blog_id,b.title,b.content,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date,b.url,b.status,b.blog_meta_title," +
-                    "b.blog_meta_keywords,b.blog_meta_description,bc.categories_id,bc.categories_name,bc.categories_name_for_url " +
-                    "FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id JOIN blog_categories  bc on" +
-                    " bcm.categories_id=bc.categories_id and bc.fk_associate_id = "+fkAssociateId+" and bc.status = 1 and parent_id = 0 " +
-                    "WHERE b.url = ? AND b.fk_associate_id = ? order by bc.sort_order limit 1";
-            }
-            preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1, id);
-            preparedStatement.setInt(2, fkAssociateId);
-            logger.debug("preparedstatement of blog : "+preparedStatement);
-            resultSet = preparedStatement.executeQuery();
-            if (resultSet.first()) {
-                blogMainModel.setFkAssociateId(fkAssociateId);
-                blogMainModel.setId(resultSet.getInt("b.blog_id"));
-                blogMainModel.setTitle(resultSet.getString("b.title"));
-                blogMainModel.setDescription(resultSet.getString("b.content"));
-                blogMainModel.setPublishDate(resultSet.getString("pub_date"));
-                blogMainModel.setUrl(resultSet.getString("b.url"));
-                blogMainModel.setStatus(resultSet.getInt("b.status"));
-                if(isCategory==false){
-                    categoryModel.setTitle(resultSet.getString("bc.categories_name"));
-                    categoryModel.setUrl(resultSet.getString("bc.categories_name_for_url"));
-                    categoryModel.setParentId(0);
-                    categoryModel.setId(resultSet.getInt("bc.categories_id"));
-
-                }
-                seoBlogModel.setSeoTitle(resultSet.getString("b.blog_meta_title"));
-                seoBlogModel.setSeoKeywords(resultSet.getString("b.blog_meta_keywords"));
-                seoBlogModel.setSeoDescription(resultSet.getString("b.blog_meta_description"));
-                blogMainModel.setSeoModel(seoBlogModel);
-            }
-            if(blogMainModel.getId()!=0){
-                statement = "SELECT b.blog_id, b.url,b.title FROM blog_post b JOIN blog_cat_map bcm ON " +
-                    "b.blog_id = bcm.blog_id WHERE bcm.categories_id in (select bc.categories_id from " +
-                    "blog_categories bc join blog_cat_map bcm on bc.categories_id = bcm.categories_id " +
-                    "and bc.status=1 "+extra+" JOIN blog_post b on b.blog_id= bcm.blog_id where b.blog_id = ? " +
-                    "order by bc.sort_order) and b.fk_associate_id=? and b.status = 1 group by b.blog_id " +
-                    "ORDER BY b.published_date desc";
-                preparedStatement = connection.prepareStatement(statement);
-                preparedStatement.setInt(1, blogMainModel.getId());
-                preparedStatement.setInt(2, fkAssociateId);
-                logger.debug("preparedstatement of blog prev-next : "+preparedStatement);
-                resultSet = preparedStatement.executeQuery();
-                while (resultSet.next()){
-                    BlogMainModel blogMainModel1 = new BlogMainModel();
-                    // find that blog and use before and next values.
-                    if(resultSet.getInt("b.blog_id")==blogMainModel.getId()){
-                        if(resultSet.previous()){
-                            blogMainModel1.setTitle(resultSet.getString("b.title"));
-                            blogMainModel1.setUrl(resultSet.getString("b.url"));
-                        }
-                        if(resultSet.next()){
-                            if(resultSet.next()){
-                                BlogMainModel blogMainModel2 = new BlogMainModel();
-                                blogMainModel2.setTitle(resultSet.getString("b.title"));
-                                blogMainModel2.setUrl(resultSet.getString("b.url"));
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
-        }catch (Exception exception){
-            logger.debug("error occured while getting blog post ",exception);
-        }finally {
-            Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeConnection(connection);
-            Database.INSTANCE.closeResultSet(resultSet);
-        }
-        return blogMainModel;
-    }
-
-
 }

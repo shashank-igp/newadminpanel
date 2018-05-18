@@ -59,25 +59,14 @@ public class BlogsMapper {
         }
         return result;
     }
-    public BlogListResponseModel getBlogList(int fkAssociateId, boolean isCategory, String categoryName, String subCategoryName, int start, int end){
+    public BlogListResponseModel getBlogList(int fkAssociateId, int id, int start, int end){
         BlogsUtil blogUtil=new BlogsUtil();
         BlogListResponseModel blogListResponseModel = new BlogListResponseModel();
         try{
-            blogListResponseModel = blogUtil.getListBlog(fkAssociateId,isCategory,categoryName,subCategoryName,start,end);
+            blogListResponseModel = blogUtil.getListBlog(fkAssociateId,id ,start,end);
         }catch (Exception exception){
             logger.debug("error occured while getBlogList. ",exception);
         }
         return blogListResponseModel;
-    }
-    public BlogMainModel getBlog(int fkAssociateId, int id, boolean isCategory, String categoryName, String subCategoryName){
-        BlogsUtil blogUtil=new BlogsUtil();
-        BlogMainModel blogMainModel = new BlogMainModel();
-
-        try{
-            blogMainModel = blogUtil.getBlog(fkAssociateId,id, isCategory, categoryName, subCategoryName);
-        }catch (Exception exception){
-            logger.debug("error occured while getting blog post ",exception);
-        }
-        return blogMainModel;
     }
 }
