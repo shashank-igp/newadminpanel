@@ -69,4 +69,16 @@ public class BlogsMapper {
         }
         return blogListResponseModel;
     }
+
+    public BlogResultModel updateBlogStatus(int id, int status){
+
+        BlogResultModel blogResultModel = new BlogResultModel();
+        BlogsUtil blogUtil=new BlogsUtil();
+        try{
+            blogResultModel = blogUtil.updateBlogStatus(id, status);
+        }catch (Exception exception){
+            logger.debug("error occured while updating blog post ",exception);
+        }
+        return blogResultModel;
+    }
 }

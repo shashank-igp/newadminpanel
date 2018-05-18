@@ -157,4 +157,33 @@ public class Blogs {
         }
         return response;
     }
+    @PUT
+    @Path("/v1/blogs/updateblogstatus")
+    public Response updateBlogStatus(@DefaultValue("-1") @QueryParam("id") int id,
+                                     @DefaultValue("-1") @QueryParam("status") int status) {
+        Response response=null;
+        BlogsMapper blogsMapper = new  BlogsMapper();
+        BlogResultModel blogResultModel = new BlogResultModel();
+        Map<String, String> errorResponse = new HashMap<>();
+        try{
+
+            if(id == -1 || status == -1){
+                errorResponse.put("error", "Parameter not specified");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }else{
+                blogResultModel = blogsMapper.updateBlogStatus(id, status);
+                if(blogResultModel.isError()==false){
+                    Map<String,String> updateBlogResponse=new HashMap<>();
+                    updateBlogResponse.put("data","blog status updated succesfully.");
+                    response= EntityFoundResponse.entityFoundResponseBuilder(updateBlogResponse);
+                }else{
+                    errorResponse.put("error",blogResultModel.getMessage());
+                    response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+                }
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while updating blog post status ",exception);
+        }
+        return response;
+    }
 }
