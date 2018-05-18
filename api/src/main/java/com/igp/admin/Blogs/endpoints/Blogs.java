@@ -67,12 +67,12 @@ public class Blogs {
     }
     @DELETE
     @Path("/v1/blogs/deleteblog")
-    public Response deleteBlog(BlogMainModel blogMainModel) {
+    public Response deleteBlog(@DefaultValue("-1") @QueryParam("id") int id) {
         Response response=null;
         BlogsMapper blogsMapper = new  BlogsMapper();
         boolean result = false;
         try{
-            result = blogsMapper.deleteBlog(blogMainModel);
+            result = blogsMapper.deleteBlog(id);
             if(result==true){
                 Map<String,String> deleteBlogResponse=new HashMap<>();
                 deleteBlogResponse.put("data","Blog deleted succesfully.");
@@ -90,28 +90,23 @@ public class Blogs {
 
     @GET
     @Path("/v1/blogs/validateblogurl")
-    public Response validateBlogUrl(@QueryParam("fkAssociateId") int fkAssociateId, @QueryParam("url") String url){
+    public Response validateBlogUrl(@QueryParam("fkAssociateId") int fkAssociateId,
+                                    @DefaultValue("") @QueryParam("url") String url,
+                                    @DefaultValue("") @QueryParam("imageurl") String imageUrl){
         Response response = null;
         BlogsMapper blogsMapper = new BlogsMapper();
         BlogResultModel result ;
         Map<String, String> validateBlogUrlResult = new HashMap<>();
         try{
 
-            if(url == null || url.trim().isEmpty()){
+            if(url.trim().isEmpty() && imageUrl.trim().isEmpty()){
                 //failed validations
                 validateBlogUrlResult.put("error", "Parameter not specified");
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(validateBlogUrlResult);
             }else {
 
-                result = blogsMapper.validateBlogUrl(fkAssociateId, url);
-                if (!result.isError()) {
-
-                    //url is valid
-                    validateBlogUrlResult.put("data", "Selected url is valid");
-                    validateBlogUrlResult.put("unique", "true");
-                    response = EntityFoundResponse.entityFoundResponseBuilder(validateBlogUrlResult);
-
-                } else {
+                result = blogsMapper.validateBlogUrl(fkAssociateId, url, imageUrl);
+                if (result.isError()) {
                     if ("urlexist".equalsIgnoreCase(result.getMessage())) {
                         //result is true, it means (fkAssociateId, url) combination already exist.
                         //return error as url must be different
@@ -124,6 +119,11 @@ public class Blogs {
                         validateBlogUrlResult.put("unique", "false");
                         response = EntityNotFoundResponse.entityNotFoundResponseBuilder(validateBlogUrlResult);
                     }
+                } else {
+                    //url is valid
+                    validateBlogUrlResult.put("data", "Selected url is valid");
+                    validateBlogUrlResult.put("unique", "true");
+                    response = EntityFoundResponse.entityFoundResponseBuilder(validateBlogUrlResult);
                 }
             }
 
