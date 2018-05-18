@@ -105,23 +105,25 @@ public class Blogs {
 
                 result = blogsMapper.validateBlogUrl(fkAssociateId, url);
                 if (!result.isError()) {
+
+                    //url is valid
+                    validateBlogUrlResult.put("data", "Selected url is valid");
+                    validateBlogUrlResult.put("unique", "true");
+                    response = EntityFoundResponse.entityFoundResponseBuilder(validateBlogUrlResult);
+
+                } else {
                     if ("urlexist".equalsIgnoreCase(result.getMessage())) {
                         //result is true, it means (fkAssociateId, url) combination already exist.
                         //return error as url must be different
                         validateBlogUrlResult.put("error", "Please choose different url");
                         validateBlogUrlResult.put("unique", "false");
                         response = EntityNotFoundResponse.entityNotFoundResponseBuilder(validateBlogUrlResult);
-                    } else {
-                        //url is valid
-                        validateBlogUrlResult.put("data", "Selected url is valid");
-                        validateBlogUrlResult.put("unique", "true");
-                        response = EntityFoundResponse.entityFoundResponseBuilder(validateBlogUrlResult);
                     }
-                } else {
-                    //status is not success - some error occured
-                    validateBlogUrlResult.put("error", result.getMessage());
-                    validateBlogUrlResult.put("unique", "false");
-                    response = EntityNotFoundResponse.entityNotFoundResponseBuilder(validateBlogUrlResult);
+                    else {//status is not success - some error occured
+                        validateBlogUrlResult.put("error", result.getMessage());
+                        validateBlogUrlResult.put("unique", "false");
+                        response = EntityNotFoundResponse.entityNotFoundResponseBuilder(validateBlogUrlResult);
+                    }
                 }
             }
 
