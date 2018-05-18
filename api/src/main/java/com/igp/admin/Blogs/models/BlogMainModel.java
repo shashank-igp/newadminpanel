@@ -38,11 +38,14 @@ public class BlogMainModel {
     @JsonProperty("imageurl")
     private String imageUrl;
 
-    @JsonProperty("imageflagfeatured")
+    @JsonIgnore
     private Integer imageFlagFeatured;
 
-    @JsonProperty("imagestatus")
+    @JsonIgnore
     private Integer imageStatus;
+
+    @JsonProperty("imageurllist")
+    private List<String> imageUrlList;
 
     @JsonProperty("publishdate")
     private String publishDate;
@@ -180,6 +183,14 @@ public class BlogMainModel {
 
     public void setImageStatus(Integer imageStatus) {
         this.imageStatus = imageStatus;
+    }
+
+    public List<String> getImageUrlList() {
+        return imageUrlList;
+    }
+
+    public void setImageUrlList(List<String> imageUrlList) {
+        this.imageUrlList = imageUrlList;
     }
 
     public void setImageFlagFeatured(Integer imageFlagFeatured) {

@@ -57,26 +57,17 @@ public class BlogsUtil {
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Failed to create blog post");
-            } else
-            {
+            } else{
                 resultSet = preparedStatement.getGeneratedKeys();
                 resultSet.first();
                 blogMainModel.setId(resultSet.getInt(1));
-                statement="INSERT INTO blog_post_image (blog_id,image_url,date_created,flag_featured,status) VALUES (? ,? ,now(),?,?)";
-                preparedStatement = connection.prepareStatement(statement);
-                preparedStatement.setInt(1, blogMainModel.getId());
-                preparedStatement.setString(2, blogMainModel.getImageUrl());
-                preparedStatement.setInt(3, blogMainModel.getImageFlagFeatured());
-                preparedStatement.setInt(4, blogMainModel.getImageStatus());
 
-
-                logger.debug("preparedstatement of insert blog_post_image : "+preparedStatement);
-
-                status = preparedStatement.executeUpdate();
-                if (status == 0) {
-                    logger.error("Failed to create blog blog_post_image");
-                }else {
+                status = insertUpdateBlogImage(blogMainModel);
+                if(status == 1){
                     blogResultModel =  insertUpdateBlogCatMap(blogMainModel);
+                }else {
+                    blogResultModel.setError(true);
+                    blogResultModel.setMessage("error in insertion.");
                 }
                 logger.debug("New blog post created with url : "+blogMainModel.getUrl()+" id : "+blogMainModel.getId());
             }
@@ -124,18 +115,10 @@ public class BlogsUtil {
             preparedStatement.setInt(13, blogMainModel.getId());
             logger.debug("preparedstatement of update blog_post : "+preparedStatement);
 
-            Integer status = preparedStatement.executeUpdate();
-            statement="UPDATE blog_post_image SET image_url=?,flag_featured=?,status=? WHERE blog_id=?";
-            preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setString(1, blogMainModel.getImageUrl());
-            preparedStatement.setInt(2, blogMainModel.getImageFlagFeatured());
-            preparedStatement.setInt(3, blogMainModel.getImageStatus());
-            preparedStatement.setInt(4, blogMainModel.getId());
+            int status = preparedStatement.executeUpdate();
 
+            status += insertUpdateBlogImage(blogMainModel);
 
-            logger.debug("preparedstatement of update blog_post_image : "+preparedStatement);
-
-            status+= preparedStatement.executeUpdate();
             blogResultModel =  insertUpdateBlogCatMap(blogMainModel);
             if(blogResultModel.isError()==true && status==0){
                 blogResultModel.setError(true);
@@ -195,6 +178,59 @@ public class BlogsUtil {
 
         }catch (Exception exception){
             logger.debug("error occured while deleting blog post ",exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
+    }
+    public int insertUpdateBlogImage(BlogMainModel blogMainModel){
+        Connection connection = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        int result = 0;
+        try {
+            connection = Database.INSTANCE.getReadWriteConnection();
+            List<String> imageList = blogMainModel.getImageUrlList();
+            statement="DELETE FROM blog_post_image WHERE blog_id = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1, blogMainModel.getId());
+            int delstatus = preparedStatement.executeUpdate();
+
+           String statement1="INSERT INTO blog_post_image (blog_id,image_url,date_created,flag_featured,status) VALUES (? ,? ,now(),?,?)";
+            preparedStatement = connection.prepareStatement(statement1);
+            preparedStatement.setInt(1, blogMainModel.getId());
+            preparedStatement.setString(2, blogMainModel.getImageUrl());
+            preparedStatement.setInt(3, 1);
+            preparedStatement.setInt(4, blogMainModel.getImageStatus());
+            logger.debug("preparedstatement of insert blog_post_image : "+preparedStatement);
+            int status = preparedStatement.executeUpdate();
+
+            int size = imageList.size();
+            while (size>0) {
+                statement1="INSERT INTO blog_post_image (blog_id,image_url,date_created,flag_featured,status) VALUES (? ,? ,now(),?,?)";
+                preparedStatement = connection.prepareStatement(statement1);
+                preparedStatement.setInt(1, blogMainModel.getId());
+                preparedStatement.setString(2, imageList.get(--size));
+                preparedStatement.setInt(3, 0);
+                preparedStatement.setInt(4, 1);
+
+                logger.debug("preparedstatement of insert blog_post_image non featured : "+preparedStatement);
+                status+= preparedStatement.executeUpdate();
+                if (status == 0) {
+                    logger.error("Failed to insert blog blog_post_image");
+                }
+               // size--;
+
+            }
+            if(delstatus == 0 || delstatus == status){
+                result = 1;
+                // check that there was same num of rows earlier
+            }
+
+        }catch (Exception exception){
+
+            logger.debug("error occured while updating/inserting blog_post_image "+exception);
         }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
@@ -422,20 +458,20 @@ public class BlogsUtil {
 
                 blogMainModelList.add(blogMainModel);
             }
-           if(id == -1){
-               statement="SELECT count(DISTINCT b.blog_id) total FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
-                   "JOIN blog_categories bc ON bcm.categories_id = bc.categories_id  AND b.fk_associate_id=bc.fk_associate_id WHERE b.fk_associate_id = "+fkAssociateId +
-                   " AND b.status = 1 "+ column;
-               preparedStatement = connection.prepareStatement(statement);
-               logger.debug("preparedstatement of blog list count : "+preparedStatement);
+            if(id == -1){
+                statement="SELECT count(DISTINCT b.blog_id) total FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
+                    "JOIN blog_categories bc ON bcm.categories_id = bc.categories_id  AND b.fk_associate_id=bc.fk_associate_id WHERE b.fk_associate_id = "+fkAssociateId +
+                    " AND b.status = 1 "+ column;
+                preparedStatement = connection.prepareStatement(statement);
+                logger.debug("preparedstatement of blog list count : "+preparedStatement);
 
-               resultSet = preparedStatement.executeQuery();
-               if(resultSet.first()){
-                   blogListResponseModel.setCount(resultSet.getInt("total"));
-               }
-           }else{
-               blogListResponseModel.setCount(1);//as returning only one blog
-           }
+                resultSet = preparedStatement.executeQuery();
+                if(resultSet.first()){
+                    blogListResponseModel.setCount(resultSet.getInt("total"));
+                }
+            }else{
+                blogListResponseModel.setCount(1);//as returning only one blog
+            }
 
             blogListResponseModel.setBlogList(blogMainModelList);
             blogListResponseModel.setSeoModel(seoBlogModel);

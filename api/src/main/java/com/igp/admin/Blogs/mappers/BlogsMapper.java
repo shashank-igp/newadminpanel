@@ -12,6 +12,7 @@ import org.slf4j.LoggerFactory;
  */
 public class BlogsMapper {
     private static final Logger logger = LoggerFactory.getLogger(BlogsMapper.class);
+
     public BlogResultModel createBlog(BlogMainModel blogMainModel){
         BlogResultModel blogResultModel = new BlogResultModel();
         BlogsUtil blogUtil = new BlogsUtil();
