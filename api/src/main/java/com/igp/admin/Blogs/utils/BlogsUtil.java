@@ -28,7 +28,7 @@ public class BlogsUtil {
         BlogResultModel blogResultModel = new BlogResultModel();
         try{
             boolean validUrl = checkUrlWithNoSpecialChar(blogMainModel.getUrl());
-            BlogResultModel blogResultModel1 = validateBlogUrl(blogMainModel.getFkAssociateId(),blogMainModel.getUrl());
+            BlogResultModel blogResultModel1 = validateBlogUrl(blogMainModel.getFkAssociateId(),blogMainModel.getUrl(), null);
             if(validUrl==false || blogResultModel1.isError()==true){
                 blogResultModel.setError(true);
                 blogResultModel.setMessage("Invalid URL");
@@ -98,7 +98,7 @@ public class BlogsUtil {
         PreparedStatement preparedStatement = null;
         BlogResultModel blogResultModel = new BlogResultModel();
         try{
-            if(validateBlogUrl(blogMainModel.getFkAssociateId(),blogMainModel.getUrl()).isError()){
+            if(validateBlogUrl(blogMainModel.getFkAssociateId(),blogMainModel.getUrl(), null).isError()){
                 blogResultModel.setError(true);
                 blogResultModel.setMessage("Invalid URL.");
                 return blogResultModel;
@@ -158,7 +158,7 @@ public class BlogsUtil {
         }
         return blogResultModel;
     }
-    public boolean deleteBlog(BlogMainModel blogMainModel){
+    public boolean deleteBlog(int id){
         boolean result = false;
         Connection connection = null;
         String statement;
@@ -167,7 +167,7 @@ public class BlogsUtil {
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="DELETE FROM blog_post WHERE blog_id = ?";
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1, blogMainModel.getId());
+            preparedStatement.setInt(1, id);
             logger.debug("preparedstatement of delete blog_post : "+preparedStatement);
 
             Integer status = preparedStatement.executeUpdate();
@@ -175,13 +175,13 @@ public class BlogsUtil {
 
                 statement="DELETE FROM blog_post_image WHERE blog_id = ?";
                 preparedStatement = connection.prepareStatement(statement);
-                preparedStatement.setInt(1, blogMainModel.getId());
+                preparedStatement.setInt(1, id);
                 logger.debug("preparedstatement of delete blog_post_image : "+preparedStatement);
                 status = preparedStatement.executeUpdate();
 
                 statement="DELETE FROM blog_cat_map WHERE blog_id = ?";
                 preparedStatement = connection.prepareStatement(statement);
-                preparedStatement.setInt(1, blogMainModel.getId());
+                preparedStatement.setInt(1, id);
                 logger.debug("preparedstatement of delete blog_cat_map : "+preparedStatement);
                 status = preparedStatement.executeUpdate();
 
@@ -189,7 +189,7 @@ public class BlogsUtil {
                     logger.error("Failed to delete blog post");
                 } else {
                     result = true;
-                    logger.debug("Blog post deleted from blog_post_image with id : "+blogMainModel.getId());
+                    logger.debug("Blog post deleted from blog_post_image with id : "+id);
                 }
             }
 
@@ -269,7 +269,7 @@ public class BlogsUtil {
     }
 
     //this method will return true if passed (fkAssociateId, url) combination already exist
-    public BlogResultModel validateBlogUrl(int fkAssociateId, String url){
+    public BlogResultModel validateBlogUrl(int fkAssociateId, String url, String imageUrl){
         Connection connection = null;
         String statement = "";
         ResultSet resultSet = null;
@@ -278,10 +278,13 @@ public class BlogsUtil {
 
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
-            statement = "select * from blog_post where fk_associate_id = ? AND url= ?";
+            if(url != null && !url.isEmpty()){
+                statement = "select * from blog_post where fk_associate_id = "+fkAssociateId+" AND url= '"+url+ "'";
+            }else if(imageUrl != null && !imageUrl.isEmpty()){
+                statement = "select * from blog_post_image where image_url= '"+imageUrl + "'";
+            }
+
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1, fkAssociateId);
-            preparedStatement.setString(2, url);
             logger.debug("preparedStatement for validating blog url -> " + preparedStatement);
 
             resultSet = preparedStatement.executeQuery();

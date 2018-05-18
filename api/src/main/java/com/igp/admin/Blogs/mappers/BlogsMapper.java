@@ -35,23 +35,23 @@ public class BlogsMapper {
         return blogResultModel;
     }
 
-    public boolean deleteBlog(BlogMainModel blogMainModel){
+    public boolean deleteBlog(int id){
 
         boolean result = false;
         BlogsUtil blogUtil=new BlogsUtil();
         try{
-            result = blogUtil.deleteBlog(blogMainModel);
+            result = blogUtil.deleteBlog(id);
         }catch (Exception exception){
             logger.debug("error occured while deleting blog post ",exception);
         }
         return result;
     }
 
-    public BlogResultModel validateBlogUrl(int fkAssociateId, String url){
+    public BlogResultModel validateBlogUrl(int fkAssociateId, String url, String imageUrl){
         BlogResultModel result = new BlogResultModel();
         BlogsUtil blogsUtil = new BlogsUtil();
         try{
-            result = blogsUtil.validateBlogUrl(fkAssociateId, url);
+            result = blogsUtil.validateBlogUrl(fkAssociateId, url, imageUrl);
         }catch (Exception e){
             logger.debug("error occured while validating blog post url",e);
             result.setError(true);
