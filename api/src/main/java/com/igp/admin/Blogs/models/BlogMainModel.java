@@ -17,7 +17,6 @@ import java.util.Map;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class BlogMainModel {
 
-
     @JsonProperty("id")
     private int id;
 
@@ -42,6 +41,9 @@ public class BlogMainModel {
     @JsonProperty("imageflagfeatured")
     private Integer imageFlagFeatured;
 
+    @JsonProperty("imagestatus")
+    private Integer imageStatus;
+
     @JsonProperty("publishdate")
     private String publishDate;
 
@@ -50,9 +52,6 @@ public class BlogMainModel {
 
     @JsonProperty("fkasid")
     private Integer fkAssociateId;
-
-    @JsonProperty("fkasidname")
-    private String fkAssociateName;
 
     @JsonProperty("status")
     private Integer status;
@@ -64,7 +63,7 @@ public class BlogMainModel {
     private Integer flagFeatured;
 
     @JsonProperty("categories")
-    private Map<Integer,List<Integer>> categories;
+    private Map<Integer, List<Integer>> categories;
 
     @JsonProperty("category")
     private List<CategorySubCategoryModel> categoryList;
@@ -166,10 +165,21 @@ public class BlogMainModel {
     }
 
     public Integer getImageFlagFeatured() {
-        if(imageFlagFeatured==null){
-            imageFlagFeatured=0;
+        if (imageFlagFeatured == null) {
+            imageFlagFeatured = 0;
         }
         return imageFlagFeatured;
+    }
+
+    public Integer getImageStatus() {
+        if (imageStatus == null) {
+            imageStatus = 1;
+        }
+        return imageStatus;
+    }
+
+    public void setImageStatus(Integer imageStatus) {
+        this.imageStatus = imageStatus;
     }
 
     public void setImageFlagFeatured(Integer imageFlagFeatured) {
@@ -192,20 +202,12 @@ public class BlogMainModel {
         this.flagFeatured = flagFeatured;
     }
 
-    public Map<Integer,List<Integer>> getCategories() {
+    public Map<Integer, List<Integer>> getCategories() {
         return categories;
     }
 
-    public void setCategories(Map<Integer,List<Integer>> categories) {
+    public void setCategories(Map<Integer, List<Integer>> categories) {
         this.categories = categories;
-    }
-
-    public String getFkAssociateName() {
-        return fkAssociateName;
-    }
-
-    public void setFkAssociateName(String fkAssociateName) {
-        this.fkAssociateName = fkAssociateName;
     }
 }
 

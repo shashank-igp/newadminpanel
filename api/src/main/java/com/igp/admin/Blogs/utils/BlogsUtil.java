@@ -28,7 +28,8 @@ public class BlogsUtil {
         BlogResultModel blogResultModel = new BlogResultModel();
         try{
             boolean validUrl = checkUrlWithNoSpecialChar(blogMainModel.getUrl());
-            if(validUrl==false){
+            BlogResultModel blogResultModel1 = validateBlogUrl(blogMainModel.getFkAssociateId(),blogMainModel.getUrl());
+            if(validUrl==false || blogResultModel1.isError()==true){
                 blogResultModel.setError(true);
                 blogResultModel.setMessage("Invalid URL");
                 return blogResultModel;
@@ -61,11 +62,12 @@ public class BlogsUtil {
                 resultSet = preparedStatement.getGeneratedKeys();
                 resultSet.first();
                 blogMainModel.setId(resultSet.getInt(1));
-                statement="INSERT INTO blog_post_image (blog_id,image_url,date_created,flag_featured) VALUES (? ,? ,now(),?)";
+                statement="INSERT INTO blog_post_image (blog_id,image_url,date_created,flag_featured,status) VALUES (? ,? ,now(),?,?)";
                 preparedStatement = connection.prepareStatement(statement);
                 preparedStatement.setInt(1, blogMainModel.getId());
                 preparedStatement.setString(2, blogMainModel.getImageUrl());
                 preparedStatement.setInt(3, blogMainModel.getImageFlagFeatured());
+                preparedStatement.setInt(4, blogMainModel.getImageStatus());
 
 
                 logger.debug("preparedstatement of insert blog_post_image : "+preparedStatement);
@@ -123,16 +125,25 @@ public class BlogsUtil {
             logger.debug("preparedstatement of update blog_post : "+preparedStatement);
 
             Integer status = preparedStatement.executeUpdate();
-            statement="UPDATE blog_post_image SET image_url=?,flag_featured=? WHERE blog_id=?";
+            statement="UPDATE blog_post_image SET image_url=?,flag_featured=?,status=? WHERE blog_id=?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, blogMainModel.getImageUrl());
             preparedStatement.setInt(2, blogMainModel.getImageFlagFeatured());
-            preparedStatement.setInt(3, blogMainModel.getId());
+            preparedStatement.setInt(3, blogMainModel.getImageStatus());
+            preparedStatement.setInt(4, blogMainModel.getId());
+
 
             logger.debug("preparedstatement of update blog_post_image : "+preparedStatement);
 
-            status = preparedStatement.executeUpdate();
+            status+= preparedStatement.executeUpdate();
             blogResultModel =  insertUpdateBlogCatMap(blogMainModel);
+            if(blogResultModel.isError()==true && status==0){
+                blogResultModel.setError(true);
+                blogResultModel.setMessage("No blog found.");
+            }
+            else {
+                blogResultModel.setError(false);
+            }
             blogResultModel.setObject(blogMainModel);
             logger.debug("Blog post updated with id : " + blogMainModel.getId());
 
@@ -202,7 +213,7 @@ public class BlogsUtil {
             statement="DELETE FROM blog_cat_map WHERE blog_id = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1, blogMainModel.getId());
-            preparedStatement.executeUpdate();
+            int status = preparedStatement.executeUpdate();
 
             for (Map.Entry<Integer, List<Integer>> entry : categories.entrySet())
             {
@@ -210,6 +221,9 @@ public class BlogsUtil {
                 list = entry.getValue();
                 list.add(i);
                 int size = list.size();
+                if(status==size){
+                    blogResultModel.setError(true);
+                }
                 while (size>0) {
                     statement = "INSERT INTO blog_cat_map (blog_id,categories_id) VALUES (? ,?) ON DUPLICATE KEY UPDATE blog_id = ?,categories_id = ?";
                     preparedStatement = connection.prepareStatement(statement);
@@ -218,7 +232,7 @@ public class BlogsUtil {
                     preparedStatement.setInt(3, blogMainModel.getId());
                     preparedStatement.setInt(4, list.get(size-1));
                     logger.debug("preparedstatement of insert blog_cat_map : " + preparedStatement);
-                    int status = preparedStatement.executeUpdate();
+                    status = preparedStatement.executeUpdate();
                     if (status == 0) {
                         logger.error("Failed to insert blog blog_cat_map");
                     }
@@ -272,7 +286,7 @@ public class BlogsUtil {
 
             resultSet = preparedStatement.executeQuery();
             if(resultSet.first()){
-                result.setError(false);
+                result.setError(true);
                 result.setMessage("urlexist");
             }
 
@@ -341,7 +355,6 @@ public class BlogsUtil {
                 seoBlogModel.setSeoDescription(resultSet.getString("home_meta_description"));
 
                 blogMainModel.setFkAssociateId(fkAssociateId);
-                blogMainModel.setFkAssociateName(resultSet.getString("bmh.home_name"));
                 blogMainModel.setId(resultSet.getInt("b.blog_id"));
                 blogMainModel.setTitle(resultSet.getString("b.title"));
                 blogMainModel.setPublishDate(resultSet.getString("pub_date"));
@@ -436,7 +449,7 @@ public class BlogsUtil {
             connection = Database.INSTANCE.getReadOnlyConnection();
             if(isCategory==true) {
                 // came through category and sub category
-             //   categoryModel = getCategoryDetails(fkAssociateId, isCategory, categoryName, subCategoryName);
+                //   categoryModel = getCategoryDetails(fkAssociateId, isCategory, categoryName, subCategoryName);
                 statement="SELECT b.blog_id,b.title,b.content,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date," +
                     "b.url,b.status, b.blog_meta_title,b.blog_meta_keywords,b.blog_meta_description FROM blog_post b JOIN " +
                     "blog_cat_map bcm ON b.blog_id = bcm.blog_id JOIN blog_categories bc ON bcm.categories_id = bc.categories_id " +
