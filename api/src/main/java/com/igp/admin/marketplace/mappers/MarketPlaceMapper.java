@@ -740,7 +740,7 @@ public class MarketPlaceMapper {
                     validationModel.setDeliveryMessageModel(deliveryMessageModel);
 
                     logger.debug("validation model : " + rowNumValue);
-                    logger.debug("values : ", validationModel.toString());
+                    logger.debug("values : "+ validationModel.toString());
 
                     validationModelList.add(validationModel);
 

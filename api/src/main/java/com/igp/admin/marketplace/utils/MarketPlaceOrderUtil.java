@@ -407,7 +407,7 @@ public class MarketPlaceOrderUtil {
 
 
             BigDecimal serviceCharges = productModel.getServiceCharge().add(new BigDecimal(productModel.getGiftBox() * productModel.getQuantity()));// * Environment.getGiftBoxPrice()));
-            BigDecimal cartValue = productModel.getSellingPrice().add(serviceCharges).subtract(orderTempModel.getDiscount());
+            BigDecimal cartValue = productModel.getSellingPrice().multiply(new BigDecimal(productModel.getQuantity()==null?1:productModel.getQuantity())).add(serviceCharges).subtract(orderTempModel.getDiscount());
 
             preparedStatement.setString(4, orderTempModel.getShippingAddressModel().getFirstname());
             preparedStatement.setString(5, orderTempModel.getShippingAddressModel().getLastname());
