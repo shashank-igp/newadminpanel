@@ -27,16 +27,17 @@ public class CategoryMapper {
         return blogResultModel;
     }
 
-    public boolean updateCategory(CategoryModel categoryModel){
+    public BlogResultModel updateCategory(CategoryModel categoryModel){
 
         boolean result = false;
+        BlogResultModel blogResultModel = new BlogResultModel();
         CategoryUtil categoryUtil = new CategoryUtil();
         try{
-            result = categoryUtil.updateCategory(categoryModel);
+            blogResultModel = categoryUtil.updateCategory(categoryModel);
         }catch (Exception exception){
             logger.debug("error occured while updating Category post ",exception);
         }
-        return result;
+        return blogResultModel;
     }
 
     public boolean deleteCategory(CategoryModel categoryModel){

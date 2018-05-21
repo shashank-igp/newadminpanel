@@ -56,6 +56,9 @@ public class BlogMainModel {
     @JsonProperty("fkasid")
     private Integer fkAssociateId;
 
+    @JsonProperty("fkasidname")
+    private String fkAssociateName;
+
     @JsonProperty("status")
     private Integer status;
 
@@ -219,6 +222,14 @@ public class BlogMainModel {
 
     public void setCategories(Map<Integer, List<Integer>> categories) {
         this.categories = categories;
+    }
+
+    public String getFkAssociateName() {
+        return fkAssociateName;
+    }
+
+    public void setFkAssociateName(String fkAssociateName) {
+        this.fkAssociateName = fkAssociateName;
     }
 }
 
