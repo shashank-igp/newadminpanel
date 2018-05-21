@@ -532,7 +532,7 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setInt(8, orderTempBasketModel.getBaseCurrencyValueInr()); // to be updated based on the current prices and products_base_currency.
             preparedStatement.setBigDecimal(9, orderTempBasketModel.getServiceCharges());
             preparedStatement.setString(10, orderTempBasketModel.getServiceType());
-            preparedStatement.setBigDecimal(11,orderTempBasketModel.getProductSellingPrice().divide(new BigDecimal(orderTempBasketModel.getQuantity()), 3, RoundingMode.HALF_UP));
+            preparedStatement.setBigDecimal(11,orderTempBasketModel.getProductSellingPrice());
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
@@ -606,18 +606,16 @@ public class MarketPlaceOrderUtil {
             resultSet = preparedStatement.executeQuery();
 
             if (resultSet.first()) {
-                logger.debug("USER DEBUGGING : " + "setUser_id "+resultSet.getString("c.customers_id"));
-                user.setId(resultSet.getString("c.customers_id"));
+
                 logger.debug("USER DEBUGGING : " + "setUserHash "+resultSet.getString("n.id_hash"));
                 user.setIdHash(resultSet.getString("n.id_hash"));
-                //  logger.debug("USER DEBUGGING : " + "setUserDOB "+resultSet.getString("c.customers_dob"));
 
-                //  if(resultSet.getString("c.customers_dob").equals("none") || resultSet.getString("c.customers_dob").equals("") || resultSet.getString("c.customers_dob").isEmpty()){
-                // don't take dob.
-                //  }
-                //  else {
-                //       user.setDob(resultSet.getString("c.customers_dob"));
-                //   }
+                if(user.getIdHash()==null){
+                    logger.debug("Interflora user, so create igp user " + "setUserHashInt "+resultSet.getString("n.id_hash_int"));
+                }else {
+                    logger.debug("USER DEBUGGING : " + "setUser_id " + resultSet.getString("c.customers_id"));
+                    user.setId(resultSet.getString("c.customers_id"));
+                }
             }
         } catch (Exception exception) {
             logger.error("Exception getting user from database : ", exception);
