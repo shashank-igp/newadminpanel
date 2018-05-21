@@ -30,11 +30,11 @@ public class Categories {
     public Response createCategory(CategoryModel categoryModel) {
         Response response=null;
         CategoryMapper categoryMapper = new  CategoryMapper();
-        BlogResultModel blogResultModel = new BlogResultModel();
+        BlogResultModel blogResultModel ;
 
         try{
             blogResultModel = categoryMapper.createCategory(categoryModel);
-            if(blogResultModel.isError()==false){
+            if(!blogResultModel.isError()){
                 response= EntityFoundResponse.entityFoundResponseBuilder(blogResultModel.getObject());
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
@@ -51,16 +51,20 @@ public class Categories {
     public Response updateCategory(CategoryModel categoryModel) {
         Response response=null;
         CategoryMapper categoryMapper =  new CategoryMapper();
-        boolean result = false;
+        BlogResultModel blogResultModel ;
         try{
-            result = categoryMapper.updateCategory(categoryModel);
-            if(result==true){
+            blogResultModel = categoryMapper.updateCategory(categoryModel);
+            if(!blogResultModel.isError()){
                 Map<String,String> updateCategoryResponse=new HashMap<>();
                 updateCategoryResponse.put("data","Category updated succesfully.");
                 response= EntityFoundResponse.entityFoundResponseBuilder(updateCategoryResponse);
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error","Could not able to update Category");
+                if(!blogResultModel.getMessage().isEmpty()){
+                    errorResponse.put("error",blogResultModel.getMessage());
+                }else {
+                    errorResponse.put("error", "Could not able to update Category");
+                }
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
         }catch (Exception exception){

@@ -1,6 +1,7 @@
 package com.igp.admin.Blogs.models;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
@@ -26,10 +27,12 @@ public class CategoryModel {
     @JsonProperty("seo")
     private SeoBlogModel seoModel;
 
-    @JsonIgnore
+    @JsonProperty("parentid")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private int parentId;
 
-    @JsonIgnore
+    @JsonProperty("sortorder")
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private int sortOrder;
 
     @JsonIgnore

@@ -52,22 +52,19 @@ public class CategoryUtil {
             /*statement="INSERT INTO blog_categories (categories_name,categories_name_alt,parent_id,sort_order,categories_description,categories_name_for_url," +
                 "categories_meta_title,categories_meta_keywords,categories_meta_description,categories_introduction_text,categories_introduction_down_text,categories_status) "
                 + " VALUES (? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?)";*/
-            statement="INSERT INTO blog_categories (categories_name,categories_name_alt,parent_id,sort_order,categories_description,categories_name_for_url," +
-                "categories_meta_title,categories_meta_keywords,categories_meta_description,categories_introduction_text,categories_introduction_down_text,categories_status) "
-                + " VALUES (? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?)";
+            statement="INSERT INTO blog_categories (fk_associate_id, categories_name,parent_id,sort_order,categories_name_for_url," +
+                "categories_meta_title,categories_meta_keywords,categories_meta_description,status) "
+                + " VALUES (? ,? ,? ,? ,? ,? ,? ,? ,? )";
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
-            preparedStatement.setString(1, categoryModel.getTitle());
-            preparedStatement.setString(2, categoryModel.getNameAlt());
+            preparedStatement.setInt(1, categoryModel.getFkAssociateId());
+            preparedStatement.setString(2, categoryModel.getTitle());
             preparedStatement.setInt(3, categoryModel.getParentId());
             preparedStatement.setInt(4, categoryModel.getSortOrder());
-            preparedStatement.setString(5, categoryModel.getDescription());
-            preparedStatement.setString(6, categoryModel.getUrl());
-            preparedStatement.setString(7, categoryModel.getSeoModel().getSeoTitle());
-            preparedStatement.setString(8, categoryModel.getSeoModel().getSeoKeywords());
-            preparedStatement.setString(9, categoryModel.getSeoModel().getSeoDescription());
-            preparedStatement.setString(10, categoryModel.getIntroText());
-            preparedStatement.setString(11, categoryModel.getIntroDownText());
-            preparedStatement.setInt(12, categoryModel.getStatus());
+            preparedStatement.setString(5, categoryModel.getUrl());
+            preparedStatement.setString(6, categoryModel.getSeoModel().getSeoTitle());
+            preparedStatement.setString(7, categoryModel.getSeoModel().getSeoKeywords());
+            preparedStatement.setString(8, categoryModel.getSeoModel().getSeoDescription());
+            preparedStatement.setInt(9, 1);
             logger.debug("preparedstatement of insert blog_categories : "+preparedStatement);
 
             Integer status = preparedStatement.executeUpdate();
@@ -92,46 +89,70 @@ public class CategoryUtil {
         }
         return blogResultModel;
     }
-    public boolean updateCategory(CategoryModel categoryModel){
-        boolean result = false;
+    public BlogResultModel updateCategory(CategoryModel categoryModel){
+        boolean result = true;
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
+        BlogsUtil blogsUtil = new BlogsUtil();
+        BlogResultModel blogResultModel = new BlogResultModel();
         try{
+
+            boolean validUrl = blogsUtil.checkUrlWithNoSpecialChar(categoryModel.getUrl());
+            if(validUrl==false){
+                blogResultModel.setError(true);
+                blogResultModel.setMessage("Invalid URL.");
+                return blogResultModel;
+            }
+            if(categoryModel.getParentId() != 0){
+                if (categoryModel.getParentId() == categoryModel.getId()) {
+                    blogResultModel.setError(true);
+                    blogResultModel.setMessage("Please choose different parent category");
+                    return blogResultModel;
+                }
+                BlogResultModel parentExistResult = validateParentCategory(categoryModel.getParentId());
+                if(!parentExistResult.getMessage().equalsIgnoreCase("categoryexist")){
+                    blogResultModel.setError(true);
+                    blogResultModel.setMessage("Invalid parent category");
+                    return blogResultModel;
+                }
+            }
+
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement="UPDATE blog_categories SET categories_name=?,categories_name_alt=?,parent_id=?,sort_order=?,categories_description=?,categories_name_for_url=?," +
-                "categories_meta_title=?,categories_meta_keywords=?,categories_meta_description=?,categories_introduction_text=?,categories_introduction_down_text=?,categories_status=? WHERE categories_id = ?";
+            statement="UPDATE blog_categories SET categories_name=?,parent_id=?,sort_order=?,categories_name_for_url=?," +
+                "categories_meta_title=?,categories_meta_keywords=?,categories_meta_description=?,status=? WHERE categories_id = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, categoryModel.getTitle());
-            preparedStatement.setString(2, categoryModel.getNameAlt());
-            preparedStatement.setInt(3, categoryModel.getParentId());
-            preparedStatement.setInt(4, categoryModel.getSortOrder());
-            preparedStatement.setString(5, categoryModel.getDescription());
-            preparedStatement.setString(6, categoryModel.getUrl());
-            preparedStatement.setString(7, categoryModel.getSeoModel().getSeoTitle());
-            preparedStatement.setString(8, categoryModel.getSeoModel().getSeoKeywords());
-            preparedStatement.setString(9, categoryModel.getSeoModel().getSeoDescription());
-            preparedStatement.setString(10, categoryModel.getIntroText());
-            preparedStatement.setString(11, categoryModel.getIntroDownText());
-            preparedStatement.setInt(12, categoryModel.getStatus());
-            preparedStatement.setInt(13, categoryModel.getId());
+            preparedStatement.setInt(2, categoryModel.getParentId());
+            preparedStatement.setInt(3, categoryModel.getSortOrder());
+            preparedStatement.setString(4, categoryModel.getUrl());
+            preparedStatement.setString(5, categoryModel.getSeoModel().getSeoTitle());
+            preparedStatement.setString(6, categoryModel.getSeoModel().getSeoKeywords());
+            preparedStatement.setString(7, categoryModel.getSeoModel().getSeoDescription());
+            preparedStatement.setInt(8, categoryModel.getStatus());
+            preparedStatement.setInt(9, categoryModel.getId());
             logger.debug("preparedstatement of update blog_categories : "+preparedStatement);
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
-                logger.error("Failed to update Category ");
+                blogResultModel.setError(true);
+                blogResultModel.setMessage("Failed to update Category");
+                logger.error("Failed to update Category");
             } else {
-                result = true;
+                blogResultModel.setError(false);
                 logger.debug("Category updated with id : "+categoryModel.getId());
             }
+
         }catch (Exception exception){
+            blogResultModel.setError(true);
+            blogResultModel.setMessage("error occured while updating Category");
             logger.debug("error occured while updating Category ",exception);
         }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
         }
-        return result;
+        return blogResultModel;
     }
     public boolean deleteCategory(CategoryModel categoryModel){
         boolean result = false;
@@ -299,7 +320,6 @@ public class CategoryUtil {
 
             resultSet = preparedStatement.executeQuery();
             if(resultSet.first()){
-                result.setError(false);
                 result.setMessage("categoryexist");
             }
 

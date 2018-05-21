@@ -399,6 +399,7 @@ public class BlogsUtil {
                 seoBlogModel.setSeoDescription(resultSet.getString("home_meta_description"));
 
                 blogMainModel.setFkAssociateId(fkAssociateId);
+                blogMainModel.setFkAssociateName(resultSet.getString("bmh.home_name"));
                 blogMainModel.setId(resultSet.getInt("b.blog_id"));
                 blogMainModel.setTitle(resultSet.getString("b.title"));
                 blogMainModel.setPublishDate(resultSet.getString("pub_date"));
