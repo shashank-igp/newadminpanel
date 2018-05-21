@@ -355,9 +355,10 @@ public class BlogsUtil {
             if(id != -1){
                 ///id is passed, return data for blog id = 'id'
                 statement= "select b.blog_id,b.title,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date,bc.categories_id,bc.parent_id,bc.categories_name,bc.categories_name_for_url,b.description,b.url,b.status,"
-                    + " b.content, bpm.image_url,bpm.status,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id "
+                    + " group_concat(DISTINCT(if(bpm.flag_featured=0,bpm.image_url,null))  separator ',') AS non_featured_image_url, group_concat(DISTINCT(if(bpm.flag_featured=1,bpm.image_url,null))  separator ',') AS image_url, "
+                    + " b.content, bpm.status,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id "
                     + " JOIN (select * from blog_categories where fk_associate_id = 5 and status = 1 order by"
-                    + " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id AND bpm.flag_featured = 1"
+                    + " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id "
                     + " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id"
                     + " WHERE b.fk_associate_id = "+fkAssociateId+" AND b.status = 1 AND b.blog_id= "+ id +" GROUP BY b.blog_id ORDER BY published_date DESC";
 
@@ -368,9 +369,10 @@ public class BlogsUtil {
             }else {
                 // homepage, return all blogs
                 statement="select b.blog_id,b.title,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date,bc.categories_id,bc.parent_id,bc.categories_name,bc.categories_name_for_url,b.description,b.url,b.status," +
-                    " bpm.image_url,bpm.status,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
-                    "JOIN (select * from blog_categories where fk_associate_id = "+fkAssociateId+" and status = 1 order by" +
-                    " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id AND bpm.flag_featured = 1 " +
+                    " group_concat(DISTINCT(if(bpm.flag_featured=0,bpm.image_url,null))  separator ',') AS non_featured_image_url, group_concat(DISTINCT(if(bpm.flag_featured=1,bpm.image_url,null))  separator ',') AS image_url, "+
+                    " bpm.status,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
+                    " JOIN (select * from blog_categories where fk_associate_id = "+fkAssociateId+" and status = 1 order by" +
+                    " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id  " +
                     " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id" +
                     " WHERE b.fk_associate_id = "+fkAssociateId+" AND b.status = 1 GROUP BY b.blog_id ORDER BY published_date DESC limit "+start+","+end;
 
@@ -401,8 +403,16 @@ public class BlogsUtil {
                 blogMainModel.setTitle(resultSet.getString("b.title"));
                 blogMainModel.setPublishDate(resultSet.getString("pub_date"));
                 blogMainModel.setUrl(resultSet.getString("b.url"));
-                blogMainModel.setImageUrl(resultSet.getString("bpm.image_url"));
                 blogMainModel.setImageStatus(resultSet.getInt("bpm.status"));
+                if(resultSet.getString("image_url") != null){
+                    //featured image url
+                   List<String> featuredImageUrls = Arrays.asList(resultSet.getString("image_url").split(","));
+                   blogMainModel.setImageUrl(featuredImageUrls.get(0));
+                }
+                if(resultSet.getString("non_featured_image_url") != null){
+                    List<String> nonFeaturedImageUrls = Arrays.asList(resultSet.getString("non_featured_image_url").split(","));
+                    blogMainModel.setImageUrlList(nonFeaturedImageUrls);
+                }
                 if(id != -1){
                     blogMainModel.setDescription(resultSet.getString("b.content"));
                     blogMainModel.setShortDescription(resultSet.getString("b.description"));
