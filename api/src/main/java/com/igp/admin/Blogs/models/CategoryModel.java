@@ -41,6 +41,17 @@ public class CategoryModel {
     @JsonProperty("introdowntext")
     private String introDownText;
 
+    @JsonProperty("fkasid")
+    private Integer fkAssociateId;
+
+    public Integer getFkAssociateId() {
+        return fkAssociateId;
+    }
+
+    public void setFkAssociateId(Integer fkAssociateId) {
+        this.fkAssociateId = fkAssociateId;
+    }
+
     public int getId() {
         return id;
     }

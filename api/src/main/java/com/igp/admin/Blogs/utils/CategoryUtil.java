@@ -33,7 +33,25 @@ public class CategoryUtil {
                 blogResultModel.setError(true);
                 blogResultModel.setMessage("Invalid URL");
                 return blogResultModel;
-            }            connection = Database.INSTANCE.getReadWriteConnection();
+            }
+            BlogResultModel validUrlResult = validateCategoryUrl(categoryModel.getFkAssociateId(), categoryModel.getUrl());
+            if(validUrlResult.isError() && validUrlResult.getMessage().equalsIgnoreCase("urlexist")){
+                blogResultModel.setError(true);
+                blogResultModel.setMessage("Please choose different url for category");
+                return blogResultModel;
+            }
+            if(categoryModel.getParentId() != 0){
+                BlogResultModel parentExistResult = validateParentCategory(categoryModel.getParentId());
+                if(!parentExistResult.getMessage().equalsIgnoreCase("categoryexist")){
+                    blogResultModel.setError(true);
+                    blogResultModel.setMessage("Invalid parent category");
+                    return blogResultModel;
+                }
+            }
+            connection = Database.INSTANCE.getReadWriteConnection();
+            /*statement="INSERT INTO blog_categories (categories_name,categories_name_alt,parent_id,sort_order,categories_description,categories_name_for_url," +
+                "categories_meta_title,categories_meta_keywords,categories_meta_description,categories_introduction_text,categories_introduction_down_text,categories_status) "
+                + " VALUES (? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?)";*/
             statement="INSERT INTO blog_categories (categories_name,categories_name_alt,parent_id,sort_order,categories_description,categories_name_for_url," +
                 "categories_meta_title,categories_meta_keywords,categories_meta_description,categories_introduction_text,categories_introduction_down_text,categories_status) "
                 + " VALUES (? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,? ,?)";
@@ -228,5 +246,72 @@ public class CategoryUtil {
             Database.INSTANCE.closeResultSet(resultSet);
         }
         return categorySubCategoryLists;
+    }
+
+    public BlogResultModel validateCategoryUrl(int fkAssociateId, String url){
+        Connection connection = null;
+        String statement = "";
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        BlogResultModel result = new BlogResultModel();
+
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+
+            statement = "select * from blog_categories where fk_associate_id = "+fkAssociateId+" AND categories_name_for_url= '"+url+ "'";
+
+            preparedStatement = connection.prepareStatement(statement);
+            logger.debug("preparedStatement for validating categories_name_for_url -> " + preparedStatement);
+
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.first()){
+                result.setError(true);
+                result.setMessage("urlexist");
+            }
+
+        }catch (Exception e){
+            logger.debug("error occured while validating url for category.", e);
+            result.setError(true);
+            result.setMessage(e.getMessage());
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return result;
+    }
+
+    //this will check whether category exist or not
+    public BlogResultModel validateParentCategory(int id){
+        Connection connection = null;
+        String statement = "";
+        ResultSet resultSet = null;
+        PreparedStatement preparedStatement = null;
+        BlogResultModel result = new BlogResultModel();
+
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+
+            statement = "select * from blog_categories where categories_id = '"+id+ "'";
+
+            preparedStatement = connection.prepareStatement(statement);
+            logger.debug("preparedStatement for url -> " + preparedStatement);
+
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.first()){
+                result.setError(false);
+                result.setMessage("categoryexist");
+            }
+
+        }catch (Exception e){
+            logger.debug("error occured while validating category.", e);
+            result.setError(true);
+            result.setMessage(e.getMessage());
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return result;
     }
 }
