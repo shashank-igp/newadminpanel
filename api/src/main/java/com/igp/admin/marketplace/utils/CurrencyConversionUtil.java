@@ -32,7 +32,7 @@ public class CurrencyConversionUtil {
         try {
             CurrencyRates currencyRates = currencyConversion.getCurrencyRates();
             if (baseCurrency == 2)
-                usd = usd.divide(BigDecimal.valueOf(currencyRates.getCurrencyRatesINR().getInr()), 2, RoundingMode.HALF_UP);
+                usd = usd.divide(BigDecimal.valueOf(currencyRates.getCurrencyRatesINR().getInr()), 4, RoundingMode.HALF_UP);
         } catch (IOException e) {
             e.printStackTrace();
         }

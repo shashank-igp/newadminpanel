@@ -267,7 +267,7 @@ public class MarketPlaceMapper {
                             .mobilePrefix(mprefix)
                             .password(millis + "")
                             .countryId(99)
-                            .associateId(fk_associate_id)
+                            .associateId(5)
                             .uniqsrc("Bulk-" + millis)
                             .build();
 
@@ -429,7 +429,7 @@ public class MarketPlaceMapper {
                             .mobilePrefix("91")
                             .password(millis + "")
                             .countryId(99)
-                            .associateId(fk_associate_id)
+                            .associateId(5)
                             .uniqsrc("Bulk-" + millis)
                             .build();
 
@@ -598,7 +598,7 @@ public class MarketPlaceMapper {
                             .mobilePrefix("91")
                             .password(millis + "")
                             .countryId(99)
-                            .associateId(fk_associate_id)
+                            .associateId(5)
                             .uniqsrc("Bulk-" + millis)
                             .build();
 
