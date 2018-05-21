@@ -410,8 +410,8 @@ public class BlogsUtil {
                    blogMainModel.setImageUrl(featuredImageUrls.get(0));
                 }
                 if(resultSet.getString("non_featured_image_url") != null){
-                    List<String> nonFetauredImageUrls = Arrays.asList(resultSet.getString("non_featured_image_url").split(","));
-                    blogMainModel.setImageUrlList(nonFetauredImageUrls);
+                    List<String> nonFeaturedImageUrls = Arrays.asList(resultSet.getString("non_featured_image_url").split(","));
+                    blogMainModel.setImageUrlList(nonFeaturedImageUrls);
                 }
                 if(id != -1){
                     blogMainModel.setDescription(resultSet.getString("b.content"));
