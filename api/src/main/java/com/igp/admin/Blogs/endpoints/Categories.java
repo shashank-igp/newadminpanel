@@ -74,21 +74,28 @@ public class Categories {
     }
     @DELETE
     @Path("/v1/categories/deletecategory")
-    public Response deleteCategory(CategoryModel categoryModel) {
+    public Response deleteCategory(@DefaultValue("-1") @QueryParam("id") int id) {
         Response response=null;
         CategoryMapper categoryMapper =  new CategoryMapper();
         boolean result = false;
         try{
-            result = categoryMapper.deleteCategory(categoryModel);
-            if(result==true){
-                Map<String,String> updateCategoryResponse=new HashMap<>();
-                updateCategoryResponse.put("data","Category deleted succesfully.");
-                response= EntityFoundResponse.entityFoundResponseBuilder(updateCategoryResponse);
-            }else{
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error","Could not able to delete Category");
+            if(id == -1){
+                Map<String,String> errorResponse=new HashMap<>();
+                errorResponse.put("error","Parameter not specified");
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }else{
+                result = categoryMapper.deleteCategory(id);
+                if(result){
+                    Map<String,String> updateCategoryResponse=new HashMap<>();
+                    updateCategoryResponse.put("data","Category deleted succesfully.");
+                    response= EntityFoundResponse.entityFoundResponseBuilder(updateCategoryResponse);
+                }else{
+                    Map<String, String> errorResponse = new HashMap<>();
+                    errorResponse.put("error","Could not able to delete Category");
+                    response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+                }
             }
+
         }catch (Exception exception){
             logger.debug("error occured while deleting Category post "+exception);
         }

@@ -476,7 +476,7 @@ public class BlogsUtil {
             if(id == -1){
                 statement="SELECT count(DISTINCT b.blog_id) total FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
                     "JOIN blog_categories bc ON bcm.categories_id = bc.categories_id  AND b.fk_associate_id=bc.fk_associate_id WHERE b.fk_associate_id = "+fkAssociateId +
-                    " AND b.status = 1 "+ column;
+                    " AND bc.status = 1 AND b.status = 1 "+ column;
                 preparedStatement = connection.prepareStatement(statement);
                 logger.debug("preparedstatement of blog list count : "+preparedStatement);
 
