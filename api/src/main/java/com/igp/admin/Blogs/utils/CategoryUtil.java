@@ -154,23 +154,28 @@ public class CategoryUtil {
         }
         return blogResultModel;
     }
-    public boolean deleteCategory(CategoryModel categoryModel){
+
+    //this will disable category & its sub categories if any (put status as 0)
+    public boolean deleteCategory(int id){
         boolean result = false;
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement="DELETE FROM blog_categories WHERE categories_id = ?";
+            //statement="DELETE FROM blog_categories WHERE categories_id = ?";
+            statement="update blog_categories set status = 0 WHERE categories_id = ? OR parent_id = ?";
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1, categoryModel.getId());
+            preparedStatement.setInt(1, id);
+            preparedStatement.setInt(2, id);
 
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Failed to delete Category ");
             } else {
                 result = true;
-                logger.debug("Category deleted with id : "+categoryModel.getId());
+                logger.debug("Category deleted with id : "+id);
+                logger.debug("Rows affected : "+status);
             }
         }catch (Exception exception){
             logger.debug("error occured while deleting Category ",exception);

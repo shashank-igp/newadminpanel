@@ -40,12 +40,12 @@ public class CategoryMapper {
         return blogResultModel;
     }
 
-    public boolean deleteCategory(CategoryModel categoryModel){
+    public boolean deleteCategory(int id){
 
         boolean result = false;
         CategoryUtil categoryUtil = new CategoryUtil();
         try{
-            result = categoryUtil.deleteCategory(categoryModel);
+            result = categoryUtil.deleteCategory(id);
         }catch (Exception exception){
             logger.debug("error occured while deleting Category post ",exception);
         }
