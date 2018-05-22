@@ -89,10 +89,16 @@ public class BlogsUtil {
         PreparedStatement preparedStatement = null;
         BlogResultModel blogResultModel = new BlogResultModel();
         try{
-            if(validateBlogUrl(blogMainModel.getFkAssociateId(),blogMainModel.getUrl(), null).isError()){
-                blogResultModel.setError(true);
-                blogResultModel.setMessage("Invalid URL.");
-                return blogResultModel;
+            blogResultModel = validateBlogUrl(blogMainModel.getFkAssociateId(),blogMainModel.getUrl(), null);
+            if(blogResultModel.isError()){
+                // check if url exists for the same id
+                BlogMainModel blogMainModel1 = (BlogMainModel) blogResultModel.getObject();
+
+                if(blogMainModel.getId()!=blogMainModel1.getId()) {
+                    blogResultModel.setError(true);
+                    blogResultModel.setMessage("Invalid URL.");
+                    return blogResultModel;
+                }
             }
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="UPDATE blog_post SET title = ?,created_by = ?,description = ?,content = ?,url = ?," +
@@ -197,7 +203,7 @@ public class BlogsUtil {
             preparedStatement.setInt(1, blogMainModel.getId());
             int delstatus = preparedStatement.executeUpdate();
 
-           String statement1="INSERT INTO blog_post_image (blog_id,image_url,date_created,flag_featured,status) VALUES (? ,? ,now(),?,?)";
+            String statement1="INSERT INTO blog_post_image (blog_id,image_url,date_created,flag_featured,status) VALUES (? ,? ,now(),?,?)";
             preparedStatement = connection.prepareStatement(statement1);
             preparedStatement.setInt(1, blogMainModel.getId());
             preparedStatement.setString(2, blogMainModel.getImageUrl());
@@ -220,7 +226,7 @@ public class BlogsUtil {
                 if (status == 0) {
                     logger.error("Failed to insert blog blog_post_image");
                 }
-               // size--;
+                // size--;
 
             }
             if(delstatus == 0 || delstatus == status){
@@ -311,8 +317,9 @@ public class BlogsUtil {
         ResultSet resultSet = null;
         PreparedStatement preparedStatement = null;
         BlogResultModel result = new BlogResultModel();
-
+        BlogMainModel blogMainModel = new BlogMainModel();
         try{
+            blogMainModel.setId(0);
             connection = Database.INSTANCE.getReadOnlyConnection();
             if(url != null && !url.isEmpty()){
                 statement = "select * from blog_post where fk_associate_id = "+fkAssociateId+" AND url= '"+url+ "'";
@@ -325,6 +332,7 @@ public class BlogsUtil {
 
             resultSet = preparedStatement.executeQuery();
             if(resultSet.first()){
+                blogMainModel.setId(resultSet.getInt("blog_id"));
                 result.setError(true);
                 result.setMessage("urlexist");
             }
@@ -338,6 +346,7 @@ public class BlogsUtil {
             Database.INSTANCE.closeConnection(connection);
             Database.INSTANCE.closeResultSet(resultSet);
         }
+        result.setObject(blogMainModel);
         return result;
     }
 
@@ -407,8 +416,8 @@ public class BlogsUtil {
                 blogMainModel.setImageStatus(resultSet.getInt("bpm.status"));
                 if(resultSet.getString("image_url") != null){
                     //featured image url
-                   List<String> featuredImageUrls = Arrays.asList(resultSet.getString("image_url").split(","));
-                   blogMainModel.setImageUrl(featuredImageUrls.get(0));
+                    List<String> featuredImageUrls = Arrays.asList(resultSet.getString("image_url").split(","));
+                    blogMainModel.setImageUrl(featuredImageUrls.get(0));
                 }
                 if(resultSet.getString("non_featured_image_url") != null){
                     List<String> nonFeaturedImageUrls = Arrays.asList(resultSet.getString("non_featured_image_url").split(","));
@@ -529,6 +538,6 @@ public class BlogsUtil {
             Database.INSTANCE.closeConnection(connection);
         }
 
-    return blogResultModel;
+        return blogResultModel;
     }
 }
