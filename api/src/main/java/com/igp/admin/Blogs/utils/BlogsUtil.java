@@ -376,7 +376,7 @@ public class BlogsUtil {
 
                 statementCategories = "select pst.blog_id, bct.categories_id, bct.categories_name, bct.categories_name_for_url ,bct2.categories_id as p_cat_id, bct2.categories_name as p_cat_name, bct2.categories_name_for_url as p_cat_name_for_url from "
                     +"blog_post pst join blog_cat_map bcm on pst.blog_id = bcm.blog_id join blog_categories bct on bcm.categories_id = bct.categories_id "
-                    +"left join blog_categories bct2 on bct.parent_id = bct2.categories_id where pst.status = 1 AND bct.status = 1  AND pst.blog_id = "+id+" order by pst.blog_id, bct.parent_id DESC";
+                    +"left join blog_categories bct2 on bct.parent_id = bct2.categories_id where bct.status = 1  AND pst.blog_id = "+id+" order by pst.blog_id, bct.parent_id DESC";
 
             }else {
                 // homepage, return all blogs
@@ -390,7 +390,7 @@ public class BlogsUtil {
 
                 statementCategories = "select pst.blog_id, bct.categories_id, bct.categories_name, bct.categories_name_for_url ,bct2.categories_id as p_cat_id, bct2.categories_name as p_cat_name, bct2.categories_name_for_url as p_cat_name_for_url from "
                     +"blog_post pst join blog_cat_map bcm on pst.blog_id = bcm.blog_id join blog_categories bct on bcm.categories_id = bct.categories_id "
-                    +"left join blog_categories bct2 on bct.parent_id = bct2.categories_id where pst.status = 1 AND bct.status = 1 order by pst.blog_id, bct.parent_id DESC";
+                    +"left join blog_categories bct2 on bct.parent_id = bct2.categories_id where bct.status = 1 order by pst.blog_id, bct.parent_id DESC";
 
             }
             connection = Database.INSTANCE.getReadOnlyConnection();
