@@ -214,7 +214,7 @@ public class BlogsUtil {
 
             int size = 0;
             if(imageList != null){
-                imageList.size();
+                size = imageList.size();
             }
             while (size>0) {
                 statement1="INSERT INTO blog_post_image (blog_id,image_url,date_created,flag_featured,status) VALUES (? ,? ,now(),?,?)";
