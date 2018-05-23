@@ -365,7 +365,7 @@ public class BlogsUtil {
                 ///id is passed, return data for blog id = 'id'
                 statement= "select b.blog_id,b.title,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date,bc.categories_id,bc.parent_id,bc.categories_name,bc.categories_name_for_url,b.description,b.url,b.status,"
                     + " group_concat(DISTINCT(if(bpm.flag_featured=0,bpm.image_url,null))  separator ',') AS non_featured_image_url, group_concat(DISTINCT(if(bpm.flag_featured=1,bpm.image_url,null))  separator ',') AS image_url, "
-                    + " b.content,b.created_by, b.status, b.flag_featured, b.sort_order, bpm.status,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id "
+                    + " b.content,b.created_by,  b.flag_featured, b.sort_order, bpm.status,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id "
                     + " JOIN (select * from blog_categories where fk_associate_id = 5 and status = 1 order by"
                     + " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id "
                     + " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id"
@@ -414,6 +414,7 @@ public class BlogsUtil {
                 blogMainModel.setPublishDate(resultSet.getString("pub_date"));
                 blogMainModel.setUrl(resultSet.getString("b.url"));
                 blogMainModel.setImageStatus(resultSet.getInt("bpm.status"));
+                blogMainModel.setStatus(resultSet.getInt("b.status"));
                 if(resultSet.getString("image_url") != null){
                     //featured image url
                     List<String> featuredImageUrls = Arrays.asList(resultSet.getString("image_url").split(","));
@@ -425,7 +426,6 @@ public class BlogsUtil {
                 }
                 if(id != -1){
                     blogMainModel.setUser(resultSet.getString("b.created_by"));
-                    blogMainModel.setStatus(resultSet.getInt("b.status"));
                     blogMainModel.setFlagFeatured(resultSet.getInt("b.flag_featured"));
                     blogMainModel.setSortOrder(resultSet.getInt("b.sort_order"));
                     blogMainModel.setDescription(resultSet.getString("b.content"));
