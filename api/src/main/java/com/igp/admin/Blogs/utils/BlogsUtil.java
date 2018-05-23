@@ -372,7 +372,7 @@ public class BlogsUtil {
                     + " JOIN (select * from blog_categories where fk_associate_id = 5 and status = 1 order by"
                     + " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id "
                     + " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id"
-                    + " WHERE b.fk_associate_id = "+fkAssociateId+" AND b.status = 1 AND b.blog_id= "+ id +" GROUP BY b.blog_id ORDER BY published_date DESC";
+                    + " WHERE b.fk_associate_id = "+fkAssociateId+" AND b.blog_id= "+ id +" GROUP BY b.blog_id ORDER BY published_date DESC";
 
                 statementCategories = "select pst.blog_id, bct.categories_id, bct.categories_name, bct.categories_name_for_url ,bct2.categories_id as p_cat_id, bct2.categories_name as p_cat_name, bct2.categories_name_for_url as p_cat_name_for_url from "
                     +"blog_post pst join blog_cat_map bcm on pst.blog_id = bcm.blog_id join blog_categories bct on bcm.categories_id = bct.categories_id "
@@ -386,7 +386,7 @@ public class BlogsUtil {
                     " JOIN (select * from blog_categories where fk_associate_id = "+fkAssociateId+" and status = 1 order by" +
                     " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id  " +
                     " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id" +
-                    " WHERE b.fk_associate_id = "+fkAssociateId+" AND b.status = 1 GROUP BY b.blog_id ORDER BY published_date DESC limit "+start+","+end;
+                    " WHERE b.fk_associate_id = "+fkAssociateId+" GROUP BY b.blog_id ORDER BY published_date DESC limit "+start+","+end;
 
                 statementCategories = "select pst.blog_id, bct.categories_id, bct.categories_name, bct.categories_name_for_url ,bct2.categories_id as p_cat_id, bct2.categories_name as p_cat_name, bct2.categories_name_for_url as p_cat_name_for_url from "
                     +"blog_post pst join blog_cat_map bcm on pst.blog_id = bcm.blog_id join blog_categories bct on bcm.categories_id = bct.categories_id "
