@@ -212,7 +212,10 @@ public class BlogsUtil {
             logger.debug("preparedstatement of insert blog_post_image : "+preparedStatement);
             int status = preparedStatement.executeUpdate();
 
-            int size = imageList.size();
+            int size = 0;
+            if(imageList != null){
+                imageList.size();
+            }
             while (size>0) {
                 statement1="INSERT INTO blog_post_image (blog_id,image_url,date_created,flag_featured,status) VALUES (? ,? ,now(),?,?)";
                 preparedStatement = connection.prepareStatement(statement1);
