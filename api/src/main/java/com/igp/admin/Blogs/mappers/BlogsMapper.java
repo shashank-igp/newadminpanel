@@ -3,6 +3,7 @@ package com.igp.admin.Blogs.mappers;
 import com.igp.admin.Blogs.models.BlogListResponseModel;
 import com.igp.admin.Blogs.models.BlogMainModel;
 import com.igp.admin.Blogs.models.BlogResultModel;
+import com.igp.admin.Blogs.models.SeoBlogModel;
 import com.igp.admin.Blogs.utils.BlogsUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,4 +83,26 @@ public class BlogsMapper {
         }
         return blogResultModel;
     }
+    public SeoBlogModel getMetaHome(int fkAssociateId){
+        BlogsUtil blogUtil=new BlogsUtil();
+        SeoBlogModel seoBlogModel = new SeoBlogModel();
+        try{
+            seoBlogModel = blogUtil.getMetaHome(fkAssociateId);
+        }catch (Exception exception){
+            logger.debug("error occured while getMetaHome. ",exception);
+        }
+        return seoBlogModel;
+    }
+    public boolean updateMetaHome(SeoBlogModel seoBlogModel){
+
+        BlogsUtil blogUtil=new BlogsUtil();
+        boolean result = false;
+        try{
+            result = blogUtil.updateMetaHome(seoBlogModel);
+        }catch (Exception exception){
+            logger.debug("error occured while updating meta home : ",exception);
+        }
+        return result;
+    }
+
 }
