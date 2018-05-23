@@ -4,6 +4,7 @@ import com.igp.admin.Blogs.mappers.*;
 import com.igp.admin.Blogs.models.BlogListResponseModel;
 import com.igp.admin.Blogs.models.BlogMainModel;
 import com.igp.admin.Blogs.models.BlogResultModel;
+import com.igp.admin.Blogs.models.SeoBlogModel;
 import com.igp.admin.response.EntityFoundResponse;
 import com.igp.admin.response.EntityNotFoundResponse;
 import org.slf4j.Logger;
@@ -186,4 +187,47 @@ public class Blogs {
         }
         return response;
     }
+    @GET
+    @Path("/v1/blogs/getmetahome")
+    public Response getmetahome(@DefaultValue("5") @QueryParam("fkasid") int fkAssociateId) {
+        Response response=null;
+        BlogsMapper blogMapper=new BlogsMapper();
+
+        try{
+            SeoBlogModel seoBlogModel = blogMapper.getMetaHome(fkAssociateId);
+            if(seoBlogModel.getId()!=null){
+                response = EntityFoundResponse.entityFoundResponseBuilder(seoBlogModel);
+            }else{
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error","Not able to get meta home");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while get meta home "+exception);
+        }
+        return response;
+    }
+    @PUT
+    @Path("/v1/blogs/updatemetahome")
+    public Response updateMetaHome(SeoBlogModel seoBlogModel) {
+        Response response=null;
+        BlogsMapper blogsMapper = new  BlogsMapper();
+        boolean result = false;
+        try{
+            result = blogsMapper.updateMetaHome(seoBlogModel);
+            if(result==true){
+                Map<String,String> updateMetaHome=new HashMap<>();
+                updateMetaHome.put("data","meta home updated succesfully.");
+                response= EntityFoundResponse.entityFoundResponseBuilder(updateMetaHome);
+            }else{
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error","Error while updating meta home.");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while updating meta home: "+exception);
+        }
+        return response;
+    }
+
 }

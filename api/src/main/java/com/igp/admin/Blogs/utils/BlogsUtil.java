@@ -543,4 +543,65 @@ public class BlogsUtil {
 
         return blogResultModel;
     }
+    public SeoBlogModel getMetaHome(int fkAssociateId){
+        Connection connection = null;
+        String statement="";
+        ResultSet resultSet =  null;
+        PreparedStatement preparedStatement = null;
+        SeoBlogModel seoBlogModel = new SeoBlogModel();
+        try{
+            statement="select * from blog_meta_home where fk_associate_id = ?";
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1,fkAssociateId);
+
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.first()) {
+                seoBlogModel.setStatus(resultSet.getInt("status"));
+                seoBlogModel.setId(resultSet.getInt("home_id"));
+                seoBlogModel.setFkAssociateId(fkAssociateId);
+                seoBlogModel.setSeoTitle(resultSet.getString("home_meta_title"));
+                seoBlogModel.setSeoKeywords(resultSet.getString("home_meta_keywords"));
+                seoBlogModel.setSeoDescription(resultSet.getString("home_meta_description"));
+            }
+
+        }catch (Exception exception){
+            logger.debug("error occured while getting home meta info "+exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return seoBlogModel;
+    }
+    public boolean updateMetaHome(SeoBlogModel seoBlogModel){
+        String statement;
+        PreparedStatement preparedStatement = null;
+        Connection connection = null;
+        boolean result = false;
+        try{
+            statement = "update blog_meta_home set home_meta_title = ? , " +
+                "home_meta_keywords=?,home_meta_description=?,status=? where home_id = ?";
+
+            connection = Database.INSTANCE.getReadWriteConnection();
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1,seoBlogModel.getSeoTitle());
+            preparedStatement.setString(2,seoBlogModel.getSeoKeywords());
+            preparedStatement.setString(3,seoBlogModel.getSeoDescription());
+            preparedStatement.setInt(4,seoBlogModel.getStatus());
+            preparedStatement.setInt(5,seoBlogModel.getId());
+
+            int status = preparedStatement.executeUpdate();
+            if(status != 0 ){
+                result=true;
+            }
+        }catch(Exception e){
+            logger.debug("error occured while updating blog post ",e);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return result;
+    }
+
 }
