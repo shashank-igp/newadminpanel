@@ -155,6 +155,10 @@ public class BlogMainModel {
     }
 
     public Integer getStatus() {
+
+        if (status == null) {
+            status = 1;
+        }
         return status;
     }
 

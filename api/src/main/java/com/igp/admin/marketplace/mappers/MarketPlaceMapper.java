@@ -291,6 +291,7 @@ public class MarketPlaceMapper {
                         if (!sP.isEmpty()) {
                             double d = Double.parseDouble(sP);
                             sellingPrice = (int) d;
+                            sellingPrice = sellingPrice/quantity; // as it has calculated amount
                         }
 
                         String itemCode = column.get("Item Code").trim();
@@ -311,6 +312,7 @@ public class MarketPlaceMapper {
 
                             itemCode = marketPlaceOrderUtil.getProductIdForLoyaltyOnly(itemCode);
                         }
+
                         if(marketPlaceOrderUtil.handelProductOrNot(itemCode)){
                             productModel = new ProductModel.Builder()
                                 .productCode(itemCode)
@@ -356,7 +358,7 @@ public class MarketPlaceMapper {
                             quantity + "(#)" +
                             column.get("MRP")+ "(#)" +
                             column.get("POAmount")+ "(#)" +
-                            sellingPrice + "(#)" +
+                            sP + "(#)" +
                             column.get("ProductName")+ "(#)" +
                             column.get("ProgramName")+ "(#)" +
                             column.get("Vendor")+ "(#)" +

@@ -36,8 +36,8 @@ public class BlogsUtil {
             }
             connection = Database.INSTANCE.getReadWriteConnection();
             statement="INSERT INTO blog_post (title,created_by,description,content,url,published_date," +
-                "fk_associate_id,status,blog_meta_title,blog_meta_keywords,blog_meta_description,flag_featured,sort_order) "
-                + " VALUES ( ? ,? ,? ,? ,? ,now() ,? ,? ,? ,? , ? ,? ,?)";
+                "fk_associate_id,status,blog_meta_title,blog_meta_keywords,blog_meta_description,flag_featured,sort_order,status) "
+                + " VALUES ( ? ,? ,? ,? ,? ,now() ,? ,? ,? ,? , ? ,? ,? ,?)";
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, blogMainModel.getTitle());
             preparedStatement.setString(2, blogMainModel.getUser());
@@ -51,6 +51,7 @@ public class BlogsUtil {
             preparedStatement.setString(10, blogMainModel.getSeoModel().getSeoDescription());
             preparedStatement.setInt(11, blogMainModel.getFlagFeatured()); // by default keeping flag_featured as 0
             preparedStatement.setInt(12, blogMainModel.getSortOrder()); // by default keeping sort order as 1
+            preparedStatement.setInt(13, blogMainModel.getStatus());
 
             logger.debug("preparedstatement of insert blog_post : "+preparedStatement);
 
