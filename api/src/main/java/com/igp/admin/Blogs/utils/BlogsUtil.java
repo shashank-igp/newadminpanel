@@ -434,46 +434,53 @@ public class BlogsUtil {
                 //set blog category List(bloglist) object here
                 List<CategorySubCategoryModel> categoryList = new ArrayList<>();
                 CategorySubCategoryModel categorySubCategoryModel ;
+                List<Integer> notAllowedCat = new ArrayList<>();
                 while (resultSetCategories.next()){
 
                     if(resultSetCategories.getInt("blog_id") == blogMainModel.getId()){
-                        categorySubCategoryModel= new CategorySubCategoryModel();
-                        if(resultSetCategories.getInt("p_cat_id") == 0){
-                            //current category not having parent category
-                            categorySubCategoryModel.setId(resultSetCategories.getInt("categories_id"));
-                            categorySubCategoryModel.setTitle(resultSetCategories.getString("categories_name"));
-                            categorySubCategoryModel.setUrl(resultSetCategories.getString("categories_name_for_url"));
+                        //first check whether it it already added  ad prent with its sub categories or not
+                        if(!notAllowedCat.contains(resultSetCategories.getInt("categories_id"))) {
+                            categorySubCategoryModel = new CategorySubCategoryModel();
+                            if (resultSetCategories.getInt("p_cat_id") == 0) {
+                                //current category not having parent category
 
-                        }else{
-                            //current category having parent category, collect all subcategories under current parent category
-                            categorySubCategoryModel.setId(resultSetCategories.getInt("p_cat_id"));
-                            categorySubCategoryModel.setTitle(resultSetCategories.getString("p_cat_name"));
-                            categorySubCategoryModel.setUrl(resultSetCategories.getString("p_cat_name_for_url"));
-                            //now set sub category list
-                            List<CategoryModel> subCategoryModelList = new ArrayList<>();
-                            CategoryModel categoryModel2 = new CategoryModel();
-                            categoryModel2.setId(resultSetCategories.getInt("categories_id"));
-                            categoryModel2.setTitle(resultSetCategories.getString("categories_name"));
-                            categoryModel2.setUrl(resultSetCategories.getString("categories_name_for_url"));
-                            subCategoryModelList.add(categoryModel2);
+                                categorySubCategoryModel.setId(resultSetCategories.getInt("categories_id"));
+                                categorySubCategoryModel.setTitle(resultSetCategories.getString("categories_name"));
+                                categorySubCategoryModel.setUrl(resultSetCategories.getString("categories_name_for_url"));
 
-                            while (resultSetCategories.next()) {//check whether next category has same parent
-                                if (resultSetCategories.getInt("p_cat_id") == categorySubCategoryModel.getId()) {
-                                    //next category also has same parent, so add it to sub category list
-                                    categoryModel2 = new CategoryModel();
-                                    categoryModel2.setId(resultSetCategories.getInt("categories_id"));
-                                    categoryModel2.setTitle(resultSetCategories.getString("categories_name"));
-                                    categoryModel2.setUrl(resultSetCategories.getString("categories_name_for_url"));
-                                    subCategoryModelList.add(categoryModel2);
-                                } else {
-                                    //next category have different or no parent, so set resultSet to previous row & break the loop
-                                    resultSetCategories.previous();
-                                    break;
+                            } else {
+                                //current category having parent category, collect all subcategories under current parent category
+                                categorySubCategoryModel.setId(resultSetCategories.getInt("p_cat_id"));
+                                categorySubCategoryModel.setTitle(resultSetCategories.getString("p_cat_name"));
+                                categorySubCategoryModel.setUrl(resultSetCategories.getString("p_cat_name_for_url"));
+                                //add current prent cat to notAllowedCat to avoid it in next iterations
+                                notAllowedCat.add(categorySubCategoryModel.getId());
+                                //now set sub category list
+                                List<CategoryModel> subCategoryModelList = new ArrayList<>();
+                                CategoryModel categoryModel2 = new CategoryModel();
+                                categoryModel2.setId(resultSetCategories.getInt("categories_id"));
+                                categoryModel2.setTitle(resultSetCategories.getString("categories_name"));
+                                categoryModel2.setUrl(resultSetCategories.getString("categories_name_for_url"));
+                                subCategoryModelList.add(categoryModel2);
+
+                                while (resultSetCategories.next()) {//check whether next category has same parent
+                                    if (resultSetCategories.getInt("p_cat_id") == categorySubCategoryModel.getId()) {
+                                        //next category also has same parent, so add it to sub category list
+                                        categoryModel2 = new CategoryModel();
+                                        categoryModel2.setId(resultSetCategories.getInt("categories_id"));
+                                        categoryModel2.setTitle(resultSetCategories.getString("categories_name"));
+                                        categoryModel2.setUrl(resultSetCategories.getString("categories_name_for_url"));
+                                        subCategoryModelList.add(categoryModel2);
+                                    } else {
+                                        //next category have different or no parent, so set resultSet to previous row & break the loop
+                                        resultSetCategories.previous();
+                                        break;
+                                    }
                                 }
+                                categorySubCategoryModel.setSubCategoryModelList(subCategoryModelList);
                             }
-                            categorySubCategoryModel.setSubCategoryModelList(subCategoryModelList);
+                            categoryList.add(categorySubCategoryModel);
                         }
-                        categoryList.add(categorySubCategoryModel);
                     }
                 }
                 blogMainModel.setCategoryList(categoryList);
