@@ -62,7 +62,9 @@ public class BlogsUtil {
 
                 status = insertUpdateBlogImage(blogMainModel, connection);
                 if(status == 1){
-                    blogResultModel =  insertUpdateBlogCatMap(blogMainModel, connection);
+                    if(!blogMainModel.getCategories().isEmpty()){
+                        blogResultModel =  insertUpdateBlogCatMap(blogMainModel, connection);
+                    }
                     connection.commit();
                 }else {
                     blogResultModel.setError(true);
@@ -126,7 +128,10 @@ public class BlogsUtil {
 
             status += insertUpdateBlogImage(blogMainModel, connection);
 
-            blogResultModel =  insertUpdateBlogCatMap(blogMainModel, connection);
+            if(!blogMainModel.getCategories().isEmpty()) {
+                blogResultModel = insertUpdateBlogCatMap(blogMainModel, connection);
+            }
+
             if(blogResultModel.isError()==true && status==0){
                 blogResultModel.setError(true);
                 blogResultModel.setMessage("No blog found.");
