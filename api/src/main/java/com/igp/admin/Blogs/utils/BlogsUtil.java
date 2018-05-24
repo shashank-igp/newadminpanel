@@ -8,10 +8,7 @@ import com.igp.config.instance.Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.*;
 
 /**
@@ -35,6 +32,7 @@ public class BlogsUtil {
                 return blogResultModel;
             }
             connection = Database.INSTANCE.getReadWriteConnection();
+            connection.setAutoCommit(false);
             statement="INSERT INTO blog_post (title,created_by,description,content,url,published_date," +
                 "fk_associate_id,status,blog_meta_title,blog_meta_keywords,blog_meta_description,flag_featured,sort_order,status) "
                 + " VALUES ( ? ,? ,? ,? ,? ,now() ,? ,? ,? ,? , ? ,? ,? ,?)";
@@ -63,12 +61,14 @@ public class BlogsUtil {
                 resultSet.first();
                 blogMainModel.setId(resultSet.getInt(1));
 
-                status = insertUpdateBlogImage(blogMainModel);
+                status = insertUpdateBlogImage(blogMainModel, connection);
                 if(status == 1){
-                    blogResultModel =  insertUpdateBlogCatMap(blogMainModel);
+                    blogResultModel =  insertUpdateBlogCatMap(blogMainModel, connection);
+                    connection.commit();
                 }else {
                     blogResultModel.setError(true);
                     blogResultModel.setMessage("error in insertion.");
+                    connection.rollback();
                 }
                 logger.debug("New blog post created with url : "+blogMainModel.getUrl()+" id : "+blogMainModel.getId());
             }
@@ -76,7 +76,7 @@ public class BlogsUtil {
         }catch (Exception exception){
             logger.debug("error occured while creating blog post ",exception);
             blogResultModel.setError(true);
-            blogResultModel.setMessage("error in insertion.");
+            blogResultModel.setMessage("error occured while creating blog post.");
         }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
@@ -102,6 +102,7 @@ public class BlogsUtil {
                 }
             }
             connection = Database.INSTANCE.getReadWriteConnection();
+            connection.setAutoCommit(false);
             statement="UPDATE blog_post SET title = ?,created_by = ?,description = ?,content = ?,url = ?," +
                 "fk_associate_id = ?,status = ?,blog_meta_title = ?,blog_meta_keywords = ?," +
                 "blog_meta_description = ?,flag_featured = ?,sort_order = ? WHERE blog_id = ?";
@@ -124,19 +125,20 @@ public class BlogsUtil {
 
             int status = preparedStatement.executeUpdate();
 
-            status += insertUpdateBlogImage(blogMainModel);
+            status += insertUpdateBlogImage(blogMainModel, connection);
 
-            blogResultModel =  insertUpdateBlogCatMap(blogMainModel);
+            blogResultModel =  insertUpdateBlogCatMap(blogMainModel, connection);
             if(blogResultModel.isError()==true && status==0){
                 blogResultModel.setError(true);
                 blogResultModel.setMessage("No blog found.");
+                connection.rollback();
             }
             else {
                 blogResultModel.setError(false);
+                connection.commit();
             }
             blogResultModel.setObject(blogMainModel);
             logger.debug("Blog post updated with id : " + blogMainModel.getId());
-
 
         }catch (Exception exception){
             blogResultModel.setError(true);
@@ -191,13 +193,12 @@ public class BlogsUtil {
         }
         return result;
     }
-    public int insertUpdateBlogImage(BlogMainModel blogMainModel){
-        Connection connection = null;
+
+    public int insertUpdateBlogImage(BlogMainModel blogMainModel, Connection connection){
         String statement;
         PreparedStatement preparedStatement = null;
         int result = 0;
         try {
-            connection = Database.INSTANCE.getReadWriteConnection();
             List<String> imageList = blogMainModel.getImageUrlList();
             statement="DELETE FROM blog_post_image WHERE blog_id = ?";
             preparedStatement = connection.prepareStatement(statement);
@@ -230,8 +231,6 @@ public class BlogsUtil {
                 if (status == 0) {
                     logger.error("Failed to insert blog blog_post_image");
                 }
-                // size--;
-
             }
             if(delstatus == 0 || delstatus == status){
                 result = 1;
@@ -239,21 +238,18 @@ public class BlogsUtil {
             }
 
         }catch (Exception exception){
-
             logger.debug("error occured while updating/inserting blog_post_image "+exception);
         }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeConnection(connection);
         }
         return result;
     }
-    public BlogResultModel insertUpdateBlogCatMap(BlogMainModel blogMainModel){
+
+    public BlogResultModel insertUpdateBlogCatMap(BlogMainModel blogMainModel, Connection connection){
         BlogResultModel blogResultModel = new BlogResultModel();
-        Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
         try {
-            connection = Database.INSTANCE.getReadWriteConnection();
             Map<Integer,List<Integer>> categories = blogMainModel.getCategories();
             List<Integer> list = new ArrayList<>();
             statement="DELETE FROM blog_cat_map WHERE blog_id = ?";
@@ -292,7 +288,6 @@ public class BlogsUtil {
             logger.debug("error occured while updating/inserting blog_cat_map "+exception);
         }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeConnection(connection);
         }
         return blogResultModel;
     }
