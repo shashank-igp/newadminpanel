@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 /**
  * Created by suditi on 3/5/18.
  */
@@ -28,14 +30,12 @@ public class CategoryModel {
     private SeoBlogModel seoModel;
 
     @JsonProperty("parentid")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private int parentId;
 
     @JsonProperty("sortorder")
-    @JsonInclude(JsonInclude.Include.NON_NULL)
     private int sortOrder;
 
-    @JsonIgnore
+    @JsonProperty("status")
     private int status;
 
     @JsonProperty("introtext")
@@ -46,6 +46,20 @@ public class CategoryModel {
 
     @JsonProperty("fkasid")
     private Integer fkAssociateId;
+
+    @JsonProperty("fkasname")
+    private String fkAssociateName;
+
+    @JsonProperty("subcategory")
+    private List<CategoryModel> subCategoryModelList;
+
+    public List<CategoryModel> getSubCategoryModelList() {
+        return subCategoryModelList;
+    }
+
+    public void setSubCategoryModelList(List<CategoryModel> subCategoryModelList) {
+        this.subCategoryModelList = subCategoryModelList;
+    }
 
     public Integer getFkAssociateId() {
         return fkAssociateId;
@@ -141,5 +155,13 @@ public class CategoryModel {
 
     public void setIntroDownText(String introDownText) {
         this.introDownText = introDownText;
+    }
+
+    public String getFkAssociateName() {
+        return fkAssociateName;
+    }
+
+    public void setFkAssociateName(String fkAssociateName) {
+        this.fkAssociateName = fkAssociateName;
     }
 }

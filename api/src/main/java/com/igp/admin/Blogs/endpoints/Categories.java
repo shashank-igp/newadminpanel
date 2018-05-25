@@ -109,7 +109,7 @@ public class Categories {
         Response response=null;
         CategoryMapper categoryMapper =  new CategoryMapper();
         try{
-            List<CategorySubCategoryModel> categorySubCategoryLists = categoryMapper.getCategoryList(fkAssociateId,startLimit,endLimit);
+            List<CategoryModel> categorySubCategoryLists = categoryMapper.getCategoryList(fkAssociateId,startLimit,endLimit);
             if(categorySubCategoryLists!= null && !categorySubCategoryLists.isEmpty()){
                response= EntityFoundResponse.entityFoundResponseBuilder(categorySubCategoryLists);
             }else{
