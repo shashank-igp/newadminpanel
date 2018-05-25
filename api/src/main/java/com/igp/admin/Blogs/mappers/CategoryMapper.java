@@ -52,10 +52,10 @@ public class CategoryMapper {
         return result;
     }
 
-    public List<CategorySubCategoryModel> getCategoryList(int fkAssociateId, int startLimit, int endLimit) {
+    public List<CategoryModel> getCategoryList(int fkAssociateId, int startLimit, int endLimit) {
 
         CategoryUtil categoryUtil = new CategoryUtil();
-        List<CategorySubCategoryModel> categorySubCategoryLists = new ArrayList<>();
+        List<CategoryModel> categorySubCategoryLists = new ArrayList<>();
         try {
             categorySubCategoryLists = categoryUtil.getCategoryList(fkAssociateId, startLimit, endLimit);
         } catch (Exception exception) {

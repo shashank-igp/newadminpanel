@@ -3,6 +3,7 @@ package com.igp.admin.Blogs.utils;
 import com.igp.admin.Blogs.models.BlogResultModel;
 import com.igp.admin.Blogs.models.CategoryModel;
 import com.igp.admin.Blogs.models.CategorySubCategoryModel;
+import com.igp.admin.Blogs.models.SeoBlogModel;
 import com.igp.config.instance.Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -217,19 +218,19 @@ public class CategoryUtil {
         }
         return result;
     }
-    public List<CategorySubCategoryModel> getCategoryList(int fkAssociateId, int startLimit, int endLimit){
+    public List<CategoryModel> getCategoryList(int fkAssociateId, int startLimit, int endLimit){
         Connection connection = null;
         String statement="";
         ResultSet resultSet =  null;
         PreparedStatement preparedStatement = null;
-        List<CategorySubCategoryModel> categorySubCategoryLists = new ArrayList<>();
+        List<CategoryModel> categorySubCategoryLists = new ArrayList<>();
         try{
-                statement="SELECT bct.categories_id AS cat_id, bct.categories_name AS cat_name," +
-                    "bct.categories_name_for_url AS cat_url, group_concat(bct2.categories_id,','," +
-                    " bct2.categories_name,',',bct2.categories_name_for_url separator ':') AS subcat" +
+                statement="SELECT bmh.home_name,bct.categories_id AS cat_id, bct.categories_name AS cat_name, bct.categories_name_for_url AS cat_url," +
+                    "  bct.parent_id, bct.sort_order,bct.categories_meta_title,bct.categories_meta_keywords,bct.categories_meta_description,bct.status,bct.fk_associate_id," +
+                    " group_concat(bct2.categories_id,',', bct2.categories_name,',',bct2.categories_name_for_url,',',bct2.parent_id,',',bct2.sort_order,',',bct2.categories_meta_title,',',bct2.categories_meta_keywords,',',bct2.categories_meta_description,',',bct2.status,',',bct2.fk_associate_id separator ':') AS subcat" +
                     " FROM blog_categories bct LEFT JOIN blog_categories bct2 on bct.categories_id = " +
-                    "bct2.parent_id AND bct.status=1 AND bct2.status=1 and bct.fk_associate_id = " +
-                    "bct2.fk_associate_id WHERE bct.fk_associate_id = ? AND bct.parent_id = 0 GROUP BY " +
+                    "bct2.parent_id and bct.fk_associate_id = " +
+                    "bct2.fk_associate_id LEFT JOIN blog_meta_home bmh on bct.fk_associate_id = bmh.fk_associate_id WHERE bct.fk_associate_id = ? AND bct.parent_id = 0 GROUP BY " +
                     "bct.categories_id ORDER BY bct.sort_order limit ?,?";
 
             connection = Database.INSTANCE.getReadOnlyConnection();
@@ -242,11 +243,24 @@ public class CategoryUtil {
 
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
-                CategorySubCategoryModel categorySubCategoryModel = new CategorySubCategoryModel();
+                CategoryModel categorySubCategoryModel = new CategoryModel();
                 String categoryStrArray[] = null;
                 categorySubCategoryModel.setUrl(resultSet.getString("cat_url"));
                 categorySubCategoryModel.setTitle(resultSet.getString("cat_name"));
                 categorySubCategoryModel.setId(resultSet.getInt("cat_id"));
+
+                categorySubCategoryModel.setParentId(resultSet.getInt("bct.parent_id"));
+                categorySubCategoryModel.setSortOrder(resultSet.getInt("bct.sort_order"));
+                categorySubCategoryModel.setStatus(resultSet.getInt("bct.status"));
+                categorySubCategoryModel.setFkAssociateId(resultSet.getInt("bct.fk_associate_id"));
+                categorySubCategoryModel.setFkAssociateName(resultSet.getString("bmh.home_name"));
+
+
+                SeoBlogModel seoBlogModel = new SeoBlogModel();
+                seoBlogModel.setSeoTitle(resultSet.getString("bct.categories_meta_title"));
+                seoBlogModel.setSeoKeywords(resultSet.getString("bct.categories_meta_keywords"));
+                seoBlogModel.setSeoDescription(resultSet.getString("bct.categories_meta_description"));
+                categorySubCategoryModel.setSeoModel(seoBlogModel);
 
                 String subcat = resultSet.getString("subcat");
                 if(subcat!=null){
@@ -254,9 +268,23 @@ public class CategoryUtil {
                     categoryStrArray = subcat.split(":");
                     for(int i = 0; i< categoryStrArray.length ; i++){
                         CategoryModel subcategory = new CategoryModel();
-                        subcategory.setId(new Integer(categoryStrArray[i].split(",")[0]));
-                        subcategory.setTitle(categoryStrArray[i].split(",")[1]);
-                        subcategory.setUrl(categoryStrArray[i].split(",")[2]);
+                        String[] dataArray = categoryStrArray[i].split(",");
+                        subcategory.setId(new Integer(dataArray[0]));
+                        subcategory.setTitle(dataArray[1]);
+                        subcategory.setUrl(dataArray[2]);
+                        subcategory.setParentId(Integer.parseInt(dataArray[3]));
+                        subcategory.setSortOrder(Integer.parseInt(dataArray[4]));
+
+                        SeoBlogModel seoBlogModel2 = new SeoBlogModel();
+                        seoBlogModel2.setSeoTitle(dataArray[5]);
+                        seoBlogModel2.setSeoKeywords(dataArray[6]);
+                        seoBlogModel2.setSeoDescription(dataArray[7]);
+                        subcategory.setSeoModel(seoBlogModel2);
+                        subcategory.setStatus(Integer.parseInt(dataArray[8]));
+                        subcategory.setFkAssociateId(Integer.parseInt(dataArray[9]));
+                        subcategory.setFkAssociateName(resultSet.getString("bmh.home_name"));
+
+
                         subcategoryList.add(subcategory);
                     }
                     categorySubCategoryModel.setSubCategoryModelList(subcategoryList);
