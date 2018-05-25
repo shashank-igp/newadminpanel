@@ -359,40 +359,44 @@ public class BlogsUtil {
         ResultSet resultSet =  null, resultSetCategories = null;
         PreparedStatement preparedStatement = null, preparedStatement1;
         List<BlogMainModel> blogMainModelList = new ArrayList<>();
+        List<ConditionModel> conditionSet1 = new ArrayList<>();
+        List<ConditionModel> conditionSet2 = new ArrayList<>();
+        List<ConditionModel> conditionSet3 = new ArrayList<>();
+        List<ConditionModel> conditionSet4 = new ArrayList<>();
+        StringBuilder condition1, condition2 , condition3 , condition4;
         String column = "";
         BlogListResponseModel blogListResponseModel = new BlogListResponseModel();
         SeoBlogModel seoBlogModel = new SeoBlogModel();
 
         try{
-            if(id != -1){
-                ///id is passed, return data for blog id = 'id'
-                statement= "select b.blog_id,b.title,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date,bc.categories_id,bc.parent_id,bc.categories_name,bc.categories_name_for_url,b.description,b.url,b.status,"
-                    + " group_concat(DISTINCT(if(bpm.flag_featured=0,bpm.image_url,null))  separator ',') AS non_featured_image_url, group_concat(DISTINCT(if(bpm.flag_featured=1,bpm.image_url,null))  separator ',') AS image_url, "
-                    + " b.content,b.created_by,  b.flag_featured, b.sort_order, bpm.status,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id "
-                    + " JOIN (select * from blog_categories where fk_associate_id = 5 and status = 1 order by"
-                    + " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id "
-                    + " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id"
-                    + " WHERE b.fk_associate_id = "+fkAssociateId+" AND b.blog_id= "+ id +" GROUP BY b.blog_id ORDER BY published_date DESC";
+            //prepare conditions
+           if(fkAssociateId != -1){
+               conditionSet1.add(new ConditionModel("fk_associate_id = "+ fkAssociateId, "AND" ));
+               conditionSet2.add(new ConditionModel("b.fk_associate_id = "+fkAssociateId ,"AND"));
+               conditionSet4.add(new ConditionModel("b.fk_associate_id = "+fkAssociateId ,"AND"));
+           }
+           if(id != -1){
+               conditionSet2.add(new ConditionModel(" b.blog_id = "+id,  "AND"));
+               conditionSet3.add(new ConditionModel(" pst.blog_id = "+id, "AND"));
+           }
+           // build where clause
+            condition1 = whereClauseBuilder(conditionSet1);
+            condition2 = whereClauseBuilder(conditionSet2);
+            condition3 = whereClauseBuilder(conditionSet3);
+            condition4 = whereClauseBuilder(conditionSet4);
 
-                statementCategories = "select pst.blog_id, bct.categories_id, bct.categories_name, bct.categories_name_for_url ,bct2.categories_id as p_cat_id, bct2.categories_name as p_cat_name, bct2.categories_name_for_url as p_cat_name_for_url from "
-                    +"blog_post pst join blog_cat_map bcm on pst.blog_id = bcm.blog_id join blog_categories bct on bcm.categories_id = bct.categories_id "
-                    +"left join blog_categories bct2 on bct.parent_id = bct2.categories_id where bct.status = 1  AND pst.blog_id = "+id+" order by pst.blog_id, bct.parent_id DESC";
+            statement= "select b.fk_associate_id,b.blog_id,b.title,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date,bc.categories_id,bc.parent_id,bc.categories_name,bc.categories_name_for_url,b.description,b.url,b.status,"
+                + " group_concat(DISTINCT(if(bpm.flag_featured=0,bpm.image_url,null))  separator ',') AS non_featured_image_url, group_concat(DISTINCT(if(bpm.flag_featured=1,bpm.image_url,null))  separator ',') AS image_url, "
+                + " b.content,b.created_by,  b.flag_featured, b.sort_order, bpm.status,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id "
+                + " JOIN (select * from blog_categories "+ condition1 +"order by"
+                + " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id "
+                + " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id"
+                + condition2 + " GROUP BY b.blog_id ORDER BY published_date DESC";
 
-            }else {
-                // homepage, return all blogs
-                statement="select b.blog_id,b.title,DATE_FORMAT(b.published_date,'%d-%b-%Y') as pub_date,bc.categories_id,bc.parent_id,bc.categories_name,bc.categories_name_for_url,b.description,b.url,b.status," +
-                    " group_concat(DISTINCT(if(bpm.flag_featured=0,bpm.image_url,null))  separator ',') AS non_featured_image_url, group_concat(DISTINCT(if(bpm.flag_featured=1,bpm.image_url,null))  separator ',') AS image_url, "+
-                    " bpm.status,home_meta_title,home_meta_keywords,home_meta_description, bmh.home_name FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
-                    " JOIN (select * from blog_categories where fk_associate_id = "+fkAssociateId+" and status = 1 order by" +
-                    " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id  " +
-                    " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id" +
-                    " WHERE b.fk_associate_id = "+fkAssociateId+" GROUP BY b.blog_id ORDER BY published_date DESC limit "+start+","+end;
+            statementCategories = "select pst.blog_id, bct.categories_id, bct.categories_name, bct.categories_name_for_url ,bct2.categories_id as p_cat_id, bct2.categories_name as p_cat_name, bct2.categories_name_for_url as p_cat_name_for_url from "
+                +"blog_post pst join blog_cat_map bcm on pst.blog_id = bcm.blog_id join blog_categories bct on bcm.categories_id = bct.categories_id "
+                +"left join blog_categories bct2 on bct.parent_id = bct2.categories_id "+ condition3 +" order by pst.blog_id, bct.parent_id DESC";
 
-                statementCategories = "select pst.blog_id, bct.categories_id, bct.categories_name, bct.categories_name_for_url ,bct2.categories_id as p_cat_id, bct2.categories_name as p_cat_name, bct2.categories_name_for_url as p_cat_name_for_url from "
-                    +"blog_post pst join blog_cat_map bcm on pst.blog_id = bcm.blog_id join blog_categories bct on bcm.categories_id = bct.categories_id "
-                    +"left join blog_categories bct2 on bct.parent_id = bct2.categories_id where bct.status = 1 order by pst.blog_id, bct.parent_id DESC";
-
-            }
             connection = Database.INSTANCE.getReadOnlyConnection();
             preparedStatement = connection.prepareStatement(statement);
             logger.debug("preparedstatement of blog list : "+preparedStatement);
@@ -410,7 +414,7 @@ public class BlogsUtil {
                 seoBlogModel.setSeoKeywords(resultSet.getString("home_meta_keywords"));
                 seoBlogModel.setSeoDescription(resultSet.getString("home_meta_description"));
 
-                blogMainModel.setFkAssociateId(fkAssociateId);
+                blogMainModel.setFkAssociateId(resultSet.getInt("b.fk_associate_id"));
                 blogMainModel.setFkAssociateName(resultSet.getString("bmh.home_name"));
                 blogMainModel.setId(resultSet.getInt("b.blog_id"));
                 blogMainModel.setTitle(resultSet.getString("b.title"));
@@ -494,8 +498,8 @@ public class BlogsUtil {
             }
             if(id == -1){
                 statement="SELECT count(DISTINCT b.blog_id) total FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
-                    "JOIN blog_categories bc ON bcm.categories_id = bc.categories_id  AND b.fk_associate_id=bc.fk_associate_id WHERE b.fk_associate_id = "+fkAssociateId +
-                    " AND bc.status = 1 AND b.status = 1 "+ column;
+                    "JOIN blog_categories bc ON bcm.categories_id = bc.categories_id  AND b.fk_associate_id=bc.fk_associate_id "
+                    + condition4 +  " "+ column;
                 preparedStatement = connection.prepareStatement(statement);
                 logger.debug("preparedstatement of blog list count : "+preparedStatement);
 
@@ -611,4 +615,18 @@ public class BlogsUtil {
         return result;
     }
 
+    private static StringBuilder whereClauseBuilder(List<ConditionModel> list) {
+        StringBuilder sql = new StringBuilder();
+        boolean first = true;
+
+        for (ConditionModel s : list) {
+            if(first)
+                sql.append(" where ");
+            else
+                sql.append(s.getOperator()).append(" ");
+            sql.append(s.getValue()).append(" ");
+            first = false;
+        }
+        return sql;
+    }
 }
