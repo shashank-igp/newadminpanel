@@ -353,7 +353,7 @@ public class BlogsUtil {
         return result;
     }
 
-    public BlogListResponseModel getListBlog(int fkAssociateId, int id, int start, int end){
+    public BlogListResponseModel getListBlog(int fkAssociateId, int id, int blogStatus, int start, int end){
         Connection connection = null;
         String statement, statementCategories="";
         ResultSet resultSet =  null, resultSetCategories = null;
@@ -371,13 +371,18 @@ public class BlogsUtil {
         try{
             //prepare conditions
            if(fkAssociateId != -1){
-               conditionSet1.add(new ConditionModel("fk_associate_id = "+ fkAssociateId, "AND" ));
+               conditionSet1.add(new ConditionModel("fk_associate_id = "+ fkAssociateId));
                conditionSet2.add(new ConditionModel("b.fk_associate_id = "+fkAssociateId ,"AND"));
                conditionSet4.add(new ConditionModel("b.fk_associate_id = "+fkAssociateId ,"AND"));
            }
            if(id != -1){
-               conditionSet2.add(new ConditionModel(" b.blog_id = "+id,  "AND"));
-               conditionSet3.add(new ConditionModel(" pst.blog_id = "+id, "AND"));
+               conditionSet2.add(new ConditionModel("b.blog_id = "+id,  "AND"));
+               conditionSet3.add(new ConditionModel("pst.blog_id = "+id, "AND"));
+           }
+           if(blogStatus != -1){
+               conditionSet2.add(new ConditionModel("b.status = "+blogStatus ,"AND"));
+               conditionSet3.add(new ConditionModel("pst.status = "+blogStatus, "AND"));
+               conditionSet4.add(new ConditionModel("b.status = "+blogStatus, "AND"));
            }
            // build where clause
             condition1 = whereClauseBuilder(conditionSet1);
@@ -391,7 +396,7 @@ public class BlogsUtil {
                 + " JOIN (select * from blog_categories "+ condition1 +"order by"
                 + " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id "
                 + " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id"
-                + condition2 + " GROUP BY b.blog_id ORDER BY published_date DESC";
+                + condition2 + " GROUP BY b.blog_id ORDER BY published_date DESC limit " +start+ "," +end;
 
             statementCategories = "select pst.blog_id, bct.categories_id, bct.categories_name, bct.categories_name_for_url ,bct2.categories_id as p_cat_id, bct2.categories_name as p_cat_name, bct2.categories_name_for_url as p_cat_name_for_url from "
                 +"blog_post pst join blog_cat_map bcm on pst.blog_id = bcm.blog_id join blog_categories bct on bcm.categories_id = bct.categories_id "
