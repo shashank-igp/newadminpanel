@@ -137,15 +137,16 @@ public class Blogs {
     }
     @GET
     @Path("/v1/blogs/getblogs")
-    public Response getbloglist(@DefaultValue("5") @QueryParam("fkAssociateId") int fkAssociateId,
+    public Response getbloglist(@DefaultValue("-1") @QueryParam("fkAssociateId") int fkAssociateId,
                                 @DefaultValue("-1") @QueryParam("id") int id,
+                                @DefaultValue("-1") @QueryParam("blogstatus") int blogStatus,
                                 @DefaultValue("0") @QueryParam("startLimit") int startLimit,
                                 @DefaultValue("10") @QueryParam("endLimit") int endLimit) {
         Response response=null;
         BlogsMapper blogMapper=new BlogsMapper();
 
         try{
-            BlogListResponseModel blogListResponseModel = blogMapper.getBlogList(fkAssociateId,id,startLimit,endLimit);
+            BlogListResponseModel blogListResponseModel = blogMapper.getBlogList(fkAssociateId,id,blogStatus,startLimit,endLimit);
             if(blogListResponseModel.getCount()!=0 && !blogListResponseModel.getBlogList().isEmpty()){
                 response= EntityFoundResponse.entityFoundResponseBuilder(blogListResponseModel);
             }else{
