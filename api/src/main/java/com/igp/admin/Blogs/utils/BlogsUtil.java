@@ -356,7 +356,7 @@ public class BlogsUtil {
         return result;
     }
 
-    public BlogListResponseModel getListBlog(int fkAssociateId, int id, int blogStatus, int start, int end){
+    public BlogListResponseModel getListBlog(int fkAssociateId, int id, int blogStatus, int categoryId, int start, int end){
         Connection connection = null;
         String statement, statementCategories="";
         ResultSet resultSet =  null, resultSetCategories = null;
@@ -387,6 +387,11 @@ public class BlogsUtil {
                conditionSet3.add(new ConditionModel("pst.status = "+blogStatus, "AND"));
                conditionSet4.add(new ConditionModel("b.status = "+blogStatus, "AND"));
            }
+           if(categoryId != -1){
+               conditionSet1.add(new ConditionModel("categories_id = " + categoryId, "AND"));
+               conditionSet4.add(new ConditionModel("bc.categories_id = "+categoryId, "AND"));
+           }
+
            // build where clause
             condition1 = whereClauseBuilder(conditionSet1);
             condition2 = whereClauseBuilder(conditionSet2);
@@ -506,7 +511,7 @@ public class BlogsUtil {
             }
             if(id == -1){
                 statement="SELECT count(DISTINCT b.blog_id) total FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
-                    "JOIN blog_categories bc ON bcm.categories_id = bc.categories_id  AND b.fk_associate_id=bc.fk_associate_id "
+                    "JOIN blog_categories bc ON bcm.categories_id = bc.categories_id "
                     + condition4 +  " "+ column;
                 preparedStatement = connection.prepareStatement(statement);
                 logger.debug("preparedstatement of blog list count : "+preparedStatement);

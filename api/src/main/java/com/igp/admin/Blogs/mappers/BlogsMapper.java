@@ -61,11 +61,11 @@ public class BlogsMapper {
         }
         return result;
     }
-    public BlogListResponseModel getBlogList(int fkAssociateId, int id, int blogStatus, int start, int end){
+    public BlogListResponseModel getBlogList(int fkAssociateId, int id, int blogStatus, int categoryId, int start, int end){
         BlogsUtil blogUtil=new BlogsUtil();
         BlogListResponseModel blogListResponseModel = new BlogListResponseModel();
         try{
-            blogListResponseModel = blogUtil.getListBlog(fkAssociateId,id,blogStatus,start,end);
+            blogListResponseModel = blogUtil.getListBlog(fkAssociateId,id,blogStatus,categoryId,start,end);
         }catch (Exception exception){
             logger.debug("error occured while getBlogList. ",exception);
         }
