@@ -356,7 +356,7 @@ public class BlogsUtil {
         return result;
     }
 
-    public BlogListResponseModel getListBlog(int fkAssociateId, int id, int blogStatus, int start, int end){
+    public BlogListResponseModel getListBlog(int fkAssociateId, int id, int blogStatus, int categoryId, int start, int end){
         Connection connection = null;
         String statement, statementCategories="";
         ResultSet resultSet =  null, resultSetCategories = null;
@@ -387,6 +387,11 @@ public class BlogsUtil {
                conditionSet3.add(new ConditionModel("pst.status = "+blogStatus, "AND"));
                conditionSet4.add(new ConditionModel("b.status = "+blogStatus, "AND"));
            }
+           if(categoryId != -1){
+               conditionSet1.add(new ConditionModel("categories_id = " + categoryId, "AND"));
+               conditionSet4.add(new ConditionModel("bc.categories_id = "+categoryId, "AND"));
+           }
+
            // build where clause
             condition1 = whereClauseBuilder(conditionSet1);
             condition2 = whereClauseBuilder(conditionSet2);
@@ -399,7 +404,7 @@ public class BlogsUtil {
                 + " JOIN (select * from blog_categories "+ condition1 +"order by"
                 + " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id "
                 + " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id"
-                + condition2 + " GROUP BY b.blog_id ORDER BY published_date DESC limit " +start+ "," +end;
+                + condition2 + " GROUP BY b.blog_id ORDER BY b.sort_order ASC, published_date DESC limit " +start+ "," +end;
 
             statementCategories = "select pst.blog_id, bct.categories_id, bct.categories_name, bct.categories_name_for_url ,bct2.categories_id as p_cat_id, bct2.categories_name as p_cat_name, bct2.categories_name_for_url as p_cat_name_for_url from "
                 +"blog_post pst join blog_cat_map bcm on pst.blog_id = bcm.blog_id join blog_categories bct on bcm.categories_id = bct.categories_id "
@@ -506,7 +511,7 @@ public class BlogsUtil {
             }
             if(id == -1){
                 statement="SELECT count(DISTINCT b.blog_id) total FROM blog_post b JOIN blog_cat_map bcm ON b.blog_id = bcm.blog_id " +
-                    "JOIN blog_categories bc ON bcm.categories_id = bc.categories_id  AND b.fk_associate_id=bc.fk_associate_id "
+                    "JOIN blog_categories bc ON bcm.categories_id = bc.categories_id "
                     + condition4 +  " "+ column;
                 preparedStatement = connection.prepareStatement(statement);
                 logger.debug("preparedstatement of blog list count : "+preparedStatement);
