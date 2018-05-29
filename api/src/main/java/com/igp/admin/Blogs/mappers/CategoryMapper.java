@@ -75,4 +75,16 @@ public class CategoryMapper {
         }
         return result;
     }
+    public BlogResultModel validateCategoryUrl(int fkAssociateId, String url){
+        BlogResultModel result = new BlogResultModel();
+        CategoryUtil categoryUtil = new CategoryUtil();
+        try{
+            result = categoryUtil.validateCategoryUrl(fkAssociateId, url);
+        }catch (Exception e){
+            logger.debug("error occured while validating category url",e);
+            result.setError(true);
+            result.setMessage(e.getMessage());
+        }
+        return result;
+    }
 }
