@@ -105,13 +105,10 @@ public class Categories {
                     if(categorySubCategoryLists!= null && !categorySubCategoryLists.isEmpty()){
                         response= EntityFoundResponse.entityFoundResponseBuilder(categorySubCategoryLists);
                     }else{
-                        Map<String, String> errorResponse = new HashMap<>();
-                        errorResponse.put("error","Could not get list of Categories");
-                        response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+                        Map<String,String> updateCategoryResponse=new HashMap<>();
+                        updateCategoryResponse.put("data","Category deleted succesfully.");
+                        response= EntityFoundResponse.entityFoundResponseBuilder(updateCategoryResponse);
                     }
-                    //Map<String,String> updateCategoryResponse=new HashMap<>();
-                    //updateCategoryResponse.put("data","Category deleted succesfully.");
-                    //response= EntityFoundResponse.entityFoundResponseBuilder(updateCategoryResponse);
                 }else{
                     Map<String, String> errorResponse = new HashMap<>();
                     errorResponse.put("error","Could not able to delete Category");
