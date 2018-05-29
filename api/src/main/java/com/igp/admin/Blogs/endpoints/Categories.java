@@ -35,7 +35,15 @@ public class Categories {
         try{
             blogResultModel = categoryMapper.createCategory(categoryModel);
             if(!blogResultModel.isError()){
-                response= EntityFoundResponse.entityFoundResponseBuilder(blogResultModel.getObject());
+                //response= EntityFoundResponse.entityFoundResponseBuilder(blogResultModel.getObject());
+                List<CategoryModel> categorySubCategoryLists = categoryMapper.getCategoryList(categoryModel.getFkAssociateId(), 0, 100);
+                if(categorySubCategoryLists!= null && !categorySubCategoryLists.isEmpty()){
+                    response= EntityFoundResponse.entityFoundResponseBuilder(categorySubCategoryLists);
+                }else{
+                    Map<String, String> errorResponse = new HashMap<>();
+                    errorResponse.put("error","Could not get list of Categories");
+                    response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+                }
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error",blogResultModel.getMessage());
@@ -55,9 +63,15 @@ public class Categories {
         try{
             blogResultModel = categoryMapper.updateCategory(categoryModel);
             if(!blogResultModel.isError()){
-                Map<String,String> updateCategoryResponse=new HashMap<>();
-                updateCategoryResponse.put("data","Category updated succesfully.");
-                response= EntityFoundResponse.entityFoundResponseBuilder(updateCategoryResponse);
+                List<CategoryModel> categorySubCategoryLists = categoryMapper.getCategoryList(categoryModel.getFkAssociateId(), 0, 100);
+                if(categorySubCategoryLists!= null && !categorySubCategoryLists.isEmpty()){
+                    response= EntityFoundResponse.entityFoundResponseBuilder(categorySubCategoryLists);
+                }else{
+                    Map<String, String> errorResponse = new HashMap<>();
+                    errorResponse.put("error","Could not get list of Categories");
+                    response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+                }
+
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
                 if(!blogResultModel.getMessage().isEmpty()){
@@ -74,7 +88,8 @@ public class Categories {
     }
     @DELETE
     @Path("/v1/categories/deletecategory")
-    public Response deleteCategory(@DefaultValue("-1") @QueryParam("id") int id) {
+    public Response deleteCategory(@DefaultValue("-1") @QueryParam("id") int id,
+                                   @QueryParam("fkAssociateId")int fkAssociateId) {
         Response response=null;
         CategoryMapper categoryMapper =  new CategoryMapper();
         boolean result = false;
@@ -86,9 +101,17 @@ public class Categories {
             }else{
                 result = categoryMapper.deleteCategory(id);
                 if(result){
-                    Map<String,String> updateCategoryResponse=new HashMap<>();
-                    updateCategoryResponse.put("data","Category deleted succesfully.");
-                    response= EntityFoundResponse.entityFoundResponseBuilder(updateCategoryResponse);
+                    List<CategoryModel> categorySubCategoryLists = categoryMapper.getCategoryList(fkAssociateId, 0, 100);
+                    if(categorySubCategoryLists!= null && !categorySubCategoryLists.isEmpty()){
+                        response= EntityFoundResponse.entityFoundResponseBuilder(categorySubCategoryLists);
+                    }else{
+                        Map<String, String> errorResponse = new HashMap<>();
+                        errorResponse.put("error","Could not get list of Categories");
+                        response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+                    }
+                    //Map<String,String> updateCategoryResponse=new HashMap<>();
+                    //updateCategoryResponse.put("data","Category deleted succesfully.");
+                    //response= EntityFoundResponse.entityFoundResponseBuilder(updateCategoryResponse);
                 }else{
                     Map<String, String> errorResponse = new HashMap<>();
                     errorResponse.put("error","Could not able to delete Category");
@@ -111,7 +134,7 @@ public class Categories {
         try{
             List<CategoryModel> categorySubCategoryLists = categoryMapper.getCategoryList(fkAssociateId,startLimit,endLimit);
             if(categorySubCategoryLists!= null && !categorySubCategoryLists.isEmpty()){
-               response= EntityFoundResponse.entityFoundResponseBuilder(categorySubCategoryLists);
+                response= EntityFoundResponse.entityFoundResponseBuilder(categorySubCategoryLists);
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error","Could not get list of Categories");
@@ -125,7 +148,9 @@ public class Categories {
 
     @GET
     @Path("/v1/categories/validatecategory")
-    public Response validateCategory(@QueryParam("fkAssociateId") @DefaultValue("5") int fkAssociateId, @QueryParam("categoryName") String categoryName, @QueryParam("subCategoryName") String subCategoryName) {
+    public Response validateCategory(@QueryParam("fkAssociateId") @DefaultValue("5") int fkAssociateId,
+                                     @QueryParam("categoryName") String categoryName,
+                                     @QueryParam("subCategoryName") String subCategoryName) {
         Response response=null;
         CategoryMapper categoryMapper =  new CategoryMapper();
         boolean result = false;
@@ -142,6 +167,40 @@ public class Categories {
             }
         }catch (Exception exception){
             logger.debug("error occured while updating Category post ",exception);
+        }
+        return response;
+    }
+
+    @GET
+    @Path("/v1/categories/validatecategoryurl")
+    public Response validateCategoryUrl(@QueryParam("fkAssociateId")int fkAssociateId, @QueryParam("url") String url) {
+        Response response=null;
+        CategoryMapper categoryMapper =  new CategoryMapper();
+        Map<String, String> validateBlogUrlResult = new HashMap<>();
+        BlogResultModel result ;
+        try{
+            result = categoryMapper.validateCategoryUrl(fkAssociateId, url);
+            if (result.isError()) {
+                if ("urlexist".equalsIgnoreCase(result.getMessage())) {
+                    //result is true, it means (fkAssociateId, url) combination already exist.
+                    //return error as url must be different
+                    validateBlogUrlResult.put("error", "Please choose different url");
+                    validateBlogUrlResult.put("unique", "false");
+                    response = EntityNotFoundResponse.entityNotFoundResponseBuilder(validateBlogUrlResult);
+                }
+                else {//status is not success - some error occured
+                    validateBlogUrlResult.put("error", result.getMessage());
+                    validateBlogUrlResult.put("unique", "false");
+                    response = EntityNotFoundResponse.entityNotFoundResponseBuilder(validateBlogUrlResult);
+                }
+            } else {
+                //url is valid
+                validateBlogUrlResult.put("data", "Selected url is valid");
+                validateBlogUrlResult.put("unique", "true");
+                response = EntityFoundResponse.entityFoundResponseBuilder(validateBlogUrlResult);
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while validating Category url ",exception);
         }
         return response;
     }
