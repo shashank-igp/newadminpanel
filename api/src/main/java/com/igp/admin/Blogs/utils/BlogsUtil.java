@@ -404,7 +404,7 @@ public class BlogsUtil {
                 + " JOIN (select * from blog_categories "+ condition1 +"order by"
                 + " sort_order desc) as bc on bcm.categories_id=bc.categories_id LEFT JOIN blog_post_image bpm ON b.blog_id = bpm.blog_id "
                 + " AND bpm.status = 1 JOIN blog_meta_home bmh ON b.fk_associate_id = bmh.fk_associate_id"
-                + condition2 + " GROUP BY b.blog_id ORDER BY b.sort_order ASC, published_date DESC limit " +start+ "," +end;
+                + condition2 + " GROUP BY b.blog_id ORDER BY b.sort_order is null,b.sort_order ASC, published_date DESC limit " +start+ "," +end;
 
             statementCategories = "select pst.blog_id, bct.categories_id, bct.categories_name, bct.categories_name_for_url ,bct2.categories_id as p_cat_id, bct2.categories_name as p_cat_name, bct2.categories_name_for_url as p_cat_name_for_url from "
                 +"blog_post pst join blog_cat_map bcm on pst.blog_id = bcm.blog_id join blog_categories bct on bcm.categories_id = bct.categories_id "
