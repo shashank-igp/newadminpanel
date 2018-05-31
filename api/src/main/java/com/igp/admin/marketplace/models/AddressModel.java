@@ -82,6 +82,9 @@ public class AddressModel {
     }
 
     public String getTitle() {
+        if(title==null){
+            title="";
+        }
         return title;
     }
 

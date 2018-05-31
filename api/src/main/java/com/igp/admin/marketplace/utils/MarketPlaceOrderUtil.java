@@ -937,11 +937,14 @@ public class MarketPlaceOrderUtil {
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, rlId);
             preparedStatement.setInt(2,fkAsId);
+            logger.debug(" preparedstatement to check order exists : "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.first()) {
                 // when order exists
                 result = true;
                 logger.debug("ORDER-ID ALREADY EXISTS IN ORDERS TABLE, CAN'T TAKE YOUR REQUEST");
+            }else {
+                logger.debug("ORDER-ID DOESN'T EXIST.");
             }
         } catch (Exception exception) {
             logger.error("Exception at check order exists : " + exception);
