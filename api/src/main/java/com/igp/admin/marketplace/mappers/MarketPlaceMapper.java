@@ -784,6 +784,7 @@ public class MarketPlaceMapper {
             try {
                 validationModel = validationModelList1.get(i);
 
+                logger.debug("value of i : "+ i);
                 logger.debug("row number : "+ validationModel.getRowNum());
                 logger.debug("row values : "+ validationModel.toString());
 
@@ -925,7 +926,7 @@ public class MarketPlaceMapper {
             logger.debug("TEMP-ORDER DEBUGGING : " + "setAssociateId "+validationModel.getFkAssociateId());
 
             marketPlaceTempOrderModel.setShippingAddressModel(addressModel);
-            logger.debug("TEMP-ORDER DEBUGGING : " + "setShippingAddressModel");
+            logger.debug("TEMP-ORDER DEBUGGING : " + "setShippingAddressModel" + addressModel.toString());
 
             marketPlaceTempOrderModel.setDeliveryInstr("  ");
             logger.debug("TEMP-ORDER DEBUGGING : " + "setDeliveryInstr"+"   ");
