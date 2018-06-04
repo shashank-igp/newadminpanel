@@ -238,4 +238,31 @@ public class MarketPlaceTempOrderModel {
     public void setIdHash(String idHash) {
         this.idHash = idHash;
     }
+
+    @Override
+    public String toString() {
+        return "MarketPlaceTempOrderModel{" +
+            "customerId=" + customerId +
+            ", idHash='" + idHash + '\'' +
+            ", uniqSrc='" + uniqSrc + '\'' +
+            ", addressBookId=" + addressBookId +
+            ", discount=" + discount +
+            ", discountUSD=" + discountUSD +
+            ", shippingCharges=" + shippingCharges +
+            ", shippingChargesUSD=" + shippingChargesUSD +
+            ", cartValue=" + cartValue +
+            ", cartValueUSD=" + cartValueUSD +
+            ", associateId=" + associateId +
+            ", voucher='" + voucher + '\'' +
+            ", comment='" + comment + '\'' +
+            ", relation='" + relation + '\'' +
+            ", deliveryInstr='" + deliveryInstr + '\'' +
+            ", extraValue='" + extraValue + '\'' +
+            ", shippingAddressModel=" + shippingAddressModel +
+            ", deliveryMessageModel=" + deliveryMessageModel +
+            ", tempOrderId=" + tempOrderId +
+            ", occasionId=" + occasionId +
+            ", deliveryDate='" + deliveryDate + '\'' +
+            '}';
+    }
 }
