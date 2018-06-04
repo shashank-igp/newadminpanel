@@ -738,16 +738,21 @@ public class MarketPlaceOrderUtil {
             headerKeyValueModelList.add(headerKeyValueModel);
             String postData = objectMapper.writeValueAsString(marketPlaceOrderModel);
             String orderRequest = httpRequestUtil.sendCurlRequest(postData, ServerProperties.getPropertyValue("CREATE_ORDER_URL"),headerKeyValueModelList);
+            logger.debug(" create order api response : "+orderRequest);
             generalOrderResponseModel = objectMapper.readValue(orderRequest, GeneralOrderResponseModel.class);
             Map<String, APIOrderResponseModel> orderResponse = generalOrderResponseModel.getData();
             APIOrderResponseModel apiOrderResponseModel = orderResponse.get("payment");
 
-            if(orderResponse.get("error") != null || (apiOrderResponseModel.getOrderId() == 0 || apiOrderResponseModel.getOrderId() == null)){
+            orderId = getGeneratedOrderNum(orderTempModel.getTempOrderId());
+            if(orderId==0){
+
+        //    if(orderResponse.get("error") != null || (apiOrderResponseModel.getOrderId() == 0 || apiOrderResponseModel.getOrderId() == null)){
                 // order is not created
                 throw new Exception("Exception in Order Creation.");
             }else{
                 Integer status;
-                orderId = apiOrderResponseModel.getOrderId();
+              //  orderId = getGeneratedOrderNum(orderTempModel.getTempOrderId());
+               // orderId = apiOrderResponseModel.getOrderId();
                 logger.debug("Orders Created successfully : " + orderId);
                 connection = Database.INSTANCE.getReadWriteConnection();
                 statement = "UPDATE orders SET rl_req_ID = ? , marketplace_data = ? , marketplace_name = ? WHERE orders_id = ?";
@@ -775,7 +780,7 @@ public class MarketPlaceOrderUtil {
             }
         }
         catch (Exception e){
-            logger.error("Exception While Creation of Order : ", e);
+            logger.error("Exception While Creation of Order : "+ e);
             orderId = 0;
         }
         finally {
@@ -1122,5 +1127,27 @@ public class MarketPlaceOrderUtil {
         correctStr = correctStr.trim();
         return correctStr;
     }
-
+    public int getGeneratedOrderNum(int ordersTempId) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        int orderId=0;
+        try {
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            String statement = "select orders_id from orders where orders_temp_id = ?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setInt(1, ordersTempId);
+            resultSet = preparedStatement.executeQuery();
+            if (resultSet.first()) {
+                orderId = resultSet.getInt("orders_id");
+            }
+        } catch (Exception exception) {
+            logger.error("Error", exception);
+        } finally {
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return orderId;
+    }
 }
