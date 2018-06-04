@@ -147,7 +147,7 @@ public class MarketPlaceOrderUtil {
                 }
             }
         } catch (Exception e) {
-            logger.error("Exception at validating Customer Details.", e);
+            logger.error("Exception at validating Customer Details."+ e);
             validationModel.setError(Boolean.TRUE);
             if(e.getMessage().contains("response code")){
                 validationModel.setMessage("Problem in Creating a New Customer.");
@@ -399,12 +399,6 @@ public class MarketPlaceOrderUtil {
                 preparedStatement.setString(3, "f");
             else
                 preparedStatement.setString(3, "");
-            logger.debug("serive charges : " + productModel.getServiceCharge());
-            logger.debug("gift box : " + productModel.getGiftBox());
-            logger.debug("quantity : " + productModel.getQuantity());
-            logger.debug("sellingPrice : " + productModel.getSellingPrice());
-            logger.debug("discount : "+orderTempModel.getDiscount());
-
 
             BigDecimal serviceCharges = productModel.getServiceCharge().add(new BigDecimal(productModel.getGiftBox() * productModel.getQuantity()));// * Environment.getGiftBoxPrice()));
             BigDecimal cartValue = productModel.getSellingPrice().multiply(new BigDecimal(productModel.getQuantity()==null?1:productModel.getQuantity())).add(serviceCharges).subtract(orderTempModel.getDiscount());
@@ -598,7 +592,7 @@ public class MarketPlaceOrderUtil {
         user.setId(0 + "");
         try {
             logger.debug("USER DEBUGGING : " + "email id is "+user.getEmail());
-            connection = Database.INSTANCE.getReadOnlyConnection();
+            connection = Database.INSTANCE.getReadWriteConnection();
             String statement = "SELECT * FROM customers c INNER JOIN n_user n ON n.id = c.customers_id where c.customers_email_address = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, user.getEmail());
@@ -722,7 +716,7 @@ public class MarketPlaceOrderUtil {
             String hash = encryptPayment(hashStringSequence + SecretProperties.getPaymentKey());
             marketPlaceOrderModel.setHash(hash);
 
-            TimeUnit.SECONDS.sleep(1);
+            TimeUnit.MILLISECONDS.sleep(500);
 
             // sleep for a second.
 
@@ -737,11 +731,14 @@ public class MarketPlaceOrderUtil {
             headerKeyValueModel.setValue("BO-Panel");
             headerKeyValueModelList.add(headerKeyValueModel);
             String postData = objectMapper.writeValueAsString(marketPlaceOrderModel);
+            logger.debug(" create order postdata : "+postData);
             String orderRequest = httpRequestUtil.sendCurlRequest(postData, ServerProperties.getPropertyValue("CREATE_ORDER_URL"),headerKeyValueModelList);
             logger.debug(" create order api response : "+orderRequest);
             generalOrderResponseModel = objectMapper.readValue(orderRequest, GeneralOrderResponseModel.class);
             Map<String, APIOrderResponseModel> orderResponse = generalOrderResponseModel.getData();
             APIOrderResponseModel apiOrderResponseModel = orderResponse.get("payment");
+
+            TimeUnit.MILLISECONDS.sleep(500);
 
             orderId = getGeneratedOrderNum(orderTempModel.getTempOrderId());
             if(orderId==0){
@@ -845,7 +842,13 @@ public class MarketPlaceOrderUtil {
         ResultSet resultSet = null;
         try {
             connection = Database.INSTANCE.getReadOnlyConnection();
-            String statement = "select p.products_code from products p left join prep_ticket_index f on f.fk_products_id = p.products_id left join prep_sku_attribution a on f.id = a.prep_id left join prep_sku s on s.prep_sku_id = f.id left join prep_ticket_index b on b.id = s.prep_id where ((a.festival_config like '96|%' or a.festival_config like '%|96|%') and ( b.barcode = ? or b.barcode = concat('IGP-',?) ) ) or (p.products_code = ?) order by p.products_id desc limit 1";
+            String statement = "select p.products_code from products p left join " +
+                "prep_ticket_index f on f.fk_products_id = p.products_id left join " +
+                "prep_sku_attribution a on f.id = a.prep_id left join prep_sku s on s.prep_sku_id = f.id " +
+                "left join prep_ticket_index b on b.id = s.prep_id where " +
+                "((a.festival_config like '96|%' or a.festival_config like '%|96|%') and " +
+                "( b.barcode = ? or b.barcode = concat('IGP-',?) ) ) or (p.products_code = ?) " +
+                "order by p.products_id desc limit 1";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1, productCode);
             preparedStatement.setString(2, productCode);
@@ -1057,7 +1060,7 @@ public class MarketPlaceOrderUtil {
             if (addressModel.getRelation() != null) {
                 selectRel = "AND a.entry_relation = ?";
             }
-            connection = Database.INSTANCE.getReadOnlyConnection();
+            connection = Database.INSTANCE.getReadWriteConnection();
             String statement = "SELECT * FROM address_book as a LEFT JOIN address_book_to_customers as b ON a.address_book_id = b.address_book_id" +
                 " LEFT JOIN address_book_extra_info as c ON b.address_book_id = c.address_book_id WHERE a.entry_gender = ? AND " +
                 " a.entry_firstname = ? AND a.entry_lastname = ? AND  a.entry_street_address = ? AND  " +
@@ -1133,10 +1136,11 @@ public class MarketPlaceOrderUtil {
         ResultSet resultSet = null;
         int orderId=0;
         try {
-            connection = Database.INSTANCE.getReadOnlyConnection();
+            connection = Database.INSTANCE.getReadWriteConnection();
             String statement = "select orders_id from orders where orders_temp_id = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1, ordersTempId);
+            logger.debug(" prepared statement of find order : "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
             if (resultSet.first()) {
                 orderId = resultSet.getInt("orders_id");
@@ -1148,6 +1152,8 @@ public class MarketPlaceOrderUtil {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
         }
+        logger.debug(" order id is  : "+orderId);
+
         return orderId;
     }
 }
