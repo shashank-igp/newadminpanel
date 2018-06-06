@@ -416,9 +416,9 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setString(14, orderTempModel.getDeliveryInstr());
             preparedStatement.setString(15, orderTempModel.getDeliveryDate());
             preparedStatement.setString(16, orderTempModel.getExtraValue());
-            preparedStatement.setBigDecimal(17, CurrencyConversionUtil.getUsdPrice(cartValue, 2));
-            preparedStatement.setBigDecimal(18, CurrencyConversionUtil.getUsdPrice(orderTempModel.getDiscount(), 2));
-            preparedStatement.setBigDecimal(19, CurrencyConversionUtil.getUsdPrice(serviceCharges, 2));
+            preparedStatement.setBigDecimal(17, CurrencyConversionUtil.getConvertedPrice(cartValue,"INR","USD"));
+            preparedStatement.setBigDecimal(18, CurrencyConversionUtil.getConvertedPrice(orderTempModel.getDiscount(), "INR","USD"));
+            preparedStatement.setBigDecimal(19, CurrencyConversionUtil.getConvertedPrice(serviceCharges, "INR","USD"));
             preparedStatement.setBigDecimal(20, serviceCharges);
             preparedStatement.setString(21, orderTempModel.getShippingAddressModel().getMobile());
             preparedStatement.setInt(22, orderTempModel.getAssociateId());
