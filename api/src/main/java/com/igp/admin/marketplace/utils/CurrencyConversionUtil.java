@@ -1,17 +1,10 @@
 package com.igp.admin.marketplace.utils;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.igp.admin.marketplace.models.CurrencyMappingModel;
-import com.igp.config.Environment;
-import com.igp.config.RedisKeys;
 import com.igp.config.instance.Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Connection;
