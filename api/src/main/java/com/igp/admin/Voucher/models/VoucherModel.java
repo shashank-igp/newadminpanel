@@ -14,6 +14,12 @@ public class VoucherModel {
     @JsonProperty("vouchercode")
     private String voucherCode;
 
+    @JsonProperty("createdby")
+    private String createdBy;
+
+    @JsonProperty("modifiedby")
+    private String modifiedBy;
+
     @JsonProperty("vouchervalue")
     private int voucherValue;
 
@@ -45,7 +51,7 @@ public class VoucherModel {
     private String expiryDate;
 
     @JsonProperty("applicableemail")
-    private String applicableEmail;
+    private List<String> applicableEmail;
 
     @JsonProperty("ordervaluecheck")
     private int orderValueCheck;
@@ -85,6 +91,22 @@ public class VoucherModel {
 
     public void setVoucherCode(String voucherCode) {
         this.voucherCode = voucherCode;
+    }
+
+    public String getCreatedBy() {
+        return createdBy;
+    }
+
+    public void setCreatedBy(String createdBy) {
+        this.createdBy = createdBy;
+    }
+
+    public String getModifiedBy() {
+        return modifiedBy;
+    }
+
+    public void setModifiedBy(String modifiedBy) {
+        this.modifiedBy = modifiedBy;
     }
 
     public int getVoucherValue() {
@@ -168,11 +190,11 @@ public class VoucherModel {
     }
 
 
-    public String getApplicableEmail() {
+    public List<String> getApplicableEmail() {
         return applicableEmail;
     }
 
-    public void setApplicableEmail(String applicableEmail) {
+    public void setApplicableEmail(List<String> applicableEmail) {
         this.applicableEmail = applicableEmail;
     }
 
