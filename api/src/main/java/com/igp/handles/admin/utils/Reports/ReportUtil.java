@@ -571,10 +571,10 @@ public class ReportUtil {
                 String statement;
 
                 connection = Database.INSTANCE.getReadOnlyConnection();
-                queryTotal="select count(*) as totalno from associate as a JOIN associate_user as au ON a.associate_id = au.fk_associate_login_id JOIN vendor_extra_info as v ON au.fk_associate_login_id = v.associate_id where v.type=2 and a.associate_status=1";
+                queryTotal="select count(*) as totalno from associate as a JOIN associate_user as au ON a.associate_id = au.fk_associate_login_id JOIN vendor_extra_info as v ON au.fk_associate_login_id = v.associate_id where v.type=2";
                 statement = " select * from associate as a JOIN associate_user as au ON " +
                     "a.associate_id = au.fk_associate_login_id JOIN vendor_extra_info as v ON " +
-                    "au.fk_associate_login_id = v.associate_id where v.type=2 and a.associate_status=1 limit " + startLimit + "," + endLimit + " ";
+                    "au.fk_associate_login_id = v.associate_id where v.type=2 limit " + startLimit + "," + endLimit + " ";
                 preparedStatement = connection.prepareStatement(statement);
                 logger.debug("sql query in getVendorDetails " + preparedStatement);
 
