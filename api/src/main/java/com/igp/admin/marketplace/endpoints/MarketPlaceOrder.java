@@ -13,7 +13,9 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +40,9 @@ public class MarketPlaceOrder {
         ErrorModel errorModel = new ErrorModel();
         List<ErrorModel> errorModelList = new ArrayList<>();
         try{
+            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+            Date date = new Date();
+            logger.debug("file uploaded : "+formatter.format(date));
             int fkAssociateId = marketPlaceMapper.findVendor(userValue);
             if(fkAssociateId!=0 && loginId == 1 ) {
                 // parse the excel file.
