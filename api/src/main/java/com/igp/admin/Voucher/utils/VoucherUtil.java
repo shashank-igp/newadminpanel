@@ -339,7 +339,7 @@ public class VoucherUtil {
                 String whiteList = resultSet.getString("nv.white_list_pt");
                 List<Integer> blackarray = new ArrayList<>();
                 List<Integer> whitearray = new ArrayList<>();
-                if(blackList!=null){
+                if(blackList!=null && !blackList.isEmpty()){
                     String split[] = blackList.split(",");
                     int i=split.length-1;
                     while(i>0){
@@ -348,7 +348,7 @@ public class VoucherUtil {
                     }
                     blackarray.add(new Integer(split[i]));
                 }
-                if(whiteList!=null){
+                if(whiteList!=null && !whiteList.isEmpty()){
                     String split[] = whiteList.split(",");
                     int i=split.length-1;
                     while(i>0){
@@ -359,7 +359,7 @@ public class VoucherUtil {
                 }
                 String emailList = resultSet.getString("nv.email");
                 List<String> emailarray = new ArrayList<>();
-                if(emailList!=null){
+                if(emailList!=null && !emailList.isEmpty()){
                     String split[] = emailList.split(",");
                     int i=split.length-1;
                     while(i>0){
