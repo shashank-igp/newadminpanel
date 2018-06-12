@@ -1,5 +1,6 @@
 package com.igp.admin.Voucher.utils;
 
+import com.igp.admin.Voucher.models.VoucherListModel;
 import com.igp.admin.Voucher.models.VoucherModel;
 import com.igp.config.instance.Database;
 import org.slf4j.Logger;
@@ -230,8 +231,8 @@ public class VoucherUtil {
             logger.debug("preparedstatement of delete Voucher_post : "+preparedStatement);
             Integer status = preparedStatement.executeUpdate();
             if (status != 0){
-                    result = true;
-                    logger.debug("voucher disabled from voucher with id : "+id);
+                result = true;
+                logger.debug("voucher disabled from voucher with id : "+id);
             }
 
         }catch (Exception exception){
@@ -270,24 +271,40 @@ public class VoucherUtil {
         }
         return  firstHalfVoucher+lastHalfVoucher;
     }
-    public List<VoucherModel> getVoucherList(int id, int start, int end){
+    public VoucherListModel getVoucherList(int id, int fkAssociateId, int start, int end){
         Connection connection = null;
         String statement,condition="";
         ResultSet resultSet =  null;
         PreparedStatement preparedStatement=null;
         List<VoucherModel> voucherModelList = new ArrayList<>();
+        VoucherListModel voucherListModel = new VoucherListModel();
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             if(id != -1){
                 condition = " where v.id= "+id;
+            }else if(fkAssociateId != -1){
+                condition = " where v.affiliate_id= "+fkAssociateId;
             }
-            statement = "SELECT * from voucher v JOIN newigp_voucher_extra_info nv ON v.id = nv.fk_voucher_id "+condition+" limit ?,?";
+
+            String queryTotal="select count(*) as totalno  from voucher v LEFT JOIN newigp_voucher_extra_info nv ON v.id = nv.fk_voucher_id "+condition;
+            preparedStatement = connection.prepareStatement(queryTotal);
+            logger.debug("preparedstatement of voucher list : "+preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            if(resultSet.first()){
+                int count = resultSet.getInt("totalno");
+                voucherListModel.setCount(count);
+            }
+
+            statement = "SELECT * from voucher v LEFT JOIN newigp_voucher_extra_info nv ON" +
+                " v.id = nv.fk_voucher_id "+condition+" limit ?,?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,start);
             preparedStatement.setInt(2,end);
             logger.debug("preparedstatement of voucher list : "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
+
             while (resultSet.next()) {
+                try{
                 VoucherModel voucherModel = new VoucherModel();
                 String blackList = resultSet.getString("nv.black_list_pt");
                 String whiteList = resultSet.getString("nv.white_list_pt");
@@ -325,34 +342,39 @@ public class VoucherUtil {
 
                 DateFormat df = new SimpleDateFormat("dd/MM/YYYY hh:mm:ss");
                 DateFormat df1 = new SimpleDateFormat("dd/MM/yyyy");
-          //      Date date = df.parse(resultSet.getString("v.expiry_date"));
-          //      String text = df1.format(date);
+                //      Date date = df.parse(resultSet.getString("v.expiry_date"));
+                //      String text = df1.format(date);
 
 
-                voucherModel.setId(resultSet.getInt("v.id"));
-                voucherModel.setVoucherCode(resultSet.getString("v.voucher_code"));
-                voucherModel.setVoucherValue(resultSet.getInt("v.discount"));
-                voucherModel.setFkAssociateId(resultSet.getInt("v.affiliate_id"));
-                voucherModel.setComment(resultSet.getString("v.comment"));
-                voucherModel.setMultipleUsage(resultSet.getInt("v.multiple_usage"));
-                voucherModel.setEnabled(resultSet.getInt("v.enabled"));
-                voucherModel.setUsedCount(resultSet.getInt("v.used_count"));
-                voucherModel.setApplicableCategory(resultSet.getString("v.applicable_category"));
-                voucherModel.setVoucherType(resultSet.getInt("v.coupon_type"));
-                voucherModel.setApplicableVoucherType(resultSet.getInt("nv.coupon_type"));
-                voucherModel.setApplicableEmail(emailarray);
-                voucherModel.setOrderValue(resultSet.getInt("nv.total_order_value"));
-                voucherModel.setOrderValueCheck(resultSet.getInt("nv.order_value_check"));
-                voucherModel.setShippingWaiverType(resultSet.getInt("nv.shipping_waiver_type"));
-                voucherModel.setProductQuant(resultSet.getString("nv.product_quant"));
-                voucherModel.setApplicablePid(resultSet.getString("nv.applicable_pid"));
-                voucherModel.setCreatedBy(resultSet.getString("nv.created_by"));
-                voucherModel.setModifiedBy(resultSet.getString("nv.modified_by"));
-                voucherModel.setBlackListPts(blackarray);
-                voucherModel.setWhiteListPts(whitearray);
-                // date created,expiry
-                voucherModelList.add(voucherModel);
+                    voucherModel.setId(resultSet.getInt("v.id"));
+                    voucherModel.setVoucherCode(resultSet.getString("v.voucher_code"));
+                    voucherModel.setVoucherValue(resultSet.getInt("v.discount"));
+                    voucherModel.setFkAssociateId(resultSet.getInt("v.affiliate_id"));
+                    voucherModel.setComment(resultSet.getString("v.comment"));
+                    voucherModel.setMultipleUsage(resultSet.getInt("v.multiple_usage"));
+                    voucherModel.setEnabled(resultSet.getInt("v.enabled"));
+                    voucherModel.setUsedCount(resultSet.getInt("v.used_count"));
+                    voucherModel.setApplicableCategory(resultSet.getString("v.applicable_category"));
+                    voucherModel.setVoucherType(resultSet.getInt("v.coupon_type"));
+                    voucherModel.setApplicableVoucherType(resultSet.getInt("nv.coupon_type"));
+                    voucherModel.setApplicableEmail(emailarray);
+                    voucherModel.setOrderValue(resultSet.getInt("nv.total_order_value"));
+                    voucherModel.setOrderValueCheck(resultSet.getInt("nv.order_value_check"));
+                    voucherModel.setShippingWaiverType(resultSet.getInt("nv.shipping_waiver_type"));
+                    voucherModel.setProductQuant(resultSet.getString("nv.product_quant"));
+                    voucherModel.setApplicablePid(resultSet.getString("nv.applicable_pid"));
+                    voucherModel.setCreatedBy(resultSet.getString("nv.created_by"));
+                    voucherModel.setModifiedBy(resultSet.getString("nv.modified_by"));
+                    //            voucherModel.setExpiryDate(resultSet.getString("DATE_FORMAT(b.published_date,'%d-%b-%Y')"));
+                    voucherModel.setBlackListPts(blackarray);
+                    voucherModel.setWhiteListPts(whitearray);
+                    // date created,expiry
+                    voucherModelList.add(voucherModel);
+                }catch (Exception exception){
+                    logger.debug("error occured while getting voucher list : "+exception);
+                }
             }
+            voucherListModel.setVoucherModelList(voucherModelList);
 
         }catch (Exception exception){
             logger.debug("error occured while getting voucher list : "+exception);
@@ -361,7 +383,7 @@ public class VoucherUtil {
             Database.INSTANCE.closeConnection(connection);
             Database.INSTANCE.closeResultSet(resultSet);
         }
-        return voucherModelList;
+        return voucherListModel;
     }
 
 

@@ -1,6 +1,7 @@
 package com.igp.admin.Voucher.endpoints;
 
 import com.igp.admin.Voucher.mappers.VoucherMapper;
+import com.igp.admin.Voucher.models.VoucherListModel;
 import com.igp.admin.Voucher.models.VoucherModel;
 import com.igp.admin.response.EntityFoundResponse;
 import com.igp.admin.response.EntityNotFoundResponse;
@@ -94,13 +95,13 @@ public class Voucher {
     public Response getVoucherlist(@DefaultValue("-1") @QueryParam("fkAssociateId") int fkAssociateId,
                                 @DefaultValue("-1") @QueryParam("id") int id,
                                 @DefaultValue("0") @QueryParam("startLimit") int startLimit,
-                                @DefaultValue("1000") @QueryParam("endLimit") int endLimit) {
+                                @DefaultValue("2000") @QueryParam("endLimit") int endLimit) {
         Response response=null;
         VoucherMapper voucherMapper=new VoucherMapper();
 
         try{
-            List<VoucherModel>  voucherModelList= voucherMapper.getVoucherList(id,startLimit,endLimit);
-            if(voucherModelList.size()!=0 && !voucherModelList.isEmpty()){
+           VoucherListModel voucherModelList= voucherMapper.getVoucherList(id,fkAssociateId,startLimit,endLimit);
+            if(voucherModelList.getVoucherModelList().size()!=0 && !voucherModelList.getVoucherModelList().isEmpty()){
                 response= EntityFoundResponse.entityFoundResponseBuilder(voucherModelList);
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
