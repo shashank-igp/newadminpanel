@@ -12,7 +12,6 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -110,6 +109,30 @@ public class Voucher {
             }
         }catch (Exception exception){
             logger.debug("error occured while get list of Vouchers "+exception);
+        }
+        return response;
+    }
+
+    @GET
+    @Path("/v1/voucher/validatevoucher")
+    public Response validateCategory(@QueryParam("fkAssociateId") @DefaultValue("5") int fkAssociateId,
+                                     @QueryParam("vouchercode") String vouchercode) {
+        Response response=null;
+        boolean result = false;
+        VoucherMapper voucherMapper = new VoucherMapper();
+        try{
+            result = voucherMapper.validateVoucher(fkAssociateId,vouchercode);
+            if(result==false){
+                Map<String,String> validateCategoryResponse=new HashMap<>();
+                validateCategoryResponse.put("data","Voucher code doesn't exist.");
+                response = EntityFoundResponse.entityFoundResponseBuilder(validateCategoryResponse);
+            }else{
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error","Voucher already exists.");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while validating voucher "+exception);
         }
         return response;
     }
