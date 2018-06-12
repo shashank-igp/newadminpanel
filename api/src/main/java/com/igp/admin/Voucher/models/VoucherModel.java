@@ -158,11 +158,15 @@ public class VoucherModel {
     }
 
     public String getApplicableCategory() {
+        if(applicableCategory==null){
+            applicableCategory="";
+        }
         return applicableCategory;
     }
 
     public void setApplicableCategory(String applicableCategory) {
-        this.applicableCategory = applicableCategory;
+
+            this.applicableCategory = applicableCategory;
     }
 
     public int getVoucherType() {

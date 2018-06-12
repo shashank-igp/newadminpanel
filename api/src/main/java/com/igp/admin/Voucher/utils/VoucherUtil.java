@@ -244,6 +244,35 @@ public class VoucherUtil {
         return result;
     }
 
+    public boolean validateVoucher(int fkAssociateId, String voucherCode){
+        boolean result = false;
+        Connection connection = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try{
+            connection = Database.INSTANCE.getReadWriteConnection();
+            statement="SELECT id FROM voucher WHERE voucher_code = ? and affiliate_id=?";
+            preparedStatement = connection.prepareStatement(statement);
+            preparedStatement.setString(1,voucherCode);
+            preparedStatement.setInt(2, fkAssociateId);
+            logger.debug("preparedstatement of validate Voucher : "+preparedStatement);
+           resultSet = preparedStatement.executeQuery();
+            if (resultSet.first()){
+                result = true;
+                logger.debug("voucher code already exists : "+voucherCode);
+            }
+
+        }catch (Exception exception){
+            logger.debug("error occured while disabling Voucher "+exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return result;
+    }
+
 
     public static String generateVoucherCodeFromCustomerName(String email){
         String firstHalfVoucher="",lastHalfVoucher="",random="";
@@ -286,7 +315,7 @@ public class VoucherUtil {
                 condition = " where v.affiliate_id= "+fkAssociateId;
             }
 
-            String queryTotal="select count(*) as totalno  from voucher v LEFT JOIN newigp_voucher_extra_info nv ON v.id = nv.fk_voucher_id "+condition;
+            String queryTotal="select count(*) as totalno  from voucher v JOIN newigp_voucher_extra_info nv ON v.id = nv.fk_voucher_id "+condition;
             preparedStatement = connection.prepareStatement(queryTotal);
             logger.debug("preparedstatement of voucher list : "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
@@ -295,7 +324,7 @@ public class VoucherUtil {
                 voucherListModel.setCount(count);
             }
 
-            statement = "SELECT * from voucher v LEFT JOIN newigp_voucher_extra_info nv ON" +
+            statement = "SELECT * from voucher v JOIN newigp_voucher_extra_info nv ON" +
                 " v.id = nv.fk_voucher_id "+condition+" limit ?,?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,start);

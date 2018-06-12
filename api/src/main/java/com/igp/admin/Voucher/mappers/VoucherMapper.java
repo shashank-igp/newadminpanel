@@ -49,7 +49,17 @@ public class VoucherMapper {
         return result;
     }
 
-    
+    public boolean validateVoucher(int fkAssociateId, String voucherCode){
+
+        VoucherUtil voucherUtil=new VoucherUtil();
+        boolean result = false;
+        try{
+            result = voucherUtil.validateVoucher(fkAssociateId,voucherCode);
+        }catch (Exception exception){
+            logger.debug("error occured while validating Voucher "+exception);
+        }
+        return result;
+    }
     public VoucherListModel getVoucherList(int id, int fkAssociateId, int start, int end){
         VoucherUtil voucherUtil=new VoucherUtil();
         VoucherListModel voucherModelList = new VoucherListModel();
