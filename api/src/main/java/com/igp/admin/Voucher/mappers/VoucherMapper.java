@@ -36,12 +36,12 @@ public class VoucherMapper {
         return result;
     }
 
-    public boolean deleteVoucher(int id){
+    public boolean deleteVoucher(int id, String modifiedBy){
 
         boolean result = false;
         VoucherUtil voucherUtil=new VoucherUtil();
         try{
-            result = voucherUtil.deleteVoucher(id);
+            result = voucherUtil.deleteVoucher(id,modifiedBy);
         }catch (Exception exception){
             logger.debug("error occured while deleting Voucher "+exception);
         }

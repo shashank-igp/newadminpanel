@@ -48,7 +48,6 @@ public class Voucher {
     public Response updateVoucher(VoucherModel voucherModel) {
         Response response=null;
         VoucherMapper voucherMapper = new VoucherMapper();
-        VoucherModel VoucherModel = new VoucherModel();
         try{
             boolean result = voucherMapper.updateVoucher(voucherModel);
             if(result==true){
@@ -57,7 +56,7 @@ public class Voucher {
                 response= EntityFoundResponse.entityFoundResponseBuilder(updateVoucherResponse);
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
-            //    errorResponse.put("error",VoucherModel.getMessage());
+                errorResponse.put("error","voucher could't be updated.");
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
         }catch (Exception exception){
@@ -67,15 +66,16 @@ public class Voucher {
     }
     @DELETE
     @Path("/v1/voucher/deletevoucher")
-    public Response deleteVoucher(@DefaultValue("-1") @QueryParam("id") int id) {
+    public Response deleteVoucher(@DefaultValue("-1") @QueryParam("id") int id,
+                                  @DefaultValue("") @QueryParam("modifiedby") String modifiedBy) {
         Response response=null;
         VoucherMapper voucherMapper = new VoucherMapper();
         boolean result = false;
         try{
-            result = voucherMapper.deleteVoucher(id);
+            result = voucherMapper.deleteVoucher(id,modifiedBy);
             if(result==true){
                 Map<String,String> deleteVoucherResponse=new HashMap<>();
-                deleteVoucherResponse.put("data","Voucher deleted succesfully.");
+                deleteVoucherResponse.put("result","Voucher deleted succesfully.");
                 response= EntityFoundResponse.entityFoundResponseBuilder(deleteVoucherResponse);
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
@@ -83,7 +83,7 @@ public class Voucher {
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
         }catch (Exception exception){
-            logger.debug("error occured while deleting Voucher post ",exception);
+            logger.debug("error occured while deleting Voucher "+exception);
         }
         return response;
     }

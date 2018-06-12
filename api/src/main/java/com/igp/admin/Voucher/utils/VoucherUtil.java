@@ -170,21 +170,21 @@ public class VoucherUtil {
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1,voucherModel.getVoucherCode()); //voucher code
             preparedStatement.setDate(2,sqlDate); // expiry date
-            preparedStatement.setInt(2,voucherModel.getVoucherValue());   // discount percentage
-            preparedStatement.setInt(3,voucherModel.getFkAssociateId());  // affiliate
-            preparedStatement.setString(4,voucherModel.getComment());  // comment
-            preparedStatement.setInt(5,voucherModel.getMultipleUsage()); //  multiple usage
-            preparedStatement.setInt(6,voucherModel.getEnabled());  // enabled
-            preparedStatement.setInt(7,voucherModel.getUsedCount() );  // used_count
-            preparedStatement.setString(8,voucherModel.getApplicableCategory()); // applicable category
-            preparedStatement.setInt(9,voucherModel.getVoucherType()); // coupon type corporate
-            preparedStatement.setInt(10,voucherModel.getId());
+            preparedStatement.setInt(3,voucherModel.getVoucherValue());   // discount percentage
+            preparedStatement.setInt(4,voucherModel.getFkAssociateId());  // affiliate
+            preparedStatement.setString(5,voucherModel.getComment());  // comment
+            preparedStatement.setInt(6,voucherModel.getMultipleUsage()); //  multiple usage
+            preparedStatement.setInt(7,voucherModel.getEnabled());  // enabled
+            preparedStatement.setInt(8,voucherModel.getUsedCount() );  // used_count
+            preparedStatement.setString(9,voucherModel.getApplicableCategory()); // applicable category
+            preparedStatement.setInt(10,voucherModel.getVoucherType()); // coupon type corporate
+            preparedStatement.setInt(11,voucherModel.getId());
 
             logger.debug("preparedstatement of update Voucher_post : "+preparedStatement);
             int  status = preparedStatement.executeUpdate();
             statement2 ="UPDATE newigp_voucher_extra_info SET coupon_type=?,email=?," +
                 "total_order_value=?,black_list_pt=?,white_list_pt=?,shipping_waiver_type=?," +
-                "order_value_check=?,applicable_pid=?,product_quant=?) where fk_voucher_id=? ";
+                "order_value_check=?,applicable_pid=?,product_quant=? where fk_voucher_id=? ";
             preparedStatement=connection.prepareStatement(statement2);
             preparedStatement.setInt(1,voucherModel.getApplicableVoucherType()); // coupon type : 0-noEmail, 1-emailList, 2-domainBased
             preparedStatement.setString(2,email);
@@ -201,53 +201,41 @@ public class VoucherUtil {
             Integer status2 = preparedStatement.executeUpdate();
             if(status==1 || status2==1){
                 result=true;
+                connection.commit();
+            } else {
+                connection.rollback();
+                logger.error("Exception in updating voucher2");
             }
 
         }catch (Exception exception){
-            logger.debug("error occured while updating Voucher post ",exception);
+            logger.debug("error occured while updating Voucher: "+exception);
         }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
         }
         return result;
     }
-    public boolean deleteVoucher(int id){
+    public boolean deleteVoucher(int id, String modifiedBy){
         boolean result = false;
         Connection connection = null;
         String statement;
         PreparedStatement preparedStatement = null;
         try{
             connection = Database.INSTANCE.getReadWriteConnection();
-            statement="DELETE FROM Voucher_post WHERE Voucher_id = ?";
+            statement="UPDATE voucher v JOIN newigp_voucher_extra_info nv ON " +
+                " v.id = nv.fk_voucher_id SET enabled =0, modified_by=? WHERE id = ?";
             preparedStatement = connection.prepareStatement(statement);
-            preparedStatement.setInt(1, id);
+            preparedStatement.setString(1,modifiedBy);
+            preparedStatement.setInt(2, id);
             logger.debug("preparedstatement of delete Voucher_post : "+preparedStatement);
-
             Integer status = preparedStatement.executeUpdate();
             if (status != 0){
-
-                statement="DELETE FROM Voucher_post_image WHERE Voucher_id = ?";
-                preparedStatement = connection.prepareStatement(statement);
-                preparedStatement.setInt(1, id);
-                logger.debug("preparedstatement of delete Voucher_post_image : "+preparedStatement);
-                status = preparedStatement.executeUpdate();
-
-                statement="DELETE FROM Voucher_cat_map WHERE Voucher_id = ?";
-                preparedStatement = connection.prepareStatement(statement);
-                preparedStatement.setInt(1, id);
-                logger.debug("preparedstatement of delete Voucher_cat_map : "+preparedStatement);
-                status = preparedStatement.executeUpdate();
-
-                if (status == 0) {
-                    logger.error("Failed to delete Voucher post");
-                } else {
                     result = true;
-                    logger.debug("Voucher post deleted from Voucher_post_image with id : "+id);
-                }
+                    logger.debug("voucher disabled from voucher with id : "+id);
             }
 
         }catch (Exception exception){
-            logger.debug("error occured while deleting Voucher post ",exception);
+            logger.debug("error occured while disabling Voucher "+exception);
         }finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
