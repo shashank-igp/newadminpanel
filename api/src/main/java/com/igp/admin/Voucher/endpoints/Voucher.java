@@ -32,7 +32,14 @@ public class Voucher {
         try{
             boolean result = voucherMapper.createVoucher(voucherModel);
             if(result==true){
-                response= EntityFoundResponse.entityFoundResponseBuilder("true ");
+                VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,voucherModel.getFkAssociateId(),0,2000);
+                if(voucherModelList!= null && voucherModelList.getVoucherModelList() != null && !voucherModelList.getVoucherModelList().isEmpty()){
+                    response= EntityFoundResponse.entityFoundResponseBuilder(voucherModelList);
+                }else{
+                    Map<String, String> errorResponse = new HashMap<>();
+                    errorResponse.put("error","Could not get list of vouchers");
+                    response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+                }
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error","Voucher not created.");
@@ -51,9 +58,14 @@ public class Voucher {
         try{
             boolean result = voucherMapper.updateVoucher(voucherModel);
             if(result==true){
-                Map<String,String> updateVoucherResponse=new HashMap<>();
-                updateVoucherResponse.put("data","Voucher updated succesfully.");
-                response= EntityFoundResponse.entityFoundResponseBuilder(updateVoucherResponse);
+                VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,voucherModel.getFkAssociateId(),0,2000);
+                if(voucherModelList!= null && voucherModelList.getVoucherModelList() != null && !voucherModelList.getVoucherModelList().isEmpty()){
+                    response= EntityFoundResponse.entityFoundResponseBuilder(voucherModelList);
+                }else{
+                    Map<String, String> errorResponse = new HashMap<>();
+                    errorResponse.put("error","Could not get list of vouchers");
+                    response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+                }
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error","voucher could't be updated.");
@@ -67,6 +79,7 @@ public class Voucher {
     @DELETE
     @Path("/v1/voucher/deletevoucher")
     public Response deleteVoucher(@DefaultValue("-1") @QueryParam("id") int id,
+                                    @QueryParam("fkAssociateId") int fkAssociateId,
                                   @DefaultValue("") @QueryParam("modifiedby") String modifiedBy) {
         Response response=null;
         VoucherMapper voucherMapper = new VoucherMapper();
@@ -74,9 +87,14 @@ public class Voucher {
         try{
             result = voucherMapper.deleteVoucher(id,modifiedBy);
             if(result==true){
-                Map<String,String> deleteVoucherResponse=new HashMap<>();
-                deleteVoucherResponse.put("result","Voucher deleted succesfully.");
-                response= EntityFoundResponse.entityFoundResponseBuilder(deleteVoucherResponse);
+                VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,fkAssociateId,0,2000);
+                if(voucherModelList!= null && voucherModelList.getVoucherModelList() != null && !voucherModelList.getVoucherModelList().isEmpty()){
+                    response= EntityFoundResponse.entityFoundResponseBuilder(voucherModelList);
+                }else{
+                    Map<String, String> errorResponse = new HashMap<>();
+                    errorResponse.put("error","Could not get list of vouchers");
+                    response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+                }
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error","Could not delete Voucher");
