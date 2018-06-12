@@ -1,4 +1,5 @@
 package com.igp.admin.Voucher.mappers;
+import com.igp.admin.Voucher.models.VoucherListModel;
 import com.igp.admin.Voucher.models.VoucherModel;
 import com.igp.admin.Voucher.utils.VoucherUtil;
 import org.slf4j.Logger;
@@ -49,11 +50,11 @@ public class VoucherMapper {
     }
 
     
-    public List<VoucherModel> getVoucherList(int id, int start, int end){
+    public VoucherListModel getVoucherList(int id, int fkAssociateId, int start, int end){
         VoucherUtil voucherUtil=new VoucherUtil();
-        List<VoucherModel> voucherModelList = new ArrayList<>();
+        VoucherListModel voucherModelList = new VoucherListModel();
         try{
-            voucherModelList = voucherUtil.getVoucherList(id,start,end);
+           voucherModelList = voucherUtil.getVoucherList(id,fkAssociateId,start,end);
         }catch (Exception exception){
             logger.debug("error occured while getVoucherList. "+exception);
         }
