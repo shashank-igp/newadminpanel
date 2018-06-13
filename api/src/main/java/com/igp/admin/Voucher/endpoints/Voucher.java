@@ -12,6 +12,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -151,6 +152,30 @@ public class Voucher {
             }
         }catch (Exception exception){
             logger.debug("error occured while validating voucher "+exception);
+        }
+        return response;
+    }
+
+
+
+    @GET
+    @Path("/v1/voucher/getExistingBlackListProdCats")
+    public Response getExistingBlackListProdCats() {
+        Response response=null;
+        VoucherMapper voucherMapper=new VoucherMapper();
+        List<String> blackList = null;
+
+        try{
+            blackList = voucherMapper.getExistingBlackListProdCats();
+            if(blackList != null && !blackList.isEmpty()){
+                response= EntityFoundResponse.entityFoundResponseBuilder(blackList);
+            }else{
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error","Not able to get list of black list product categories");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while get list of Vouchers "+exception);
         }
         return response;
     }

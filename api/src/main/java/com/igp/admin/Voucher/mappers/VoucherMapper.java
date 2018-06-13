@@ -5,7 +5,6 @@ import com.igp.admin.Voucher.utils.VoucherUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -69,6 +68,16 @@ public class VoucherMapper {
             logger.debug("error occured while getVoucherList. "+exception);
         }
         return voucherModelList;
+    }
+    public List<String> getExistingBlackListProdCats(){
+        VoucherUtil voucherUtil=new VoucherUtil();
+        List<String> blackList = null;
+        try{
+            blackList = voucherUtil.getExistingBlackListProdCats();
+        }catch (Exception exception){
+            logger.debug("error occured while getVoucherList. "+exception);
+        }
+        return blackList;
     }
     
 }
