@@ -321,7 +321,7 @@ public class VoucherUtil {
                 condition = " where v.affiliate_id= "+fkAssociateId;
             }
 
-            String queryTotal="select count(*) as totalno  from voucher v JOIN newigp_voucher_extra_info nv ON v.id = nv.fk_voucher_id "+condition;
+            String queryTotal="select count(*) as totalno from voucher v JOIN newigp_voucher_extra_info nv ON v.id = nv.fk_voucher_id "+condition;
             preparedStatement = connection.prepareStatement(queryTotal);
             logger.debug("preparedstatement of voucher list : "+preparedStatement);
             resultSet = preparedStatement.executeQuery();
@@ -331,7 +331,7 @@ public class VoucherUtil {
             }
 
             statement = "SELECT * from voucher v JOIN newigp_voucher_extra_info nv ON" +
-                " v.id = nv.fk_voucher_id "+condition+" limit ?,?";
+                " v.id = nv.fk_voucher_id "+condition+" order by v.id DESC limit ?,?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,start);
             preparedStatement.setInt(2,end);
