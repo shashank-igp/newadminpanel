@@ -159,7 +159,7 @@ public class Voucher {
 
 
     @GET
-    @Path("/v1/voucher/getExistingBlackListProdCats")
+    @Path("/v1/voucher/getTemporaryBlackListProdCats")
     public Response getExistingBlackListProdCats() {
         Response response=null;
         VoucherMapper voucherMapper=new VoucherMapper();
