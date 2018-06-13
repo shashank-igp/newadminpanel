@@ -50,6 +50,12 @@ public class VoucherModel {
     @JsonProperty("expirydate")
     private String expiryDate;
 
+    @JsonProperty("createddate")
+    private String createdDate;
+
+    @JsonProperty("modifieddate")
+    private String modifiedDate;
+
     @JsonProperty("applicableemail")
     private List<String> applicableEmail;
 
@@ -76,6 +82,26 @@ public class VoucherModel {
 
     @JsonProperty("applicablevouchertype")
     private int applicableVoucherType; // 0-noEmail, 1-emailList, 2-domainBased
+
+    public String getCreatedDate()
+    {
+        return createdDate;
+    }
+
+    public void setCreatedDate(String createdDate)
+    {
+        this.createdDate = createdDate;
+    }
+
+    public String getModifiedDate()
+    {
+        return modifiedDate;
+    }
+
+    public void setModifiedDate(String modifiedDate)
+    {
+        this.modifiedDate = modifiedDate;
+    }
 
     public int getId() {
         return id;
