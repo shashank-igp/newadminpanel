@@ -8,6 +8,8 @@ import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
 import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerOrderProduct;
 import com.igp.handles.vendorpanel.utils.FileUpload.UploadUtil;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
+import org.apache.commons.collections4.MultiMap;
+import org.apache.commons.collections4.map.MultiValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -270,7 +272,9 @@ public class OrderMapper
             }
         }
 
-        Map<Long, Order> sortedOrderMap = new TreeMap<>();
+//        Map<Long, Order> sortedOrderMap = new TreeMap<>();
+//        Multimap<Long,Order> sortedOrderMap= ArrayListMultimap.create();
+        MultiMap sortedOrderMap = new MultiValueMap();
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         UploadUtil uploadUtil=new UploadUtil();
         for (Map.Entry<String, Order> entry : originalOrderMap.entrySet()) {
@@ -301,10 +305,6 @@ public class OrderMapper
 
                 sortedOrderMap.put(Long.valueOf(deliveryTime+orderId.longValue()), order);
 
-                // doing this only for admin/Handel panel
-//                if(forAdminPanelOrNot){
-//                    fillSlaFlagsOnOrderProducts(order,forAdminPanelOrNot);
-//                }
             } catch (Exception e) {
                 logger.error("Error in the order :" + entry.getKey(), e);
             }
