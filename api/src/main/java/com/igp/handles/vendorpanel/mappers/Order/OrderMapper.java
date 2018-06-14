@@ -1,5 +1,6 @@
 package com.igp.handles.vendorpanel.mappers.Order;
 
+import com.google.common.collect.TreeMultimap;
 import com.igp.handles.admin.utils.Order.SlaCompliant;
 import com.igp.handles.vendorpanel.models.Order.Order;
 import com.igp.handles.vendorpanel.models.Order.OrderComponent;
@@ -8,8 +9,6 @@ import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
 import com.igp.handles.vendorpanel.models.Vendor.OrderDetailsPerOrderProduct;
 import com.igp.handles.vendorpanel.utils.FileUpload.UploadUtil;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
-import org.apache.commons.collections4.MultiMap;
-import org.apache.commons.collections4.map.MultiValueMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -274,7 +273,21 @@ public class OrderMapper
 
 //        Map<Long, Order> sortedOrderMap = new TreeMap<>();
 //        Multimap<Long,Order> sortedOrderMap= ArrayListMultimap.create();
-        MultiMap sortedOrderMap = new MultiValueMap();
+//        Multivalued sortedOrderMap = new MultivaluedHashMap();
+        TreeMultimap<Long,Order> sortedOrderMap= TreeMultimap.create(new Comparator<Long>()
+        {
+            @Override public int compare(Long timeMiliSec, Long timeMiliSec2)
+            {
+                return timeMiliSec.compareTo(timeMiliSec2);
+            }
+        }, new Comparator<Order>()
+        {
+            @Override public int compare(Order order1, Order order2)
+            {
+                return order1.getOrderId()>=order2.getOrderId() ? 1 : 0;
+            }
+        });
+
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
         UploadUtil uploadUtil=new UploadUtil();
         for (Map.Entry<String, Order> entry : originalOrderMap.entrySet()) {
