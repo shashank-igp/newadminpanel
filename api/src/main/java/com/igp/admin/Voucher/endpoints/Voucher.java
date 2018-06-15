@@ -1,8 +1,10 @@
 package com.igp.admin.Voucher.endpoints;
 
 import com.igp.admin.Voucher.mappers.VoucherMapper;
+import com.igp.admin.Voucher.models.RowLimitModel;
 import com.igp.admin.Voucher.models.VoucherListModel;
 import com.igp.admin.Voucher.models.VoucherModel;
+import com.igp.admin.Voucher.models.VoucherRequestContainer;
 import com.igp.admin.response.EntityFoundResponse;
 import com.igp.admin.response.EntityNotFoundResponse;
 import org.slf4j.Logger;
@@ -27,13 +29,15 @@ public class Voucher {
 
     @POST
     @Path("/v1/voucher/createvoucher")
-    public Response createVoucher(VoucherModel voucherModel) {
+    public Response createVoucher(VoucherRequestContainer voucherRequestContainer) {
         Response response=null;
         VoucherMapper voucherMapper = new VoucherMapper();
+        VoucherModel voucherModel = voucherRequestContainer.getVoucherModel();
+        RowLimitModel rowLimitModel = voucherRequestContainer.getRowLimitModel();
         try{
             boolean result = voucherMapper.createVoucher(voucherModel);
             if(result==true){
-                VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,voucherModel.getFkAssociateId(),0,2000);
+                VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,voucherModel.getFkAssociateId(),rowLimitModel.getStartIndex(),rowLimitModel.getRowsCount());
                 if(voucherModelList!= null && voucherModelList.getVoucherModelList() != null && !voucherModelList.getVoucherModelList().isEmpty()){
                     response= EntityFoundResponse.entityFoundResponseBuilder(voucherModelList);
                 }else{
@@ -53,13 +57,15 @@ public class Voucher {
     }
     @PUT
     @Path("/v1/voucher/updatevoucher")
-    public Response updateVoucher(VoucherModel voucherModel) {
+    public Response updateVoucher(VoucherRequestContainer voucherRequestContainer) {
         Response response=null;
         VoucherMapper voucherMapper = new VoucherMapper();
+        VoucherModel voucherModel = voucherRequestContainer.getVoucherModel();
+        RowLimitModel rowLimitModel = voucherRequestContainer.getRowLimitModel();
         try{
             boolean result = voucherMapper.updateVoucher(voucherModel);
             if(result==true){
-                VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,voucherModel.getFkAssociateId(),0,2000);
+                VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,voucherModel.getFkAssociateId(),rowLimitModel.getStartIndex(),rowLimitModel.getRowsCount());
                 if(voucherModelList!= null && voucherModelList.getVoucherModelList() != null && !voucherModelList.getVoucherModelList().isEmpty()){
                     response= EntityFoundResponse.entityFoundResponseBuilder(voucherModelList);
                 }else{
@@ -81,14 +87,16 @@ public class Voucher {
     @Path("/v1/voucher/deletevoucher")
     public Response deleteVoucher(@DefaultValue("-1") @QueryParam("id") int id,
                                     @QueryParam("fkAssociateId") int fkAssociateId,
-                                  @DefaultValue("") @QueryParam("modifiedby") String modifiedBy) {
+                                    @DefaultValue("") @QueryParam("modifiedby") String modifiedBy,
+                                    @DefaultValue("0") @QueryParam("startIndex") int startIndex,
+                                    @QueryParam("rowsCount") int rowsCount) {
         Response response=null;
         VoucherMapper voucherMapper = new VoucherMapper();
         boolean result = false;
         try{
             result = voucherMapper.deleteVoucher(id,modifiedBy);
             if(result==true){
-                VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,fkAssociateId,0,2000);
+                VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,fkAssociateId,startIndex,rowsCount);
                 if(voucherModelList!= null && voucherModelList.getVoucherModelList() != null && !voucherModelList.getVoucherModelList().isEmpty()){
                     response= EntityFoundResponse.entityFoundResponseBuilder(voucherModelList);
                 }else{
