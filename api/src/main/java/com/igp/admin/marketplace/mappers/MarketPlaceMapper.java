@@ -765,7 +765,6 @@ public class MarketPlaceMapper {
 
         MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
         List<ValidationModel> validationModelList1 = validationModelList;
-        List<MarketPlaceFinalOrderResponseModel> marketPlaceFinalOrderResponseModelList = new ArrayList<>();
         MarketPlaceFinalOrderResponseModel marketPlaceFinalOrderResponseModel = new MarketPlaceFinalOrderResponseModel();
         List<ErrorModel> errorModelList = new ArrayList<>();
         Integer orderId = 0;
@@ -889,7 +888,6 @@ public class MarketPlaceMapper {
                     countModel.setFail(fail);
                 }
 
-                // everything went well and lets add the model in the list.
             }
             catch(Exception e){
                 logger.error("Exception Caught at validation : ", e);
@@ -898,12 +896,10 @@ public class MarketPlaceMapper {
                 countModel.setFail(++fail);
                 errorModelList.add(errorModel);
             }
-            //   validationModelList1.add(validationModel);
+            // everything went well and lets add the model in the list.
             marketPlaceFinalOrderResponseModel.setError(errorModelList);
             marketPlaceFinalOrderResponseModel.setCount(countModel);
-            //   marketPlaceFinalOrderResponseModelList.add(marketPlaceFinalOrderResponseModel);
         }
-
         return marketPlaceFinalOrderResponseModel;
     }
 

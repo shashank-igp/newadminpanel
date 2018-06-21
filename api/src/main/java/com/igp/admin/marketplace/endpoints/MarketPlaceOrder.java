@@ -29,7 +29,7 @@ public class MarketPlaceOrder {
     private static final Logger logger = LoggerFactory.getLogger(MarketPlaceOrder.class);
     @POST
     @Path("/v1/admin/marketplaceorder")
-    public Response performCheckOnCorporateOrder(@QueryParam("user") String user,
+    public synchronized Response performCheckOnCorporateOrder(@QueryParam("user") String user,
                                                  @QueryParam("value") String userValue,
                                                  @QueryParam("fkasid") @DefaultValue("0") int loginId,
                                                  final FormDataMultiPart multiPart) throws ParseException {
@@ -42,8 +42,8 @@ public class MarketPlaceOrder {
         try{
             SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
             Date date = new Date();
-            logger.debug("file uploaded : "+formatter.format(date));
             int fkAssociateId = marketPlaceMapper.findVendor(userValue);
+            logger.debug("file uploaded : "+formatter.format(date) + " with vendor id : "+fkAssociateId);
             if(fkAssociateId!=0 && loginId == 1 ) {
                 // parse the excel file.
                 data = marketPlaceMapper.parseExcelForMarketPlace(multiPart, user + fkAssociateId, fkAssociateId);

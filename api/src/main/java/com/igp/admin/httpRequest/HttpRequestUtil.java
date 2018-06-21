@@ -19,7 +19,7 @@ import java.util.List;
 public class HttpRequestUtil {
     private static final Logger logger = LoggerFactory.getLogger(HttpRequestUtil.class);
 
-    public String sendCurlRequest(String requestMsg, String urll, List<HeaderKeyValueModel> headerKeyValueModelList) throws IOException {
+    public synchronized String sendCurlRequest(String requestMsg, String urll, List<HeaderKeyValueModel> headerKeyValueModelList) throws IOException {
         String response="",encoding="";
         InputStream in;
         URL url = new URL(urll);

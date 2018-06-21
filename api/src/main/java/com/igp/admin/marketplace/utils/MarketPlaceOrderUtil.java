@@ -207,7 +207,7 @@ public class MarketPlaceOrderUtil {
                 String postData1 = objectMapper.writeValueAsString(shippingAddress);
                 logger.debug("Postdata1 for /v1/user/address : "+ postData1);
                 String createAddress = httpRequestUtil.sendCurlRequest(postData1, ServerProperties.getPropertyValue("ADD_ADDRESS_URL"),new ArrayList<>());
-                logger.debug("Create address response : " + createAddress.toString());
+         //       logger.debug("Create address response : " + createAddress.toString());
                 if(createAddress.contains("error")){
                     validationModel.setError(Boolean.TRUE);
                     validationModel.setMessage("Some Problem in Address.");
@@ -716,7 +716,7 @@ public class MarketPlaceOrderUtil {
             String hash = encryptPayment(hashStringSequence + SecretProperties.getPaymentKey());
             marketPlaceOrderModel.setHash(hash);
 
-            TimeUnit.MILLISECONDS.sleep(500);
+       //     TimeUnit.MILLISECONDS.sleep(500);
 
             // sleep for a second.
 
@@ -738,7 +738,7 @@ public class MarketPlaceOrderUtil {
             Map<String, APIOrderResponseModel> orderResponse = generalOrderResponseModel.getData();
             APIOrderResponseModel apiOrderResponseModel = orderResponse.get("payment");
 
-            TimeUnit.MILLISECONDS.sleep(500);
+         //   TimeUnit.MILLISECONDS.sleep(500);
 
             orderId = getGeneratedOrderNum(orderTempModel.getTempOrderId());
             if(orderId==0){
