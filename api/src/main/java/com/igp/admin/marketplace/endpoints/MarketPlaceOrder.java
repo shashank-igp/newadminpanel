@@ -39,10 +39,11 @@ public class MarketPlaceOrder {
         Map<Integer, Map<String, String>> data = null;
         ErrorModel errorModel = new ErrorModel();
         List<ErrorModel> errorModelList = new ArrayList<>();
+        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        Date date = new Date();
+        int fkAssociateId = 0;
         try{
-            SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-            Date date = new Date();
-            int fkAssociateId = marketPlaceMapper.findVendor(userValue);
+            fkAssociateId = marketPlaceMapper.findVendor(userValue);
             logger.debug("file uploaded : "+formatter.format(date) + " with vendor id : "+fkAssociateId);
             if(fkAssociateId!=0 && loginId == 1 ) {
                 // parse the excel file.
@@ -68,6 +69,7 @@ public class MarketPlaceOrder {
             errorModelList.add(errorModel);
             marketPlaceFinalOrderResponseModel.setError(errorModelList);
         }
+        logger.debug("Response of file uploaded : "+formatter.format(date) + " with vendor id : "+fkAssociateId+ " is "+marketPlaceFinalOrderResponseModel.toString());
         response = EntityFoundResponse.entityFoundResponseBuilder(marketPlaceFinalOrderResponseModel);
         return response;
     }

@@ -34,4 +34,12 @@ public class MarketPlaceFinalOrderResponseModel {
     public void setCount(CountModel count) {
         this.count = count;
     }
+
+    @Override
+    public String toString() {
+        return "MarketPlaceFinalOrderResponseModel{" +
+            "error=" + error +
+            ", count=" + count +
+            '}';
+    }
 }
