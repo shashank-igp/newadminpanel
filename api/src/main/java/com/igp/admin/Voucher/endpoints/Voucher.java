@@ -1,10 +1,8 @@
 package com.igp.admin.Voucher.endpoints;
 
+import com.igp.admin.Blogs.models.SeoBlogModel;
 import com.igp.admin.Voucher.mappers.VoucherMapper;
-import com.igp.admin.Voucher.models.RowLimitModel;
-import com.igp.admin.Voucher.models.VoucherListModel;
-import com.igp.admin.Voucher.models.VoucherModel;
-import com.igp.admin.Voucher.models.VoucherRequestContainer;
+import com.igp.admin.Voucher.models.*;
 import com.igp.admin.response.EntityFoundResponse;
 import com.igp.admin.response.EntityNotFoundResponse;
 import org.slf4j.Logger;
@@ -126,7 +124,7 @@ public class Voucher {
         VoucherMapper voucherMapper=new VoucherMapper();
 
         try{
-           VoucherListModel voucherModelList= voucherMapper.getVoucherList(id,fkAssociateId,startLimit,endLimit);
+            VoucherListModel voucherModelList= voucherMapper.getVoucherList(id,fkAssociateId,startLimit,endLimit);
             if(voucherModelList.getVoucherModelList().size()!=0 && !voucherModelList.getVoucherModelList().isEmpty()){
                 response= EntityFoundResponse.entityFoundResponseBuilder(voucherModelList);
             }else{
@@ -188,6 +186,57 @@ public class Voucher {
         return response;
     }
 
+
+    @GET
+    @Path("/v1/voucher/getAssociates")
+    public Response getAssociates()
+    {
+        Response response = null;
+        VoucherMapper voucherMapper = new VoucherMapper();
+
+        try
+        {
+            List<SeoBlogModel> seoBlogModel = voucherMapper.getAssociates();
+            if (seoBlogModel != null && !seoBlogModel.isEmpty())
+            {
+                response = EntityFoundResponse.entityFoundResponseBuilder(seoBlogModel);
+            }
+            else
+            {
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Not able to get associates data");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.debug("error occured while get associates data " + exception);
+        }
+        return response;
+    }
+
+    @GET
+    @Path("/v1/voucher/getMetaData")
+    public Response getVoucherMetaData()
+    {
+        Response response = null;
+        VoucherMapper voucherMapper = new VoucherMapper();
+
+        try
+        {
+            VoucherMetaData voucherMetaData = voucherMapper.getVoucherMetaData();
+            if (voucherMetaData != null){
+                response = EntityFoundResponse.entityFoundResponseBuilder(voucherMetaData);
+            }else{
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Not able to get voucher meta data");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.debug("error occured while fetching voucher meta data " + exception);
+        }
+        return response;
+    }
 }
-
-

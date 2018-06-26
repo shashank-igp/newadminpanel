@@ -15,10 +15,10 @@ public class VoucherModel {
     private String voucherCode;
 
     @JsonProperty("createdby")
-    private String createdBy;
+    private String createdBy = "admin";
 
     @JsonProperty("modifiedby")
-    private String modifiedBy;
+    private String modifiedBy = "admin";
 
     @JsonProperty("vouchervalue")
     private int voucherValue;

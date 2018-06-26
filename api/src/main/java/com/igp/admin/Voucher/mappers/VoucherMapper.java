@@ -1,5 +1,7 @@
 package com.igp.admin.Voucher.mappers;
+import com.igp.admin.Blogs.models.SeoBlogModel;
 import com.igp.admin.Voucher.models.VoucherListModel;
+import com.igp.admin.Voucher.models.VoucherMetaData;
 import com.igp.admin.Voucher.models.VoucherModel;
 import com.igp.admin.Voucher.utils.VoucherUtil;
 import org.slf4j.Logger;
@@ -78,6 +80,26 @@ public class VoucherMapper {
             logger.debug("error occured while getVoucherList. "+exception);
         }
         return blackList;
+    }
+    public List<SeoBlogModel> getAssociates(){
+        VoucherUtil voucherUtil=new VoucherUtil();
+        List<SeoBlogModel> associateList = null;
+        try{
+            associateList = voucherUtil.getAssociates();
+        }catch (Exception exception){
+            logger.debug("error occured while getVoucherList. "+exception);
+        }
+        return associateList;
+    }
+    public VoucherMetaData getVoucherMetaData(){
+        VoucherUtil voucherUtil=new VoucherUtil();
+        VoucherMetaData voucherMetaData = null;
+        try{
+            voucherMetaData = voucherUtil.getVoucherMetaData();
+        }catch (Exception exception){
+            logger.debug("error occured while getVoucherList. "+exception);
+        }
+        return voucherMetaData;
     }
     
 }
