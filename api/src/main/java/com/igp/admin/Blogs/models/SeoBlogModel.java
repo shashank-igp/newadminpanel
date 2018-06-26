@@ -24,6 +24,9 @@ public class SeoBlogModel {
     @JsonProperty("seokeywords")
     private String seoKeywords;
 
+    @JsonProperty("storename")
+    private String storeName;
+
     public Integer getId() {
         return id;
     }
@@ -70,5 +73,15 @@ public class SeoBlogModel {
 
     public void setSeoKeywords(String seoKeywords) {
         this.seoKeywords = seoKeywords;
+    }
+
+    public String getStoreName()
+    {
+        return storeName;
+    }
+
+    public void setStoreName(String storeName)
+    {
+        this.storeName = storeName;
     }
 }

@@ -1,6 +1,8 @@
 package com.igp.admin.Voucher.utils;
 
+import com.igp.admin.Blogs.models.SeoBlogModel;
 import com.igp.admin.Voucher.models.VoucherListModel;
+import com.igp.admin.Voucher.models.VoucherMetaData;
 import com.igp.admin.Voucher.models.VoucherModel;
 import com.igp.config.instance.Database;
 import org.slf4j.Logger;
@@ -12,11 +14,7 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-
+import java.util.*;
 
 /**
  * Created by suditi on 8/6/18.
@@ -448,5 +446,80 @@ public class VoucherUtil {
         return blackList;
     }
 
+    public List<SeoBlogModel> getAssociates(){
+        Connection connection = null;
+        String statement;
+        ResultSet resultSet =  null;
+        PreparedStatement preparedStatement=null;
+        List<SeoBlogModel> associateList = new ArrayList<>();
+
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement = "select * from associate where associate_id in (5,830) ";
+            preparedStatement = connection.prepareStatement(statement);
+           // Array array = connection.createArrayOf("INTEGER", new Object[]{5,830});
+           // preparedStatement.setArray(1,array);
+
+            logger.debug("preparedStatement for getAssociates => "+preparedStatement);
+
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                SeoBlogModel seoBlogModel = new SeoBlogModel();
+                seoBlogModel.setFkAssociateId(resultSet.getInt("associate_id"));
+                seoBlogModel.setSeoTitle(resultSet.getString("associate_name"));
+                seoBlogModel.setStoreName(resultSet.getString("associate_login_id"));
+                associateList.add(seoBlogModel);
+            }
+
+        }catch (Exception exception){
+            logger.debug("error occured while getting associates list : "+exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return associateList;
+    }
+
+    public VoucherMetaData getVoucherMetaData(){
+        VoucherMetaData voucherMetaData = new VoucherMetaData();
+        Map<Integer, String> types = new HashMap<>();
+
+        try{
+            //coupon type voucher
+            types.put(0,"% based");
+            types.put(1,"Value based");
+            types.put(2,"Shipping waiver");
+            types.put(3,"Corporate gifting voucher");
+            voucherMetaData.setType1(types);
+
+            types = new HashMap<>();
+            //coupon type newigp_voucher_extra_info
+            types.put(0,"No email");
+            types.put(1,"Email based");
+            types.put(2,"Domain based");
+            voucherMetaData.setType2(types);
+
+            types = new HashMap<>();
+            //order value check newigp_voucher_extra_info
+            types.put(0,"No check");
+            types.put(1,"Order level without shipping");
+            types.put(2,"Order level with shipping");
+            types.put(3,"Product level");
+            voucherMetaData.setOrderValueCheck(types);
+
+            types = new HashMap<>();
+            //shipping waiver type newigp_voucher_extra_info
+            types.put(1,"Standard Delivery");
+            types.put(2,"Fixed Time Delivery");
+            types.put(3,"Midnight Delivery");
+            types.put(4,"Fix Date Delivery");
+            voucherMetaData.setShippingWaiverType(types);
+
+        }catch (Exception exception){
+            logger.debug("error occured while getting voucher meta data : "+exception);
+        }
+        return voucherMetaData;
+    }
 
 }
