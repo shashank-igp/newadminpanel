@@ -27,4 +27,12 @@ public class ErrorModel {
     public void setMsg(String msg) {
         this.msg = msg;
     }
+
+    @Override
+    public String toString() {
+        return "ErrorModel{" +
+            "row=" + row +
+            ", msg='" + msg + '\'' +
+            '}';
+    }
 }

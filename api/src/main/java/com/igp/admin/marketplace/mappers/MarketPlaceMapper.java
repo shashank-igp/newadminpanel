@@ -1,5 +1,6 @@
 package com.igp.admin.marketplace.mappers;
 
+import com.igp.admin.marketplace.endpoints.MarketPlaceOrder;
 import com.igp.admin.marketplace.models.*;
 import com.igp.admin.marketplace.utils.MarketPlaceOrderUtil;
 import org.apache.poi.hssf.usermodel.HSSFDateUtil;
@@ -942,4 +943,16 @@ public class MarketPlaceMapper {
         marketPlaceTempOrderModel.setTempOrderId(orderTempId);
         return marketPlaceTempOrderModel;
     }
+    public String setSemaphore(String processName) {
+        // ensures that only one process is chosen if there are multiple requests at single instance
+        String result = processName;
+        try {
+            MarketPlaceOrder.semaphore = processName;
+
+        } catch (Exception exception) {
+            logger.error("Error at semaphore checking : "+ exception);
+        }
+        return result;
+    }
 }
+

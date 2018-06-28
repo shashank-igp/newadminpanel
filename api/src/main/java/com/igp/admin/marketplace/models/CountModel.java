@@ -27,4 +27,12 @@ public class CountModel {
     public void setFail(Integer fail) {
         this.fail = fail;
     }
+
+    @Override
+    public String toString() {
+        return "CountModel{" +
+            "correct=" + correct +
+            ", fail=" + fail +
+            '}';
+    }
 }
