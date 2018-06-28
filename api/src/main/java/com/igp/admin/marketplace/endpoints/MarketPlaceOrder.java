@@ -50,16 +50,16 @@ public class MarketPlaceOrder {
             fkAssociateId = marketPlaceMapper.findVendor(userValue);
             logger.debug("file uploaded : "+formatter.format(date) + " with vendor id : "+fkAssociateId);
             String processName = ManagementFactory.getRuntimeMXBean().getName();
-            System.out.println("Process ID for this request = " + processName);
+            logger.debug("Process ID for this request = " + processName);
             if(fkAssociateId!=0 && loginId == 1 ) {
 
                 if(semaphore.equals("false") && marketPlaceMapper.setSemaphore(processName).equals(semaphore)){
                     // system is not serving any other request / current process is chosen to be served
                     // parse the excel file.
-                    System.out.println("semaphore is = " + semaphore);
+                    logger.debug("semaphore is = " + semaphore);
 
                     semaphore = "true"; // lock taken
-                    System.out.println("semaphore is = " + semaphore);
+                    logger.debug("semaphore is = " + semaphore);
 
                     data = marketPlaceMapper.parseExcelForMarketPlace(multiPart, user + fkAssociateId, fkAssociateId);
                     if (!data.isEmpty()) {
