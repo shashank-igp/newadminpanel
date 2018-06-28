@@ -8,10 +8,12 @@ import com.igp.admin.response.EntityFoundResponse;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.java2d.loops.ProcessPath;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.lang.management.ManagementFactory;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -26,13 +28,15 @@ import java.util.Map;
 @Consumes(MediaType.MULTIPART_FORM_DATA)
 @Produces(MediaType.APPLICATION_JSON)
 public class MarketPlaceOrder {
+    public static String semaphore = "false";
+    // we will serve only one request at a time
     private static final Logger logger = LoggerFactory.getLogger(MarketPlaceOrder.class);
     @POST
     @Path("/v1/admin/marketplaceorder")
     public synchronized Response performCheckOnCorporateOrder(@QueryParam("user") String user,
-                                                 @QueryParam("value") String userValue,
-                                                 @QueryParam("fkasid") @DefaultValue("0") int loginId,
-                                                 final FormDataMultiPart multiPart) throws ParseException {
+                                                              @QueryParam("value") String userValue,
+                                                              @QueryParam("fkasid") @DefaultValue("0") int loginId,
+                                                              final FormDataMultiPart multiPart) throws ParseException {
         MarketPlaceFinalOrderResponseModel marketPlaceFinalOrderResponseModel = new MarketPlaceFinalOrderResponseModel();
         Response response = null;
         MarketPlaceMapper  marketPlaceMapper = new MarketPlaceMapper();
@@ -45,16 +49,33 @@ public class MarketPlaceOrder {
         try{
             fkAssociateId = marketPlaceMapper.findVendor(userValue);
             logger.debug("file uploaded : "+formatter.format(date) + " with vendor id : "+fkAssociateId);
+            String processName = ManagementFactory.getRuntimeMXBean().getName();
+            System.out.println("Process ID for this request = " + processName);
             if(fkAssociateId!=0 && loginId == 1 ) {
-                // parse the excel file.
-                data = marketPlaceMapper.parseExcelForMarketPlace(multiPart, user + fkAssociateId, fkAssociateId);
-                if(!data.isEmpty()) {
-                    // fill the models.
-                    List<ValidationModel> validationModelList = marketPlaceMapper.refineDataAndPopulateModels(data, userValue, fkAssociateId);
-                    // validate all the models and create order.
-                    marketPlaceFinalOrderResponseModel = marketPlaceMapper.validateDataForMarketPlace(validationModelList);
-                }else {
-                    errorModel.setMsg("File is Empty/Invalid.");
+
+                if(semaphore.equals("false") && marketPlaceMapper.setSemaphore(processName).equals(semaphore)){
+                    // system is not serving any other request / current process is chosen to be served
+                    // parse the excel file.
+                    System.out.println("semaphore is = " + semaphore);
+
+                    semaphore = "true"; // lock taken
+                    System.out.println("semaphore is = " + semaphore);
+
+                    data = marketPlaceMapper.parseExcelForMarketPlace(multiPart, user + fkAssociateId, fkAssociateId);
+                    if (!data.isEmpty()) {
+                        // fill the models.
+                        List<ValidationModel> validationModelList = marketPlaceMapper.refineDataAndPopulateModels(data, userValue, fkAssociateId);
+                        // validate all the models and create order.
+                        marketPlaceFinalOrderResponseModel = marketPlaceMapper.validateDataForMarketPlace(validationModelList);
+                    } else {
+                        errorModel.setMsg("File is Empty/Invalid.");
+                        errorModelList.add(errorModel);
+                        marketPlaceFinalOrderResponseModel.setError(errorModelList);
+                    }
+                    semaphore = "false"; // lock released
+                }
+                else {
+                    errorModel.setMsg("Some One is already uploading the file. Please Wait !!!");
                     errorModelList.add(errorModel);
                     marketPlaceFinalOrderResponseModel.setError(errorModelList);
                 }
@@ -69,8 +90,9 @@ public class MarketPlaceOrder {
             errorModelList.add(errorModel);
             marketPlaceFinalOrderResponseModel.setError(errorModelList);
         }
-        logger.debug("Response of file uploaded : "+formatter.format(date) + " with vendor id : "+fkAssociateId+ " is "+marketPlaceFinalOrderResponseModel.toString());
+        logger.debug("Response of file upload : "+formatter.format(date) + " with vendor id : "+fkAssociateId+ " is "+marketPlaceFinalOrderResponseModel.toString());
         response = EntityFoundResponse.entityFoundResponseBuilder(marketPlaceFinalOrderResponseModel);
+        System.out.println("semaphore is = " + semaphore);
         return response;
     }
 }
