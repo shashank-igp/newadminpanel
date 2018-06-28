@@ -92,7 +92,7 @@ public class MarketPlaceOrder {
         }
         logger.debug("Response of file upload : "+formatter.format(date) + " with vendor id : "+fkAssociateId+ " is "+marketPlaceFinalOrderResponseModel.toString());
         response = EntityFoundResponse.entityFoundResponseBuilder(marketPlaceFinalOrderResponseModel);
-        System.out.println("semaphore is = " + semaphore);
+        logger.debug("semaphore is = " + semaphore);
         return response;
     }
 }
