@@ -83,12 +83,19 @@ public class VoucherValidationUtil{
             errorList.add("Created by not specified.");
         }
 
-        //TODO
+
         // Either blacklist or whitelist should have data
+        int blackSize = voucherModel.getBlackListPts().size();
+        int whiteSize = voucherModel.getWhiteListPts().size();
+        if((blackSize == 0 && whiteSize == 0) || (blackSize > 0 && whiteSize > 0)){
+            errorList.add("Specify either blackListPts or whiteListPts.");
+        }
 
 
-        //TODO
         // Multiple usage count = 100000 for unlimited usage
+        if(voucherModel.getMultipleUsage() <= 0){
+            voucherModel.setMultipleUsage(100000);
+        }
         return errorList;
     }
 

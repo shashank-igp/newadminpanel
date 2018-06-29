@@ -1,5 +1,6 @@
 package com.igp.admin.Voucher.mappers;
 import com.igp.admin.Blogs.models.SeoBlogModel;
+import com.igp.admin.Voucher.models.CategoriesModel;
 import com.igp.admin.Voucher.models.VoucherListModel;
 import com.igp.admin.Voucher.models.VoucherMetaData;
 import com.igp.admin.Voucher.models.VoucherModel;
@@ -100,6 +101,16 @@ public class VoucherMapper {
             logger.debug("error occured while getVoucherList. "+exception);
         }
         return voucherMetaData;
+    }
+    public List<CategoriesModel> getCategories(int parentCatId, int categoryId){
+        VoucherUtil voucherUtil=new VoucherUtil();
+        List<CategoriesModel> categoriesModelList = null;
+        try{
+            categoriesModelList = voucherUtil.getCategories(parentCatId, categoryId);
+        }catch (Exception exception){
+            logger.debug("error occured while getCategories. "+exception);
+        }
+        return categoriesModelList;
     }
     
 }

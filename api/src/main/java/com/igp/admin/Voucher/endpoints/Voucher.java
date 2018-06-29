@@ -239,4 +239,30 @@ public class Voucher {
         }
         return response;
     }
+
+    @GET
+    @Path("/v1/voucher/getCategories")
+    public Response getCategories(@DefaultValue("133824") @QueryParam("parentId") int parentCatId,
+                                @QueryParam("categoryId") int categoryId)
+    {
+        Response response = null;
+        VoucherMapper voucherMapper = new VoucherMapper();
+
+        try
+        {
+            List<CategoriesModel> categoriesModelList = voucherMapper.getCategories(parentCatId, categoryId);
+            if (categoriesModelList != null){
+                response = EntityFoundResponse.entityFoundResponseBuilder(categoriesModelList);
+            }else{
+                Map<String, String> errorResponse = new HashMap<>();
+                errorResponse.put("error", "Not able to get categories.");
+                response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
+            }
+        }
+        catch (Exception exception)
+        {
+            logger.debug("error occured while fetching voucher meta data " + exception);
+        }
+        return response;
+    }
 }

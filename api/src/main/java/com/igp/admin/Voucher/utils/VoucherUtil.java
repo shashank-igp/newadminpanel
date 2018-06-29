@@ -1,6 +1,7 @@
 package com.igp.admin.Voucher.utils;
 
 import com.igp.admin.Blogs.models.SeoBlogModel;
+import com.igp.admin.Voucher.models.CategoriesModel;
 import com.igp.admin.Voucher.models.VoucherListModel;
 import com.igp.admin.Voucher.models.VoucherMetaData;
 import com.igp.admin.Voucher.models.VoucherModel;
@@ -522,4 +523,93 @@ public class VoucherUtil {
         return voucherMetaData;
     }
 
+    //TODO : move this to common functinalities section if required
+    public List<CategoriesModel> getCategories(int parentCatId, int categoryId){
+        Connection connection = null;
+        String statement;
+        ResultSet resultSet =  null;
+        PreparedStatement preparedStatement=null;
+        Map<String, CategoriesModel> oneLevelCategoriesMap = new HashMap<>();
+        Map<String, List<CategoriesModel>> twoLevelCategoriesMap = new HashMap<>();
+        Map<String, List<CategoriesModel>> threeLevelCategoriesMap = new HashMap<>();
+        List<CategoriesModel> categoriesModelList;
+        List<CategoriesModel> finalCategoriesModelList = new ArrayList<>();
+
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+
+            statement = "select l1.categories_id, l1.categories_name, l1.parent_id, n1.top_parent, n1.cat_type, n1.is_hidden, n1.weightage , n1.category_level, n1.addon_type "
+               + " from categories as l1 left join newigp_category_extra_info as n1 on l1.categories_id = n1.categories_id  where n1.top_parent is not null "
+               + " order by category_level,parent_id,categories_name ";
+
+            preparedStatement = connection.prepareStatement(statement);
+            logger.debug("preparedStatement for getCategories => "+preparedStatement);
+
+            resultSet = preparedStatement.executeQuery();
+            CategoriesModel categoryModel ;
+            while (resultSet.next()){
+                categoryModel = new CategoriesModel();
+                categoryModel.setCategoriesId(resultSet.getInt("categories_id"));
+                categoryModel.setCategoriesName(resultSet.getString("categories_name"));
+                categoryModel.setTopParent(resultSet.getInt("top_parent"));
+                categoryModel.setParentId(resultSet.getInt("parent_id"));
+                categoryModel.setCategoryLevel(resultSet.getInt("category_level"));
+                //we can add some more fields from both entities
+
+                if(resultSet.getInt("category_level") == 1){
+                    //ths is Map<1 level category_id , List<1 level categoriesModel>>
+                    oneLevelCategoriesMap.put(""+resultSet.getInt("categories_id"), categoryModel);
+                }
+                if(resultSet.getInt("category_level") == 2){
+                    //this is Map<1 level parent_id, List<2 level categoriesModel>
+                    categoriesModelList = new ArrayList<>();
+                    if(twoLevelCategoriesMap.containsKey(""+categoryModel.getParentId())){
+                        categoriesModelList.addAll(twoLevelCategoriesMap.get(""+categoryModel.getParentId()));
+                        categoriesModelList.add(categoryModel);
+                        twoLevelCategoriesMap.put(""+categoryModel.getParentId(), categoriesModelList);
+                    }else{
+                        categoriesModelList.add(categoryModel);
+                        twoLevelCategoriesMap.put(""+categoryModel.getParentId(), categoriesModelList);
+                    }
+                }
+                if(resultSet.getInt("category_level") == 3){
+                    //this is Map<2 level parent_id, List<3 level categoriesModel>
+                    categoriesModelList = new ArrayList<>();
+                    if(threeLevelCategoriesMap.containsKey(""+categoryModel.getParentId())){
+                        categoriesModelList.addAll(threeLevelCategoriesMap.get(""+categoryModel.getParentId()));
+                        categoriesModelList.add(categoryModel);
+                        threeLevelCategoriesMap.put(""+categoryModel.getParentId(), categoriesModelList);
+                    }else{
+                        categoriesModelList.add(categoryModel);
+                        threeLevelCategoriesMap.put(""+categoryModel.getParentId(), categoriesModelList);
+                    }
+                }
+            }
+
+            for(Map.Entry<String, List<CategoriesModel>> twoLevelCat : twoLevelCategoriesMap.entrySet()){
+                //mapping 3 level categories to 2 level categories
+                categoriesModelList = twoLevelCat.getValue();
+                for(CategoriesModel categoriesModel : categoriesModelList){
+                    categoriesModel.setSubCategories(threeLevelCategoriesMap.get(""+categoriesModel.getCategoriesId()));
+                }
+            }
+            for(Map.Entry<String, CategoriesModel> oneLevelCat : oneLevelCategoriesMap.entrySet()){
+                //mapping 2 level categories to 1 level categories(2 level categories already have 3 level categories mapped in previous for loop)
+                CategoriesModel categoriesModel = oneLevelCat.getValue();
+                categoriesModel.setSubCategories(twoLevelCategoriesMap.get(""+categoriesModel.getCategoriesId()));
+
+                //checking parent_id for 1 level categories e.g. newigp or interflora
+                if(parentCatId == categoriesModel.getParentId()){
+                    finalCategoriesModelList.add(categoriesModel);
+                }
+            }
+        }catch (Exception exception){
+            logger.debug("error occured while getting Categories list : "+exception);
+        }finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+            Database.INSTANCE.closeResultSet(resultSet);
+        }
+        return finalCategoriesModelList;
+    }
 }

@@ -2,6 +2,7 @@ package com.igp.admin.Voucher.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -66,10 +67,10 @@ public class VoucherModel {
     private Integer orderValue;   // voucher valid only if orderValue greater than this
 
     @JsonProperty("blackListPts")
-    private List<Integer> blackListPts;// In Valid Cat iDs
+    private List<Integer> blackListPts = new ArrayList<>();// In Valid Cat iDs
 
     @JsonProperty("whiteListPts")
-    private List<Integer> whiteListPts; // valid cat iDs
+    private List<Integer> whiteListPts = new ArrayList<>();// valid cat iDs
 
     @JsonProperty("shippingwaivertype")
     private int shippingWaiverType;
