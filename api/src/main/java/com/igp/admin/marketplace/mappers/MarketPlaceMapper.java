@@ -131,12 +131,12 @@ public class MarketPlaceMapper {
                     }
                     if (count >= 15) {
                         // row is empty.
-                        logger.debug("row : " + row);
-                        logger.debug("Empty Row.");
+              //          logger.debug("row : " + row);
+             //           logger.debug("Empty Row.");
                     } else {
                         data.put(row, a);
-                        logger.debug("row : " + row);
-                        logger.debug("values : " + data.get(row));
+               //         logger.debug("row : " + row);
+              //          logger.debug("values : " + data.get(row));
                     }
                 }
             }
@@ -742,8 +742,8 @@ public class MarketPlaceMapper {
                     validationModel.setExtraInfoModel(extraInfoModel);
                     validationModel.setDeliveryMessageModel(deliveryMessageModel);
 
-                    logger.debug("validation model : " + rowNumValue);
-                    logger.debug("values : "+ validationModel.toString());
+          //          logger.debug("validation model : " + rowNumValue);
+          //          logger.debug("values : "+ validationModel.toString());
 
                     validationModelList.add(validationModel);
 
