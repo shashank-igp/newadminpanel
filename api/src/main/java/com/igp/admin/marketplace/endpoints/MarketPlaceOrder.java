@@ -49,17 +49,18 @@ public class MarketPlaceOrder {
         try{
             fkAssociateId = marketPlaceMapper.findVendor(userValue);
             logger.debug("file uploaded : "+formatter.format(date) + " with vendor id : "+fkAssociateId);
-            String processName = ManagementFactory.getRuntimeMXBean().getName();
+            String processName = ManagementFactory.getRuntimeMXBean().getName()+date.hashCode()+"";
             logger.debug("Process ID for this request = " + processName);
             if(fkAssociateId!=0 && loginId == 1 ) {
+                logger.debug("semaphore value at start = " + semaphore);
 
                 if(semaphore.equals("false") && marketPlaceMapper.setSemaphore(processName).equals(semaphore)){
                     // system is not serving any other request / current process is chosen to be served
                     // parse the excel file.
-                    logger.debug("semaphore is = " + semaphore);
+                    logger.debug("semaphore value acc to process = " + semaphore);
 
                     semaphore = "true"; // lock taken
-                    logger.debug("semaphore is = " + semaphore);
+                    logger.debug("semaphore got the lock so " + semaphore);
 
                     data = marketPlaceMapper.parseExcelForMarketPlace(multiPart, user + fkAssociateId, fkAssociateId);
                     if (!data.isEmpty()) {
@@ -92,7 +93,7 @@ public class MarketPlaceOrder {
         }
         logger.debug("Response of file upload : "+formatter.format(date) + " with vendor id : "+fkAssociateId+ " is "+marketPlaceFinalOrderResponseModel.toString());
         response = EntityFoundResponse.entityFoundResponseBuilder(marketPlaceFinalOrderResponseModel);
-        logger.debug("semaphore is = " + semaphore);
+        logger.debug("semaphore finally = " + semaphore);
         return response;
     }
 }
