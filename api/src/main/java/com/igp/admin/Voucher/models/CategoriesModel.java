@@ -6,16 +6,26 @@ public class CategoriesModel{
 
     private int    categoriesId;
     private String categoriesName;
-    private int    topParent;
+    private String categoriesNameAlt;
     private int    parentId;
+    private int    sortOrder;
     private String categoriesUrl;
+    private String categoriesAltUrl;
+    private String categoriesDescription;
+    private String categoriesNameForUrl;
+    private String categoriesMetaTile;
+    private String categoriesMetaKeywords;
+    private String categoriesMetaDescription;
+    private String categoriesIfNotDisplay;
     private int    categoriesStatus;
 
+
+    private int                   topParent;
     private int                   catType;
     private int                   isHidden;
     private float                 weightage;
     private int                   categoryLevel;
-    private int                   addonLevel;
+    private int                   addonType;
     private List<CategoriesModel> subCategories;
 
     public int getCategoriesId()
@@ -108,14 +118,14 @@ public class CategoriesModel{
         this.categoryLevel = categoryLevel;
     }
 
-    public int getAddonLevel()
+    public int getAddonType()
     {
-        return addonLevel;
+        return addonType;
     }
 
-    public void setAddonLevel(int addonLevel)
+    public void setAddonType(int addonType)
     {
-        this.addonLevel = addonLevel;
+        this.addonType = addonType;
     }
 
     public List<CategoriesModel> getSubCategories()
@@ -138,12 +148,107 @@ public class CategoriesModel{
         this.parentId = parentId;
     }
 
-    @Override public String toString()
+    public String getCategoriesNameAlt()
     {
+        return categoriesNameAlt;
+    }
+
+    public void setCategoriesNameAlt(String categoriesNameAlt)
+    {
+        this.categoriesNameAlt = categoriesNameAlt;
+    }
+
+    public int getSortOrder()
+    {
+        return sortOrder;
+    }
+
+    public void setSortOrder(int sortOrder)
+    {
+        this.sortOrder = sortOrder;
+    }
+
+    public String getCategoriesAltUrl()
+    {
+        return categoriesAltUrl;
+    }
+
+    public void setCategoriesAltUrl(String categoriesAltUrl)
+    {
+        this.categoriesAltUrl = categoriesAltUrl;
+    }
+
+    public String getCategoriesDescription()
+    {
+        return categoriesDescription;
+    }
+
+    public void setCategoriesDescription(String categoriesDescription)
+    {
+        this.categoriesDescription = categoriesDescription;
+    }
+
+    public String getCategoriesNameForUrl()
+    {
+        return categoriesNameForUrl;
+    }
+
+    public void setCategoriesNameForUrl(String categoriesNameForUrl)
+    {
+        this.categoriesNameForUrl = categoriesNameForUrl;
+    }
+
+    public String getCategoriesMetaTile()
+    {
+        return categoriesMetaTile;
+    }
+
+    public void setCategoriesMetaTile(String categoriesMetaTile)
+    {
+        this.categoriesMetaTile = categoriesMetaTile;
+    }
+
+    public String getCategoriesMetaKeywords()
+    {
+        return categoriesMetaKeywords;
+    }
+
+    public void setCategoriesMetaKeywords(String categoriesMetaKeywords)
+    {
+        this.categoriesMetaKeywords = categoriesMetaKeywords;
+    }
+
+    public String getCategoriesMetaDescription()
+    {
+        return categoriesMetaDescription;
+    }
+
+    public void setCategoriesMetaDescription(String categoriesMetaDescription)
+    {
+        this.categoriesMetaDescription = categoriesMetaDescription;
+    }
+
+    public String getCategoriesIfNotDisplay()
+    {
+        return categoriesIfNotDisplay;
+    }
+
+    public void setCategoriesIfNotDisplay(String categoriesIfNotDisplay)
+    {
+        this.categoriesIfNotDisplay = categoriesIfNotDisplay;
+    }
+
+    @Override
+    public String toString() {
         return "CategoriesModel{" + "categoriesId=" + categoriesId + ", categoriesName='" + categoriesName + '\''
-            + ", topParent=" + topParent + ", parentId=" + parentId + ", categoriesUrl='" + categoriesUrl + '\''
-            + ", categoriesStatus=" + categoriesStatus + ", catType=" + catType + ", isHidden=" + isHidden
-            + ", weightage=" + weightage + ", categoryLevel=" + categoryLevel + ", addonLevel=" + addonLevel
-            + ",\n\n subCategories=" + subCategories + '}';
+            + ", categoriesNameAlt='" + categoriesNameAlt + '\'' + ", parentId=" + parentId + ", sortOrder=" + sortOrder
+            + ", categoriesUrl='" + categoriesUrl + '\'' + ", categoriesAltUrl='" + categoriesAltUrl + '\''
+            + ", categoriesDescription='" + categoriesDescription + '\'' + ", categoriesNameForUrl='"
+            + categoriesNameForUrl + '\'' + ", categoriesMetaTile='" + categoriesMetaTile + '\''
+            + ", categoriesMetaKeywords='" + categoriesMetaKeywords + '\'' + ", categoriesMetaDescription='"
+            + categoriesMetaDescription + '\'' + ", categoriesIfNotDisplay='" + categoriesIfNotDisplay + '\''
+            + ", categoriesStatus=" + categoriesStatus + ", topParent=" + topParent + ", catType=" + catType
+            + ", isHidden=" + isHidden + ", weightage=" + weightage + ", categoryLevel=" + categoryLevel
+            + ", addonType=" + addonType + ", subCategories=" + subCategories + '}';
     }
 }
