@@ -67,7 +67,7 @@ public class VoucherModel {
     private Integer orderValue;   // voucher valid only if orderValue greater than this
 
     @JsonProperty("blackListPts")
-    private List<Integer> blackListPts = new ArrayList<>();// In Valid Cat iDs
+    private List<Integer> blackListPts = new ArrayList<>();// InValid Cat iDs
 
     @JsonProperty("whiteListPts")
     private List<Integer> whiteListPts = new ArrayList<>();// valid cat iDs

@@ -26,16 +26,16 @@ public class Voucher {
     private static final Logger logger = LoggerFactory.getLogger(Voucher.class);
 
     @POST
-    @Path("/v1/voucher/createvoucher")
+        @Path("/v1/voucher/createvoucher")
     public Response createVoucher(VoucherRequestContainer voucherRequestContainer) {
         Response response=null;
         VoucherMapper voucherMapper = new VoucherMapper();
         VoucherModel voucherModel = voucherRequestContainer.getVoucherModel();
-        RowLimitModel rowLimitModel = voucherRequestContainer.getRowLimitModel();
+        RowLimitModel rowLimit = voucherRequestContainer.getRowLimitModel();
         try{
-            boolean result = voucherMapper.createVoucher(voucherModel);
-            if(result==true){
-                VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,voucherModel.getFkAssociateId(),rowLimitModel.getStartIndex(),rowLimitModel.getRowsCount());
+            ResultModel result = voucherMapper.createVoucher(voucherModel);
+            if(result.isError()==false){
+                VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,voucherModel.getFkAssociateId(),rowLimit.getStartIndex(),rowLimit.getRowsCount());
                 if(voucherModelList!= null && voucherModelList.getVoucherModelList() != null && !voucherModelList.getVoucherModelList().isEmpty()){
                     response= EntityFoundResponse.entityFoundResponseBuilder(voucherModelList);
                 }else{
@@ -46,6 +46,9 @@ public class Voucher {
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error","Voucher not created.");
+                if(result.getObject() != null){
+                    errorResponse.put("error_reason", result.getObject().toString());
+                }
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
         }catch (Exception exception){
@@ -61,8 +64,8 @@ public class Voucher {
         VoucherModel voucherModel = voucherRequestContainer.getVoucherModel();
         RowLimitModel rowLimitModel = voucherRequestContainer.getRowLimitModel();
         try{
-            boolean result = voucherMapper.updateVoucher(voucherModel);
-            if(result==true){
+            ResultModel result = voucherMapper.updateVoucher(voucherModel);
+            if(result.isError()==false){
                 VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,voucherModel.getFkAssociateId(),rowLimitModel.getStartIndex(),rowLimitModel.getRowsCount());
                 if(voucherModelList!= null && voucherModelList.getVoucherModelList() != null && !voucherModelList.getVoucherModelList().isEmpty()){
                     response= EntityFoundResponse.entityFoundResponseBuilder(voucherModelList);
@@ -74,6 +77,9 @@ public class Voucher {
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error","voucher could't be updated.");
+                if(result.getObject() != null){
+                    errorResponse.put("error_reason", result.getObject().toString());
+                }
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
         }catch (Exception exception){
@@ -90,10 +96,9 @@ public class Voucher {
                                     @QueryParam("rowsCount") int rowsCount) {
         Response response=null;
         VoucherMapper voucherMapper = new VoucherMapper();
-        boolean result = false;
         try{
-            result = voucherMapper.deleteVoucher(id,modifiedBy);
-            if(result==true){
+            ResultModel result = voucherMapper.deleteVoucher(id,modifiedBy);
+            if(result.isError()==false){
                 VoucherListModel voucherModelList= voucherMapper.getVoucherList(-1,fkAssociateId,startIndex,rowsCount);
                 if(voucherModelList!= null && voucherModelList.getVoucherModelList() != null && !voucherModelList.getVoucherModelList().isEmpty()){
                     response= EntityFoundResponse.entityFoundResponseBuilder(voucherModelList);
@@ -105,6 +110,9 @@ public class Voucher {
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error","Could not delete Voucher");
+                if(result.getObject() != null){
+                    errorResponse.put("error_reason", result.getObject().toString());
+                }
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
         }catch (Exception exception){
