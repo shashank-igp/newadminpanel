@@ -45,9 +45,9 @@ public class Voucher {
                 }
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error","Voucher not created.");
+                errorResponse.put("error","Could not create voucher.");
                 if(result.getObject() != null){
-                    errorResponse.put("error_reason", result.getObject().toString());
+                    errorResponse.put("error", result.getObject().toString());
                 }
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
@@ -76,9 +76,9 @@ public class Voucher {
                 }
             }else{
                 Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error","voucher could't be updated.");
+                errorResponse.put("error","Voucher could't be updated.");
                 if(result.getObject() != null){
-                    errorResponse.put("error_reason", result.getObject().toString());
+                    errorResponse.put("error", result.getObject().toString());
                 }
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }
@@ -111,7 +111,7 @@ public class Voucher {
                 Map<String, String> errorResponse = new HashMap<>();
                 errorResponse.put("error","Could not delete Voucher");
                 if(result.getObject() != null){
-                    errorResponse.put("error_reason", result.getObject().toString());
+                    errorResponse.put("error", result.getObject().toString());
                 }
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }

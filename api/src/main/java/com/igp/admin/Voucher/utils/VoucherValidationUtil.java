@@ -104,7 +104,7 @@ public class VoucherValidationUtil{
             Date expiryDate = dateFormat.parse(voucherModel.getExpiryDate());
             Date nowDate = dateFormat.parse(dateFormat.format(new Date()));
             if(expiryDate.before(nowDate)){
-                errorList.add("Expiry date must be equal or greater than today.");
+                errorList.add("Expiry date must be equal to or greater than today.");
             }
         }
         catch (ParseException e){

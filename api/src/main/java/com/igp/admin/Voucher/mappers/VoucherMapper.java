@@ -22,7 +22,7 @@ public class VoucherMapper {
             List<String> validationList = voucherValidationUtil.createVoucher(voucherModel);
             if(validationList.size() > 0){
                 result.setError(true);
-                result.setObject(validationList);
+                result.setObject(VoucherUtil.getCommaSepString(validationList));
                 logger.debug(validationList.toString());
             }else{
                 if(!voucherUtil.createVoucher(voucherModel)){
@@ -44,7 +44,7 @@ public class VoucherMapper {
             List<String> validationList = voucherValidationUtil.updateVoucher(voucherModel);
             if(validationList.size() > 0){
                 result.setError(true);
-                result.setObject(validationList);
+                result.setObject(VoucherUtil.getCommaSepString(validationList));
                 logger.debug(validationList.toString());
             }else{
                 if(!voucherUtil.updateVoucher(voucherModel)){
@@ -65,7 +65,7 @@ public class VoucherMapper {
             List<String> validationList = voucherValidationUtil.deleteVoucher(id,modifiedBy);
             if(validationList.size() > 0){
                 result.setError(true);
-                result.setObject(validationList);
+                result.setObject(VoucherUtil.getCommaSepString(validationList));
                 logger.debug(validationList.toString());
             }else{
                 if(!voucherUtil.deleteVoucher(id,modifiedBy)){
