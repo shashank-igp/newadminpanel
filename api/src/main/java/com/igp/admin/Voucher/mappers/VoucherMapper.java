@@ -1,10 +1,8 @@
 package com.igp.admin.Voucher.mappers;
 import com.igp.admin.Blogs.models.SeoBlogModel;
-import com.igp.admin.Voucher.models.CategoriesModel;
-import com.igp.admin.Voucher.models.VoucherListModel;
-import com.igp.admin.Voucher.models.VoucherMetaData;
-import com.igp.admin.Voucher.models.VoucherModel;
+import com.igp.admin.Voucher.models.*;
 import com.igp.admin.Voucher.utils.VoucherUtil;
+import com.igp.admin.Voucher.utils.VoucherValidationUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,35 +14,64 @@ import java.util.List;
 public class VoucherMapper {
     private static final Logger logger = LoggerFactory.getLogger(VoucherMapper.class);
 
-    public boolean createVoucher(VoucherModel voucherModel){
-        boolean result = false;
+    public ResultModel createVoucher(VoucherModel voucherModel){
         VoucherUtil voucherUtil = new VoucherUtil();
+        ResultModel result = new ResultModel();
+        VoucherValidationUtil voucherValidationUtil = new VoucherValidationUtil();
         try{
-            result = voucherUtil.createVoucher(voucherModel);
+            List<String> validationList = voucherValidationUtil.createVoucher(voucherModel);
+            if(validationList.size() > 0){
+                result.setError(true);
+                result.setObject(VoucherUtil.getCommaSepString(validationList));
+                logger.debug(validationList.toString());
+            }else{
+                if(!voucherUtil.createVoucher(voucherModel)){
+                    result.setError(true);
+                }
+            }
         }catch (Exception exception){
             logger.debug("error occured while creating Voucher "+exception);
+            result.setError(true);
         }
         return result;
     }
 
-    public boolean updateVoucher(VoucherModel voucherModel){
-
+    public ResultModel updateVoucher(VoucherModel voucherModel){
         VoucherUtil voucherUtil=new VoucherUtil();
-        boolean result = false;
+        ResultModel result = new ResultModel();
+        VoucherValidationUtil voucherValidationUtil = new VoucherValidationUtil();
         try{
-            result = voucherUtil.updateVoucher(voucherModel);
+            List<String> validationList = voucherValidationUtil.updateVoucher(voucherModel);
+            if(validationList.size() > 0){
+                result.setError(true);
+                result.setObject(VoucherUtil.getCommaSepString(validationList));
+                logger.debug(validationList.toString());
+            }else{
+                if(!voucherUtil.updateVoucher(voucherModel)){
+                    result.setError(true);
+                }
+            }
         }catch (Exception exception){
             logger.debug("error occured while updating Voucher "+exception);
         }
         return result;
     }
 
-    public boolean deleteVoucher(int id, String modifiedBy){
-
-        boolean result = false;
+    public ResultModel deleteVoucher(int id, String modifiedBy){
         VoucherUtil voucherUtil=new VoucherUtil();
+        ResultModel result = new ResultModel();
+        VoucherValidationUtil voucherValidationUtil = new VoucherValidationUtil();
         try{
-            result = voucherUtil.deleteVoucher(id,modifiedBy);
+            List<String> validationList = voucherValidationUtil.deleteVoucher(id,modifiedBy);
+            if(validationList.size() > 0){
+                result.setError(true);
+                result.setObject(VoucherUtil.getCommaSepString(validationList));
+                logger.debug(validationList.toString());
+            }else{
+                if(!voucherUtil.deleteVoucher(id,modifiedBy)){
+                    result.setError(true);
+                }
+            }
         }catch (Exception exception){
             logger.debug("error occured while deleting Voucher "+exception);
         }
@@ -112,5 +139,5 @@ public class VoucherMapper {
         }
         return categoriesModelList;
     }
-    
+
 }

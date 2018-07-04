@@ -629,4 +629,7 @@ public class VoucherUtil {
         }
         return finalCategoriesModelList;
     }
+    public static String getCommaSepString(List<String> list){
+        return list.toString().replace("[","").replace("]", "");
+    }
 }
