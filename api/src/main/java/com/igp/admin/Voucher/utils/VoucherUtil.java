@@ -60,10 +60,11 @@ public class VoucherUtil {
             Integer status = preparedStatement.executeUpdate();
             if (status != 0) {
 
-                String blackList = "";
-                String whiteList = "";
+                String blackList = null;
+                String whiteList = null;
                 String email = "";
                 if(voucherModel.getBlackListPts()!=null && !voucherModel.getBlackListPts().isEmpty()){
+                    blackList = "";
                     int i = voucherModel.getBlackListPts().size()-1;
                     while(i>=0){
                         blackList+=voucherModel.getBlackListPts().get(i)+",";
@@ -72,6 +73,7 @@ public class VoucherUtil {
                     blackList = blackList.substring(0, blackList.length() - 1);
                 }
                 if(voucherModel.getWhiteListPts()!=null && !voucherModel.getWhiteListPts().isEmpty()){
+                    whiteList = "";
                     int i = voucherModel.getWhiteListPts().size()-1;
                     while(i>=0){
                         whiteList+=voucherModel.getWhiteListPts().get(i)+",";
@@ -138,11 +140,13 @@ public class VoucherUtil {
         PreparedStatement preparedStatement = null;
         boolean result = false;
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        try{
-            String blackList = "";
-            String whiteList = "";
+        try
+        {
+            String blackList = null;
+            String whiteList = null;
             String email = "";
             if(voucherModel.getBlackListPts()!=null && !voucherModel.getBlackListPts().isEmpty()){
+                blackList = "";
                 int i = voucherModel.getBlackListPts().size()-1;
                 while(i>=0){
                     blackList+=voucherModel.getBlackListPts().get(i)+",";
@@ -151,6 +155,7 @@ public class VoucherUtil {
                 blackList = blackList.substring(0, blackList.length() - 1);
             }
             if(voucherModel.getWhiteListPts()!=null && !voucherModel.getWhiteListPts().isEmpty()){
+                whiteList = "";
                 int i = voucherModel.getWhiteListPts().size()-1;
                 while(i>=0){
                     whiteList+=voucherModel.getWhiteListPts().get(i)+",";
