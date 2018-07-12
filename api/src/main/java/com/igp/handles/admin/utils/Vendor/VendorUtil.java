@@ -169,7 +169,7 @@ public class VendorUtil
         try {
             connection = Database.INSTANCE.getReadOnlyConnection();
             String statement = " select * from associate as a JOIN associate_user as au ON " +
-                "a.associate_id = au.fk_associate_login_id JOIN vendor_extra_info as v ON " +
+                "a.associate_id = au.fk_associate_login_id left JOIN vendor_extra_info as v ON " +
                 "au.fk_associate_login_id = v.associate_id where a.associate_id = ?";
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setInt(1,vendorId);
@@ -186,8 +186,6 @@ public class VendorUtil
                 vendorInfoModel.setContactPerson(resultSet.getString("a.associate_contact_person"));
                 vendorInfoModel.setEmail(resultSet.getString("a.associate_email"));
                 vendorInfoModel.setPassword(resultSet.getString("au.associate_user_pass"));
-                vendorInfoModel.setRating(resultSet.getInt("v.rating"));
-                vendorInfoModel.setDailyCap(resultSet.getInt("v.daily_cap"));
             }
         }catch (Exception exception){
             logger.error("Exception in connection", exception);
