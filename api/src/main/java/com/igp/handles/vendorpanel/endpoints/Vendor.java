@@ -92,7 +92,7 @@ public class Vendor {
         Map<String,List<OrderLogModel>> orderLog=new HashMap<>();
         try{
             vendorUtil.saveVendorIssueInHandelsHistory(orderProductIds,orderId,fkAssociateId,vendorIssue,ipAddress,userAgent);
-            orderLog.put("logs",orderMapper.getOrderLog(orderId,"message"));
+            orderLog.put("logs",orderMapper.getOrderLog(orderId,"message",fkAssociateId));
             handleServiceResponse.setResult(orderLog);
         }catch (Exception exception){
             logger.error("error while adding vendor instruction from vendor in vendor panel ",exception);
