@@ -7,7 +7,6 @@ import com.igp.handles.vendorpanel.models.Order.OrderComponent;
 import com.igp.handles.vendorpanel.models.Order.OrderProductExtraInfo;
 import com.igp.handles.vendorpanel.models.Order.OrdersProducts;
 import com.igp.handles.vendorpanel.response.HandleServiceResponse;
-import com.igp.handles.vendorpanel.utils.Order.OrderStatusUpdateUtil;
 import com.igp.handles.vendorpanel.utils.Order.OrderUtil;
 import org.apache.commons.collections4.ListUtils;
 import org.slf4j.Logger;
@@ -233,11 +232,11 @@ public class OrderMapper {
         }
         return result;
     }
-    public List<OrderLogModel> getOrderLog(int orderId,String type){
+    public List<OrderLogModel> getOrderLog(int orderId,String type,String fkAssociateId){
         List<OrderLogModel> orderLogModelList=new ArrayList<>();
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         try {
-            orderLogModelList =orderUtil.getOrderLog(orderId,type);
+            orderLogModelList =orderUtil.getOrderLog(orderId,type,fkAssociateId);
         }catch (Exception exception){
             logger.error("error while getting OrderLog",exception);
 
@@ -308,11 +307,11 @@ public class OrderMapper {
         boolean result=false;
         com.igp.handles.admin.utils.Order.OrderUtil orderUtil=new com.igp.handles.admin.utils.Order.OrderUtil();
         try{
-            String productIds=OrderStatusUpdateUtil.getProductsIds(orderProductIdString);
-            String[] productIdArray=productIds.split(",");
-            for(int i=0;i<productIdArray.length;i++){
-                if(productIdArray[i]!=null && !productIdArray[i].equals("")){
-                    result=orderUtil.insertIntoHandelOrderHistory(orderId,Integer.parseInt(productIdArray[i]),fkAssociateId,instruction,ipAddress,userAgent,"instruction","from_igp");
+            List<OrdersProducts> orderProductList=orderUtil.getOrderProductList(orderProductIdString);
+            for(OrdersProducts ordersProducts:orderProductList){
+                if(ordersProducts.getFkAssociateId()!=null && !ordersProducts.getFkAssociateId().equals("")){
+                    result=orderUtil.insertIntoHandelOrderHistory(orderId,ordersProducts.getProductId(),Integer.parseInt(ordersProducts.getFkAssociateId()),instruction,ipAddress,userAgent,"instruction","from_igp");
+                    //here fk_associate_id is for whom this instrution is supposed to go i.e vendorID  i.e for fetching the instruction for certain vendor from IGP we just have to provide the vendorID for that vendor also
                 }
             }
         }catch(Exception exception){

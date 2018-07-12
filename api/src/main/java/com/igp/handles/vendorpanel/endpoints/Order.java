@@ -116,12 +116,12 @@ public class Order {
     }
     @GET
     @Path("/v1/handels/getOrderLog")
-    public HandleServiceResponse getOrderLog(@QueryParam("orderId") int orderId){
+    public HandleServiceResponse getOrderLog(@QueryParam("orderId") int orderId,@QueryParam("fkassociateId") String fkAssociateId){
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         com.igp.handles.admin.mappers.Order.OrderMapper orderMapper=new com.igp.handles.admin.mappers.Order.OrderMapper();
         try{
             Map<String,List<OrderLogModel>> orderLog=new HashMap<>();
-            orderLog.put("logs",orderMapper.getOrderLog(orderId,"message"));
+            orderLog.put("logs",orderMapper.getOrderLog(orderId,"message",fkAssociateId));
             handleServiceResponse.setResult(orderLog);
 
         }catch (Exception exception){

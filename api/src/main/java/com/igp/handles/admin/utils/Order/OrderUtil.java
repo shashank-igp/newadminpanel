@@ -757,7 +757,7 @@ public class OrderUtil {
         }
         return result;
     }
-    public List<OrderLogModel> getOrderLog(int orderId,String type){
+    public List<OrderLogModel> getOrderLog(int orderId,String type,String fkAssociateId){
         String insertTime="",log="";
         Connection connection = null;
         ResultSet resultSet = null;
@@ -768,10 +768,11 @@ public class OrderUtil {
         try{
             connection = Database.INSTANCE.getReadOnlyConnection();
             if(type.equals("message")){
-                statement="SELECT  * from handel_order_history where orders_id = ? and action = ?  order by handel_order_history_id desc";
+                statement="SELECT  * from handel_order_history where orders_id = ? and action = ? and fk_associate_id = ?  order by handel_order_history_id desc";
                 preparedStatement = connection.prepareStatement(statement);
                 preparedStatement.setInt(1,orderId);
                 preparedStatement.setString(2,"instruction");
+                preparedStatement.setInt(3,Integer.parseInt(fkAssociateId));
             }else{
                 statement="SELECT  * from handel_order_history where orders_id = ? order by handel_order_history_id desc";
                 preparedStatement = connection.prepareStatement(statement);
@@ -786,7 +787,11 @@ public class OrderUtil {
                 orderLogModel.setDate(insertTime.split(" ")[0]);
                 orderLogModel.setTime(insertTime.split(" ")[1]);
                 orderLogModel.setMessage(log);
-                orderLogModel.setUser(vendorUtil.getVendorInfo(resultSet.getInt("fk_associate_id")).getAssociateName());
+                if(resultSet.getString("sub_action").equals("from_igp")){
+                    orderLogModel.setUser(vendorUtil.getVendorInfo(72).getAssociateName());
+                }else{
+                    orderLogModel.setUser(vendorUtil.getVendorInfo(resultSet.getInt("fk_associate_id")).getAssociateName());
+                }
                 if(resultSet.getString("action").equals("instruction")){
                     orderLogModel.setType("message");
                 }else {
