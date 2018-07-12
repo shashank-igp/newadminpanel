@@ -116,7 +116,7 @@ public class Order {
     }
     @GET
     @Path("/v1/handels/getOrderLog")
-    public HandleServiceResponse getOrderLog(@QueryParam("orderId") int orderId,@QueryParam("fkassociateId") String fkAssociateId){
+    public HandleServiceResponse getOrderLog(@QueryParam("orderId") int orderId,@QueryParam("fkAssociateId") String fkAssociateId){ // here fkAssociateId instead of fkassociateId   just for quick bug fix
         HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
         com.igp.handles.admin.mappers.Order.OrderMapper orderMapper=new com.igp.handles.admin.mappers.Order.OrderMapper();
         try{
