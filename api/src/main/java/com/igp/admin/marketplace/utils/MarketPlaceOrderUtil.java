@@ -189,7 +189,7 @@ public class MarketPlaceOrderUtil {
                     validationModel.setError(Boolean.TRUE);
                     validationModel.setMessage("We do not serve this Pincode.");
 
-                 //   throw new Exception("We do not serve this Pincode.");
+                    //   throw new Exception("We do not serve this Pincode.");
                 }
             }
             // model didn't return any error and now work on address book.
@@ -207,7 +207,7 @@ public class MarketPlaceOrderUtil {
                 String postData1 = objectMapper.writeValueAsString(shippingAddress);
                 logger.debug("Postdata1 for /v1/user/address : "+ postData1);
                 String createAddress = httpRequestUtil.sendCurlRequest(postData1, ServerProperties.getPropertyValue("ADD_ADDRESS_URL"),new ArrayList<>());
-         //       logger.debug("Create address response : " + createAddress.toString());
+                //       logger.debug("Create address response : " + createAddress.toString());
                 if(createAddress.contains("error")){
                     validationModel.setError(Boolean.TRUE);
                     validationModel.setMessage("Some Problem in Address.");
@@ -700,8 +700,6 @@ public class MarketPlaceOrderUtil {
         GeneralOrderResponseModel generalOrderResponseModel;
         Connection connection = null;
         PreparedStatement preparedStatement = null;
-        PreparedStatement preparedStatement1 = null;
-        String statement, statement1;
         try {
             marketPlaceOrderModel.setOrderTempId(orderTempModel.getTempOrderId());
             marketPlaceOrderModel.setAssociateId(orderTempModel.getAssociateId());
@@ -716,7 +714,7 @@ public class MarketPlaceOrderUtil {
             String hash = encryptPayment(hashStringSequence + SecretProperties.getPaymentKey());
             marketPlaceOrderModel.setHash(hash);
 
-       //     TimeUnit.MILLISECONDS.sleep(500);
+            //     TimeUnit.MILLISECONDS.sleep(500);
 
             // sleep for a second.
 
@@ -738,54 +736,78 @@ public class MarketPlaceOrderUtil {
             Map<String, APIOrderResponseModel> orderResponse = generalOrderResponseModel.getData();
             APIOrderResponseModel apiOrderResponseModel = orderResponse.get("payment");
 
-         //   TimeUnit.MILLISECONDS.sleep(500);
+            //   TimeUnit.MILLISECONDS.sleep(500);
 
             orderId = getGeneratedOrderNum(orderTempModel.getTempOrderId());
             if(orderId==0){
-
-        //    if(orderResponse.get("error") != null || (apiOrderResponseModel.getOrderId() == 0 || apiOrderResponseModel.getOrderId() == null)){
+                //    if(orderResponse.get("error") != null || (apiOrderResponseModel.getOrderId() == 0 || apiOrderResponseModel.getOrderId() == null)){
                 // order is not created
                 throw new Exception("Exception in Order Creation.");
             }else{
-                Integer status;
-              //  orderId = getGeneratedOrderNum(orderTempModel.getTempOrderId());
-               // orderId = apiOrderResponseModel.getOrderId();
+                orderId = updateOrderAndExtraInfo(orderId,extraInfoModel);
+                //  orderId = getGeneratedOrderNum(orderTempModel.getTempOrderId());
+                // orderId = apiOrderResponseModel.getOrderId();
                 logger.debug("Orders Created successfully : " + orderId);
-                connection = Database.INSTANCE.getReadWriteConnection();
-                statement = "UPDATE orders SET rl_req_ID = ? , marketplace_data = ? , marketplace_name = ? WHERE orders_id = ?";
-                preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
-                preparedStatement.setString(1, extraInfoModel.getRelId());
-                preparedStatement.setString(2, extraInfoModel.getMarketData());
-                preparedStatement.setString(3, extraInfoModel.getMarketName());
-                preparedStatement.setInt(4, apiOrderResponseModel.getOrderId());
-                status = preparedStatement.executeUpdate();
-                if(status==1) {
-                    // then only update extra info table.
-                    statement1 = "UPDATE orders_extra_info SET gst_no = ? WHERE orders_id = ?";
-                    preparedStatement1 = connection.prepareStatement(statement1, Statement.RETURN_GENERATED_KEYS);
-                    preparedStatement1.setString(1, extraInfoModel.getGstNo());
-                    preparedStatement1.setInt(2, apiOrderResponseModel.getOrderId());
-                    status = preparedStatement1.executeUpdate();
-                }
-
-                if (status == 0) {
-                    logger.error("Failed while updating orders table");
-                    throw new Exception("Failed while updating orders table");
-                } else {
-                    logger.debug("Orders & orders_extra_info updation successful" + orderId);
-                }
             }
         }
         catch (Exception e){
-            logger.error("Exception While Creation of Order : "+ e);
-            orderId = 0;
+            if(e.toString().contains("HTTP response code: 504")){
+                try {
+                    TimeUnit.MILLISECONDS.sleep(500);
+                }catch (Exception e1){
+
+                }
+                orderId = getGeneratedOrderNum(orderTempModel.getTempOrderId());
+                orderId = updateOrderAndExtraInfo(orderId,extraInfoModel);
+                logger.debug("Entered in exception block of HTTP response code: 504 where ordersId : "+orderId);
+            }else {
+                logger.error("Exception While Creation of Order : " + e);
+                orderId = 0;
+            }
         }
         finally {
             Database.INSTANCE.closeStatement(preparedStatement);
-            Database.INSTANCE.closeStatement(preparedStatement1);
             Database.INSTANCE.closeConnection(connection);
         }
         return orderId;
+    }
+
+    public int updateOrderAndExtraInfo(int ordersId, ExtraInfoModel extraInfoModel) {
+        Connection connection = null;
+        PreparedStatement preparedStatement = null;
+        int status;
+        try {
+            connection = Database.INSTANCE.getReadWriteConnection();
+            String statement = "UPDATE orders SET rl_req_ID = ? , marketplace_data = ? , marketplace_name = ? WHERE orders_id = ?";
+            preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, extraInfoModel.getRelId());
+            preparedStatement.setString(2, extraInfoModel.getMarketData());
+            preparedStatement.setString(3, extraInfoModel.getMarketName());
+            preparedStatement.setInt(4, ordersId);
+            status = preparedStatement.executeUpdate();
+            if(status==1 && extraInfoModel.getGstNo().isEmpty()!=true) {
+                // then only update extra info table.
+                statement = "UPDATE orders_extra_info SET gst_no = ? WHERE orders_id = ?";
+                preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
+                preparedStatement.setString(1, extraInfoModel.getGstNo());
+                preparedStatement.setInt(2, ordersId);
+                status = preparedStatement.executeUpdate();
+            }
+            if (status == 0) {
+                logger.error("Failed while updating orders table");
+                throw new Exception("Failed while updating orders table");
+            } else {
+                logger.debug("Orders & orders_extra_info updation successful" + ordersId);
+            }
+
+        } catch (Exception exception) {
+            logger.error("Error", exception);
+            ordersId = 0;
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return ordersId;
     }
     public int getCountryId(String countryName) {
         int countryId = 0;
