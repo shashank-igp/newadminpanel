@@ -41,11 +41,12 @@ public class MarketPlaceMapper {
                 put("UKG",546);         //UKGiftsPortal
                 put("oyo",547);         //Oyo
                 put("corp",556);        //Corporate orders
-                put("artisanG",561);      //Artisan Gilt
+                put("artisanG",561);    //Artisan Gilt
                 put("Inductus",562);    //Inductus
                 put("FNP",741);         //Fnp International
-                put("JnJ",769);           //Johnsons and Johnsons
+                put("JnJ",769);         //Johnsons and Johnsons
                 put("INFUK",841);       //Interflora International
+        //        put("ZIFIT",xyz);       // rakhi vendor
 
             }
 
@@ -65,7 +66,7 @@ public class MarketPlaceMapper {
     public  Map<Integer, Map<String, String>> parseExcelForMarketPlace(FormDataMultiPart multiPart, String filePrefix, int fkAsId) {
         Map<Integer, Map<String, String>> data= new HashMap<>();
         int NUM_COLUMNS = 20;
-        if(fkAsId==433){
+        if(fkAsId == 433){   // || fkAsId == xyz){
             NUM_COLUMNS = 25;
         }
         MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
@@ -378,6 +379,196 @@ public class MarketPlaceMapper {
                             .relId(column.get("PO Number"))
                             .marketData(detail)
                             .marketName("RL")
+                            .build();
+
+                    } else if (fk_associate_id == 43){ //xyz) {
+                        // ZIFIT vendor for rakhi
+
+                        String mprefix = marketPlaceOrderUtil.getMobilePrefixByCountryId(223);
+                        String phone = column.get("buyer-phone-number").trim();
+
+                        if (!phone.isEmpty()) {
+                            phone = new BigDecimal(column.get("Contact No")).toPlainString().replace("-","").replace("(","").replace(")","");
+                        }
+                        String zipCode = column.get("ship-postal-code"); // change it later i think constant
+
+                        String quant = column.get("quantity-purchased");
+                        int quantity = 0;
+                        if (!quant.isEmpty()) {
+                            double d = Double.parseDouble(quant);
+                            quantity = (int) d;
+                        }
+
+                        String name = column.get("buyer-name").trim();
+
+                        name = " "+marketPlaceOrderUtil.replaceSpecialChars(name)+" ";
+                        name=name.replaceAll("\\sNA\\s"," ").replaceAll("\\sna\\s"," ").replaceAll("\\sNa\\s"," ").trim();
+                        String fname = "";
+                        String lname = "";
+
+                        if (name != null) {
+
+                            if (name.contains(" ")) {
+                                String[] nameArray = name.trim().split(" ");
+
+                                fname = nameArray[0];
+                                if (nameArray.length > 1) {
+
+                                    for(int i=1;i<nameArray.length-1;i++){
+                                        if(fname.length()+nameArray[i].length()<20){
+                                            fname+=" "+nameArray[i];
+                                        }else {
+                                            break;
+                                        }
+                                    }
+                                    lname = name.trim().substring(fname.length() + 1, name.trim().length());
+                                }
+                            } else {
+                                fname = name;
+                            }
+                        }
+
+
+                        String address = column.get("ship-address-1").trim();
+                        String address2 = column.get("ship-address-2").trim();
+                        String address3 = column.get("ship-address-3").trim();
+                        // i think it'll be constant as is not there in file
+
+                        address = marketPlaceOrderUtil.replaceSpecialChars(address);
+                        address2 = marketPlaceOrderUtil.replaceSpecialChars(address2);
+
+                        String email = column.get("buyer-email").trim();
+
+                        userModel = new UserModel.UserBuilder()
+                            .id(null)
+                            .firstname(fname)
+                            .lastname(lname)
+                            .addressField1(address+","+address2+","+address3 +column.get("ship-city")+ "," + column.get("ship-state"))
+                            .state(column.get("ship-state")) // check
+                            .city(column.get("ship-city")) // check
+                            .postcode(zipCode) // check
+                            .email(email)
+                            .mobile(phone.split("\\.")[0])
+                            .mobilePrefix(mprefix) // check
+                            .password(millis + "")
+                            .countryId(223) // check
+                            .associateId(5)
+                            .uniqsrc("Bulk-" + millis)
+                            .build();
+
+
+                        addressModel.setTitle("");
+                        addressModel.setFirstname(userModel.getFirstname());
+                        addressModel.setLastname(userModel.getLastname());
+                        addressModel.setStreetAddress(userModel.getAddressField1());
+                        addressModel.setPostcode(userModel.getPostcode());
+                        addressModel.setCity(userModel.getCity());
+                        addressModel.setState(userModel.getState());
+                        addressModel.setCountryId(userModel.getCountryId().toString());
+                        addressModel.setRelation("Self");
+                        addressModel.setEmail(userModel.getEmail());
+                        addressModel.setMobile(userModel.getMobile());
+                        addressModel.setMobilePrefix(mprefix);
+                        addressModel.setAddressType(0); // home
+
+                        // check complete address model i think address will be same as recepient
+
+                        String sP = column.get("item-price").trim();
+                        int sellingPrice = 0;
+                        if (!sP.isEmpty()) {
+                            double d = Double.parseDouble(sP);
+                            sellingPrice = (int) d;
+                            sellingPrice = sellingPrice/quantity; // here it must be per quantity, also take care of shipping cost
+                        }
+
+                        String itemCode = column.get("sku").trim();
+                        if(!itemCode.isEmpty()) {
+                            String itemCodeArray[] = column.get("sku").trim().split("IGP-");
+                            if(itemCodeArray.length==2) {
+                                itemCode = itemCodeArray[1];
+                            } else {
+                                itemCode = itemCodeArray[0];
+                            }
+                            // removes IGP-
+                            itemCodeArray = itemCode.split("--");
+                            itemCode = itemCodeArray[0];
+                            // removes --
+                            itemCodeArray = itemCode.split("—");
+                            itemCode = itemCodeArray[0];
+                            // removes —
+
+                            itemCode = marketPlaceOrderUtil.getProductIdForLoyaltyOnly(itemCode);
+
+                        // check product code how to find it from sample file
+                        }
+
+                        if(marketPlaceOrderUtil.handelProductOrNot(itemCode)){
+                            productModel = new ProductModel.Builder()
+                                .productCode(itemCode)
+                                .quantity(quantity)
+                                .sellingPrice(new BigDecimal(sellingPrice))
+                                .name(column.get("product-name"))
+                                .serviceDate(simpleDateFormat.format(todayDate))
+                                .serviceTypeId(String.valueOf(4))  // for delivery type fixed date
+                                .serviceCharge(new BigDecimal(column.get("shipping-price"))) //check it
+                                .displayAttrList(new HashMap<>())
+                                .perProductDiscount(new BigDecimal(0))
+                                .giftBox(0)
+                                .voucher(null)
+                                .fkId(0)
+                                .build();
+                        }else {
+                            productModel = new ProductModel.Builder()
+                                .productCode(itemCode)
+                                .quantity(quantity)
+                                .sellingPrice(new BigDecimal(sellingPrice))
+                                .name(column.get("product-name"))
+                                .serviceDate("1970-01-01")
+                                .serviceTypeId(1 + "") // for delivery type standard
+                                .serviceCharge(new BigDecimal(column.get("shipping-price")))  //check it
+                                .displayAttrList(new HashMap<>())
+                                .perProductDiscount(new BigDecimal(0))
+                                .giftBox(0)
+                                .voucher(null)
+                                .fkId(0)
+                                .build();
+                        }
+
+                        String detail = column.get("order-id") + "(#)" +
+                            column.get("MemberName") + "(#)" +
+                            userModel.getMobile() + "(#)" +
+                            column.get("Email") + "(#)" +
+                            address + "(#)" +
+                            address2 + "(#)" +
+                            column.get("City") + "(#)" +
+                            column.get("State") + "(#)" +
+                            userModel.getPostcode() + "(#)" +
+                            column.get("Item Code") + "(#)" +
+                            quantity + "(#)" +
+                            column.get("MRP")+ "(#)" +
+                            column.get("POAmount")+ "(#)" +
+                            sP + "(#)" +
+                            column.get("ProductName")+ "(#)" +
+                            column.get("ProgramName")+ "(#)" +
+                            column.get("Vendor")+ "(#)" +
+                            column.get("Open/Requested(DD/MM/YYYY)")+ "(#)" +
+                            column.get("POStatus")+ "(#)" +
+                            column.get("PODate")+ "(#)" +
+                            column.get("TrackingInfo")+ "(#)" +
+                            column.get("Courier")+ "(#)" +
+                            column.get("DispatchDate(DD/MM/YYYY)")+ "(#)" +
+                            column.get("DeliveryDate(DD/MM/YYYY)")+ "(#)" +
+                            column.get("CancellationComments");
+
+
+                        // change this
+
+
+                        extraInfoModel = new ExtraInfoModel.Builder()
+                            .gstNo("")
+                            .relId(column.get("order-id"))
+                            .marketData(detail)
+                            .marketName("ZIFIT")
                             .build();
 
                     } else if(fk_associate_id==841){
@@ -786,7 +977,7 @@ public class MarketPlaceMapper {
 
                 logger.debug("value of i : "+ i);
                 logger.debug("row number : "+ validationModel.getRowNum());
-                logger.debug("row values : "+ validationModel.toString());
+           //     logger.debug("row values : "+ validationModel.toString());
 
                 if(validationModel.getError() == false && validationModel!=null) {
                     AddressModel addressModel = validationModel.getAddressModel();
@@ -832,9 +1023,9 @@ public class MarketPlaceMapper {
                                         validationModel.setMessage("Product Can't be found.");
                                     } else {
                                         // fourth step : validate extra info values and add in the model
-                                        if (extraInfoModel.getGstNo() != null || extraInfoModel.getGstNo() != "" ||
-                                            extraInfoModel.getMarketData() != null || extraInfoModel.getMarketData() != "" ||
-                                            extraInfoModel.getMarketName() != null || extraInfoModel.getMarketName() != "" ||
+                                        if (extraInfoModel.getGstNo() != null &&
+                                            (extraInfoModel.getMarketData() != null || extraInfoModel.getMarketData() != "") &&
+                                            (extraInfoModel.getMarketName() != null || extraInfoModel.getMarketName() != "") &&
                                             extraInfoModel.getRelId() != "") {
                                             // fifth step : all info is good so create temp model and create temp order.
                                             marketPlaceTempOrderModel = fillTempModelAndCreateTempOrder(validationModel);
