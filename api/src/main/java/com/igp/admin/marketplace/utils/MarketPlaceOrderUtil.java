@@ -427,6 +427,7 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setString(25, "call_agent_name");
             preparedStatement.setString(26, "call_customer_issue");
             preparedStatement.setString(27, "campaignTracking");
+            logger.debug("order temp creation : "+preparedStatement);
             Integer status = preparedStatement.executeUpdate();
             if (status == 0) {
                 logger.error("Failed to create tempOrder");
@@ -758,7 +759,10 @@ public class MarketPlaceOrderUtil {
 
                 }
                 orderId = getGeneratedOrderNum(orderTempModel.getTempOrderId());
-                orderId = updateOrderAndExtraInfo(orderId,extraInfoModel);
+                if(orderId>0) {
+                    // order id found
+                    orderId = updateOrderAndExtraInfo(orderId, extraInfoModel);
+                }
                 logger.debug("Entered in exception block of HTTP response code: 504 where ordersId : "+orderId);
             }else {
                 logger.error("Exception While Creation of Order : " + e);
