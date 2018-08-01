@@ -139,7 +139,9 @@ public class VoucherUtil {
         String statement,statement2;
         PreparedStatement preparedStatement = null;
         boolean result = false;
+
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
         try
         {
             String blackList = null;
