@@ -31,7 +31,7 @@ public class VoucherUtil {
         String statement;
         String statement2;
         PreparedStatement preparedStatement = null;
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         try{
             if((voucherModel.getApplicableVoucherType()==1 || voucherModel.getApplicableVoucherType()==2) && voucherModel.getApplicableEmail()!=null){
@@ -47,7 +47,7 @@ public class VoucherUtil {
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1,voucherModel.getVoucherCode()); //voucher code
             Date date = dateFormat.parse(voucherModel.getExpiryDate());
-            preparedStatement.setDate(2, new java.sql.Date(date.getTime())); // expiry date
+            preparedStatement.setTimestamp(2, new java.sql.Timestamp(date.getTime())); // expiry date
             preparedStatement.setInt(3,voucherModel.getVoucherValue());   // discount percentage
             preparedStatement.setInt(4,voucherModel.getFkAssociateId());  // affiliate
             preparedStatement.setString(5,voucherModel.getComment());  // comment
@@ -139,7 +139,7 @@ public class VoucherUtil {
         String statement,statement2;
         PreparedStatement preparedStatement = null;
         boolean result = false;
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try
         {
             String blackList = null;
@@ -179,7 +179,7 @@ public class VoucherUtil {
             preparedStatement = connection.prepareStatement(statement);
             preparedStatement.setString(1,voucherModel.getVoucherCode()); //voucher code
             Date date = dateFormat.parse(voucherModel.getExpiryDate());
-            preparedStatement.setDate(2, new java.sql.Date(date.getTime()));//expiry date
+            preparedStatement.setTimestamp(2, new java.sql.Timestamp(date.getTime()));//expiry date
             preparedStatement.setInt(3,voucherModel.getVoucherValue());   // discount percentage
             preparedStatement.setInt(4,voucherModel.getFkAssociateId());  // affiliate
             preparedStatement.setString(5,voucherModel.getComment());  // comment
@@ -379,7 +379,7 @@ public class VoucherUtil {
                     emailarray.add(split[i]);
                 }
 
-                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+                DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 
                     voucherModel.setId(resultSet.getInt("v.id"));
