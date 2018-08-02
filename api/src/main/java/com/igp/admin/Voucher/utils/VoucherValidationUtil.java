@@ -129,7 +129,8 @@ public class VoucherValidationUtil{
         // Either blacklist or whitelist should have data
         int blackSize = voucherModel.getBlackListPts().size();
         int whiteSize = voucherModel.getWhiteListPts().size();
-        if((blackSize == 0 && whiteSize == 0) || (blackSize > 0 && whiteSize > 0)){
+        //if((blackSize == 0 && whiteSize == 0) || (blackSize > 0 && whiteSize > 0)){
+        if((blackSize == 0 && whiteSize == 0)){
             errorList.add("Specify either blackListPts or whiteListPts.");
         }
 
