@@ -55,7 +55,7 @@ public class VoucherUtil {
             preparedStatement.setInt(7,voucherModel.getEnabled());  // enabled
             preparedStatement.setInt(8,voucherModel.getUsedCount() );  // used_count
             preparedStatement.setString(9,voucherModel.getApplicableCategory()); // applicable category
-            preparedStatement.setInt(10,0); // coupon type is voucher
+            preparedStatement.setInt(10,voucherModel.getVoucherType()); // coupon type is voucher
             logger.debug("Statement :"+ preparedStatement);
             Integer status = preparedStatement.executeUpdate();
             if (status != 0) {
