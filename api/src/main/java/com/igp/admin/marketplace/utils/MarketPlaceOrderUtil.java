@@ -91,7 +91,7 @@ public class MarketPlaceOrderUtil {
                     userModel.setId(custId.toString());
                     userModel.setIdHash(userModel1.getIdHash());
                     // for existing customer blindly update all the fields.
-                    if (updateDetails(userModel)) {
+                    if (updateDetails(userModel,validationModel.getFkAssociateId())) {
                         // updated the customer.
                         validationModel.setUserModel(userModel);
                     }
@@ -134,7 +134,7 @@ public class MarketPlaceOrderUtil {
                             // fill all the details.
                             userModel = isUser(userModel);
                             if(!userModel.getId().equals("0")){
-                                updateDetails(userModel);
+                                updateDetails(userModel,validationModel.getFkAssociateId());
                                 logger.debug("update successful for Customer Id : " + userModel.getId());
 
                             }else {
@@ -265,15 +265,15 @@ public class MarketPlaceOrderUtil {
         return data;
     }
 
-    public ValidationModel validateAndGetProductDetails(ValidationModel validationModel) {
-        ProductModel productModel = validationModel.getProductModel();
+    public ProductModel validateAndGetProductDetails(ProductModel productModel) {
+        ProductModel productModel1 = null;
         Connection connection = null;
         String statement;
         int serviceTypeId;
         PreparedStatement preparedStatement = null;
         ResultSet resultSet = null;
         String prodCode = productModel.getProductCode();
-        validationModel.setError(Boolean.FALSE);
+        String result = "true";
         Map<Integer, String> serviceType = new HashMap<Integer, String>() {
 
             {
@@ -285,10 +285,7 @@ public class MarketPlaceOrderUtil {
 
         };
         try {
-            if (prodCode == "" || prodCode == null) {
-                logger.debug("product details : "+productModel);
-                throw new Exception("Product Code is Wrong.");
-            }
+
             connection = Database.INSTANCE.getReadOnlyConnection();
             statement = "SELECT * FROM products LEFT JOIN newigp_product_extra_info ON " +
                 "products.products_id = newigp_product_extra_info.products_id WHERE products.products_code = ?";
@@ -308,7 +305,7 @@ public class MarketPlaceOrderUtil {
                 }else if(serviceTypeId==0 && fkAssociateId!=72){
                     serviceTypeId = 1;
                 }
-                ProductModel productModel1 = new ProductModel.Builder()
+                productModel1 = new ProductModel.Builder()
                     .id(resultSet.getInt("products.products_id"))
                     .quantity(productModel.getQuantity())
                     .name(resultSet.getString("products.products_name"))
@@ -329,25 +326,15 @@ public class MarketPlaceOrderUtil {
                     .serviceType(serviceType.get(serviceTypeId))
                     .build();
                 logger.debug("product details : "+productModel1);
-                productModel = productModel1;
-                validationModel.setProductModel(productModel1);
-            }
-            if(productModel.getId() == null || productModel.getId() == 0 ||
-                productModel.getSellingPrice() == null || productModel.getQuantity() <= 0 ||
-                productModel.getServiceCharge() == null){
-                throw new Exception("Product is not available Or Details incorrect.");
             }
         } catch (Exception exception) {
             logger.error("Exception in products : ", exception);
-            validationModel.setError(Boolean.TRUE);
-            validationModel.setMessage(exception.getMessage());
-
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeResultSet(resultSet);
             Database.INSTANCE.closeConnection(connection);
         }
-        return validationModel;
+        return productModel1;
     }
 
     public String encryptPayment(String msg) throws NoSuchAlgorithmException {
@@ -374,12 +361,15 @@ public class MarketPlaceOrderUtil {
         return out;
     }
 
-    public Integer createTempOrder(MarketPlaceTempOrderModel orderTempModel, ProductModel productModel) {
+    public Integer createTempOrder(MarketPlaceTempOrderModel orderTempModel, List<ProductModel> productModelList) {
         Integer orderTempId = 0;
+        int count = 0;
         Connection connection = null;
         ResultSet resultSet = null;
         String statement;
         PreparedStatement preparedStatement = null;
+        BigDecimal serviceCharges=new BigDecimal("0");
+        BigDecimal cartValue= new BigDecimal("0");
         try {
             connection = Database.INSTANCE.getReadWriteConnection();
             connection.setAutoCommit(false);
@@ -400,9 +390,11 @@ public class MarketPlaceOrderUtil {
             else
                 preparedStatement.setString(3, "");
 
-            BigDecimal serviceCharges = productModel.getServiceCharge().add(new BigDecimal(productModel.getGiftBox() * productModel.getQuantity()));// * Environment.getGiftBoxPrice()));
-            BigDecimal cartValue = productModel.getSellingPrice().multiply(new BigDecimal(productModel.getQuantity()==null?1:productModel.getQuantity())).add(serviceCharges).subtract(orderTempModel.getDiscount());
-
+            for(int i=0; i<productModelList.size();i++) {
+                ProductModel productModel = productModelList.get(i);
+                serviceCharges = serviceCharges.add(productModel.getServiceCharge().add(new BigDecimal(productModel.getGiftBox() * productModel.getQuantity())));// * Environment.getGiftBoxPrice()));
+                cartValue = cartValue.add(productModel.getSellingPrice().multiply(new BigDecimal(productModel.getQuantity() == null ? 1 : productModel.getQuantity())).add(serviceCharges).subtract(orderTempModel.getDiscount()));
+            }
             preparedStatement.setString(4, orderTempModel.getShippingAddressModel().getFirstname());
             preparedStatement.setString(5, orderTempModel.getShippingAddressModel().getLastname());
             preparedStatement.setString(6, orderTempModel.getShippingAddressModel().getEmail());
@@ -439,44 +431,49 @@ public class MarketPlaceOrderUtil {
                 orderTempId = resultSet.getInt(1);
                 if (orderTempId != null && orderTempId != 0) {
                     logger.debug("TEMP-ORDER CREATED SUCCESSFULLY: " + orderTempId);
-                    if (productModel.getGiftBox().equals("1")) {
-                        shippingType = shippingType + productModel.getServiceType() + "[Rs. " + productModel.getServiceCharge() + "]" + "GiftBox Item";
-                    } else {
-                        shippingType = shippingType + productModel.getServiceType() + "[Rs. " + productModel.getServiceCharge() + "]";
+                    for(int i=0;i<productModelList.size();i++) {
+                        ProductModel productModel = productModelList.get(i);
+                        if (productModel.getGiftBox().equals("1")) {
+                            shippingType = shippingType + productModel.getServiceType() + "[Rs. " + productModel.getServiceCharge() + "]" + "GiftBox Item";
+                        } else {
+                            shippingType = shippingType + productModel.getServiceType() + "[Rs. " + productModel.getServiceCharge() + "]";
+                        }
+
+                        OrderTempBasketModel orderTempBasketModel = new OrderTempBasketModel();
+                        orderTempBasketModel.setCustomerId(orderTempModel.getCustomerId());
+                        orderTempBasketModel.setOrderTempId(orderTempId);
+                        orderTempBasketModel.setProductId(productModel.getId());
+                        orderTempBasketModel.setQuantity(productModel.getQuantity());
+                        orderTempBasketModel.setVendorId(productModel.getFkId());
+                        orderTempBasketModel.setBaseCurrency(2);
+                        orderTempBasketModel.setBaseCurrencyValue(1);
+                        orderTempBasketModel.setBaseCurrencyValueInr(65);
+                        orderTempBasketModel.setServiceCharges(serviceCharges);
+                        orderTempBasketModel.setServiceType(shippingType);
+                        orderTempBasketModel.setProductAttribute(parseAndSortProductAttributes(productModel.getDisplayAttrList()));
+                        orderTempBasketModel.setGiftBox(productModel.getGiftBox());
+                        orderTempBasketModel.setServiceTypeId(new Integer(productModel.getServiceTypeId()));
+                        orderTempBasketModel.setServiceDate(productModel.getServiceDate()); // check format of storing it
+                        orderTempBasketModel.setServiceTime("");
+                        orderTempBasketModel.setProductSellingPrice(productModel.getSellingPrice());
+                        Integer tempOrderBasketId = createTempOrderBasket(orderTempBasketModel);
+                        if(tempOrderBasketId!=null){
+                            count++;
+                        }
                     }
-
-                    OrderTempBasketModel orderTempBasketModel = new OrderTempBasketModel();
-                    orderTempBasketModel.setCustomerId(orderTempModel.getCustomerId());
-                    orderTempBasketModel.setOrderTempId(orderTempId);
-                    orderTempBasketModel.setProductId(productModel.getId());
-                    orderTempBasketModel.setQuantity(productModel.getQuantity());
-                    orderTempBasketModel.setVendorId(productModel.getFkId());
-                    orderTempBasketModel.setBaseCurrency(2);
-                    orderTempBasketModel.setBaseCurrencyValue(1);
-                    orderTempBasketModel.setBaseCurrencyValueInr(65);
-                    orderTempBasketModel.setServiceCharges(serviceCharges);
-                    orderTempBasketModel.setServiceType(shippingType);
-                    orderTempBasketModel.setProductAttribute(parseAndSortProductAttributes(productModel.getDisplayAttrList()));
-                    orderTempBasketModel.setGiftBox(productModel.getGiftBox());
-                    orderTempBasketModel.setServiceTypeId(new Integer(productModel.getServiceTypeId()));
-                    orderTempBasketModel.setServiceDate(productModel.getServiceDate()); // check format of storing it
-                    orderTempBasketModel.setServiceTime("");
-                    orderTempBasketModel.setProductSellingPrice(productModel.getSellingPrice());
-                    Integer tempOrderBasketId = createTempOrderBasket(orderTempBasketModel);
-                    if (tempOrderBasketId != null) {
-                        if (insertIntoOrdersTempBasketExtraInfo(orderTempBasketModel, tempOrderBasketId))
-                            logger.debug("ORDER-TEMP-EXTRA-INFO UPDATED");
-
+                    if (count==productModelList.size()){
+                        logger.debug("all ORDER-TEMP-basket created sucessfully");
                         connection.commit();
                     } else {
                         connection.rollback();
-                        throw new Exception("Exception in connection while creation of temp order.");
+                        throw new Exception("Exception in connection while creation of temp order basket.");
                     }
+
                 }
             }
         } catch (Exception exception) {
             orderTempId = 0;
-            logger.error("Exception in connection while creation of temp order : ", exception);
+            logger.error("Exception in connection while creation of temp order : "+ exception);
         } finally {
             Database.INSTANCE.closeStatement(preparedStatement);
             Database.INSTANCE.closeConnection(connection);
@@ -512,6 +509,7 @@ public class MarketPlaceOrderUtil {
 
         try {
             connection = Database.INSTANCE.getReadWriteConnection();
+            connection.setAutoCommit(false);
             statement = "INSERT INTO orders_temp_basket (customers_id, products_id, products_quantity, orders_temp_id, " +
                 "fk_associate_id, products_base_currency, products_base_currency_value, products_base_currency_value_inr, " +
                 "special_charges, shipping_type, final_price) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -536,6 +534,13 @@ public class MarketPlaceOrderUtil {
                 resultSet = preparedStatement.getGeneratedKeys();
                 resultSet.first();
                 tempOrderBasketId = resultSet.getInt(1);
+                if (insertIntoOrdersTempBasketExtraInfo(orderTempBasketModel, tempOrderBasketId)){
+                    logger.debug("ORDER-TEMP-EXTRA-INFO UPDATED");
+                    connection.commit();
+                } else {
+                    connection.rollback();
+                    throw new Exception("Exception in connection while creation of temp order basket.");
+                }
                 logger.debug("ORDER-TEMP-BASKET CREATED SUCCESSFULLY: " + tempOrderBasketId);
             }
         } catch (Exception exception) {
@@ -622,7 +627,7 @@ public class MarketPlaceOrderUtil {
         return user;
     }
 
-    public Boolean updateDetails(UserModel userModel) {
+    public Boolean updateDetails(UserModel userModel, int fkAssociatedId) {
         Boolean response;
         Connection connection = null;
         String statement;
@@ -664,7 +669,7 @@ public class MarketPlaceOrderUtil {
             preparedStatement.setString(7, userModel.getPostcode()==null?"none":userModel.getPostcode());
             preparedStatement.setString(8, userModel.getCity()==null?"none":userModel.getCity());
             preparedStatement.setString(9, userModel.getState()==null?"none":userModel.getState());
-            preparedStatement.setInt(10, userModel.getAssociateId());
+            preparedStatement.setInt(10, fkAssociatedId);
 
             if (isChangeDob == 1){
                 preparedStatement.setString(11, userModel.getDob());
@@ -707,6 +712,7 @@ public class MarketPlaceOrderUtil {
             marketPlaceOrderModel.setIdHash(orderTempModel.getIdHash());
             marketPlaceOrderModel.setPaymentStatus(true);
             marketPlaceOrderModel.setOrderPaySite("MarketPlace");
+            //      marketPlaceOrderModel.setExtraInfoModel(extraInfoModel);
             String hashStringSequence = marketPlaceOrderModel.getIdHash() +
                 marketPlaceOrderModel.getOrderTempId() +
                 marketPlaceOrderModel.getPaymentStatus().toString() +
@@ -947,7 +953,7 @@ public class MarketPlaceOrderUtil {
                 // when order exists
                 logger.debug("ORDER-ID ALREADY EXISTS IN ORDERS TABLE, CAN'T TAKE YOUR REQUEST");
                 validationModel.setError(true);
-                validationModel.setMessage("Duplicate Order.");
+                validationModel.setMessage("Duplicate Order : ("+resultSet.getInt("orders_id")+")");
             }
         } catch (Exception exception) {
             validationModel.setError(true);

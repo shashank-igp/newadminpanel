@@ -2,6 +2,8 @@ package com.igp.admin.marketplace.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 /**
  * Created by suditi on 15/1/18.
  */
@@ -17,7 +19,7 @@ public class ValidationModel {
     private AddressModel addressModel;
 
     @JsonProperty("product")
-    private ProductModel productModel;
+    private List<ProductModel> productModelList;
 
     @JsonProperty("extrainfo")
     private ExtraInfoModel extraInfoModel;
@@ -36,6 +38,8 @@ public class ValidationModel {
 
     @JsonProperty("row")
     private int rowNum;
+
+    private String errorAt;
 
     public Boolean getError() {
         return error;
@@ -61,12 +65,12 @@ public class ValidationModel {
         this.addressModel = addressModel;
     }
 
-    public ProductModel getProductModel() {
-        return productModel;
+    public List<ProductModel> getProductModelList() {
+        return productModelList;
     }
 
-    public void setProductModel(ProductModel productModel) {
-        this.productModel = productModel;
+    public void setProductModelList(List<ProductModel> productModelList) {
+        this.productModelList = productModelList;
     }
 
     public ExtraInfoModel getExtraInfoModel() {
@@ -117,19 +121,31 @@ public class ValidationModel {
         this.rowNum = rowNum;
     }
 
+    public String getErrorAt() {
+        if(errorAt==null){
+            errorAt="-1";
+        }
+        return errorAt;
+    }
+
+    public void setErrorAt(String errorAt) {
+        this.errorAt = errorAt;
+    }
+
     @Override
     public String toString() {
         return "ValidationModel{" +
             "error=" + error +
             ", userModel=" + userModel +
             ", addressModel=" + addressModel +
-            ", productModel=" + productModel +
+            ", productModelList=" + productModelList +
             ", extraInfoModel=" + extraInfoModel +
             ", deliveryMessageModel=" + deliveryMessageModel +
             ", id=" + id +
             ", fkAssociateId=" + fkAssociateId +
             ", message='" + message + '\'' +
             ", rowNum=" + rowNum +
+            ", errorAt=" + errorAt +
             '}';
     }
 }

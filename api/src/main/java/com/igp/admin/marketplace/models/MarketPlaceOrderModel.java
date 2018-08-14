@@ -77,6 +77,9 @@ public class MarketPlaceOrderModel {
     @JsonProperty("upiobject")
     private String upiObject;
 
+ //   @JsonProperty("marketplace")
+    private ExtraInfoModel extraInfoModel;
+
     public String getIdHash() {
         return idHash;
     }
@@ -243,5 +246,13 @@ public class MarketPlaceOrderModel {
 
     public void setUpiObject(String upiObject) {
         this.upiObject = upiObject;
+    }
+
+    public ExtraInfoModel getExtraInfoModel() {
+        return extraInfoModel;
+    }
+
+    public void setExtraInfoModel(ExtraInfoModel extraInfoModel) {
+        this.extraInfoModel = extraInfoModel;
     }
 }
