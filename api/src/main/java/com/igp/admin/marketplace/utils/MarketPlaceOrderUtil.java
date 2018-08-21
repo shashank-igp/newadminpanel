@@ -712,7 +712,7 @@ public class MarketPlaceOrderUtil {
             marketPlaceOrderModel.setIdHash(orderTempModel.getIdHash());
             marketPlaceOrderModel.setPaymentStatus(true);
             marketPlaceOrderModel.setOrderPaySite("MarketPlace");
-            //      marketPlaceOrderModel.setExtraInfoModel(extraInfoModel);
+            marketPlaceOrderModel.setExtraInfoModel(extraInfoModel);
             String hashStringSequence = marketPlaceOrderModel.getIdHash() +
                 marketPlaceOrderModel.getOrderTempId() +
                 marketPlaceOrderModel.getPaymentStatus().toString() +
@@ -758,22 +758,22 @@ public class MarketPlaceOrderUtil {
             }
         }
         catch (Exception e){
-            if(e.toString().contains("HTTP response code: 504")){
-                try {
-                    TimeUnit.MILLISECONDS.sleep(500);
-                }catch (Exception e1){
-
-                }
-                orderId = getGeneratedOrderNum(orderTempModel.getTempOrderId());
-                if(orderId>0) {
-                    // order id found
-                    orderId = updateOrderAndExtraInfo(orderId, extraInfoModel);
-                }
-                logger.debug("Entered in exception block of HTTP response code: 504 where ordersId : "+orderId);
-            }else {
+  //          if(e.toString().contains("HTTP response code: 504")){
+//                try {
+//                    TimeUnit.MILLISECONDS.sleep(500);
+//                }catch (Exception e1){
+//
+//                }
+//                orderId = getGeneratedOrderNum(orderTempModel.getTempOrderId());
+//                if(orderId>0) {
+//                    // order id found
+//                    orderId = updateOrderAndExtraInfo(orderId, extraInfoModel);
+//                }
+        //        logger.debug("Entered in exception block of HTTP response code: 504 where ordersId : "+orderId);
+    //        }else {
                 logger.error("Exception While Creation of Order : " + e);
                 orderId = 0;
-            }
+         //   }
         }
         finally {
             Database.INSTANCE.closeStatement(preparedStatement);

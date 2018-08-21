@@ -77,7 +77,7 @@ public class MarketPlaceOrderModel {
     @JsonProperty("upiobject")
     private String upiObject;
 
- //   @JsonProperty("marketplace")
+    @JsonProperty("marketplace")
     private ExtraInfoModel extraInfoModel;
 
     public String getIdHash() {
