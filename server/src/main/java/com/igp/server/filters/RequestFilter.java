@@ -5,7 +5,6 @@ import com.igp.handles.vendorpanel.response.ResponseModel;
 import com.igp.handles.vendorpanel.response.Status;
 import com.igp.config.Environment;
 import com.igp.config.ResponseProperties;
-import com.igp.permit.endpoints.Permission;
 import com.igp.server.utils.RequestHeader;
 
 import javax.servlet.Filter;
