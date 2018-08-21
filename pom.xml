@@ -194,6 +194,7 @@
         <module>api</module>
         <module>config</module>
         <module>distribution</module>
+        <module>permission</module>  
     </modules>
 
     <properties>
