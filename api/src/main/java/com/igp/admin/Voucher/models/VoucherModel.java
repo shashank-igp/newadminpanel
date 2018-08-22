@@ -8,7 +8,8 @@ import java.util.List;
 /**
  * Created by suditi on 8/6/18.
  */
-public class VoucherModel {
+public class VoucherModel
+{
     @JsonProperty("id")
     private int id;
 
