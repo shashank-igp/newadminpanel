@@ -1,10 +1,7 @@
 package com.igp.admin.Voucher.utils;
 
 import com.igp.admin.Blogs.models.SeoBlogModel;
-import com.igp.admin.Voucher.models.CategoriesModel;
-import com.igp.admin.Voucher.models.VoucherListModel;
-import com.igp.admin.Voucher.models.VoucherMetaData;
-import com.igp.admin.Voucher.models.VoucherModel;
+import com.igp.admin.Voucher.models.*;
 import com.igp.config.instance.Database;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -491,38 +488,39 @@ public class VoucherUtil {
 
     public VoucherMetaData getVoucherMetaData(){
         VoucherMetaData voucherMetaData = new VoucherMetaData();
-        Map<Integer, String> types = new HashMap<>();
+        List<MetaDataModel> arrayList = new ArrayList<>();
 
         try{
             //coupon type voucher
-            types.put(0,"% based");
-            types.put(1,"Value based");
-            types.put(2,"Shipping waiver");
-            types.put(3,"Corporate gifting voucher");
-            voucherMetaData.setType1(types);
+            arrayList.add(new MetaDataModel(0,"% based"));
+            arrayList.add(new MetaDataModel(1,"Value based"));
+            arrayList.add(new MetaDataModel(2,"Email based"));
+            arrayList.add(new MetaDataModel(3,"Domain based"));
+            voucherMetaData.setType1(arrayList);
 
-            types = new HashMap<>();
             //coupon type newigp_voucher_extra_info
-            types.put(0,"No email");
-            types.put(1,"Email based");
-            types.put(2,"Domain based");
-            voucherMetaData.setType2(types);
+            arrayList = new ArrayList<>();
+            arrayList.add(new MetaDataModel(0,"No email"));
+            arrayList.add(new MetaDataModel(1,"Email based"));
+            arrayList.add(new MetaDataModel(2,"Domain based"));
+            voucherMetaData.setType2(arrayList);
 
-            types = new HashMap<>();
             //order value check newigp_voucher_extra_info
-            types.put(0,"No check");
-            types.put(1,"Order level without shipping");
-            types.put(2,"Order level with shipping");
-            types.put(3,"Product level");
-            voucherMetaData.setOrderValueCheck(types);
+            arrayList = new ArrayList<>();
+            arrayList.add(new MetaDataModel(0,"No check"));
+            arrayList.add(new MetaDataModel(1,"Order level without shipping"));
+            arrayList.add(new MetaDataModel(2,"Order level with shipping"));
+            arrayList.add(new MetaDataModel(3,"Product level"));
+            voucherMetaData.setOrderValueCheck(arrayList);
 
-            types = new HashMap<>();
+
             //shipping waiver type newigp_voucher_extra_info
-            types.put(1,"Standard Delivery");
-            types.put(2,"Fixed Time Delivery");
-            types.put(3,"Midnight Delivery");
-            types.put(4,"Fix Date Delivery");
-            voucherMetaData.setShippingWaiverType(types);
+            arrayList = new ArrayList<>();
+            arrayList.add(new MetaDataModel(1,"Standard Delivery"));
+            arrayList.add(new MetaDataModel(2,"Fixed Time Delivery"));
+            arrayList.add(new MetaDataModel(3,"Midnight Delivery"));
+            arrayList.add(new MetaDataModel(4,"Fix Date Delivery"));
+            voucherMetaData.setShippingWaiverType(arrayList);
 
         }catch (Exception exception){
             logger.debug("error occured while getting voucher meta data : "+exception);
@@ -639,4 +637,5 @@ public class VoucherUtil {
     public static String getCommaSepString(List<String> list){
         return list.toString().replace("[","").replace("]", "");
     }
+
 }
