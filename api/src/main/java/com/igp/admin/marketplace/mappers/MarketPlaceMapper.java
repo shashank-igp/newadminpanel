@@ -281,7 +281,7 @@ public class MarketPlaceMapper {
                                 sP + "(#)" +
                                 column.get("ProductName"));
 
-                            extraInfoModelPrev.setMarketData(marketPlaceData.toString());
+                            extraInfoModelPrev.setMarketData(marketPlaceOrderUtil.replaceSpecialChars(marketPlaceData.toString()));
 
                             validationModelPrev.setExtraInfoModel(extraInfoModelPrev);
                             validationModelPrev.setProductModelList(productModelList);
@@ -476,6 +476,7 @@ public class MarketPlaceMapper {
                                 column.get("DeliveryDate(DD/MM/YYYY)") + "(#)" +
                                 column.get("CancellationComments");
 
+                            detail = marketPlaceOrderUtil.replaceSpecialChars(detail);
                             extraInfoModel.setMarketData(detail);
                         }
                     } else if (fk_associate_id == 859){
@@ -509,8 +510,8 @@ public class MarketPlaceMapper {
                                 // the item price is in USD so convert it in INR
                                 BigDecimal d = CurrencyConversionUtil.getConvertedPrice(new BigDecimal(sellP),"USD","INR");
                                 sellingPrice = d.intValue();
-//                                if(quantity>0)
-//                                    sellingPrice = sellingPrice/quantity; // as it has calculated amount
+                                //                                if(quantity>0)
+                                //                                    sellingPrice = sellingPrice/quantity; // as it has calculated amount
                             }
 
                             String shipP = column.get("shipping-price");
@@ -519,8 +520,8 @@ public class MarketPlaceMapper {
                                 // the shipping price is in USD so convert it in INR
                                 BigDecimal d = CurrencyConversionUtil.getConvertedPrice(new BigDecimal(shipP),"USD","INR");
                                 shippingPrice = d.intValue();
-//                                if(quantity>0)
-//                                    sellingPrice = sellingPrice/quantity; // as it has calculated amount
+                                //                                if(quantity>0)
+                                //                                    sellingPrice = sellingPrice/quantity; // as it has calculated amount
                             }
 
                             String itemCode = column.get("sku").trim();
@@ -568,7 +569,7 @@ public class MarketPlaceMapper {
                                 column.get("shipping-price") + "(#)" +
                                 column.get("product-name"));
 
-                            extraInfoModelPrev.setMarketData(marketPlaceData.toString());
+                            extraInfoModelPrev.setMarketData(marketPlaceOrderUtil.replaceSpecialChars(marketPlaceData.toString()));
 
                             validationModelPrev.setExtraInfoModel(extraInfoModelPrev);
                             validationModelPrev.setProductModelList(productModelList);
@@ -681,8 +682,8 @@ public class MarketPlaceMapper {
                                 // the item price is in USD so convert it in INR
                                 BigDecimal d = CurrencyConversionUtil.getConvertedPrice(new BigDecimal(sellP),"USD","INR");
                                 sellingPrice = d.intValue();
-//                                if(quantity>0)
-//                                    sellingPrice = sellingPrice/quantity; // as it has calculated amount
+                                //                                if(quantity>0)
+                                //                                    sellingPrice = sellingPrice/quantity; // as it has calculated amount
                             }
 
                             String shipP = column.get("shipping-price");
@@ -691,8 +692,8 @@ public class MarketPlaceMapper {
                                 // the shipping price is in USD so convert it in INR
                                 BigDecimal d = CurrencyConversionUtil.getConvertedPrice(new BigDecimal(shipP),"USD","INR");
                                 shippingPrice = d.intValue();
-//                                if(quantity>0)
-//                                    sellingPrice = sellingPrice/quantity; // as it has calculated amount
+                                //                                if(quantity>0)
+                                //                                    sellingPrice = sellingPrice/quantity; // as it has calculated amount
                             }
 
                             String itemCode = column.get("sku").trim();
@@ -756,6 +757,7 @@ public class MarketPlaceMapper {
                                 column.get("ship-country") + "(#)" +
                                 column.get("ship-phone-number");
 
+                            detail = marketPlaceOrderUtil.replaceSpecialChars(detail);
                             extraInfoModel.setMarketData(detail);
 
                         }
@@ -824,7 +826,7 @@ public class MarketPlaceMapper {
                                 quantity + "(#)" +
                                 sellingPrice);
 
-                            extraInfoModelPrev.setMarketData(marketPlaceData.toString());
+                            extraInfoModelPrev.setMarketData(marketPlaceOrderUtil.replaceSpecialChars(marketPlaceData.toString()));
 
                             validationModelPrev.setExtraInfoModel(extraInfoModelPrev);
                             validationModelPrev.setProductModelList(productModelList);
@@ -986,6 +988,7 @@ public class MarketPlaceMapper {
                                 addressModel.getMobile() + "(#)" +
                                 column.get("Gift Msg") + "(#)" +
                                 column.get("Addons Detail");
+                            detail = marketPlaceOrderUtil.replaceSpecialChars(detail);
 
 
                             extraInfoModel.setMarketData(detail);
@@ -1072,7 +1075,7 @@ public class MarketPlaceMapper {
                                 productModel.getProductCode() + "(#)" +
                                 sellingPrice + "(#)" );
 
-                            extraInfoModelPrev.setMarketData(marketPlaceData.toString());
+                            extraInfoModelPrev.setMarketData(marketPlaceOrderUtil.replaceSpecialChars(marketPlaceData.toString()));
 
                             validationModelPrev.setExtraInfoModel(extraInfoModelPrev);
                             validationModelPrev.setProductModelList(productModelList);
@@ -1253,6 +1256,7 @@ public class MarketPlaceMapper {
                                 addressModel.getMobile() + "(#)" +
                                 column.get("Gift Msg") + "(#)" +
                                 column.get("Addons Detail");
+                            detail = marketPlaceOrderUtil.replaceSpecialChars(detail);
 
                             extraInfoModel.setMarketData(detail);
 
@@ -1550,4 +1554,3 @@ public class MarketPlaceMapper {
         return result;
     }
 }
-
