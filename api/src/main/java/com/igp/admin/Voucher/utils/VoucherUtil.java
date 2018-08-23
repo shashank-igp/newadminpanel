@@ -494,8 +494,8 @@ public class VoucherUtil {
             //coupon type voucher
             arrayList.add(new MetaDataModel(0,"% based"));
             arrayList.add(new MetaDataModel(1,"Value based"));
-            arrayList.add(new MetaDataModel(2,"Email based"));
-            arrayList.add(new MetaDataModel(3,"Domain based"));
+            arrayList.add(new MetaDataModel(2,"Shipping waiver"));
+            arrayList.add(new MetaDataModel(3,"Corporate gifting voucher"));
             voucherMetaData.setType1(arrayList);
 
             //coupon type newigp_voucher_extra_info
