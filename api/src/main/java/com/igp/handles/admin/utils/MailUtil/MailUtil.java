@@ -1,5 +1,7 @@
 package com.igp.handles.admin.utils.MailUtil;
 
+import com.igp.config.instance.Database;
+import com.igp.handles.admin.models.Mail.MailTemplateModel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -7,6 +9,10 @@ import java.io.DataOutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 /**
  * Created by shanky on 29/1/18.
@@ -90,4 +96,34 @@ public class MailUtil {
         }
         return result;
     }
+    public MailTemplateModel getMailTemplateFromDb(Integer templateType) {
+
+        MailTemplateModel mailTemplateModel = new MailTemplateModel();
+        Connection connection = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        ResultSet resultSet = null;
+        try {
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement = "SELECT * from newigp_mail_template  WHERE mail_id = ?";
+            preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
+            preparedStatement.setString(1, templateType.toString());
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                mailTemplateModel.setContent(resultSet.getString("content"));
+                mailTemplateModel.setEmail_body(resultSet.getString("email_body"));
+                mailTemplateModel.setEmail_header(resultSet.getString("email_header"));
+                mailTemplateModel.setEmail_footer(resultSet.getString("email_footer"));
+                logger.debug("Email Template is found and is sent for processing");
+            }
+        } catch (Exception exception) {
+            logger.error("Exception in connection", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return mailTemplateModel;
+    }
+
 }
