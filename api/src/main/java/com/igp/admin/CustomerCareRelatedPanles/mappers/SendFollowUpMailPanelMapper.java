@@ -9,7 +9,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,8 +18,8 @@ import java.util.Map;
  */
 public class SendFollowUpMailPanelMapper {
     private static final Logger logger = LoggerFactory.getLogger(SendFollowUpMailPanelMapper.class);
-    public Map<String,String> uploadFolloUpTrackingNumberFile(Map<Integer, Map<String, String>> listOfAwb,String issue){
-        Map<String,String> result=new HashMap<>();
+    public List<String> uploadFolloUpTrackingNumberFile(Map<Integer, Map<String, String>> listOfAwb,String issue){
+        List<String> result=new ArrayList<>();
         MailTemplateModel mailTemplateModel=null;
         MailUtil mailUtil=new MailUtil();
         Order order=null;
@@ -101,9 +102,9 @@ public class SendFollowUpMailPanelMapper {
                     }
 
                     if(order != null && subject !=null && emailBody !=null && order.getDeliveryEmail() !=null && mailUtil.sendGenericMail("",subject.toString(),emailBody,order.getDeliveryEmail(),false)){
-                        result.put(awb,"Mail Sent Successfully");
+                        result.add(awb+"-Mail Sent Successfully");
                     }else{
-                        result.put(awb,"Mail Not Sent");
+                        result.add(awb+"-Mail Not Sent");
                     }
                 }
             }
