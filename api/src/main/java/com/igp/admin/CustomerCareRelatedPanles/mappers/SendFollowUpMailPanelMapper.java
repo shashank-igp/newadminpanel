@@ -38,14 +38,20 @@ public class SendFollowUpMailPanelMapper {
                 for(Map.Entry<String,String> entry1:columnNameToAWBMap.entrySet()){
                     recipientAddress=new StringBuilder();
                     subject=new StringBuilder();
-                    String awb=new BigDecimal(entry1.getValue()).toPlainString();
+                    String awb=null;
+                    try{
+                        awb=new BigDecimal(entry1.getValue()).toPlainString();
+                    }catch (RuntimeException runTimeException){
+                        awb=entry1.getValue();
+                    }
                     if(issue.equalsIgnoreCase("AddressRelated")){
                         subject.append("Incomplete address. ");
                     }else if(issue.equalsIgnoreCase("CustomerNotFound")){
                         subject.append("Recipient unavailable. ");
                     }
-                    order=sendFollowUpMailPanelUtil.getOrderDetailsBasedOnAwbNumber(awb);
-
+                    if( awb != null && !awb.equalsIgnoreCase("")){
+                        order=sendFollowUpMailPanelUtil.getOrderDetailsBasedOnAwbNumber(awb);
+                    }
                     if(order!=null && mailTemplateModel != null){
                         if(order.getDeliveryName()!=null){
                             recipientAddress.append(order.getDeliveryName());
@@ -106,7 +112,7 @@ public class SendFollowUpMailPanelMapper {
 //                        logger.debug("Subject :- "+subject.toString());
                     }
 
-                    if(order != null && subject !=null && emailBody !=null && order.getDeliveryEmail() !=null && mailUtil.sendGenericMail("",subject.toString(),emailBody,order.getDeliveryEmail(),false)){
+                    if(order != null && subject !=null && emailBody !=null && order.getCustomersEmail() !=null && mailUtil.sendGenericMail("",subject.toString(),emailBody,order.getCustomersEmail(),false)){
                         result.add(awb+"-Mail Sent Successfully");
                     }else{
                         result.add(awb+"-Mail Not Sent");
