@@ -43,7 +43,7 @@ public class VendorUtil
                 + " END ) as  vendor_assign_time,opei.delivery_type,opei.delivery_time,torder.date_purchased from orders_products op join order_product_extra_info opei on "
                 + " op.orders_products_id = opei.order_product_id join vendor_assign_price vap on vap.orders_id = op.orders_id "
                 + " and vap.products_id = op.products_id left join trackorders torder on op.orders_id = torder.orders_id "
-                + " and op.orders_products_id = torder.orders_products_id where  op.orders_product_status "
+                + " and op.products_id = torder.products_id where  op.orders_product_status "
                 + " in ('Processed','Confirmed'" +pStatus + ") and  vap.fk_associate_id = ?  and "
                 + " vap.delivery_date "+dateComapareSymbol+" ? and vap.shipping_type !='Any time'  and  vap.shipping_type !='' ";
             preparedStatement = connection.prepareStatement(statement);

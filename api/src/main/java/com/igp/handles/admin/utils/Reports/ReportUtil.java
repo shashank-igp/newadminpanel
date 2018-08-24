@@ -1180,7 +1180,7 @@ public class ReportUtil {
 
             queryForCount="select count(*) as totalNo from orders_products op join "
                 + " vendor_assign_price vap on op.orders_id = vap.orders_id join trackorders track on "
-                + " track.orders_products_id = op.orders_products_id join order_product_extra_info opei on "
+                + " op.orders_id = track.orders_id and op.products_id = track.products_id join order_product_extra_info opei on "
                 + " op.orders_products_id = opei.order_product_id left join associate a on op.fk_associate_id "
                 + " = a.associate_id where op.products_id = vap.products_id "+sb.toString();
             count=SummaryFunctionsUtil.getCount(queryForCount);
@@ -1195,7 +1195,7 @@ public class ReportUtil {
                 + " op.sla_code2,op.sla_code3,track.date_purchased,op.orders_product_status,op.delivery_status, "
                 + " opei.delivery_time from orders_products op join "
                 + " vendor_assign_price vap on op.orders_id = vap.orders_id join trackorders track on "
-                + " track.orders_products_id = op.orders_products_id join order_product_extra_info opei on "
+                + " op.orders_id = track.orders_id and op.products_id = track.products_id join order_product_extra_info opei on "
                 + " op.orders_products_id = opei.order_product_id left join associate a on op.fk_associate_id "
                 + " = a.associate_id where op.products_id = vap.products_id "+sb.toString()+" limit "+startLimit+","+endLimit+" ";
 
