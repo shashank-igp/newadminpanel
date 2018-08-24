@@ -92,9 +92,12 @@ public class SendFollowUpMailPanelMapper {
                         subject.append(String.valueOf(order.getOrderId()));
                         subject.append(" AWB #");
                         subject.append(awb);
+                        logger.debug("Mail Template :- "+mailTemplateModel.toString());
+                        logger.debug("Subject :- "+subject.toString());
+                        logger.debug("Order Model"+order.toString());
                     }
 
-                    if(order != null && mailUtil.sendGenericMail("",subject.toString(),emailBody,order.getDeliveryEmail(),false)){
+                    if(order != null && subject !=null && emailBody !=null && order.getDeliveryEmail() !=null && mailUtil.sendGenericMail("",subject.toString(),emailBody,order.getDeliveryEmail(),false)){
                         result.put(awb,"Mail Sent Successfully");
                     }else{
                         result.put(awb,"Mail Not Sent");

@@ -45,4 +45,10 @@ public class MailTemplateModel {
     public void setEmail_body(String email_body) {
         this.email_body = email_body;
     }
+
+    @Override public String toString()
+    {
+        return "MailTemplateModel{" + "content='" + content + '\'' + ", email_header='" + email_header + '\''
+            + ", email_footer='" + email_footer + '\'' + ", email_body='" + email_body + '\'' + '}';
+    }
 }
