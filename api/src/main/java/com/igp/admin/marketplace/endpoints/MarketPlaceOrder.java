@@ -8,7 +8,6 @@ import com.igp.admin.response.EntityFoundResponse;
 import org.glassfish.jersey.media.multipart.FormDataMultiPart;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.java2d.loops.ProcessPath;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -45,6 +44,7 @@ public class MarketPlaceOrder {
         List<ErrorModel> errorModelList = new ArrayList<>();
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         Date date = new Date();
+        int numColumns=20;
         int fkAssociateId = 0;
         try{
             fkAssociateId = marketPlaceMapper.findVendor(userValue);
@@ -61,8 +61,10 @@ public class MarketPlaceOrder {
 
                     semaphore = "true"; // lock taken
                     logger.debug("semaphore got the lock so " + semaphore);
-
-                    data = marketPlaceMapper.parseExcelForMarketPlace(multiPart, user + fkAssociateId, fkAssociateId);
+                    if(fkAssociateId == 433 || fkAssociateId == 859){
+                        numColumns = 25;
+                    }
+                    data = marketPlaceMapper.parseExcelForMarketPlace(multiPart, user + fkAssociateId,numColumns);
                     if (!data.isEmpty()) {
                         // fill the models.
                         List<ValidationModel> validationModelList = marketPlaceMapper.refineDataAndPopulateModels(data, userValue, fkAssociateId);
