@@ -30,10 +30,8 @@ public class SendFollowUpMailPanelMapper {
         try{
             if(issue.equalsIgnoreCase("AddressRelated")){
                 mailTemplateModel=mailUtil.getMailTemplateFromDb(MailConstants.FOLLOW_UP_MAIL_ADDRESS_RELATED);
-                subject.append("Incomplete address. ");
             }else if(issue.equalsIgnoreCase("CustomerNotFound")){
                 mailTemplateModel=mailUtil.getMailTemplateFromDb(MailConstants.FOLLOW_UP_MAIL_CUSTOMMER_NOT_FOUND);
-                subject.append("Recipient unavailable. ");
             }
             for(Map.Entry<Integer,Map<String,String>> entry:listOfAwb.entrySet()){
                 Map<String,String> columnNameToAWBMap=entry.getValue();
@@ -41,6 +39,11 @@ public class SendFollowUpMailPanelMapper {
                     recipientAddress=new StringBuilder();
                     subject=new StringBuilder();
                     String awb=new BigDecimal(entry1.getValue()).toPlainString();
+                    if(issue.equalsIgnoreCase("AddressRelated")){
+                        subject.append("Incomplete address. ");
+                    }else if(issue.equalsIgnoreCase("CustomerNotFound")){
+                        subject.append("Recipient unavailable. ");
+                    }
                     order=sendFollowUpMailPanelUtil.getOrderDetailsBasedOnAwbNumber(awb);
 
                     if(order!=null && mailTemplateModel != null){
