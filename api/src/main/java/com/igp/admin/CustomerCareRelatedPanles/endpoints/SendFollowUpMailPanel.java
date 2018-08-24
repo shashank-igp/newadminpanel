@@ -28,7 +28,7 @@ public class SendFollowUpMailPanel {
     public Response uploadFolloUpTrackingNumberFile(@QueryParam("user")@DefaultValue("temp") String user,
                                     @QueryParam("value")@DefaultValue("temp") String userValue,
                                     @QueryParam("fkasid") @DefaultValue("0") int loginId,
-                                    @QueryParam("issue")@DefaultValue("Address Related") String issue,
+                                    @QueryParam("issue")@DefaultValue("Address_Related") String issue,
                                     final FormDataMultiPart multiPart) throws ParseException{
         Response response = null;
         MarketPlaceMapper marketPlaceMapper = new MarketPlaceMapper();

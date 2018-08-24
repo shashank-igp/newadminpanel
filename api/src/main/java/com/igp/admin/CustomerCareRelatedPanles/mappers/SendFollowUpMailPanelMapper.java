@@ -27,10 +27,10 @@ public class SendFollowUpMailPanelMapper {
         StringBuilder subject=new StringBuilder();
         SendFollowUpMailPanelUtil sendFollowUpMailPanelUtil=new SendFollowUpMailPanelUtil();
         try{
-            if(issue.equalsIgnoreCase("Address Related")){
+            if(issue.equalsIgnoreCase("Address_Related")){
                 mailTemplateModel=mailUtil.getMailTemplateFromDb(MailConstants.FOLLOW_UP_MAIL_ADDRESS_RELATED);
                 subject.append("Incomplete address. ");
-            }else if(issue.equalsIgnoreCase("Customer Not Found")){
+            }else if(issue.equalsIgnoreCase("Customer_Not_Found")){
                 mailTemplateModel=mailUtil.getMailTemplateFromDb(MailConstants.FOLLOW_UP_MAIL_CUSTOMMER_NOT_FOUND);
                 subject.append("Recipient unavailable. ");
             }
