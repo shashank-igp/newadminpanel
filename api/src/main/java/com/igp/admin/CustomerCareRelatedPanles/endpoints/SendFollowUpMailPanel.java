@@ -12,7 +12,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import java.text.ParseException;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -35,15 +36,15 @@ public class SendFollowUpMailPanel {
         Map<Integer, Map<String, String>> data = null;
         int fkAssociateId = 0,numColumn=1;
         SendFollowUpMailPanelMapper sendFollowUpMailPanelMapper=new SendFollowUpMailPanelMapper();
-        Map<String,String> mailSendResponse=null;
+        List<String> mailSendResponse=null;
         try{
             data = marketPlaceMapper.parseExcelForMarketPlace(multiPart, user + fkAssociateId,numColumn);
             if(data.size()>0){
                 mailSendResponse=sendFollowUpMailPanelMapper.uploadFolloUpTrackingNumberFile(data,issue);
             }
             if(mailSendResponse==null){
-                Map<String, String> errorResponse = new HashMap<>();
-                errorResponse.put("error","Could not upload/send emails at this time please try again later");
+                List<String> errorResponse = new ArrayList<>();
+                errorResponse.add("Could not upload/send emails at this time please try again later");
                 response = EntityNotFoundResponse.entityNotFoundResponseBuilder(errorResponse);
             }else{
                 response= EntityFoundResponse.entityFoundResponseBuilder(mailSendResponse);
