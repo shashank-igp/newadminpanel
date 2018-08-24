@@ -62,12 +62,8 @@ public class MarketPlaceMapper {
         return fkAssociateId;
     }
 
-    public  Map<Integer, Map<String, String>> parseExcelForMarketPlace(FormDataMultiPart multiPart, String filePrefix, int fkAsId) {
+    public  Map<Integer, Map<String, String>> parseExcelForMarketPlace(FormDataMultiPart multiPart, String filePrefix,int NUM_COLUMNS) {
         Map<Integer, Map<String, String>> data= new HashMap<>();
-        int NUM_COLUMNS = 20;
-        if(fkAsId == 433 || fkAsId == 859){
-            NUM_COLUMNS = 25;
-        }
         MarketPlaceOrderUtil marketPlaceOrderUtil = new MarketPlaceOrderUtil();
         try {
             FileUploadModel fileUploadModel = marketPlaceOrderUtil.uploadTheFile(multiPart, filePrefix);
