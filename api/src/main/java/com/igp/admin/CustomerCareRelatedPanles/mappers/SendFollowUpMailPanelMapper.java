@@ -24,8 +24,8 @@ public class SendFollowUpMailPanelMapper {
         MailUtil mailUtil=new MailUtil();
         Order order=null;
         String emailBody=null;
-        StringBuilder recipientAddress=new StringBuilder();
-        StringBuilder subject=new StringBuilder();
+        StringBuilder recipientAddress=null;
+        StringBuilder subject=null;
         SendFollowUpMailPanelUtil sendFollowUpMailPanelUtil=new SendFollowUpMailPanelUtil();
         try{
             if(issue.equalsIgnoreCase("AddressRelated")){
@@ -38,6 +38,8 @@ public class SendFollowUpMailPanelMapper {
             for(Map.Entry<Integer,Map<String,String>> entry:listOfAwb.entrySet()){
                 Map<String,String> columnNameToAWBMap=entry.getValue();
                 for(Map.Entry<String,String> entry1:columnNameToAWBMap.entrySet()){
+                    recipientAddress=new StringBuilder();
+                    subject=new StringBuilder();
                     String awb=new BigDecimal(entry1.getValue()).toPlainString();
                     order=sendFollowUpMailPanelUtil.getOrderDetailsBasedOnAwbNumber(awb);
 
