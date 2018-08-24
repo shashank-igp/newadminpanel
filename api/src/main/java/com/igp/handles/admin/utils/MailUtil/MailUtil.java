@@ -108,6 +108,7 @@ public class MailUtil {
             statement = "SELECT * from newigp_mail_template  WHERE mail_id = ?";
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, templateType.toString());
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 mailTemplateModel.setContent(resultSet.getString("content"));
