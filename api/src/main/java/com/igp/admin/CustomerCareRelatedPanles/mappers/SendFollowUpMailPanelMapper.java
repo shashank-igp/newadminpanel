@@ -93,7 +93,7 @@ public class SendFollowUpMailPanelMapper {
 //                        logger.debug("Mail Template :- "+mailTemplateModel.toString());
 
                         logger.debug("Order Model : "+order.toString());
-                        logger.debug("Recipient Address : "+recipientAddress.toString())
+                        logger.debug("Recipient Address : "+recipientAddress.toString());
                         if(mailTemplateModel.getContent() !=null ){
                             emailBody=mailTemplateModel.getContent().replace("(<orders_id>)",String.valueOf(order.getOrderId()));
                             emailBody=emailBody.replace("<address as printed on label including recipient name>",recipientAddress.toString());
