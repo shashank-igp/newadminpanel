@@ -26,6 +26,7 @@ public class SendFollowUpMailPanelUtil {
             statement = "select o.* from orders o join  orders_products op  on o.orders_id = op.orders_id where op.orders_awbnumber_associatewise = ? limit 1";
             preparedStatement = connection.prepareStatement(statement, Statement.RETURN_GENERATED_KEYS);
             preparedStatement.setString(1, awb);
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
             resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 order=new Order.Builder()

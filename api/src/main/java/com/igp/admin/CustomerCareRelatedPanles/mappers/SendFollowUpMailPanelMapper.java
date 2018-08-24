@@ -40,7 +40,7 @@ public class SendFollowUpMailPanelMapper {
                     String awb=new BigDecimal(entry1.getValue()).toPlainString();
                     order=sendFollowUpMailPanelUtil.getOrderDetailsBasedOnAwbNumber(awb);
 
-                    if(order!=null){
+                    if(order!=null && mailTemplateModel != null){
                         if(order.getDeliveryName()!=null){
                             recipientAddress.append(order.getDeliveryName());
                         }else {
@@ -84,17 +84,20 @@ public class SendFollowUpMailPanelMapper {
                             recipientAddress.append(" Country : ");
                         }
 
+                        logger.debug("Mail Template :- "+mailTemplateModel.toString());
 
-                        emailBody=mailTemplateModel.getContent().replace("(<orders_id>)",String.valueOf(order.getOrderId()));
-                        emailBody=emailBody.replace("<address as printed on label including recipient name>",recipientAddress.toString());
+                        logger.debug("Order Model"+order.toString());
 
+                        if(mailTemplateModel.getContent() !=null ){
+                            emailBody=mailTemplateModel.getContent().replace("(<orders_id>)",String.valueOf(order.getOrderId()));
+                            emailBody=emailBody.replace("<address as printed on label including recipient name>",recipientAddress.toString());
+
+                        }
                         subject.append("Order #");
                         subject.append(String.valueOf(order.getOrderId()));
                         subject.append(" AWB #");
                         subject.append(awb);
-                        logger.debug("Mail Template :- "+mailTemplateModel.toString());
                         logger.debug("Subject :- "+subject.toString());
-                        logger.debug("Order Model"+order.toString());
                     }
 
                     if(order != null && subject !=null && emailBody !=null && order.getDeliveryEmail() !=null && mailUtil.sendGenericMail("",subject.toString(),emailBody,order.getDeliveryEmail(),false)){
