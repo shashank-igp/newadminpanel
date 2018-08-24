@@ -37,7 +37,7 @@ public class SendFollowUpMailPanelUtil {
                     .deliveryPostcode(resultSet.getString("o.delivery_postcode"))
                     .deliveryState(resultSet.getString("o.delivery_state"))
                     .deliveryCountry(resultSet.getString("o.delivery_country"))
-                    .deliveryEmail(resultSet.getString("o.delivery_email_address"))
+                    .deliveryEmail(resultSet.getString("o.customers_email_address"))
                     .deliveryMobile(resultSet.getString("o.delivery_mobile"))
                     .build();
             }
