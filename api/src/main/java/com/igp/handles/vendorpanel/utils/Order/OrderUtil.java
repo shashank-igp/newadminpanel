@@ -862,6 +862,43 @@ public class OrderUtil
         }
         return result;
     }
+    public Map<Integer,Map<String,String>> getOrderProductIdsForHandelsOrderIds(String orderIdList){
+        //orderIdList = comma separator list or orderIds
+        Connection connection = null;
+        ResultSet resultSet = null;
+        String statement;
+        PreparedStatement preparedStatement = null;
+        Map<Integer,Map<String,String>> orderIdToOrderProductIdListMap=new HashMap<>(); // bifercation in vendorIds
+        try{
+            connection = Database.INSTANCE.getReadOnlyConnection();
+            statement="select o.orders_id as orderId,group_concat(op.orders_products_id separator ',') as "
+                + " orderProductId ,op.fk_associate_id as fkAsId from orders o join orders_products op on o.orders_id = op.orders_id join products p "
+                + " on p.products_id = op.products_id where p.fk_associate_id = 72 and o.orders_id in ("+orderIdList+") "
+                + " group by op.orders_id , op.fk_associate_id ";
+            preparedStatement = connection.prepareStatement(statement);
+            logger.debug("STATEMENT CHECK: " + preparedStatement);
+            resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()){
+                Integer orderId=resultSet.getInt("orderId");
+                String orderProductIds=resultSet.getString("orderProductId");
+                String fkAssociateId=resultSet.getString("fkAsId");
+                if(orderIdToOrderProductIdListMap.get(orderId)==null){
+                    Map<String,String> fkAsIDToOrderProductIdMap=new HashMap<>();
+                    fkAsIDToOrderProductIdMap.put(fkAssociateId,orderProductIds);
+                    orderIdToOrderProductIdListMap.put(orderId,fkAsIDToOrderProductIdMap);
+                }else{
+                    orderIdToOrderProductIdListMap.get(orderId).put(fkAssociateId,orderProductIds);
+                }
+            }
+        }catch(Exception exception) {
+            logger.error("Exception in connection while getOrderProductIdsForHandelsOrderIds ", exception);
+        } finally {
+            Database.INSTANCE.closeStatement(preparedStatement);
+            Database.INSTANCE.closeResultSet(resultSet);
+            Database.INSTANCE.closeConnection(connection);
+        }
+        return orderIdToOrderProductIdListMap;
+    }
 
     public static String getDeliverWhen(String deliverDate) throws ParseException
     {

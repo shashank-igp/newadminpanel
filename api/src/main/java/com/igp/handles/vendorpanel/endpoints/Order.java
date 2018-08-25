@@ -130,4 +130,33 @@ public class Order {
 
         return handleServiceResponse;
     }
+    @POST
+    @Path("/v1/handels/updateOrderStatusInBulk")
+    public  HandleServiceResponse updateOrderStatusInBulk(@Context HttpServletResponse response,@Context HttpServletRequest request,
+                                                            @QueryParam("orderIdList") String orderIdList,
+                                                            @QueryParam("status") String status,
+                                                            @QueryParam("recipientName") String recipientName,
+                                                            @DefaultValue("0") @QueryParam("rejectionType") int rejectionType)
+    {
+        //orderIdList is comma separated list of order Ids
+        HandleServiceResponse handleServiceResponse=new HandleServiceResponse();
+        OrderMapper orderMapper=new OrderMapper();
+        List<String> orderIdStatusList=null;
+        try{
+            String ipAddress=request.getRemoteAddr();
+            String userAgent = request.getHeader("User-Agent");
+            orderIdStatusList=orderMapper.updateOrderStatusInBulk(orderIdList,recipientName,ipAddress,userAgent);
+            if(orderIdStatusList.size()>0){
+                handleServiceResponse.setResult(orderIdStatusList);
+            }else{
+                orderIdStatusList.add("Nothing happend ask shanky for his help :P ");
+                handleServiceResponse.setResult(orderIdStatusList);
+            }
+            response.addHeader("token",request.getHeader("token"));
+        }catch (Exception exception){
+            logger.error("error while updating order status in bulk",exception);
+        }
+        return  handleServiceResponse;
+
+    }
 }

@@ -362,5 +362,34 @@ public class OrderMapper
         }
 
     }
-
+    public List<String> updateOrderStatusInBulk(String orderIdList,String recipientName,String ipAddress,String userAgent){
+        List<String> orderIdStatusList=new ArrayList<>();;
+        OrderUtil orderUtil=new OrderUtil();
+        Map<Integer,Map<String,String>> orderIdToOrderProductIdListMap=null;
+        try{
+            orderIdToOrderProductIdListMap=orderUtil.getOrderProductIdsForHandelsOrderIds(orderIdList);
+            if(orderIdToOrderProductIdListMap!=null){
+                for(Map.Entry<Integer,Map<String,String>> entry:orderIdToOrderProductIdListMap.entrySet()){
+                    Integer orderId=entry.getKey();
+                    Map<String,String>fkAsIDToOrderProductIdMap=entry.getValue();
+                    for(Map.Entry<String,String> entry1:fkAsIDToOrderProductIdMap.entrySet()){
+                        String fkAssociateId=entry1.getKey();
+                        String orderProductIdList=entry1.getValue();
+                        if(doUpdateOrderProductsStatus(orderId,fkAssociateId,"Delivered",orderProductIdList,
+                                                        "","","",recipientName,0,
+                                                        ipAddress,userAgent)){
+                            orderIdStatusList.add("OrderId : "+orderId.intValue()+" successfully mark Delivered");
+                        }else{
+                            orderIdStatusList.add("OrderId : "+orderId.intValue()+" is not possible to mark Delivered , ask for assistance or do it manually");
+                        }
+                    }
+                }
+            }else {
+                // nothing
+            }
+        }catch (Exception exception){
+            logger.error("error while updating order status in bulk",exception);
+        }
+        return orderIdStatusList;
+    }
 }
