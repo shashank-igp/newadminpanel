@@ -1012,7 +1012,7 @@ public class MarketPlaceMapper {
                                 double d = Double.parseDouble(sP);
                                 sellingPrice = (int) d;
                             }
-                            String quant = column.get("QTY");
+                            String quant = column.get("Qty");
                             int quantity = 0;
                             if (quant!=null && !quant.isEmpty()) {
                                 double d = Double.parseDouble(quant);
